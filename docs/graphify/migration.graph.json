@@ -2,18 +2,18 @@
   "schemaVersion": 1,
   "project": "aseprite-mcp",
   "goal": "complete-typescript-migration",
-  "generatedAt": "2026-08-01T14:23:44.236Z",
+  "generatedAt": "2026-08-01T14:29:06.474Z",
   "source": {
     "repository": "https://github.com/diivi/aseprite-mcp",
     "branch": "upstream/main",
     "commit": "90d1696a7e41edff89bbd0823ae6a5f86c114bcc"
   },
   "local": {
-    "branch": "codex/migrate/analysis-tools",
-    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-analysis",
-    "baseCommit": "f0e9593ef4c9636dda9faea320d2fe8c4bba7247",
-    "typescriptToolCount": 51,
-    "testCount": 24
+    "branch": "codex/migrate/color-analysis",
+    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-color-analysis",
+    "baseCommit": "824aa00d4f6250b4c8a6ae9cb1e8fdd6891f15fc",
+    "typescriptToolCount": 55,
+    "testCount": 25
   },
   "tools": [
     {
@@ -50,9 +50,13 @@
       "name": "get_color_stats",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "palette",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -378,9 +382,13 @@
       "name": "set_cel_opacity",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "animation",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -1014,9 +1022,13 @@
       "name": "extract_palette",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "palette",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -1025,9 +1037,13 @@
       "name": "get_palette",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "palette",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
