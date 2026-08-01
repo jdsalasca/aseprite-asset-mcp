@@ -78,6 +78,10 @@ test("rejects traversal in every input sprite path before starting Aseprite", as
     gateway.getPixelsRect("../sprite.aseprite", 0, 0, 1, 1),
     gateway.getCompositePixel("../sprite.aseprite", 0, 0),
     gateway.getCompositeRect("../sprite.aseprite", 0, 0, 1, 1),
+    gateway.moveRegion("../sprite.aseprite", "Layer", 1, 0, 0, 1, 1, 1, 1),
+    gateway.copyRegion("../sprite.aseprite", "Layer", 1, 0, 0, 1, 1, 1, 1),
+    gateway.eraseRegion("../sprite.aseprite", "Layer", 1, 0, 0, 1, 1),
+    gateway.eraseColor("../sprite.aseprite", "Layer", 1, "#000000"),
     gateway.setTag("../sprite.aseprite", "idle", 1, 1),
     gateway.createTilemapLayer("../sprite.aseprite", "Tiles", 16, 16),
     gateway.validateScene("../sprite.aseprite", ["Layer"]),
@@ -338,6 +342,20 @@ test("rejects invalid pixel read contracts before starting Aseprite", async () =
   assert.equal(badRectWidth.message, "Width and height must be positive integers");
   assert.equal(badRectHeight.message, "Width and height must be positive integers");
   assert.equal(badCompositeFrame.message, "Frame index must be a positive integer");
+});
+
+test("rejects invalid selection contracts before starting Aseprite", async () => {
+  const badMoveSize = await gateway.moveRegion("sprite.aseprite", "Layer", 1, 0, 0, 0, 1, 1, 1);
+  const badCopyFrame = await gateway.copyRegion("sprite.aseprite", "Layer", 0, 0, 0, 1, 1, 1, 1);
+  const badEraseSize = await gateway.eraseRegion("sprite.aseprite", "Layer", 1, 0, 0, 1, 0);
+  const badEraseColor = await gateway.eraseColor("sprite.aseprite", "Layer", 1, "invalid");
+  const badTolerance = await gateway.eraseColor("sprite.aseprite", "Layer", 1, "#000000", 256);
+
+  assert.equal(badMoveSize.message, "Width and height must be positive integers");
+  assert.equal(badCopyFrame.message, "Frame index must be a positive integer");
+  assert.equal(badEraseSize.message, "Width and height must be positive integers");
+  assert.equal(badEraseColor.message, "Colors must use hexadecimal values");
+  assert.equal(badTolerance.message, "Tolerance must be between 0 and 255");
 });
 
 test("rejects invalid tag frame ranges before starting Aseprite", async () => {

@@ -76,6 +76,10 @@ const TOOL_NAMES = [
   "get_pixels_rect",
   "get_composite_pixel",
   "get_composite_rect",
+  "move_region",
+  "copy_region",
+  "erase_region",
+  "erase_color",
   "outline_native",
   "adjust_hsl_native",
   "adjust_brightness_contrast",
@@ -499,6 +503,26 @@ export class AsepriteMcpServerAdapter {
       description: "Read a visible flattened composite region as JSON.",
       inputSchema: { filename: z.string().min(1), x: z.number().int(), y: z.number().int(), width: z.number().int().positive(), height: z.number().int().positive(), frame_index: z.number().int().positive().default(1) },
     }, async ({ filename, x, y, width, height, frame_index }) => this.result(await this.assets.getCompositeRect(filename, x, y, width, height, frame_index)));
+
+    this.server.registerTool("move_region", {
+      description: "Move a rectangular region within a cel, clearing its source.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(), x: z.number().int(), y: z.number().int(), width: z.number().int().positive(), height: z.number().int().positive(), dest_x: z.number().int(), dest_y: z.number().int() },
+    }, async ({ filename, layer_name, frame_index, x, y, width, height, dest_x, dest_y }) => this.result(await this.assets.moveRegion(filename, layer_name, frame_index, x, y, width, height, dest_x, dest_y)));
+
+    this.server.registerTool("copy_region", {
+      description: "Copy a rectangular region to a layer and frame destination.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(), x: z.number().int(), y: z.number().int(), width: z.number().int().positive(), height: z.number().int().positive(), dest_x: z.number().int(), dest_y: z.number().int(), target_layer_name: z.string().default(""), target_frame_index: z.number().int().nonnegative().default(0) },
+    }, async ({ filename, layer_name, frame_index, x, y, width, height, dest_x, dest_y, target_layer_name, target_frame_index }) => this.result(await this.assets.copyRegion(filename, layer_name, frame_index, x, y, width, height, dest_x, dest_y, target_layer_name, target_frame_index)));
+
+    this.server.registerTool("erase_region", {
+      description: "Erase a rectangular region to transparency.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(), x: z.number().int(), y: z.number().int(), width: z.number().int().positive(), height: z.number().int().positive() },
+    }, async ({ filename, layer_name, frame_index, x, y, width, height }) => this.result(await this.assets.eraseRegion(filename, layer_name, frame_index, x, y, width, height)));
+
+    this.server.registerTool("erase_color", {
+      description: "Erase opaque pixels matching a color within channel tolerance.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(), color: z.string().regex(HEX_COLOR), tolerance: z.number().int().min(0).max(255).default(0) },
+    }, async ({ filename, layer_name, frame_index, color, tolerance }) => this.result(await this.assets.eraseColor(filename, layer_name, frame_index, color, tolerance)));
 
     this.server.registerTool("outline_native", {
       description: "Apply Aseprite native outline to a selected layer and frame.",

@@ -106,6 +106,10 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
       await gateway.getPixelsRect(source, 0, 0, 2, 2, "body", 2),
       await gateway.getCompositePixel(source, 2, 2, 2),
       await gateway.getCompositeRect(source, 0, 0, 2, 2, 2),
+      await gateway.moveRegion(source, "body", 1, 0, 0, 2, 2, 2, 2),
+      await gateway.copyRegion(source, "body", 1, 2, 2, 2, 2, 4, 4),
+      await gateway.eraseRegion(source, "body", 1, 4, 4, 1, 1),
+      await gateway.eraseColor(source, "body", 1, "#abcdef", 0),
     ];
     for (const [index, step] of steps.entries()) assert.equal(step.ok, true, `step ${index}: ${step.message}`);
     const matricesResult = await gateway.listConvolutionMatrices();

@@ -73,6 +73,10 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("get_pixels_rect"));
     assert.ok(tools.includes("get_composite_pixel"));
     assert.ok(tools.includes("get_composite_rect"));
+    assert.ok(tools.includes("move_region"));
+    assert.ok(tools.includes("copy_region"));
+    assert.ok(tools.includes("erase_region"));
+    assert.ok(tools.includes("erase_color"));
     assert.ok(tools.includes("draw_rectangle"));
     assert.ok(tools.includes("create_character_plan"));
     assert.ok(tools.includes("create_scene_plan"));
@@ -201,6 +205,10 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
     await call("get_pixels_rect", { filename: source, x: 0, y: 0, width: 2, height: 2, layer_name: "body", frame_index: 1 });
     await call("get_composite_pixel", { filename: source, x: 2, y: 2, frame_index: 1 });
     await call("get_composite_rect", { filename: source, x: 0, y: 0, width: 2, height: 2, frame_index: 1 });
+    await call("move_region", { filename: source, layer_name: "body", frame_index: 1, x: 0, y: 0, width: 2, height: 2, dest_x: 2, dest_y: 2 });
+    await call("copy_region", { filename: source, layer_name: "body", frame_index: 1, x: 2, y: 2, width: 2, height: 2, dest_x: 4, dest_y: 4 });
+    await call("erase_region", { filename: source, layer_name: "body", frame_index: 1, x: 4, y: 4, width: 1, height: 1 });
+    await call("erase_color", { filename: source, layer_name: "body", frame_index: 1, color: "#abcdef", tolerance: 0 });
     await call("flatten_sprite", { filename: source });
     await call("export_spritesheet", {
       filename: source,
