@@ -1,4 +1,5 @@
 import type { ReferenceAnalysis } from "./visual-assets.js";
+import type { ImageOutputFormat } from "./image-assets.js";
 
 export type EnhancementGoal = "cleanup" | "terrain_grain" | "water_flow" | "directional_lighting" | "particles" | "time_of_day" | "animation";
 
@@ -25,4 +26,18 @@ export interface EnhancementPlan {
   warnings: string[];
   passes: EnhancementPass[];
   destructive: false;
+}
+
+export interface EnhancementApplyInput {
+  outputFilename: string;
+  format: ImageOutputFormat;
+}
+
+export interface EnhancementApplyReport {
+  planId: string;
+  outputFilename: string;
+  format: ImageOutputFormat;
+  frames: number;
+  passesApplied: string[];
+  sourcePreserved: true;
 }

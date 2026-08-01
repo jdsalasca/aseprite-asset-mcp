@@ -5,11 +5,12 @@ import type { EnhancementGoal } from "../../domain/enhancement.js";
 import type { AsepriteResult } from "../../domain/aseprite.js";
 import type { ReferenceAnalysis } from "../../domain/visual-assets.js";
 import { VisualAssetService } from "../../application/services/VisualAssetService.js";
+import { DeterministicEnhancementService } from "../../application/services/DeterministicEnhancementService.js";
 
 const ENHANCEMENT_GOALS = ["cleanup", "terrain_grain", "water_flow", "directional_lighting", "particles", "time_of_day", "animation"] as const;
 
 export class EnhancementToolController {
-  public constructor(private readonly visualAssets: VisualAssetService, private readonly plans = new EnhancementPlanService()) {}
+  public constructor(private readonly visualAssets: VisualAssetService, private readonly enhancements: DeterministicEnhancementService, private readonly plans = new EnhancementPlanService()) {}
 
   public register(server: McpServer): void {
     server.registerTool("suggest_enhancement_plan", {
@@ -28,6 +29,28 @@ export class EnhancementToolController {
         return this.text(this.plans.suggest({ filename, analysis, ...(goals ? { goals: goals as EnhancementGoal[] } : {}), maxColors: max_colors, seed }));
       } catch {
         return this.result({ ok: false, message: "Reference analysis did not return a valid enhancement contract" });
+      }
+    });
+    server.registerTool("apply_enhancement_plan", {
+      description: "Apply a deterministic enhancement plan to a new output file while preserving the source asset.",
+      inputSchema: {
+        filename: z.string().min(1),
+        output_filename: z.string().min(1),
+        format: z.enum(["png", "gif"]).default("png"),
+        goals: z.array(z.enum(ENHANCEMENT_GOALS)).optional(),
+        max_colors: z.number().int().min(2).max(256).default(64),
+        seed: z.number().int().default(1),
+      },
+    }, async ({ filename, output_filename, format, goals, max_colors, seed }) => {
+      const analysisResult = await this.visualAssets.inspectReference(filename);
+      if (!analysisResult.ok) return this.result(analysisResult);
+      try {
+        const analysis = JSON.parse(analysisResult.message) as ReferenceAnalysis;
+        const plan = this.plans.suggest({ filename, analysis, ...(goals ? { goals: goals as EnhancementGoal[] } : {}), maxColors: max_colors, seed });
+        const applied = await this.enhancements.apply(plan, { outputFilename: output_filename, format });
+        return this.text({ plan, applied });
+      } catch (error) {
+        return this.result({ ok: false, message: error instanceof Error ? error.message : String(error) });
       }
     });
   }

@@ -14,6 +14,7 @@ import { EnhancementToolController } from "./controllers/EnhancementToolControll
 import { AssetJobToolController } from "./controllers/AssetJobToolController.js";
 import { AssetJobService } from "../application/services/AssetJobService.js";
 import { InMemoryAssetJobStore } from "../infrastructure/jobs/InMemoryAssetJobStore.js";
+import { DeterministicEnhancementService } from "../application/services/DeterministicEnhancementService.js";
 
 const SERVER_VERSION = "1.0.0";
 const TYPESCRIPT_VERSION = "6.0.3";
@@ -140,6 +141,8 @@ const TOOL_NAMES = [
   "create_scene_plan",
   "get_tools_list",
   "get_tools_by_folder",
+  "suggest_enhancement_plan",
+  "apply_enhancement_plan",
   "convert_image_to_pixel_art",
   "convert_animation_to_pixel_art",
   "export_animation_gif",
@@ -154,7 +157,6 @@ const TOOL_NAMES = [
   "export_asset_pack",
   "create_style_bible",
   "inspect_reference",
-  "suggest_enhancement_plan",
   "run_asset_quality_gate",
   "build_terrain_tileset",
   "generate_world_map",
@@ -169,11 +171,15 @@ export class AsepriteMcpServerAdapter {
 
   private readonly imageAssets: PixelArtAssetService;
   private readonly visualAssets: VisualAssetService;
+  private readonly enhancements: DeterministicEnhancementService;
   private readonly assetJobs: AssetJobService;
 
   public constructor(private readonly assets: AsepriteAssetService, imageAssets?: PixelArtAssetService) {
-    this.imageAssets = imageAssets ?? new PixelArtAssetService(new SharpRasterCodec(), new JsonAssetManifestWriter());
-    this.visualAssets = new VisualAssetService(new SharpRasterCodec(), new JsonAssetManifestWriter());
+    const rasterCodec = new SharpRasterCodec();
+    const manifestWriter = new JsonAssetManifestWriter();
+    this.imageAssets = imageAssets ?? new PixelArtAssetService(rasterCodec, manifestWriter);
+    this.visualAssets = new VisualAssetService(rasterCodec, manifestWriter);
+    this.enhancements = new DeterministicEnhancementService(rasterCodec);
     this.assetJobs = new AssetJobService({ run: (input) => this.imageAssets.runBatch(input) }, new InMemoryAssetJobStore());
     this.server = new McpServer({ name: "aseprite-asset-mcp", version: SERVER_VERSION });
     this.registerTools();
@@ -259,7 +265,7 @@ export class AsepriteMcpServerAdapter {
       description: "Analyze reference dimensions, dominant colors, contrast, edges, and transparency.",
       inputSchema: { filename: z.string().min(1) },
     }, async ({ filename }) => this.result(await this.visualAssets.inspectReference(filename)));
-    new EnhancementToolController(this.visualAssets).register(this.server);
+    new EnhancementToolController(this.visualAssets, this.enhancements).register(this.server);
     new AssetJobToolController(this.assetJobs).register(this.server);
 
     this.server.registerTool("run_asset_quality_gate", {
