@@ -216,3 +216,26 @@ test("real TypeScript text rasterizer measures and draws a system font", { skip:
   assert.equal(values[0]?.a, 0);
   assert.ok(values.some((pixel) => pixel.r > 200 && pixel.g < 80 && pixel.b < 80 && pixel.a > 0));
 });
+
+test("real Aseprite creates, edits, places, and reads tilemap data", { skip: !existsSync(asepritePath) }, async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "aseprite-mcp-tilemap-"));
+  const source = path.join(directory, "tilemap.aseprite");
+  const gateway = new AsepriteCliGateway({ executable: asepritePath });
+
+  assert.equal((await gateway.createCanvas(16, 16, source)).ok, true);
+  const created = await gateway.createTilemapLayer(source, "terrain", 4, 4);
+  assert.equal(created.ok, true, created.message);
+  const infoBefore = await gateway.getTilemapInfo(source, "terrain");
+  assert.equal(infoBefore.ok, true, infoBefore.message);
+  assert.deepEqual(JSON.parse(infoBefore.message), { tile_width: 4, tile_height: 4, tile_count: 0, map_cols: 4, map_rows: 4 });
+  const drawn = await gateway.drawOnTile(source, "terrain", 1, [{ x: 0, y: 0, color: "#ff0000" }, { x: 3, y: 3, color: "#00ff00" }]);
+  assert.equal(drawn.ok, true, drawn.message);
+  const placed = await gateway.setTiles(source, "terrain", 1, [{ col: 0, row: 0, tileIndex: 1 }, { col: 3, row: 3, tileIndex: 1 }]);
+  assert.equal(placed.ok, true, placed.message);
+  const tile = await gateway.getTileAt(source, "terrain", 1, 3, 3);
+  assert.equal(tile.ok, true, tile.message);
+  assert.deepEqual(JSON.parse(tile.message), { col: 3, row: 3, tile_index: 1 });
+  const infoAfter = await gateway.getTilemapInfo(source, "terrain");
+  assert.equal(infoAfter.ok, true, infoAfter.message);
+  assert.equal(JSON.parse(infoAfter.message).tile_count, 1);
+});

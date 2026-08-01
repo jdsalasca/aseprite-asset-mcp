@@ -3,7 +3,7 @@ import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
-import type { AsepriteGateway, AsepriteResult, PixelInput, PointInput, TextDrawInput } from "../../domain/aseprite.js";
+import type { AsepriteGateway, AsepriteResult, PixelInput, PointInput, TextDrawInput, TilePixelInput, TilePlacementInput } from "../../domain/aseprite.js";
 import { availableTextFonts, measureText as rasterMeasureText, rasterizeText } from "../text/TextRasterizer.js";
 
 const execFileAsync = promisify(execFile);
@@ -898,13 +898,158 @@ export class AsepriteCliGateway implements AsepriteGateway {
   public async createTilemapLayer(filename: string, layerName: string, tileWidth: number, tileHeight: number): Promise<AsepriteResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
     if (!isPositiveInteger(tileWidth) || !isPositiveInteger(tileHeight)) return { ok: false, message: "Tile dimensions must be positive integers" };
-    const script = this.openScript(filename, `
+    const script = this.openScript(source, `
+      local name_taken = false
+      for _, layer in ipairs(spr.layers) do if layer.name == "${luaEscape(name)}" then name_taken = true break end end
+      if name_taken then print("ERROR:Layer with that name already exists") return end
       spr.gridBounds = Rectangle(0, 0, ${tileWidth}, ${tileHeight})
       app.command.NewLayer { tilemap = true }
-      app.activeLayer.name = "${luaEscape(layerName)}"
+      app.activeLayer.name = "${luaEscape(name)}"
     `);
-    return result(await this.runLua(script, filename), `Tilemap layer '${layerName}' created in ${filename}`);
+    return result(await this.runLua(script, source), `Tilemap layer '${name}' created with ${tileWidth}x${tileHeight} tiles in ${source}`);
+  }
+
+  public async drawOnTile(filename: string, layerName: string, tileIndex: number, pixels: TilePixelInput[]): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (!Number.isInteger(tileIndex) || tileIndex < 1) return { ok: false, message: "Tile index must be >= 1 (tile 0 is reserved)" };
+    if (!Array.isArray(pixels) || pixels.length === 0) return { ok: false, message: "Pixels list cannot be empty" };
+    const puts: string[] = [];
+    for (const pixel of pixels) {
+      if (!Number.isInteger(pixel.x) || !Number.isInteger(pixel.y)) return { ok: false, message: "Tile pixel coordinates must be integers" };
+      const rgba = this.parseHexColor(pixel.color);
+      if (!rgba) return { ok: false, message: `Invalid color value: ${pixel.color}` };
+      const [red, green, blue, alpha] = rgba;
+      puts.push(`put(img, ${pixel.x}, ${pixel.y}, app.pixelColor.rgba(${red}, ${green}, ${blue}, ${alpha}))`);
+    }
+    const script = this.openScript(source, `
+      local target = find_layer(spr, "${luaEscape(name)}")
+      if not target then print("ERROR:Layer not found") return end
+      if not target.isTilemap then print("ERROR:Layer is not a tilemap layer") return end
+      local ts = target.tileset
+      if not ts then print("ERROR:Layer has no tileset") return end
+      local idx = ${tileIndex}
+      if idx > #ts then print("ERROR:Tile index out of range") return end
+      if idx == #ts then spr:newTile(ts) end
+      local tile = ts:tile(idx)
+      local img = tile.image:clone()
+      local function put(im, px, py, color)
+        if px >= 0 and py >= 0 and px < im.width and py < im.height then im:putPixel(px, py, color) end
+      end
+      ${puts.join("\n      ")}
+      tile.image = img
+    `);
+    return result(await this.runLua(script, source), `Drew ${pixels.length} pixels on tile ${tileIndex} of '${name}' in ${source}`);
+  }
+
+  public async setTiles(filename: string, layerName: string, frameIndex: number, tiles: TilePlacementInput[]): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    if (!Array.isArray(tiles) || tiles.length === 0) return { ok: false, message: "Tiles list cannot be empty" };
+    for (const tile of tiles) {
+      if (![tile.col, tile.row, tile.tileIndex].every(Number.isInteger)) return { ok: false, message: "Tile positions and indices must be integers" };
+      if (tile.col < 0 || tile.row < 0) return { ok: false, message: "Tile positions must be non-negative" };
+      if (tile.tileIndex < 0) return { ok: false, message: "Tile indices must be non-negative" };
+    }
+    const entries = tiles.map((tile) => `{${tile.col},${tile.row},${tile.tileIndex}}`).join(", ");
+    const script = this.openScript(source, `
+      if ${frameIndex} > #spr.frames then print("ERROR:Frame index out of range") return end
+      local target = find_layer(spr, "${luaEscape(name)}")
+      if not target then print("ERROR:Layer not found") return end
+      if not target.isTilemap then print("ERROR:Layer is not a tilemap layer") return end
+      local ts = target.tileset
+      local grid = spr.gridBounds
+      local tw, th = grid.width, grid.height
+      if tw <= 0 or th <= 0 then print("ERROR:Invalid tile grid") return end
+      local cols = math.ceil(spr.width / tw)
+      local rows = math.ceil(spr.height / th)
+      local placements = { ${entries} }
+      for _, tile in ipairs(placements) do
+        if tile[1] >= cols or tile[2] >= rows then print("ERROR:Tile position outside map") return end
+        if tile[3] < 0 or tile[3] >= #ts then print("ERROR:Tile index out of range") return end
+      end
+      local frame = spr.frames[${frameIndex}]
+      local cel = target:cel(frame)
+      local img
+      if cel and cel.image.width == cols and cel.image.height == rows and cel.position.x == 0 and cel.position.y == 0 then
+        img = cel.image
+      else
+        img = Image(cols, rows, ColorMode.TILEMAP)
+        if cel then
+          local old = cel.image
+          local ox, oy = cel.position.x // tw, cel.position.y // th
+          for py = 0, old.height - 1 do
+            for px = 0, old.width - 1 do
+              local nx, ny = px + ox, py + oy
+              if nx >= 0 and ny >= 0 and nx < cols and ny < rows then img:putPixel(nx, ny, old:getPixel(px, py)) end
+            end
+          end
+        end
+        cel = spr:newCel(target, frame, img, Point(0, 0))
+      end
+      for _, tile in ipairs(placements) do img:putPixel(tile[1], tile[2], tile[3]) end
+      cel.image = img
+    `);
+    return result(await this.runLua(script, source), `Placed ${tiles.length} tiles on '${name}' frame ${frameIndex} in ${source}`);
+  }
+
+  public async getTileAt(filename: string, layerName: string, frameIndex: number, col: number, row: number): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    if (![col, row].every(Number.isInteger)) return { ok: false, message: "Tile coordinates must be integers" };
+    if (col < 0 || row < 0) return { ok: false, message: "Tile coordinates must be non-negative" };
+    const script = `
+      if ${frameIndex} > #spr.frames then print("ERROR:Frame index out of range") return end
+      local target = find_layer(spr, "${luaEscape(name)}")
+      if not target then print("ERROR:Layer not found") return end
+      if not target.isTilemap then print("ERROR:Layer is not a tilemap layer") return end
+      local grid = spr.gridBounds
+      local cel = target:cel(spr.frames[${frameIndex}])
+      local tile = 0
+      if cel then
+        local cx = ${col} - cel.position.x // grid.width
+        local cy = ${row} - cel.position.y // grid.height
+        if cx >= 0 and cy >= 0 and cx < cel.image.width and cy < cel.image.height then tile = app.pixelColor.tileI(cel.image:getPixel(cx, cy)) end
+      end
+      print("TILE:" .. tile)
+    `;
+    const command = await this.runLua(this.readOnlyScript(script), source);
+    if (!command.ok) return { ok: false, message: `Failed to read tile: ${command.output}` };
+    const tileLine = command.output.split(/\r?\n/).find((line) => line.startsWith("TILE:"));
+    if (!tileLine) return { ok: false, message: "No tile data returned" };
+    return { ok: true, message: JSON.stringify({ col, row, tile_index: Number(tileLine.slice(5)) }) };
+  }
+
+  public async getTilemapInfo(filename: string, layerName: string): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    const script = this.readOnlyScript(`
+      local target = find_layer(spr, "${luaEscape(name)}")
+      if not target then print("ERROR:Layer not found") return end
+      if not target.isTilemap then print("ERROR:Layer is not a tilemap layer") return end
+      local ts = target.tileset
+      local grid = spr.gridBounds
+      print(string.format("INFO:%d,%d,%d,%d,%d", grid.width, grid.height, #ts - 1, math.ceil(spr.width / grid.width), math.ceil(spr.height / grid.height)))
+    `);
+    const command = await this.runLua(script, source);
+    if (!command.ok) return { ok: false, message: `Failed to get tilemap info: ${command.output}` };
+    const line = command.output.split(/\r?\n/).find((entry) => entry.startsWith("INFO:"));
+    if (!line) return { ok: false, message: "No tilemap data returned" };
+    const [tileWidth, tileHeight, tileCount, mapCols, mapRows] = line.slice(5).split(",").map(Number);
+    return { ok: true, message: JSON.stringify({ tile_width: tileWidth, tile_height: tileHeight, tile_count: tileCount, map_cols: mapCols, map_rows: mapRows }) };
   }
 
   public async validateScene(filename: string, requiredLayers: string[], startFrame = 1, endFrame?: number): Promise<AsepriteResult> {
@@ -2534,6 +2679,21 @@ export class AsepriteCliGateway implements AsepriteGateway {
       app.transaction(function() ${body} end)
       spr:saveAs(spr.filename)
       print("OK")
+    `;
+  }
+
+  private readOnlyScript(body: string): string {
+    return `
+      local function find_layer(parent, name)
+        for _, layer in ipairs(parent.layers) do
+          if layer.name == name then return layer end
+          if layer.isGroup then local nested = find_layer(layer, name) if nested then return nested end end
+        end
+        return nil
+      end
+      local spr = app.activeSprite
+      if not spr then print("ERROR:No active sprite") return end
+      ${body}
     `;
   }
 

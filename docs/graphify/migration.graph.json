@@ -2,18 +2,18 @@
   "schemaVersion": 1,
   "project": "aseprite-mcp",
   "goal": "complete-typescript-migration",
-  "generatedAt": "2026-08-01T16:00:56.669Z",
+  "generatedAt": "2026-08-01T16:10:44.109Z",
   "source": {
     "repository": "https://github.com/diivi/aseprite-mcp",
     "branch": "upstream/main",
     "commit": "90d1696a7e41edff89bbd0823ae6a5f86c114bcc"
   },
   "local": {
-    "branch": "codex/migrate/text",
-    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-text",
-    "baseCommit": "6344eefc965f1bb72bdbdc9879e7f97bc955f0a6",
-    "typescriptToolCount": 94,
-    "testCount": 37
+    "branch": "codex/migrate/tilemap",
+    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-tilemap",
+    "baseCommit": "fde35d3a76d8f9d81141aa6ce94d070576726378",
+    "typescriptToolCount": 98,
+    "testCount": 39
   },
   "tools": [
     {
@@ -1556,9 +1556,13 @@
       "name": "draw_on_tile",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "drawing",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -1567,9 +1571,13 @@
       "name": "set_tiles",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "tilemap",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -1578,9 +1586,13 @@
       "name": "get_tile_at",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "tilemap",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -1589,9 +1601,13 @@
       "name": "get_tilemap_info",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "tilemap",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []

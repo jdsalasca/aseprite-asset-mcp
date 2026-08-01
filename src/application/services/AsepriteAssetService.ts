@@ -1,4 +1,4 @@
-import type { AsepriteGateway, AsepriteResult, PixelInput, PointInput, TextDrawInput } from "../../domain/aseprite.js";
+import type { AsepriteGateway, AsepriteResult, PixelInput, PointInput, TextDrawInput, TilePixelInput, TilePlacementInput } from "../../domain/aseprite.js";
 
 export class AsepriteAssetService {
   public constructor(private readonly gateway: AsepriteGateway) {}
@@ -333,6 +333,22 @@ export class AsepriteAssetService {
 
   public drawText(input: TextDrawInput): Promise<AsepriteResult> {
     return this.gateway.drawText(input);
+  }
+
+  public drawOnTile(filename: string, layerName: string, tileIndex: number, pixels: TilePixelInput[]): Promise<AsepriteResult> {
+    return this.gateway.drawOnTile(filename, layerName, tileIndex, pixels);
+  }
+
+  public setTiles(filename: string, layerName: string, frameIndex: number, tiles: TilePlacementInput[]): Promise<AsepriteResult> {
+    return this.gateway.setTiles(filename, layerName, frameIndex, tiles);
+  }
+
+  public getTileAt(filename: string, layerName: string, frameIndex: number, col: number, row: number): Promise<AsepriteResult> {
+    return this.gateway.getTileAt(filename, layerName, frameIndex, col, row);
+  }
+
+  public getTilemapInfo(filename: string, layerName: string): Promise<AsepriteResult> {
+    return this.gateway.getTilemapInfo(filename, layerName);
   }
 
   public applyConvolution(filename: string, matrix: string, layerName = "", frameIndex = 1, x = 0, y = 0, width = 0, height = 0): Promise<AsepriteResult> {
