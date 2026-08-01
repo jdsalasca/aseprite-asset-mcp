@@ -143,6 +143,22 @@ export class AsepriteAssetService {
     return this.gateway.copyFrame(filename, sourceFrame, targetFrame, overwrite);
   }
 
+  public setCelPosition(filename: string, layerName: string, frameIndex: number, x: number, y: number, createIfMissing = false, sourceFrameIndex?: number): Promise<AsepriteResult> {
+    return this.gateway.setCelPosition(filename, layerName, frameIndex, x, y, createIfMissing, sourceFrameIndex);
+  }
+
+  public tweenCelPositions(filename: string, layerName: string, startFrame: number, endFrame: number, startX: number, startY: number, endX: number, endY: number, createMissingCels = false, sourceFrameIndex?: number): Promise<AsepriteResult> {
+    return this.gateway.tweenCelPositions(filename, layerName, startFrame, endFrame, startX, startY, endX, endY, createMissingCels, sourceFrameIndex);
+  }
+
+  public offsetCelPositions(filename: string, layerName: string, startFrame: number, endFrame: number, dx: number, dy: number): Promise<AsepriteResult> {
+    return this.gateway.offsetCelPositions(filename, layerName, startFrame, endFrame, dx, dy);
+  }
+
+  public propagateFrameToRange(filename: string, sourceFrame: number, startFrame: number, endFrame: number, overwrite = true): Promise<AsepriteResult> {
+    return this.gateway.propagateFrameToRange(filename, sourceFrame, startFrame, endFrame, overwrite);
+  }
+
   public setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction = "forward"): Promise<AsepriteResult> {
     return this.gateway.setTag(filename, name, fromFrame, toFrame, direction);
   }

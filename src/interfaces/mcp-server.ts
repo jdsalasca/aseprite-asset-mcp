@@ -46,6 +46,10 @@ const TOOL_NAMES = [
   "clear_cel",
   "copy_cel",
   "copy_frame",
+  "set_cel_position",
+  "tween_cel_positions",
+  "offset_cel_positions",
+  "propagate_frame_to_range",
   "set_tag",
   "create_tilemap_layer",
   "validate_scene",
@@ -308,6 +312,26 @@ export class AsepriteMcpServerAdapter {
       description: "Copy all cels from one frame to another frame or append a new frame.",
       inputSchema: { filename: z.string().min(1), source_frame: z.number().int().positive(), target_frame: z.number().int().positive().optional(), overwrite: z.boolean().default(true) },
     }, async ({ filename, source_frame, target_frame, overwrite }) => this.result(await this.assets.copyFrame(filename, source_frame, target_frame, overwrite)));
+
+    this.server.registerTool("set_cel_position", {
+      description: "Set one cel position, optionally creating it from a source cel.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(), x: z.number().int(), y: z.number().int(), create_if_missing: z.boolean().default(false), source_frame_index: z.number().int().positive().optional() },
+    }, async ({ filename, layer_name, frame_index, x, y, create_if_missing, source_frame_index }) => this.result(await this.assets.setCelPosition(filename, layer_name, frame_index, x, y, create_if_missing, source_frame_index)));
+
+    this.server.registerTool("tween_cel_positions", {
+      description: "Tween cel positions linearly across a frame range.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), start_frame: z.number().int().positive(), end_frame: z.number().int().positive(), start_x: z.number().int(), start_y: z.number().int(), end_x: z.number().int(), end_y: z.number().int(), create_missing_cels: z.boolean().default(false), source_frame_index: z.number().int().positive().optional() },
+    }, async ({ filename, layer_name, start_frame, end_frame, start_x, start_y, end_x, end_y, create_missing_cels, source_frame_index }) => this.result(await this.assets.tweenCelPositions(filename, layer_name, start_frame, end_frame, start_x, start_y, end_x, end_y, create_missing_cels, source_frame_index)));
+
+    this.server.registerTool("offset_cel_positions", {
+      description: "Offset cel positions across a frame range.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), start_frame: z.number().int().positive(), end_frame: z.number().int().positive(), dx: z.number().int(), dy: z.number().int() },
+    }, async ({ filename, layer_name, start_frame, end_frame, dx, dy }) => this.result(await this.assets.offsetCelPositions(filename, layer_name, start_frame, end_frame, dx, dy)));
+
+    this.server.registerTool("propagate_frame_to_range", {
+      description: "Propagate all source-frame cels to a frame range.",
+      inputSchema: { filename: z.string().min(1), source_frame: z.number().int().positive(), start_frame: z.number().int().positive(), end_frame: z.number().int().positive(), overwrite: z.boolean().default(true) },
+    }, async ({ filename, source_frame, start_frame, end_frame, overwrite }) => this.result(await this.assets.propagateFrameToRange(filename, source_frame, start_frame, end_frame, overwrite)));
 
     this.server.registerTool("set_tag", {
       description: "Create or update an animation tag.",

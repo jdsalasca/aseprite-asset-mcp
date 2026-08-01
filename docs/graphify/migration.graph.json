@@ -2,18 +2,18 @@
   "schemaVersion": 1,
   "project": "aseprite-mcp",
   "goal": "complete-typescript-migration",
-  "generatedAt": "2026-08-01T14:07:26.755Z",
+  "generatedAt": "2026-08-01T14:13:04.932Z",
   "source": {
     "repository": "https://github.com/diivi/aseprite-mcp",
     "branch": "upstream/main",
     "commit": "90d1696a7e41edff89bbd0823ae6a5f86c114bcc"
   },
   "local": {
-    "branch": "codex/migrate/cel-tools",
-    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-cel-tools",
-    "baseCommit": "95afec3422bfd0b18ea367bf997bd9b1de31e1c9",
-    "typescriptToolCount": 42,
-    "testCount": 21
+    "branch": "codex/migrate/frame-motion",
+    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-frame-motion",
+    "baseCommit": "1ec1caa6b0175bc05db45f92d704aa23f23ebee7",
+    "typescriptToolCount": 46,
+    "testCount": 22
   },
   "tools": [
     {
@@ -135,9 +135,13 @@
       "name": "set_cel_position",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "animation",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -146,9 +150,13 @@
       "name": "tween_cel_positions",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "animation",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -157,9 +165,13 @@
       "name": "offset_cel_positions",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "animation",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -228,9 +240,13 @@
       "name": "propagate_frame_to_range",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "animation",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []

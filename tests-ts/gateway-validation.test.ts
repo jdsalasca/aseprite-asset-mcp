@@ -40,6 +40,10 @@ test("rejects traversal in every input sprite path before starting Aseprite", as
     gateway.clearCel("../sprite.aseprite", "Layer", 1),
     gateway.copyCel("../sprite.aseprite", "Layer", 1, 2),
     gateway.copyFrame("../sprite.aseprite", 1),
+    gateway.setCelPosition("../sprite.aseprite", "Layer", 1, 0, 0),
+    gateway.tweenCelPositions("../sprite.aseprite", "Layer", 1, 2, 0, 0, 1, 1),
+    gateway.offsetCelPositions("../sprite.aseprite", "Layer", 1, 2, 1, 1),
+    gateway.propagateFrameToRange("../sprite.aseprite", 1, 1, 2),
     gateway.setTag("../sprite.aseprite", "idle", 1, 1),
     gateway.createTilemapLayer("../sprite.aseprite", "Tiles", 16, 16),
     gateway.validateScene("../sprite.aseprite", ["Layer"]),
@@ -150,6 +154,18 @@ test("rejects invalid import and cel contracts before starting Aseprite", async 
   assert.equal(badClear.message, "Layer name cannot be empty");
   assert.equal(badCopyCel.message, "Source frame must be a positive integer");
   assert.equal(badCopyFrame.message, "Source frame must be a positive integer");
+});
+
+test("rejects invalid frame motion contracts before starting Aseprite", async () => {
+  const badSet = await gateway.setCelPosition("sprite.aseprite", "Layer", 0, 0, 0);
+  const badTween = await gateway.tweenCelPositions("sprite.aseprite", "Layer", 3, 2, 0, 0, 1, 1);
+  const badOffset = await gateway.offsetCelPositions("sprite.aseprite", "Layer", 3, 2, 1, 1);
+  const badPropagate = await gateway.propagateFrameToRange("sprite.aseprite", 0, 1, 2);
+
+  assert.equal(badSet.message, "Frame index must be a positive integer");
+  assert.equal(badTween.message, "Frame range must start at 1 and end at or after the start");
+  assert.equal(badOffset.message, "Frame range must start at 1 and end at or after the start");
+  assert.equal(badPropagate.message, "Source frame must be a positive integer");
 });
 
 test("rejects invalid tag frame ranges before starting Aseprite", async () => {

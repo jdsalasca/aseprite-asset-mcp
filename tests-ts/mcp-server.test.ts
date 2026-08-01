@@ -37,6 +37,10 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("clear_cel"));
     assert.ok(tools.includes("copy_cel"));
     assert.ok(tools.includes("copy_frame"));
+    assert.ok(tools.includes("set_cel_position"));
+    assert.ok(tools.includes("tween_cel_positions"));
+    assert.ok(tools.includes("offset_cel_positions"));
+    assert.ok(tools.includes("propagate_frame_to_range"));
     assert.ok(tools.includes("set_frame"));
     assert.ok(tools.includes("draw_rectangle"));
     assert.ok(tools.includes("create_character_plan"));
@@ -122,6 +126,10 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
     await call("copy_cel", { filename: source, layer_name: "body", source_frame: 2, target_frame: 1, replace: true });
     await call("copy_frame", { filename: source, source_frame: 2, target_frame: 1, overwrite: true });
     await call("clear_cel", { filename: source, layer_name: "reference", frame_index: 2 });
+    await call("set_cel_position", { filename: source, layer_name: "body", frame_index: 2, x: 5, y: 5, create_if_missing: true });
+    await call("tween_cel_positions", { filename: source, layer_name: "body", start_frame: 1, end_frame: 2, start_x: 1, start_y: 1, end_x: 4, end_y: 4, create_missing_cels: false });
+    await call("offset_cel_positions", { filename: source, layer_name: "body", start_frame: 1, end_frame: 2, dx: 1, dy: -1 });
+    await call("propagate_frame_to_range", { filename: source, source_frame: 2, start_frame: 1, end_frame: 2, overwrite: true });
     await call("export_spritesheet", {
       filename: source,
       output_filename: sheet,
