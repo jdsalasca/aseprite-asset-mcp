@@ -3,6 +3,7 @@ import { AsepriteMcpClient } from "../src/workflows/mcp-client.js";
 import type { ToolCall, WorkflowPlan } from "../src/workflows/types.js";
 
 const root = "C:/Users/jdsal/Documents/Programming-personal/odiseum/art/creatures";
+const uiRoot = "C:/Users/jdsal/Documents/Programming-personal/odiseum/art/ui";
 
 function call(name: string, args: Record<string, unknown>, purpose: string): ToolCall {
   return { name, arguments: args, purpose };
@@ -97,7 +98,28 @@ try {
     : item);
   const trainerResults = await client.execute(workflow("trail-runner", trainerFile, normalizedTrainerCalls, 24, 32));
   if (trainerResults.some((result) => result.includes('"isError":true'))) throw new Error("Failed to paint trail runner");
-  console.log(JSON.stringify({ creatures: creatures.map((creature) => creature.id), trainer: "trail-runner", root }, null, 2));
+
+  const orbFile = path.join(uiRoot, "capture-orb.aseprite");
+  const orbCalls = [
+    call("create_canvas", { width: 16, height: 16, filename: orbFile }, "Create the capture orb icon"),
+    call("set_palette", { filename: orbFile, colors: ["#17152E", "#F5D76E", "#F7F2E5", "#7F76C2"] }, "Apply the cozy UI palette"),
+    box(3, 2, 10, 12, "#17152E"),
+    box(4, 3, 8, 5, "#F7F2E5"),
+    box(4, 8, 8, 5, "#7F76C2"),
+    box(7, 7, 2, 2, "#F5D76E"),
+    call("export_spritesheet", { filename: orbFile, output_filename: orbFile.replace(/\.aseprite$/i, ".png"), sheet_type: "horizontal", scale: 3, padding: 1 }, "Export the capture orb icon"),
+  ].map((item) => item.name === "draw_rectangle" ? { ...item, arguments: { ...item.arguments, filename: orbFile } } : item);
+  const orbResults = await client.execute({
+    schemaVersion: 1,
+    kind: "character",
+    assetId: "capture-orb",
+    sourceFile: orbFile,
+    calls: orbCalls,
+    exports: [],
+    godotManifest: { schemaVersion: 1, assetId: "capture-orb", assetType: "character", texture: orbFile.replace(/\.aseprite$/i, ".png"), frameWidth: 16, frameHeight: 16, animations: [] },
+  });
+  if (orbResults.some((result) => result.includes('"isError":true'))) throw new Error("Failed to paint capture orb");
+  console.log(JSON.stringify({ creatures: creatures.map((creature) => creature.id), trainer: "trail-runner", ui: ["capture-orb"], root, uiRoot }, null, 2));
 } finally {
   await client.close();
 }
