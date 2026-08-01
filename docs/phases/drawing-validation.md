@@ -25,8 +25,8 @@ Reject unsafe and invalid drawing inputs before Aseprite starts.
 
 - Tool verified: draw_rectangle.
 - Integration status: verified with the installed Aseprite executable.
-- Commit: pending.
-- Merge status: pending.
+- Commit: dd95507.
+- Merge status: merged into develop through d4bf66.
 - Risk level: best.
 - Blockers: none.
 - Next phase: drawing primitives.
