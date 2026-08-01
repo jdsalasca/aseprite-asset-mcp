@@ -1,0 +1,17 @@
+{
+  "project": "aseprite-mcp",
+  "goal": "complete-typescript-migration",
+  "continue": true,
+  "currentPhase": "core-animation",
+  "currentSlice": "frame-and-layer-tools",
+  "lastCompletedSlice": "bug-hunt-validation",
+  "nextSlice": "drawing-tools",
+  "blocked": false,
+  "retryCount": 0,
+  "lastEvidence": [
+    "npm test: 13 passed, 0 failed",
+    "upstream/main inventory: 116 tools",
+    "TypeScript server inventory: 18 tools",
+    "real Aseprite integration: passed"
+  ]
+}

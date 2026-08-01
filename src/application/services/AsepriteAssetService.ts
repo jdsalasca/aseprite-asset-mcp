@@ -15,8 +15,32 @@ export class AsepriteAssetService {
     return this.gateway.addLayer(filename, layerName, group);
   }
 
+  public addFrame(filename: string): Promise<AsepriteResult> {
+    return this.gateway.addFrame(filename);
+  }
+
   public addFrames(filename: string, count: number, durationMs?: number): Promise<AsepriteResult> {
     return this.gateway.addFrames(filename, count, durationMs);
+  }
+
+  public setFrame(filename: string, frameIndex: number): Promise<AsepriteResult> {
+    return this.gateway.setFrame(filename, frameIndex);
+  }
+
+  public setFrameDuration(filename: string, frameIndex: number, durationMs: number): Promise<AsepriteResult> {
+    return this.gateway.setFrameDuration(filename, frameIndex, durationMs);
+  }
+
+  public setFrameDurationAll(filename: string, durationMs: number): Promise<AsepriteResult> {
+    return this.gateway.setFrameDurationAll(filename, durationMs);
+  }
+
+  public setLayerVisibility(filename: string, layerName: string, visible = true): Promise<AsepriteResult> {
+    return this.gateway.setLayerVisibility(filename, layerName, visible);
+  }
+
+  public setLayerOpacity(filename: string, layerName: string, opacity: number): Promise<AsepriteResult> {
+    return this.gateway.setLayerOpacity(filename, layerName, opacity);
   }
 
   public setPalette(filename: string, colors: string[]): Promise<AsepriteResult> {

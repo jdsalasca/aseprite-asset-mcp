@@ -1,0 +1,10 @@
+flowchart TD
+  upstream["upstream/main · 116 tools"] --> inventory["Tool inventory"]
+  inventory --> schemas["Typed MCP schemas"]
+  schemas --> service["Application service"]
+  service --> gateway["Secure Aseprite CLI gateway"]
+  gateway --> unit["Unit and contract tests"]
+  gateway --> integration["Integration tests"]
+  service --> e2e["End-to-end workflows"]
+  e2e --> godot["Godot exports"]
+  e2e --> harness["Harness Moon records"]

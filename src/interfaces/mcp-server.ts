@@ -6,11 +6,34 @@ import { AsepriteCliGateway } from "../infrastructure/aseprite/AsepriteCliGatewa
 import { buildCharacterPlan, buildScenePlan } from "../workflows/plans.js";
 import type { AsepriteResult } from "../domain/aseprite.js";
 
+const SERVER_VERSION = "1.0.0";
+const TYPESCRIPT_VERSION = "6.0.3";
+const TOOL_NAMES = [
+  "server_capabilities",
+  "create_canvas",
+  "add_group",
+  "add_layer",
+  "add_frame",
+  "add_frames",
+  "set_frame",
+  "set_frame_duration",
+  "set_frame_duration_all",
+  "set_layer_visibility",
+  "set_layer_opacity",
+  "set_palette",
+  "set_tag",
+  "create_tilemap_layer",
+  "validate_scene",
+  "export_spritesheet",
+  "create_character_plan",
+  "create_scene_plan",
+];
+
 export class AsepriteMcpServerAdapter {
   public readonly server: McpServer;
 
   public constructor(private readonly assets: AsepriteAssetService) {
-    this.server = new McpServer({ name: "aseprite-mcp-typescript", version: "1.0.0" });
+    this.server = new McpServer({ name: "aseprite-mcp-typescript", version: SERVER_VERSION });
     this.registerTools();
   }
 
@@ -19,9 +42,14 @@ export class AsepriteMcpServerAdapter {
       title: "Server capabilities",
       description: "List the typed TypeScript MCP capabilities available to the current server.",
     }, async () => this.text({
-      runtime: "Node.js + TypeScript",
+      serverVersion: SERVER_VERSION,
+      typescriptVersion: TYPESCRIPT_VERSION,
+      nodeVersion: process.version,
       architecture: "hexagonal",
-      tools: ["create_canvas", "add_group", "add_layer", "add_frames", "set_palette", "set_tag", "create_tilemap_layer", "validate_scene", "export_spritesheet", "create_character_plan", "create_scene_plan"],
+      toolCount: TOOL_NAMES.length,
+      tools: TOOL_NAMES,
+      upstreamCommit: process.env.UPSTREAM_COMMIT ?? "90d1696a7e41edff89bbd0823ae6a5f86c114bcc",
+      migrationStatus: "partial",
       legacyRuntime: false,
     }));
 
@@ -40,10 +68,40 @@ export class AsepriteMcpServerAdapter {
       inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), group: z.string().default("") },
     }, async ({ filename, layer_name, group }) => this.result(await this.assets.addLayer(filename, layer_name, group)));
 
+    this.server.registerTool("add_frame", {
+      description: "Add one animation frame.",
+      inputSchema: { filename: z.string().min(1) },
+    }, async ({ filename }) => this.result(await this.assets.addFrame(filename)));
+
     this.server.registerTool("add_frames", {
       description: "Add a deterministic number of animation frames.",
       inputSchema: { filename: z.string().min(1), count: z.number().int().positive(), duration_ms: z.number().int().positive().optional() },
     }, async ({ filename, count, duration_ms }) => this.result(await this.assets.addFrames(filename, count, duration_ms)));
+
+    this.server.registerTool("set_frame", {
+      description: "Set the active animation frame by one-based index.",
+      inputSchema: { filename: z.string().min(1), frame_index: z.number().int().positive() },
+    }, async ({ filename, frame_index }) => this.result(await this.assets.setFrame(filename, frame_index)));
+
+    this.server.registerTool("set_frame_duration", {
+      description: "Set one animation frame duration in milliseconds.",
+      inputSchema: { filename: z.string().min(1), frame_index: z.number().int().positive(), duration_ms: z.number().int().positive() },
+    }, async ({ filename, frame_index, duration_ms }) => this.result(await this.assets.setFrameDuration(filename, frame_index, duration_ms)));
+
+    this.server.registerTool("set_frame_duration_all", {
+      description: "Set all animation frame durations in milliseconds.",
+      inputSchema: { filename: z.string().min(1), duration_ms: z.number().int().positive() },
+    }, async ({ filename, duration_ms }) => this.result(await this.assets.setFrameDurationAll(filename, duration_ms)));
+
+    this.server.registerTool("set_layer_visibility", {
+      description: "Set a named layer visibility.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), visible: z.boolean().default(true) },
+    }, async ({ filename, layer_name, visible }) => this.result(await this.assets.setLayerVisibility(filename, layer_name, visible)));
+
+    this.server.registerTool("set_layer_opacity", {
+      description: "Set a named layer opacity from 0 to 255.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), opacity: z.number().int().min(0).max(255) },
+    }, async ({ filename, layer_name, opacity }) => this.result(await this.assets.setLayerOpacity(filename, layer_name, opacity)));
 
     this.server.registerTool("set_palette", {
       description: "Apply a controlled hexadecimal palette to a document.",
