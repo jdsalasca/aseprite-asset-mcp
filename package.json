@@ -17,7 +17,10 @@
     "asset:character": "tsx scripts/character-workflow.ts",
     "asset:scene": "tsx scripts/scene-workflow.ts",
     "asset:paint": "tsx scripts/paint-godot-assets.ts",
-    "asset:creatures": "tsx scripts/paint-creature-assets.ts"
+    "asset:creatures": "tsx scripts/paint-creature-assets.ts",
+    "asset:odiseum-style": "tsx scripts/boost-odiseum-style.ts",
+    "asset:odiseum-world": "tsx scripts/paint-odiseum-world.ts",
+    "asset:library": "tsx scripts/paint-reusable-asset-library.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",
