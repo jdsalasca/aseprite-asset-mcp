@@ -41,6 +41,9 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("tween_cel_positions"));
     assert.ok(tools.includes("offset_cel_positions"));
     assert.ok(tools.includes("propagate_frame_to_range"));
+    assert.ok(tools.includes("delete_frame"));
+    assert.ok(tools.includes("delete_tag"));
+    assert.ok(tools.includes("set_onion_skin"));
     assert.ok(tools.includes("set_frame"));
     assert.ok(tools.includes("draw_rectangle"));
     assert.ok(tools.includes("create_character_plan"));
@@ -130,6 +133,9 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
     await call("tween_cel_positions", { filename: source, layer_name: "body", start_frame: 1, end_frame: 2, start_x: 1, start_y: 1, end_x: 4, end_y: 4, create_missing_cels: false });
     await call("offset_cel_positions", { filename: source, layer_name: "body", start_frame: 1, end_frame: 2, dx: 1, dy: -1 });
     await call("propagate_frame_to_range", { filename: source, source_frame: 2, start_frame: 1, end_frame: 2, overwrite: true });
+    await call("delete_tag", { filename: source, name: "idle" });
+    await call("delete_frame", { filename: source, frame_index: 2 });
+    await call("set_onion_skin", { filename: source, enabled: true, before: 2, after: 2, opacity: 128 });
     await call("export_spritesheet", {
       filename: source,
       output_filename: sheet,

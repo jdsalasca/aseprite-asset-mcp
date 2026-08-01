@@ -44,6 +44,9 @@ test("rejects traversal in every input sprite path before starting Aseprite", as
     gateway.tweenCelPositions("../sprite.aseprite", "Layer", 1, 2, 0, 0, 1, 1),
     gateway.offsetCelPositions("../sprite.aseprite", "Layer", 1, 2, 1, 1),
     gateway.propagateFrameToRange("../sprite.aseprite", 1, 1, 2),
+    gateway.deleteFrame("../sprite.aseprite", 1),
+    gateway.deleteTag("../sprite.aseprite", "idle"),
+    gateway.setOnionSkin("../sprite.aseprite"),
     gateway.setTag("../sprite.aseprite", "idle", 1, 1),
     gateway.createTilemapLayer("../sprite.aseprite", "Tiles", 16, 16),
     gateway.validateScene("../sprite.aseprite", ["Layer"]),
@@ -166,6 +169,18 @@ test("rejects invalid frame motion contracts before starting Aseprite", async ()
   assert.equal(badTween.message, "Frame range must start at 1 and end at or after the start");
   assert.equal(badOffset.message, "Frame range must start at 1 and end at or after the start");
   assert.equal(badPropagate.message, "Source frame must be a positive integer");
+});
+
+test("rejects invalid animation control contracts before starting Aseprite", async () => {
+  const badFrame = await gateway.deleteFrame("sprite.aseprite", 0);
+  const badTag = await gateway.deleteTag("sprite.aseprite", "");
+  const badOnionRange = await gateway.setOnionSkin("sprite.aseprite", true, -1, 2, 128);
+  const badOnionOpacity = await gateway.setOnionSkin("sprite.aseprite", true, 1, 1, 256);
+
+  assert.equal(badFrame.message, "Frame index must be a positive integer");
+  assert.equal(badTag.message, "Tag name cannot be empty");
+  assert.equal(badOnionRange.message, "Before and after must be non-negative integers");
+  assert.equal(badOnionOpacity.message, "Opacity must be between 0 and 255");
 });
 
 test("rejects invalid tag frame ranges before starting Aseprite", async () => {

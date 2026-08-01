@@ -2,18 +2,18 @@
   "schemaVersion": 1,
   "project": "aseprite-mcp",
   "goal": "complete-typescript-migration",
-  "generatedAt": "2026-08-01T14:13:04.932Z",
+  "generatedAt": "2026-08-01T14:18:20.339Z",
   "source": {
     "repository": "https://github.com/diivi/aseprite-mcp",
     "branch": "upstream/main",
     "commit": "90d1696a7e41edff89bbd0823ae6a5f86c114bcc"
   },
   "local": {
-    "branch": "codex/migrate/frame-motion",
-    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-frame-motion",
-    "baseCommit": "1ec1caa6b0175bc05db45f92d704aa23f23ebee7",
-    "typescriptToolCount": 46,
-    "testCount": 22
+    "branch": "codex/migrate/animation-controls",
+    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-animation-controls",
+    "baseCommit": "bd060e49f5097b4f6f5572660c47f2ac7c37e2a1",
+    "typescriptToolCount": 49,
+    "testCount": 23
   },
   "tools": [
     {
@@ -270,9 +270,13 @@
       "name": "set_onion_skin",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "core",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -336,9 +340,13 @@
       "name": "delete_frame",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "animation",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -347,9 +355,13 @@
       "name": "delete_tag",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "animation",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []

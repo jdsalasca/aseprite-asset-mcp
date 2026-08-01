@@ -159,6 +159,18 @@ export class AsepriteAssetService {
     return this.gateway.propagateFrameToRange(filename, sourceFrame, startFrame, endFrame, overwrite);
   }
 
+  public deleteFrame(filename: string, frameIndex: number): Promise<AsepriteResult> {
+    return this.gateway.deleteFrame(filename, frameIndex);
+  }
+
+  public deleteTag(filename: string, name: string): Promise<AsepriteResult> {
+    return this.gateway.deleteTag(filename, name);
+  }
+
+  public setOnionSkin(filename: string, enabled = true, before = 2, after = 2, opacity = 128): Promise<AsepriteResult> {
+    return this.gateway.setOnionSkin(filename, enabled, before, after, opacity);
+  }
+
   public setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction = "forward"): Promise<AsepriteResult> {
     return this.gateway.setTag(filename, name, fromFrame, toFrame, direction);
   }

@@ -2,16 +2,16 @@
   "project": "aseprite-mcp",
   "goal": "complete-typescript-migration",
   "continue": true,
-  "currentPhase": "frame-motion",
-  "currentSlice": "position-and-propagation",
-  "lastCompletedSlice": "import-and-cel-copy",
-  "nextSlice": "animation-copy-and-delete-tools",
+  "currentPhase": "animation-controls",
+  "currentSlice": "delete-and-onion-controls",
+  "lastCompletedSlice": "position-and-propagation",
+  "nextSlice": "analysis-tools",
   "blocked": false,
   "retryCount": 0,
   "lastEvidence": [
-    "npm test: 22 passed, 0 failed",
+    "npm test: 23 passed, 0 failed",
     "upstream/main inventory: 116 tools",
-    "TypeScript server inventory: 46 tools",
+    "TypeScript server inventory: 49 tools",
     "real Aseprite integration: passed",
     "MCP stdio drawing E2E: passed"
   ]
