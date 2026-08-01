@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "kind": "time_of_day_pack",
+  "input": "C:\\Users\\jdsal\\Documents\\Programming-personal\\aseprite-mcp\\docs\\media\\coastal-map.png",
+  "output": "C:\\Users\\jdsal\\Documents\\Programming-personal\\aseprite-mcp\\docs\\media\\coastal-time-of-day.gif",
+  "frames": 12,
+  "phases": [
+    "day",
+    "sunset",
+    "night",
+    "sunrise"
+  ]
+}

@@ -22,6 +22,24 @@ La rama `develop` usa únicamente el runtime TypeScript. El núcleo disponible i
 
 Este proyecto mantiene su propio desarrollo, roadmap y contrato de herramientas para convertirlo en una fábrica de assets pixel-art eficiente para agentes.
 
+## Showcase visual
+
+Los ejemplos se generan de forma reproducible con `npm run showcase`. El mismo pipeline crea estilo, tileset, mapa, oleaje, transición temporal y manifests.
+
+![Declarative asset pipeline](docs/media/mcp-pipeline.svg)
+
+![Coastal map preview](docs/media/coastal-map.png)
+
+![Animated beach waves](docs/media/beach-waves.gif)
+
+![Day, sunset, night, and sunrise transition](docs/media/coastal-time-of-day.gif)
+
+Ver también:
+
+- [Guía de uso](docs/USAGE_GUIDE.md)
+- [Recetas y reglas de calidad](docs/ASSET_RECIPES.md)
+- [Ejemplos visuales](docs/media/)
+
 ## Requisitos
 
 - Node.js 24 o posterior.
@@ -75,6 +93,7 @@ npm run asset:scene -- --asset=forest-ruins --execute
 npm run asset:odiseum-style
 npm run asset:odiseum-world
 npm run asset:library
+npm run showcase
 ```
 
 Secuencia: canvas; grupos y capas semánticas; paleta; frames y tags; validación; spritesheet, datos y manifiesto para Godot.
@@ -97,6 +116,13 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `inspect_asset` y `validate_asset_quality`: reportan dimensiones, frames, colores, transparencia, delays y pixeles aislados antes de exportar.
 - `build_texture_atlas`: empaqueta imágenes del mismo tamaño en un atlas PNG con columnas y padding.
 - `export_asset_pack`: entrega el atlas y un manifiesto JSON con la posición de cada asset.
+- `create_style_bible`: fija paleta, luz, escala, detalle y semilla para mantener consistencia.
+- `inspect_reference` y `run_asset_quality_gate`: analizan color, contraste, bordes, transparencia, banding y píxeles aislados.
+- `build_terrain_tileset`: genera 16 máscaras cardinales por terreno para transiciones reutilizables.
+- `generate_world_map`: crea mapas multi-bioma deterministas con landmarks y preview.
+- `generate_beach_scene`: crea costa, arena, tierra, preview y oleaje animado.
+- `generate_time_of_day_pack`: crea transición día, atardecer, noche y amanecer.
+- `generate_environment_pack`: empaqueta playa, bosque, aldea o cueva en una sola llamada.
 
 Las operaciones de imagen no necesitan abrir Aseprite; eso reduce latencia y tokens para conversiones masivas. Las operaciones sobre `.aseprite` siguen pasando por el adaptador CLI hexagonal y mantienen la compatibilidad con Godot.
 

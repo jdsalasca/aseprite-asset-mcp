@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "kind": "style_bible",
+  "id": "coastal-showcase",
+  "baseSize": 16,
+  "palette": [
+    "#12243A",
+    "#3081AD",
+    "#E2C277",
+    "#57975B",
+    "#686870",
+    "#F2E9C9"
+  ],
+  "outlineColor": "#12243A",
+  "lightDirection": "south_east",
+  "detailLevel": "high",
+  "seed": 4217,
+  "materials": {
+    "water": [
+      "#28577A",
+      "#3081AD"
+    ],
+    "sand": [
+      "#C49B57",
+      "#E2C277"
+    ],
+    "grass": [
+      "#3E7045",
+      "#57975B"
+    ]
+  }
+}

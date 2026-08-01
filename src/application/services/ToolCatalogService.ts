@@ -19,10 +19,23 @@ const DESCRIPTION_OVERRIDES: Record<string, string> = {
   run_asset_recipe: "Run or preview one compact asset recipe.",
   batch_asset_job: "Run or preview several compact asset recipes.",
   export_asset_pack: "Export an atlas PNG and compact JSON manifest.",
+  create_style_bible: "Create a deterministic style contract for assets.",
+  inspect_reference: "Analyze colors, contrast, edges, and transparency.",
+  run_asset_quality_gate: "Check pixel-art quality before export.",
+  build_terrain_tileset: "Build terrain variants and adjacency metadata.",
+  generate_world_map: "Generate a seeded multi-biome map manifest.",
+  generate_beach_scene: "Generate a beach map with animated waves.",
+  generate_time_of_day_pack: "Generate day, sunset, night, and sunrise frames.",
+  generate_environment_pack: "Generate a complete themed environment pack.",
 };
 
 function folderFor(name: string): string {
   if (name === "server_capabilities" || name.startsWith("get_tools_")) return "meta/catalog";
+  if (name === "create_style_bible") return "asset/style";
+  if (name === "inspect_reference" || name === "run_asset_quality_gate") return "asset/quality";
+  if (name.includes("terrain") || name.includes("tilemap")) return "asset/tilemap";
+  if (name.includes("world") || name.includes("beach") || name.includes("environment") || name.includes("map")) return "asset/world";
+  if (name.includes("time_of_day") || name.includes("weather") || name.includes("wave")) return "asset/environment";
   if (name.endsWith("_plan") || name.includes("recipe") || name.includes("asset_pack")) return "asset/recipes";
   if (name.includes("preview")) return "asset/preview";
   if (name.includes("export") || name === "copy_sprite") return "asset/export";

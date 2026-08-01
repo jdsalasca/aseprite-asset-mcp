@@ -122,6 +122,14 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("run_asset_recipe"));
     assert.ok(tools.includes("batch_asset_job"));
     assert.ok(tools.includes("export_asset_pack"));
+    assert.ok(tools.includes("create_style_bible"));
+    assert.ok(tools.includes("inspect_reference"));
+    assert.ok(tools.includes("run_asset_quality_gate"));
+    assert.ok(tools.includes("build_terrain_tileset"));
+    assert.ok(tools.includes("generate_world_map"));
+    assert.ok(tools.includes("generate_beach_scene"));
+    assert.ok(tools.includes("generate_time_of_day_pack"));
+    assert.ok(tools.includes("generate_environment_pack"));
     assert.ok(!tools.includes("legacy_server"));
 
     const folderIndex = await client.callTool("get_tools_list", {}) as { content: Array<{ type: string; text?: string }> };
@@ -136,6 +144,11 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     const drawingData = JSON.parse(drawingText) as { tools?: Array<{ name: string; folder: string; description: string }> };
     assert.ok(drawingData.tools?.some((tool) => tool.name === "draw_pixels"));
     assert.ok(drawingData.tools?.every((tool) => tool.folder === "asset/drawing"));
+
+    const worldTools = await client.callTool("get_tools_by_folder", { folder: "asset/world" }) as { content: Array<{ type: string; text?: string }> };
+    const worldText = worldTools.content.find((item) => item.type === "text")?.text ?? "";
+    const worldData = JSON.parse(worldText) as { tools?: Array<{ name: string; folder: string }> };
+    assert.ok(worldData.tools?.some((tool) => tool.name === "generate_beach_scene"));
   } finally {
     await client.close();
   }

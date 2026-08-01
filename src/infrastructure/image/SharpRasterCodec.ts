@@ -1,4 +1,6 @@
 import sharp from "sharp";
+import { promises as fs } from "node:fs";
+import path from "node:path";
 import type { ImageOutputFormat, RasterCodec } from "../../domain/image-assets.js";
 import type { RasterFrame } from "../../domain/pixel-art.js";
 
@@ -35,6 +37,7 @@ export class SharpRasterCodec implements RasterCodec {
 
   public async encode(frames: RasterFrame[], filename: string, format: ImageOutputFormat): Promise<void> {
     assertFrames(frames);
+    await fs.mkdir(path.dirname(path.resolve(filename)), { recursive: true });
     const first = frames[0];
     if (!first) throw new Error("At least one frame is required");
     if (format === "png") {

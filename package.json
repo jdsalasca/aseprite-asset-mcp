@@ -21,7 +21,8 @@
     "asset:odiseum-style": "tsx scripts/boost-odiseum-style.ts",
     "asset:odiseum-world": "tsx scripts/paint-odiseum-world.ts",
     "asset:library": "tsx scripts/paint-reusable-asset-library.ts",
-    "asset:cozy-nature": "tsx scripts/paint-cozy-nature-assets.ts"
+    "asset:cozy-nature": "tsx scripts/paint-cozy-nature-assets.ts",
+    "showcase": "tsx scripts/generate-showcase.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",

@@ -50,7 +50,10 @@ function box(x: number, y: number, width: number, height: number, color: string)
   return call("draw_rectangle", { x, y, width, height, color, fill: true }, "Paint creature pixel block");
 }
 
-const client = new AsepriteMcpClient({ cwd: process.cwd() });
+const client = new AsepriteMcpClient({
+  cwd: process.cwd(),
+  environment: { ASEPRITE_PATH: process.env.ASEPRITE_PATH ?? "C:/Program Files (x86)/Steam/steamapps/common/Aseprite/Aseprite.exe" },
+});
 try {
   const creatures = [
     {
@@ -87,6 +90,20 @@ try {
       frameOne: [box(9, 12, 14, 12, "#65758C"), box(7, 8, 18, 8, "#AFC2C7"), box(10, 5, 4, 5, "#65758C"), box(18, 5, 4, 5, "#65758C"), box(11, 12, 2, 2, "#17152E"), box(21, 12, 2, 2, "#17152E"), box(12, 19, 3, 4, "#F0C98E"), box(18, 19, 3, 4, "#F0C98E")],
       frameTwo: [box(9, 11, 14, 13, "#65758C"), box(7, 7, 18, 8, "#AFC2C7"), box(9, 4, 4, 5, "#65758C"), box(19, 4, 4, 5, "#65758C"), box(11, 11, 2, 2, "#17152E"), box(21, 11, 2, 2, "#17152E"), box(11, 19, 3, 4, "#F0C98E"), box(19, 19, 3, 4, "#F0C98E")],
       frameThree: [box(9, 12, 14, 12, "#65758C"), box(7, 8, 18, 8, "#AFC2C7"), box(10, 5, 4, 5, "#65758C"), box(18, 5, 4, 5, "#65758C"), box(11, 12, 2, 2, "#17152E"), box(21, 12, 2, 2, "#17152E"), box(12, 19, 3, 4, "#F0C98E"), box(18, 19, 3, 4, "#F0C98E")],
+    },
+    {
+      id: "cloudpaca",
+      palette: ["#17152E", "#8AA4C2", "#DDEBFA", "#FFF0CF", "#D3A7E8"],
+      frameOne: [box(8, 12, 16, 12, "#DDEBFA"), box(6, 8, 20, 8, "#FFF0CF"), box(9, 4, 5, 6, "#8AA4C2"), box(18, 4, 5, 6, "#8AA4C2"), box(11, 12, 2, 2, "#17152E"), box(21, 12, 2, 2, "#17152E"), box(6, 17, 4, 4, "#D3A7E8"), box(22, 17, 4, 4, "#D3A7E8"), box(11, 24, 4, 3, "#8AA4C2"), box(17, 24, 4, 3, "#8AA4C2")],
+      frameTwo: [box(8, 11, 16, 13, "#DDEBFA"), box(6, 7, 20, 8, "#FFF0CF"), box(8, 3, 5, 6, "#8AA4C2"), box(19, 3, 5, 6, "#8AA4C2"), box(11, 11, 2, 2, "#17152E"), box(21, 11, 2, 2, "#17152E"), box(5, 17, 5, 4, "#D3A7E8"), box(22, 17, 5, 4, "#D3A7E8"), box(10, 24, 4, 3, "#8AA4C2"), box(18, 24, 4, 3, "#8AA4C2")],
+      frameThree: [box(8, 12, 16, 12, "#DDEBFA"), box(6, 8, 20, 8, "#FFF0CF"), box(9, 4, 5, 6, "#8AA4C2"), box(18, 4, 5, 6, "#8AA4C2"), box(11, 12, 2, 2, "#17152E"), box(21, 12, 2, 2, "#17152E"), box(6, 17, 4, 4, "#D3A7E8"), box(22, 17, 4, 4, "#D3A7E8"), box(11, 24, 4, 3, "#8AA4C2"), box(17, 24, 4, 3, "#8AA4C2")],
+    },
+    {
+      id: "mosswhale",
+      palette: ["#17152E", "#3977B8", "#6ED0E8", "#C9F4FF", "#F5D76E"],
+      frameOne: [box(5, 13, 22, 10, "#3977B8"), box(8, 8, 16, 8, "#6ED0E8"), box(11, 5, 4, 5, "#3977B8"), box(18, 5, 4, 5, "#3977B8"), box(11, 11, 2, 2, "#17152E"), box(21, 11, 2, 2, "#17152E"), box(3, 15, 4, 4, "#C9F4FF"), box(25, 15, 4, 4, "#C9F4FF"), box(12, 20, 3, 3, "#F5D76E"), box(18, 20, 3, 3, "#F5D76E")],
+      frameTwo: [box(4, 12, 24, 11, "#3977B8"), box(8, 7, 16, 8, "#6ED0E8"), box(10, 4, 4, 5, "#3977B8"), box(19, 4, 4, 5, "#3977B8"), box(11, 10, 2, 2, "#17152E"), box(21, 10, 2, 2, "#17152E"), box(2, 15, 5, 4, "#C9F4FF"), box(25, 15, 5, 4, "#C9F4FF"), box(11, 20, 3, 3, "#F5D76E"), box(19, 20, 3, 3, "#F5D76E")],
+      frameThree: [box(5, 13, 22, 10, "#3977B8"), box(8, 8, 16, 8, "#6ED0E8"), box(11, 5, 4, 5, "#3977B8"), box(18, 5, 4, 5, "#3977B8"), box(11, 11, 2, 2, "#17152E"), box(21, 11, 2, 2, "#17152E"), box(3, 15, 4, 4, "#C9F4FF"), box(25, 15, 4, 4, "#C9F4FF"), box(12, 20, 3, 3, "#F5D76E"), box(18, 20, 3, 3, "#F5D76E")],
     },
   ];
 
