@@ -1568,9 +1568,24 @@ export class AsepriteCliGateway implements AsepriteGateway {
     const serverCode = `const http=require("node:http"),fs=require("node:fs"),path=require("node:path");const root=path.resolve(process.argv[1]);const port=Number(process.argv[2]);http.createServer((req,res)=>{try{const pathname=decodeURIComponent(new URL(req.url,"http://localhost").pathname);const target=path.resolve(root,"."+pathname);if(target!==root&&!target.startsWith(root+path.sep)){res.writeHead(403);return res.end("Forbidden")}let file=target;if(fs.existsSync(file)&&fs.statSync(file).isDirectory())file=path.join(file,"index.html");if(!fs.existsSync(file)||!fs.statSync(file).isFile()){res.writeHead(404);return res.end("Not found")}res.writeHead(200);fs.createReadStream(file).pipe(res)}catch(e){res.writeHead(500);res.end("Server error")}}).listen(port,"127.0.0.1")`;
     const child = spawn(process.execPath, ["-e", serverCode, target, String(port)], { cwd: target, windowsHide: true, stdio: "ignore" });
     previewServers.set(port, child);
-    await new Promise((resolve) => setTimeout(resolve, 120));
-    if (child.exitCode !== null) { previewServers.delete(port); return { ok: false, message: `Preview server failed to start on port ${port}` }; }
-    return { ok: true, message: `Preview server started: http://localhost:${port}/` };
+    for (let attempt = 0; attempt < 40; attempt += 1) {
+      if (child.exitCode !== null) break;
+      try {
+        const response = await fetch(`http://127.0.0.1:${port}/`);
+        await response.body?.cancel();
+        return { ok: true, message: `Preview server started: http://localhost:${port}/` };
+      } catch {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
+    }
+    child.kill();
+    previewServers.delete(port);
+    await new Promise<void>((resolve) => {
+      if (child.exitCode !== null) { resolve(); return; }
+      const timeout = setTimeout(resolve, 2000);
+      child.once("exit", () => { clearTimeout(timeout); resolve(); });
+    });
+    return { ok: false, message: `Preview server failed to start on port ${port}` };
   }
 
   public async stopPreviewServer(port = 8000): Promise<AsepriteResult> {
@@ -1579,6 +1594,17 @@ export class AsepriteCliGateway implements AsepriteGateway {
     if (!child || child.killed) return { ok: false, message: `No preview server found for port ${port}` };
     child.kill();
     previewServers.delete(port);
+    await new Promise<void>((resolve) => {
+      if (child.exitCode !== null) {
+        resolve();
+        return;
+      }
+      const timeout = setTimeout(resolve, 2000);
+      child.once("exit", () => {
+        clearTimeout(timeout);
+        resolve();
+      });
+    });
     return { ok: true, message: `Preview server stopped on port ${port}` };
   }
 
