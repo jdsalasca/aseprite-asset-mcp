@@ -2,16 +2,16 @@
   "project": "aseprite-mcp",
   "goal": "complete-typescript-migration",
   "continue": true,
-  "currentPhase": "text",
-  "currentSlice": "text-tools",
-  "lastCompletedSlice": "transform-tools",
-  "nextSlice": "tilemap-tools",
+  "currentPhase": "tilemap",
+  "currentSlice": "tilemap-tools",
+  "lastCompletedSlice": "text-tools",
+  "nextSlice": "slice-tools",
   "blocked": false,
   "retryCount": 0,
   "lastEvidence": [
-    "npm test: 37 passed, 0 failed",
+    "npm test: 39 passed, 0 failed",
     "upstream/main inventory: 116 tools",
-    "TypeScript server inventory: 94 tools",
+    "TypeScript server inventory: 98 tools",
     "real Aseprite integration: passed",
     "MCP stdio drawing E2E: passed"
   ]

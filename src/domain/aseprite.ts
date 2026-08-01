@@ -37,6 +37,18 @@ export interface TextDrawInput {
   createIfMissing?: boolean | undefined;
 }
 
+export interface TilePixelInput {
+  x: number;
+  y: number;
+  color: string;
+}
+
+export interface TilePlacementInput {
+  col: number;
+  row: number;
+  tileIndex: number;
+}
+
 export interface AsepriteGateway {
   createCanvas(width: number, height: number, filename: string): Promise<AsepriteResult>;
   addGroup(filename: string, groupName: string, parentGroup?: string): Promise<AsepriteResult>;
@@ -121,6 +133,10 @@ export interface AsepriteGateway {
   listTextFonts(): Promise<AsepriteResult>;
   measureText(text: string, font: string, size?: number, letterSpacing?: number, bold?: number, antialias?: boolean): Promise<AsepriteResult>;
   drawText(input: TextDrawInput): Promise<AsepriteResult>;
+  drawOnTile(filename: string, layerName: string, tileIndex: number, pixels: TilePixelInput[]): Promise<AsepriteResult>;
+  setTiles(filename: string, layerName: string, frameIndex: number, tiles: TilePlacementInput[]): Promise<AsepriteResult>;
+  getTileAt(filename: string, layerName: string, frameIndex: number, col: number, row: number): Promise<AsepriteResult>;
+  getTilemapInfo(filename: string, layerName: string): Promise<AsepriteResult>;
   applyConvolution(filename: string, matrix: string, layerName?: string, frameIndex?: number, x?: number, y?: number, width?: number, height?: number): Promise<AsepriteResult>;
   listConvolutionMatrices(): Promise<AsepriteResult>;
   applyDitherGradient(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, colorStart: string, colorEnd: string, horizontal?: boolean, createIfMissing?: boolean): Promise<AsepriteResult>;

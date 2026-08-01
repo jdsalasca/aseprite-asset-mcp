@@ -87,6 +87,10 @@ const TOOL_NAMES = [
   "list_text_fonts",
   "measure_text",
   "draw_text",
+  "draw_on_tile",
+  "set_tiles",
+  "get_tile_at",
+  "get_tilemap_info",
   "outline_native",
   "adjust_hsl_native",
   "adjust_brightness_contrast",
@@ -568,6 +572,26 @@ export class AsepriteMcpServerAdapter {
         anchor: z.enum(["topleft", "top", "topright", "left", "center", "right", "bottomleft", "bottom", "bottomright", "baselineleft", "baseline", "baselineright"]).default("topleft"), letter_spacing: z.number().int().nonnegative().default(0), bold: z.number().int().nonnegative().default(0), outline_color: z.string().regex(HEX_COLOR).optional(), outline_width: z.number().int().positive().default(1), outline_diagonal: z.boolean().default(true), shadow_color: z.string().regex(HEX_COLOR).optional(), shadow_dx: z.number().int().default(1), shadow_dy: z.number().int().default(1), antialias: z.boolean().default(false), create_if_missing: z.boolean().default(true),
       },
     }, async ({ filename, text, x, y, font, size, color, layer_name, frame_index, anchor, letter_spacing, bold, outline_color, outline_width, outline_diagonal, shadow_color, shadow_dx, shadow_dy, antialias, create_if_missing }) => this.result(await this.assets.drawText({ filename, text, x, y, font, size, color, layerName: layer_name, frameIndex: frame_index, anchor, letterSpacing: letter_spacing, bold, outlineColor: outline_color, outlineWidth: outline_width, outlineDiagonal: outline_diagonal, shadowColor: shadow_color, shadowDx: shadow_dx, shadowDy: shadow_dy, antialias, createIfMissing: create_if_missing })));
+
+    this.server.registerTool("draw_on_tile", {
+      description: "Draw pixels onto a tilemap tileset tile.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), tile_index: z.number().int().min(1), pixels: z.array(z.object({ x: z.number().int(), y: z.number().int(), color: z.string().regex(HEX_COLOR) })).min(1) },
+    }, async ({ filename, layer_name, tile_index, pixels }) => this.result(await this.assets.drawOnTile(filename, layer_name, tile_index, pixels)));
+
+    this.server.registerTool("set_tiles", {
+      description: "Place tile indices on a tilemap frame by grid coordinates.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(), tiles: z.array(z.object({ col: z.number().int().nonnegative(), row: z.number().int().nonnegative(), tile_index: z.number().int().nonnegative() })).min(1) },
+    }, async ({ filename, layer_name, frame_index, tiles }) => this.result(await this.assets.setTiles(filename, layer_name, frame_index, tiles.map(({ col, row, tile_index }) => ({ col, row, tileIndex: tile_index })))));
+
+    this.server.registerTool("get_tile_at", {
+      description: "Read the tile index at a tilemap grid coordinate.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(), col: z.number().int().nonnegative(), row: z.number().int().nonnegative() },
+    }, async ({ filename, layer_name, frame_index, col, row }) => this.result(await this.assets.getTileAt(filename, layer_name, frame_index, col, row)));
+
+    this.server.registerTool("get_tilemap_info", {
+      description: "Read tile size, tileset count, and map dimensions.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1) },
+    }, async ({ filename, layer_name }) => this.result(await this.assets.getTilemapInfo(filename, layer_name)));
 
     this.server.registerTool("outline_native", {
       description: "Apply Aseprite native outline to a selected layer and frame.",

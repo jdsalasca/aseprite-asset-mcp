@@ -85,6 +85,10 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("list_text_fonts"));
     assert.ok(tools.includes("measure_text"));
     assert.ok(tools.includes("draw_text"));
+    assert.ok(tools.includes("draw_on_tile"));
+    assert.ok(tools.includes("set_tiles"));
+    assert.ok(tools.includes("get_tile_at"));
+    assert.ok(tools.includes("get_tilemap_info"));
     assert.ok(tools.includes("draw_rectangle"));
     assert.ok(tools.includes("create_character_plan"));
     assert.ok(tools.includes("create_scene_plan"));
@@ -134,6 +138,7 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
   const onionRender = path.join(directory, "primitive-onion.png");
   const transformSource = path.join(directory, "transform.aseprite");
   const textSource = path.join(directory, "text.aseprite");
+  const tileSource = path.join(directory, "tilemap.aseprite");
   const client = new AsepriteMcpClient({
     cwd: process.cwd(),
     environment: { ASEPRITE_PATH: asepritePath },
@@ -230,6 +235,12 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
     await call("measure_text", { text: "Aseprite", font: textFontPath, size: 8, letter_spacing: 1, bold: 1 });
     await call("create_canvas", { width: 48, height: 24, filename: textSource });
     await call("draw_text", { filename: textSource, text: "A", x: 4, y: 4, font: textFontPath, size: 12, color: "#ff0000", layer_name: "labels", anchor: "topleft", outline_color: "#000000", shadow_color: "#0000ff", create_if_missing: true });
+    await call("create_canvas", { width: 16, height: 16, filename: tileSource });
+    await call("create_tilemap_layer", { filename: tileSource, layer_name: "terrain", tile_width: 4, tile_height: 4 });
+    await call("draw_on_tile", { filename: tileSource, layer_name: "terrain", tile_index: 1, pixels: [{ x: 0, y: 0, color: "#ff0000" }] });
+    await call("set_tiles", { filename: tileSource, layer_name: "terrain", frame_index: 1, tiles: [{ col: 0, row: 0, tile_index: 1 }] });
+    await call("get_tile_at", { filename: tileSource, layer_name: "terrain", frame_index: 1, col: 0, row: 0 });
+    await call("get_tilemap_info", { filename: tileSource, layer_name: "terrain" });
     await call("flatten_sprite", { filename: source });
     await call("export_spritesheet", {
       filename: source,

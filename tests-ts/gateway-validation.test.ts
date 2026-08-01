@@ -390,6 +390,28 @@ test("rejects invalid text contracts before rasterizing or starting Aseprite", a
   assert.equal(badDrawEmpty.message, "Text cannot be empty");
 });
 
+test("rejects invalid tilemap contracts before starting Aseprite", async () => {
+  const badTileSize = await gateway.createTilemapLayer("sprite.aseprite", "terrain", 0, 4);
+  const badTileIndex = await gateway.drawOnTile("sprite.aseprite", "terrain", 0, [{ x: 0, y: 0, color: "#ffffff" }]);
+  const badTilePixels = await gateway.drawOnTile("sprite.aseprite", "terrain", 1, []);
+  const badTileCoordinates = await gateway.drawOnTile("sprite.aseprite", "terrain", 1, [{ x: 0.5, y: 0, color: "#ffffff" }]);
+  const badPlacementFrame = await gateway.setTiles("sprite.aseprite", "terrain", 0, [{ col: 0, row: 0, tileIndex: 1 }]);
+  const badPlacement = await gateway.setTiles("sprite.aseprite", "terrain", 1, [{ col: -1, row: 0, tileIndex: 1 }]);
+  const badReadFrame = await gateway.getTileAt("sprite.aseprite", "terrain", 0, 0, 0);
+  const badReadCoordinates = await gateway.getTileAt("sprite.aseprite", "terrain", 1, 0.5, 0);
+  const badInfoLayer = await gateway.getTilemapInfo("sprite.aseprite", "");
+
+  assert.equal(badTileSize.message, "Tile dimensions must be positive integers");
+  assert.equal(badTileIndex.message, "Tile index must be >= 1 (tile 0 is reserved)");
+  assert.equal(badTilePixels.message, "Pixels list cannot be empty");
+  assert.equal(badTileCoordinates.message, "Tile pixel coordinates must be integers");
+  assert.equal(badPlacementFrame.message, "Frame index must be a positive integer");
+  assert.equal(badPlacement.message, "Tile positions must be non-negative");
+  assert.equal(badReadFrame.message, "Frame index must be a positive integer");
+  assert.equal(badReadCoordinates.message, "Tile coordinates must be integers");
+  assert.equal(badInfoLayer.message, "Layer name cannot be empty");
+});
+
 test("rejects invalid tag frame ranges before starting Aseprite", async () => {
   const result = await gateway.setTag("sprite.aseprite", "idle", 0, 2);
 
