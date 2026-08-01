@@ -367,6 +367,136 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Circle drawn successfully in ${source}`);
   }
 
+  public async drawPixelsAt(filename: string, layerName: string, frameIndex: number, pixels: PixelInput[], createIfMissing = true): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    if (!Array.isArray(pixels) || pixels.length === 0) return { ok: false, message: "Pixels list cannot be empty" };
+    const commands: string[] = [];
+    for (const pixel of pixels) {
+      if (!Number.isInteger(pixel.x) || !Number.isInteger(pixel.y)) return { ok: false, message: "Pixel coordinates must be integers" };
+      const rgba = this.parseHexColor(pixel.color);
+      if (!rgba) return { ok: false, message: "Colors must use hexadecimal values" };
+      const [red, green, blue, alpha] = rgba;
+      commands.push(`img:putPixel(${pixel.x} - cox, ${pixel.y} - coy, Color(${red}, ${green}, ${blue}, ${alpha}))`);
+    }
+    const body = this.layerFrameScript(name, frameIndex, createIfMissing, `
+      local img = cel.image
+      local cox = cel.position.x
+      local coy = cel.position.y
+      ${commands.join("\n      ")}
+    `);
+    return result(await this.runLua(this.openScript(source, body), source), `Pixels drawn on '${name}' frame ${frameIndex} in ${source}`);
+  }
+
+  public async drawLineAt(filename: string, layerName: string, frameIndex: number, x1: number, y1: number, x2: number, y2: number, color: string, thickness = 1, createIfMissing = true): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    if (![x1, y1, x2, y2].every((coordinate) => Number.isInteger(coordinate))) return { ok: false, message: "Coordinates must be integers" };
+    if (!isPositiveInteger(thickness)) return { ok: false, message: "Thickness must be a positive integer" };
+    const rgba = this.parseHexColor(color);
+    if (!rgba) return { ok: false, message: "Colors must use hexadecimal values" };
+    const [red, green, blue, alpha] = rgba;
+    const body = this.layerFrameScript(name, frameIndex, createIfMissing, `
+      local img = cel.image
+      local cox = cel.position.x
+      local coy = cel.position.y
+      local paint = Color(${red}, ${green}, ${blue}, ${alpha})
+      local function put_thick(image, px, py, colorValue, size)
+        local radius = math.max(0, math.floor(size / 2))
+        for offsetY = -radius, radius do
+          for offsetX = -radius, radius do image:putPixel(px + offsetX, py + offsetY, colorValue) end
+        end
+      end
+      local px0 = ${x1} - cox
+      local py0 = ${y1} - coy
+      local px1 = ${x2} - cox
+      local py1 = ${y2} - coy
+      local dx = math.abs(px1 - px0)
+      local stepX = px0 < px1 and 1 or -1
+      local dy = -math.abs(py1 - py0)
+      local stepY = py0 < py1 and 1 or -1
+      local errorValue = dx + dy
+      while true do
+        if ${thickness} > 1 then put_thick(img, px0, py0, paint, ${thickness}) else img:putPixel(px0, py0, paint) end
+        if px0 == px1 and py0 == py1 then break end
+        local doubleError = 2 * errorValue
+        if doubleError >= dy then errorValue = errorValue + dy; px0 = px0 + stepX end
+        if doubleError <= dx then errorValue = errorValue + dx; py0 = py0 + stepY end
+      end
+    `);
+    return result(await this.runLua(this.openScript(source, body), source), `Line drawn on '${name}' frame ${frameIndex} in ${source}`);
+  }
+
+  public async drawRectangleAt(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, color: string, fill = false, createIfMissing = true): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    if (![x, y].every((coordinate) => Number.isInteger(coordinate))) return { ok: false, message: "Coordinates must be integers" };
+    if (!isPositiveInteger(width) || !isPositiveInteger(height)) return { ok: false, message: "Width and height must be positive integers" };
+    const rgba = this.parseHexColor(color);
+    if (!rgba) return { ok: false, message: "Colors must use hexadecimal values" };
+    const [red, green, blue, alpha] = rgba;
+    const tool = fill ? "filled_rectangle" : "rectangle";
+    const body = this.layerFrameScript(name, frameIndex, createIfMissing, `
+      app.useTool({
+        tool = "${tool}",
+        color = Color(${red}, ${green}, ${blue}, ${alpha}),
+        points = { Point(${x}, ${y}), Point(${x + width - 1}, ${y + height - 1}) }
+      })
+    `);
+    return result(await this.runLua(this.openScript(source, body), source), `Rectangle drawn on '${name}' frame ${frameIndex} in ${source}`);
+  }
+
+  public async drawCircleAt(filename: string, layerName: string, frameIndex: number, centerX: number, centerY: number, radius: number, color: string, fill = false, createIfMissing = true): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    if (![centerX, centerY].every((coordinate) => Number.isInteger(coordinate))) return { ok: false, message: "Coordinates must be integers" };
+    if (!isPositiveInteger(radius)) return { ok: false, message: "Radius must be a positive integer" };
+    const rgba = this.parseHexColor(color);
+    if (!rgba) return { ok: false, message: "Colors must use hexadecimal values" };
+    const [red, green, blue, alpha] = rgba;
+    const tool = fill ? "filled_ellipse" : "ellipse";
+    const body = this.layerFrameScript(name, frameIndex, createIfMissing, `
+      app.useTool({
+        tool = "${tool}",
+        color = Color(${red}, ${green}, ${blue}, ${alpha}),
+        points = { Point(${centerX - radius}, ${centerY - radius}), Point(${centerX + radius}, ${centerY + radius}) }
+      })
+    `);
+    return result(await this.runLua(this.openScript(source, body), source), `Circle drawn on '${name}' frame ${frameIndex} in ${source}`);
+  }
+
+  public async fillAreaAt(filename: string, layerName: string, frameIndex: number, x: number, y: number, color: string, createIfMissing = true): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    if (![x, y].every((coordinate) => Number.isInteger(coordinate))) return { ok: false, message: "Coordinates must be integers" };
+    const rgba = this.parseHexColor(color);
+    if (!rgba) return { ok: false, message: "Colors must use hexadecimal values" };
+    const [red, green, blue, alpha] = rgba;
+    const body = this.layerFrameScript(name, frameIndex, createIfMissing, `
+      app.useTool({
+        tool = "paint_bucket",
+        color = Color(${red}, ${green}, ${blue}, ${alpha}),
+        points = { Point(${x}, ${y}) }
+      })
+    `);
+    return result(await this.runLua(this.openScript(source, body), source), `Area filled on '${name}' frame ${frameIndex} in ${source}`);
+  }
+
   public async setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction = "forward"): Promise<AsepriteResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
@@ -480,6 +610,24 @@ export class AsepriteCliGateway implements AsepriteGateway {
 
   private layerScript(filename: string, body: string): string {
     return this.openScript(filename, body);
+  }
+
+  private layerFrameScript(layerName: string, frameIndex: number, createIfMissing: boolean, body: string): string {
+    return `
+      local idx = ${frameIndex}
+      if idx > #spr.frames then print("ERROR:Frame index out of range") return end
+      local target = find_layer(spr, "${luaEscape(layerName)}")
+      if not target or target.isGroup then print("ERROR:Layer not found") return end
+      app.activeLayer = target
+      app.activeFrame = spr.frames[idx]
+      local cel = target:cel(spr.frames[idx])
+      if not cel and ${createIfMissing ? "true" : "false"} then
+        local img = Image(spr.width, spr.height, spr.colorMode)
+        cel = spr:newCel(target, spr.frames[idx], img, Point(0, 0))
+      end
+      if not cel then print("ERROR:Cel not found") return end
+      app.transaction(function() ${body} end)
+    `;
   }
 
   private parseHexColor(value: string): [number, number, number, number] | undefined {

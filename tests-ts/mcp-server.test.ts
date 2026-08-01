@@ -18,6 +18,11 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("draw_line"));
     assert.ok(tools.includes("fill_area"));
     assert.ok(tools.includes("draw_circle"));
+    assert.ok(tools.includes("draw_pixels_at"));
+    assert.ok(tools.includes("draw_line_at"));
+    assert.ok(tools.includes("draw_rectangle_at"));
+    assert.ok(tools.includes("fill_area_at"));
+    assert.ok(tools.includes("draw_circle_at"));
     assert.ok(tools.includes("set_frame"));
     assert.ok(tools.includes("draw_rectangle"));
     assert.ok(tools.includes("create_character_plan"));
@@ -72,10 +77,17 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
 
   try {
     await call("create_canvas", { width: 16, height: 16, filename: source });
+    await call("add_layer", { filename: source, layer_name: "body" });
+    await call("add_frames", { filename: source, count: 1, duration_ms: 120 });
     await call("draw_pixels", { filename: source, pixels: [{ x: 1, y: 1, color: "#ffffff" }] });
     await call("draw_line", { filename: source, x1: 0, y1: 0, x2: 8, y2: 8, color: "#123456", thickness: 1 });
     await call("fill_area", { filename: source, x: 15, y: 15, color: "#222222" });
     await call("draw_circle", { filename: source, center_x: 8, center_y: 8, radius: 3, color: "#abcdef", fill: true });
+    await call("draw_pixels_at", { filename: source, layer_name: "body", frame_index: 2, pixels: [{ x: 2, y: 2, color: "#ffffff" }] });
+    await call("draw_line_at", { filename: source, layer_name: "body", frame_index: 2, x1: 1, y1: 1, x2: 10, y2: 10, color: "#123456" });
+    await call("draw_rectangle_at", { filename: source, layer_name: "body", frame_index: 2, x: 4, y: 4, width: 5, height: 5, color: "#654321", fill: true });
+    await call("fill_area_at", { filename: source, layer_name: "body", frame_index: 2, x: 0, y: 0, color: "#222222" });
+    await call("draw_circle_at", { filename: source, layer_name: "body", frame_index: 2, center_x: 8, center_y: 8, radius: 2, color: "#fed" });
     await call("export_spritesheet", {
       filename: source,
       output_filename: sheet,

@@ -21,6 +21,11 @@ test("rejects traversal in every input sprite path before starting Aseprite", as
     gateway.drawLine("../sprite.aseprite", 0, 0, 1, 1, "#112233"),
     gateway.fillArea("../sprite.aseprite", 0, 0, "#112233"),
     gateway.drawCircle("../sprite.aseprite", 0, 0, 1, "#112233"),
+    gateway.drawPixelsAt("../sprite.aseprite", "Layer", 1, [{ x: 0, y: 0, color: "#112233" }]),
+    gateway.drawLineAt("../sprite.aseprite", "Layer", 1, 0, 0, 1, 1, "#112233"),
+    gateway.drawRectangleAt("../sprite.aseprite", "Layer", 1, 0, 0, 1, 1, "#112233"),
+    gateway.drawCircleAt("../sprite.aseprite", "Layer", 1, 0, 0, 1, "#112233"),
+    gateway.fillAreaAt("../sprite.aseprite", "Layer", 1, 0, 0, "#112233"),
     gateway.setTag("../sprite.aseprite", "idle", 1, 1),
     gateway.createTilemapLayer("../sprite.aseprite", "Tiles", 16, 16),
     gateway.validateScene("../sprite.aseprite", ["Layer"]),
@@ -61,6 +66,24 @@ test("rejects invalid primitive drawing contracts before starting Aseprite", asy
   assert.equal(badFill.message, "Coordinates must be integers");
   assert.equal(badCircle.message, "Radius must be a positive integer");
   assert.equal(badColor.message, "Colors must use hexadecimal values");
+});
+
+test("rejects invalid layer-frame drawing contracts before starting Aseprite", async () => {
+  const badFrame = await gateway.drawPixelsAt("sprite.aseprite", "Layer", 0, [{ x: 0, y: 0, color: "#112233" }]);
+  const badLayer = await gateway.drawLineAt("sprite.aseprite", "", 1, 0, 0, 1, 1, "#112233");
+  const badPixels = await gateway.drawPixelsAt("sprite.aseprite", "Layer", 1, []);
+  const badLine = await gateway.drawLineAt("sprite.aseprite", "Layer", 1, 0, 0, 1, 1, "#112233", 0);
+  const badRectangle = await gateway.drawRectangleAt("sprite.aseprite", "Layer", 1, 0, 0, 0, 1, "#112233");
+  const badCircle = await gateway.drawCircleAt("sprite.aseprite", "Layer", 1, 0, 0, 0, "#112233");
+  const badFill = await gateway.fillAreaAt("sprite.aseprite", "Layer", 1, 0.5, 0, "#112233");
+
+  assert.equal(badFrame.message, "Frame index must be a positive integer");
+  assert.equal(badLayer.message, "Layer name cannot be empty");
+  assert.equal(badPixels.message, "Pixels list cannot be empty");
+  assert.equal(badLine.message, "Thickness must be a positive integer");
+  assert.equal(badRectangle.message, "Width and height must be positive integers");
+  assert.equal(badCircle.message, "Radius must be a positive integer");
+  assert.equal(badFill.message, "Coordinates must be integers");
 });
 
 test("rejects invalid tag frame ranges before starting Aseprite", async () => {

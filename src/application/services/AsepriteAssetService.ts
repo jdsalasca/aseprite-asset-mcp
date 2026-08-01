@@ -67,6 +67,26 @@ export class AsepriteAssetService {
     return this.gateway.drawCircle(filename, centerX, centerY, radius, color, fill);
   }
 
+  public drawPixelsAt(filename: string, layerName: string, frameIndex: number, pixels: PixelInput[], createIfMissing = true): Promise<AsepriteResult> {
+    return this.gateway.drawPixelsAt(filename, layerName, frameIndex, pixels, createIfMissing);
+  }
+
+  public drawLineAt(filename: string, layerName: string, frameIndex: number, x1: number, y1: number, x2: number, y2: number, color: string, thickness = 1, createIfMissing = true): Promise<AsepriteResult> {
+    return this.gateway.drawLineAt(filename, layerName, frameIndex, x1, y1, x2, y2, color, thickness, createIfMissing);
+  }
+
+  public drawRectangleAt(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, color: string, fill = false, createIfMissing = true): Promise<AsepriteResult> {
+    return this.gateway.drawRectangleAt(filename, layerName, frameIndex, x, y, width, height, color, fill, createIfMissing);
+  }
+
+  public drawCircleAt(filename: string, layerName: string, frameIndex: number, centerX: number, centerY: number, radius: number, color: string, fill = false, createIfMissing = true): Promise<AsepriteResult> {
+    return this.gateway.drawCircleAt(filename, layerName, frameIndex, centerX, centerY, radius, color, fill, createIfMissing);
+  }
+
+  public fillAreaAt(filename: string, layerName: string, frameIndex: number, x: number, y: number, color: string, createIfMissing = true): Promise<AsepriteResult> {
+    return this.gateway.fillAreaAt(filename, layerName, frameIndex, x, y, color, createIfMissing);
+  }
+
   public setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction = "forward"): Promise<AsepriteResult> {
     return this.gateway.setTag(filename, name, fromFrame, toFrame, direction);
   }

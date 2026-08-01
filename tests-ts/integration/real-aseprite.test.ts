@@ -28,6 +28,11 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
       await gateway.drawCircle(source, 8, 8, 3, "#f0f0f0", true),
       await gateway.addFrame(source),
       await gateway.addFrames(source, 2, 120),
+      await gateway.drawPixelsAt(source, "body", 2, [{ x: 2, y: 2, color: "#ffffff" }, { x: 3, y: 2, color: "#abc" }], true),
+      await gateway.drawLineAt(source, "body", 2, 1, 1, 10, 10, "#123456", 1, true),
+      await gateway.drawRectangleAt(source, "body", 2, 4, 4, 5, 5, "#654321", true, true),
+      await gateway.fillAreaAt(source, "body", 2, 0, 0, "#222222", true),
+      await gateway.drawCircleAt(source, "body", 2, 8, 8, 2, "#fed", false, true),
       await gateway.setFrame(source, 2),
       await gateway.setFrameDuration(source, 2, 150),
       await gateway.setFrameDurationAll(source, 120),
@@ -44,6 +49,9 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
       }),
     ];
     for (const step of steps) assert.equal(step.ok, true, step.message);
+    const missingCel = await gateway.drawPixelsAt(source, "body", 3, [{ x: 0, y: 0, color: "#ffffff" }], false);
+    assert.equal(missingCel.ok, false);
+    assert.equal(missingCel.message, "Cel not found");
     assert.equal(existsSync(source), true);
     assert.equal(existsSync(sheet), true);
     assert.equal(existsSync(metadata), true);
