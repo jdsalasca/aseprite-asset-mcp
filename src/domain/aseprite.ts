@@ -63,6 +63,10 @@ export interface AsepriteGateway {
   getColorStats(filename: string, frameIndex?: number, top?: number): Promise<AsepriteResult>;
   getPalette(filename: string): Promise<AsepriteResult>;
   extractPalette(filename: string, maxColors?: number, withAlpha?: boolean): Promise<AsepriteResult>;
+  outlineNative(filename: string, layerName?: string, frameIndex?: number, color?: string, place?: string, matrix?: string): Promise<AsepriteResult>;
+  adjustHslNative(filename: string, layerName?: string, frameIndex?: number, hue?: number, saturation?: number, lightness?: number, x?: number, y?: number, width?: number, height?: number): Promise<AsepriteResult>;
+  adjustBrightnessContrast(filename: string, layerName?: string, frameIndex?: number, brightness?: number, contrast?: number, x?: number, y?: number, width?: number, height?: number): Promise<AsepriteResult>;
+  invertColors(filename: string, layerName?: string, frameIndex?: number, x?: number, y?: number, width?: number, height?: number): Promise<AsepriteResult>;
   setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction?: string): Promise<AsepriteResult>;
   createTilemapLayer(filename: string, layerName: string, tileWidth: number, tileHeight: number): Promise<AsepriteResult>;
   validateScene(filename: string, requiredLayers: string[], startFrame?: number, endFrame?: number): Promise<AsepriteResult>;

@@ -50,6 +50,10 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("get_color_stats"));
     assert.ok(tools.includes("get_palette"));
     assert.ok(tools.includes("extract_palette"));
+    assert.ok(tools.includes("outline_native"));
+    assert.ok(tools.includes("adjust_hsl_native"));
+    assert.ok(tools.includes("adjust_brightness_contrast"));
+    assert.ok(tools.includes("invert_colors"));
     assert.ok(tools.includes("set_frame"));
     assert.ok(tools.includes("draw_rectangle"));
     assert.ok(tools.includes("create_character_plan"));
@@ -146,6 +150,10 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
     await call("get_color_stats", { filename: source, frame_index: 2, top: 4 });
     await call("get_palette", { filename: source });
     await call("extract_palette", { filename: source, max_colors: 8, with_alpha: false });
+    await call("outline_native", { filename: source, layer_name: "body", frame_index: 2, color: "#00ff00", place: "outside", matrix: "circle" });
+    await call("adjust_hsl_native", { filename: source, layer_name: "body", frame_index: 2, hue: 5, saturation: 0, lightness: 0 });
+    await call("adjust_brightness_contrast", { filename: source, layer_name: "body", frame_index: 2, brightness: 0, contrast: 0 });
+    await call("invert_colors", { filename: source, layer_name: "body", frame_index: 2 });
     await call("delete_tag", { filename: source, name: "idle" });
     await call("delete_frame", { filename: source, frame_index: 2 });
     await call("set_onion_skin", { filename: source, enabled: true, before: 2, after: 2, opacity: 128 });

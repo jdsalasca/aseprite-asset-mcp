@@ -195,6 +195,22 @@ export class AsepriteAssetService {
     return this.gateway.extractPalette(filename, maxColors, withAlpha);
   }
 
+  public outlineNative(filename: string, layerName = "", frameIndex = 1, color = "#000000", place = "outside", matrix = "circle"): Promise<AsepriteResult> {
+    return this.gateway.outlineNative(filename, layerName, frameIndex, color, place, matrix);
+  }
+
+  public adjustHslNative(filename: string, layerName = "", frameIndex = 1, hue = 0, saturation = 0, lightness = 0, x = 0, y = 0, width = 0, height = 0): Promise<AsepriteResult> {
+    return this.gateway.adjustHslNative(filename, layerName, frameIndex, hue, saturation, lightness, x, y, width, height);
+  }
+
+  public adjustBrightnessContrast(filename: string, layerName = "", frameIndex = 1, brightness = 0, contrast = 0, x = 0, y = 0, width = 0, height = 0): Promise<AsepriteResult> {
+    return this.gateway.adjustBrightnessContrast(filename, layerName, frameIndex, brightness, contrast, x, y, width, height);
+  }
+
+  public invertColors(filename: string, layerName = "", frameIndex = 1, x = 0, y = 0, width = 0, height = 0): Promise<AsepriteResult> {
+    return this.gateway.invertColors(filename, layerName, frameIndex, x, y, width, height);
+  }
+
   public setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction = "forward"): Promise<AsepriteResult> {
     return this.gateway.setTag(filename, name, fromFrame, toFrame, direction);
   }

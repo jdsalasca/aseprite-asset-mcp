@@ -57,6 +57,12 @@ function validateName(value: string, label: string): string | AsepriteResult {
   return value;
 }
 
+function validateNativeRegion(x: number, y: number, width: number, height: number): AsepriteResult | undefined {
+  if (![x, y, width, height].every((value) => Number.isInteger(value))) return { ok: false, message: "Region values must be integers" };
+  if (width < 0 || height < 0 || (width === 0) !== (height === 0)) return { ok: false, message: "Region width and height must both be zero or positive integers" };
+  return undefined;
+}
+
 function result(command: CommandResult, successMessage: string): AsepriteResult {
   if (command.ok) return { ok: true, message: successMessage };
   return { ok: false, message: command.output || "Aseprite command failed" };
@@ -1303,6 +1309,73 @@ export class AsepriteCliGateway implements AsepriteGateway {
     if (!command.ok) return result(command, "Palette extraction failed");
     const colors = command.output.split(/\r?\n/).filter((line) => line.startsWith("PALETTE:")).map((line) => line.slice(8));
     return colors.length ? { ok: true, message: JSON.stringify({ colors, count: colors.length }) } : { ok: false, message: "Palette extraction returned no colors" };
+  }
+
+  public async outlineNative(filename: string, layerName = "", frameIndex = 1, color = "#000000", place = "outside", matrix = "circle"): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    if (place !== "outside" && place !== "inside") return { ok: false, message: "Place must be 'outside' or 'inside'" };
+    if (matrix !== "circle" && matrix !== "square") return { ok: false, message: "Matrix must be 'circle' or 'square'" };
+    const rgba = this.parseHexColor(color);
+    if (!rgba) return { ok: false, message: "Colors must use hexadecimal values" };
+    const [red, green, blue] = rgba;
+    const script = this.nativeScript(layerName, frameIndex, `app.command.Outline { ui = false, color = Color { r = ${red}, g = ${green}, b = ${blue}, a = 255 }, place = "${place}", matrix = "${matrix}" }`);
+    return result(await this.runLua(script, source), `Outlined (${place}, ${matrix}) ${layerName || "active layer"} in ${source}`);
+  }
+
+  public async adjustHslNative(filename: string, layerName = "", frameIndex = 1, hue = 0, saturation = 0, lightness = 0, x = 0, y = 0, width = 0, height = 0): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    if (!Number.isInteger(hue) || hue < -180 || hue > 180) return { ok: false, message: "Hue must be between -180 and 180" };
+    if (![saturation, lightness].every((value) => Number.isInteger(value) && value >= -100 && value <= 100)) return { ok: false, message: "Saturation and lightness must be between -100 and 100" };
+    const regionError = validateNativeRegion(x, y, width, height);
+    if (regionError) return regionError;
+    const region = width > 0 ? [x, y, width, height] as [number, number, number, number] : undefined;
+    const script = this.nativeScript(layerName, frameIndex, `app.command.HueSaturation { ui = false, hue = ${hue}, saturation = ${saturation}, lightness = ${lightness}, alpha = 0 }`, region);
+    return result(await this.runLua(script, source), `Adjusted HSL on ${layerName || "active layer"} in ${source}`);
+  }
+
+  public async adjustBrightnessContrast(filename: string, layerName = "", frameIndex = 1, brightness = 0, contrast = 0, x = 0, y = 0, width = 0, height = 0): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    if (![brightness, contrast].every((value) => Number.isInteger(value) && value >= -100 && value <= 100)) return { ok: false, message: "Brightness and contrast must be between -100 and 100" };
+    const regionError = validateNativeRegion(x, y, width, height);
+    if (regionError) return regionError;
+    const region = width > 0 ? [x, y, width, height] as [number, number, number, number] : undefined;
+    const script = this.nativeScript(layerName, frameIndex, `app.command.BrightnessContrast { ui = false, brightness = ${brightness}, contrast = ${contrast} }`, region);
+    return result(await this.runLua(script, source), `Adjusted brightness/contrast on ${layerName || "active layer"} in ${source}`);
+  }
+
+  public async invertColors(filename: string, layerName = "", frameIndex = 1, x = 0, y = 0, width = 0, height = 0): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    const regionError = validateNativeRegion(x, y, width, height);
+    if (regionError) return regionError;
+    const region = width > 0 ? [x, y, width, height] as [number, number, number, number] : undefined;
+    const script = this.nativeScript(layerName, frameIndex, "app.command.InvertColor { ui = false }", region);
+    return result(await this.runLua(script, source), `Inverted colours on ${layerName || "active layer"} in ${source}`);
+  }
+
+  private nativeScript(layerName: string, frameIndex: number, command: string, region?: [number, number, number, number]): string {
+    const escapedLayer = luaEscape(layerName);
+    const selection = region ? `spr.selection = Selection(Rectangle(${region[0]}, ${region[1]}, ${region[2]}, ${region[3]}))` : "";
+    const clearSelection = region ? "spr.selection:deselect()" : "";
+    return this.openScript("", `
+      if ${frameIndex} > #spr.frames then print("ERROR:Frame index out of range") return end
+      app.activeFrame = spr.frames[${frameIndex}]
+      if "${escapedLayer}" ~= "" then
+        local target = find_layer(spr, "${escapedLayer}")
+        if not target or target.isGroup then print("ERROR:Layer not found") return end
+        app.activeLayer = target
+      end
+      ${selection}
+      ${command}
+      ${clearSelection}
+    `);
   }
 
   private async resolveTagRange(filename: string, tagName: string): Promise<CommandResult> {
