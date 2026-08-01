@@ -3,7 +3,7 @@ import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
-import type { AsepriteGateway, AsepriteResult } from "../../domain/aseprite.js";
+import type { AsepriteGateway, AsepriteResult, PixelInput } from "../../domain/aseprite.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -217,6 +217,82 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, filename), `Palette applied to ${filename}`);
   }
 
+  public async drawPixels(filename: string, pixels: PixelInput[]): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (!Array.isArray(pixels) || pixels.length === 0) return { ok: false, message: "Pixels list cannot be empty" };
+    const commands: string[] = [];
+    for (const pixel of pixels) {
+      if (!Number.isInteger(pixel.x) || !Number.isInteger(pixel.y)) return { ok: false, message: "Pixel coordinates must be integers" };
+      const rgba = this.parseHexColor(pixel.color);
+      if (!rgba) return { ok: false, message: "Colors must use hexadecimal values" };
+      const [red, green, blue, alpha] = rgba;
+      commands.push(`img:putPixel(${pixel.x} - cox, ${pixel.y} - coy, Color(${red}, ${green}, ${blue}, ${alpha}))`);
+    }
+    const script = this.openScript(source, `
+      local cel = app.activeCel
+      if not cel then
+        app.activeLayer = spr.layers[1]
+        app.activeFrame = spr.frames[1]
+        cel = app.activeCel
+        if not cel then print("ERROR:No active cel and couldn't create one") return end
+      end
+      local img = cel.image
+      local cox = cel.position.x
+      local coy = cel.position.y
+      ${commands.join("\n      ")}
+    `);
+    return result(await this.runLua(script, source), `Pixels drawn successfully in ${source}`);
+  }
+
+  public async drawLine(filename: string, x1: number, y1: number, x2: number, y2: number, color: string, thickness = 1): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (![x1, y1, x2, y2].every((coordinate) => Number.isInteger(coordinate))) return { ok: false, message: "Coordinates must be integers" };
+    if (!isPositiveInteger(thickness)) return { ok: false, message: "Thickness must be a positive integer" };
+    const rgba = this.parseHexColor(color);
+    if (!rgba) return { ok: false, message: "Colors must use hexadecimal values" };
+    const [red, green, blue, alpha] = rgba;
+    const script = this.openScript(source, `
+      local cel = app.activeCel
+      if not cel then
+        app.activeLayer = spr.layers[1]
+        app.activeFrame = spr.frames[1]
+        cel = app.activeCel
+        if not cel then print("ERROR:No active cel and couldn't create one") return end
+      end
+      local img = cel.image
+      local cox = cel.position.x
+      local coy = cel.position.y
+      local color = Color(${red}, ${green}, ${blue}, ${alpha})
+      local function put_thick(image, px, py, paint, size)
+        local radius = math.max(0, math.floor(size / 2))
+        for offsetY = -radius, radius do
+          for offsetX = -radius, radius do
+            image:putPixel(px + offsetX, py + offsetY, paint)
+          end
+        end
+      end
+      local px0 = ${x1} - cox
+      local py0 = ${y1} - coy
+      local px1 = ${x2} - cox
+      local py1 = ${y2} - coy
+      local dx = math.abs(px1 - px0)
+      local stepX = px0 < px1 and 1 or -1
+      local dy = -math.abs(py1 - py0)
+      local stepY = py0 < py1 and 1 or -1
+      local errorValue = dx + dy
+      while true do
+        if ${thickness} > 1 then put_thick(img, px0, py0, color, ${thickness}) else img:putPixel(px0, py0, color) end
+        if px0 == px1 and py0 == py1 then break end
+        local doubleError = 2 * errorValue
+        if doubleError >= dy then errorValue = errorValue + dy; px0 = px0 + stepX end
+        if doubleError <= dx then errorValue = errorValue + dx; py0 = py0 + stepY end
+      end
+    `);
+    return result(await this.runLua(script, source), `Line drawn successfully in ${source}`);
+  }
+
   public async drawRectangle(filename: string, x: number, y: number, width: number, height: number, color: string, fill = false): Promise<AsepriteResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
@@ -239,6 +315,56 @@ export class AsepriteCliGateway implements AsepriteGateway {
       })
     `);
     return result(await this.runLua(script, filename), `Rectangle drawn in ${filename}`);
+  }
+
+  public async fillArea(filename: string, x: number, y: number, color: string): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (!Number.isInteger(x) || !Number.isInteger(y)) return { ok: false, message: "Coordinates must be integers" };
+    const rgba = this.parseHexColor(color);
+    if (!rgba) return { ok: false, message: "Colors must use hexadecimal values" };
+    const [red, green, blue, alpha] = rgba;
+    const script = this.openScript(source, `
+      local cel = app.activeCel
+      if not cel then
+        app.activeLayer = spr.layers[1]
+        app.activeFrame = spr.frames[1]
+        cel = app.activeCel
+        if not cel then print("ERROR:No active cel and couldn't create one") return end
+      end
+      app.useTool({
+        tool = "paint_bucket",
+        color = Color(${red}, ${green}, ${blue}, ${alpha}),
+        points = { Point(${x}, ${y}) }
+      })
+    `);
+    return result(await this.runLua(script, source), `Area filled successfully in ${source}`);
+  }
+
+  public async drawCircle(filename: string, centerX: number, centerY: number, radius: number, color: string, fill = false): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (!Number.isInteger(centerX) || !Number.isInteger(centerY)) return { ok: false, message: "Coordinates must be integers" };
+    if (!isPositiveInteger(radius)) return { ok: false, message: "Radius must be a positive integer" };
+    const rgba = this.parseHexColor(color);
+    if (!rgba) return { ok: false, message: "Colors must use hexadecimal values" };
+    const [red, green, blue, alpha] = rgba;
+    const tool = fill ? "filled_ellipse" : "ellipse";
+    const script = this.openScript(source, `
+      local cel = app.activeCel
+      if not cel then
+        app.activeLayer = spr.layers[1]
+        app.activeFrame = spr.frames[1]
+        cel = app.activeCel
+        if not cel then print("ERROR:No active cel and couldn't create one") return end
+      end
+      app.useTool({
+        tool = "${tool}",
+        color = Color(${red}, ${green}, ${blue}, ${alpha}),
+        points = { Point(${centerX - radius}, ${centerY - radius}), Point(${centerX + radius}, ${centerY + radius}) }
+      })
+    `);
+    return result(await this.runLua(script, source), `Circle drawn successfully in ${source}`);
   }
 
   public async setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction = "forward"): Promise<AsepriteResult> {
@@ -357,6 +483,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
   }
 
   private parseHexColor(value: string): [number, number, number, number] | undefined {
+    if (typeof value !== "string") return undefined;
     let normalized = value.trim().replace("#", "");
     if (!/^[0-9a-fA-F]{3,4}$|^[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/.test(normalized)) return undefined;
     if (normalized.length === 3 || normalized.length === 4) normalized = [...normalized].map((component) => component + component).join("");

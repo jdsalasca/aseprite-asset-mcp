@@ -1,4 +1,4 @@
-import type { AsepriteGateway, AsepriteResult } from "../../domain/aseprite.js";
+import type { AsepriteGateway, AsepriteResult, PixelInput } from "../../domain/aseprite.js";
 
 export class AsepriteAssetService {
   public constructor(private readonly gateway: AsepriteGateway) {}
@@ -47,8 +47,24 @@ export class AsepriteAssetService {
     return this.gateway.setPalette(filename, colors);
   }
 
+  public drawPixels(filename: string, pixels: PixelInput[]): Promise<AsepriteResult> {
+    return this.gateway.drawPixels(filename, pixels);
+  }
+
+  public drawLine(filename: string, x1: number, y1: number, x2: number, y2: number, color: string, thickness = 1): Promise<AsepriteResult> {
+    return this.gateway.drawLine(filename, x1, y1, x2, y2, color, thickness);
+  }
+
   public drawRectangle(filename: string, x: number, y: number, width: number, height: number, color: string, fill = false): Promise<AsepriteResult> {
     return this.gateway.drawRectangle(filename, x, y, width, height, color, fill);
+  }
+
+  public fillArea(filename: string, x: number, y: number, color: string): Promise<AsepriteResult> {
+    return this.gateway.fillArea(filename, x, y, color);
+  }
+
+  public drawCircle(filename: string, centerX: number, centerY: number, radius: number, color: string, fill = false): Promise<AsepriteResult> {
+    return this.gateway.drawCircle(filename, centerX, centerY, radius, color, fill);
   }
 
   public setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction = "forward"): Promise<AsepriteResult> {

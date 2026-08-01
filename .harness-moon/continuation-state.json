@@ -2,16 +2,17 @@
   "project": "aseprite-mcp",
   "goal": "complete-typescript-migration",
   "continue": true,
-  "currentPhase": "drawing-validation",
-  "currentSlice": "draw-rectangle",
-  "lastCompletedSlice": "core-animation",
-  "nextSlice": "drawing-primitives",
+  "currentPhase": "drawing-primitives",
+  "currentSlice": "core-primitives",
+  "lastCompletedSlice": "drawing-validation",
+  "nextSlice": "layer-frame-drawing-tools",
   "blocked": false,
   "retryCount": 0,
   "lastEvidence": [
-    "npm test: 13 passed, 0 failed",
+    "npm test: 16 passed, 0 failed",
     "upstream/main inventory: 116 tools",
-    "TypeScript server inventory: 19 tools",
-    "real Aseprite integration: passed"
+    "TypeScript server inventory: 23 tools",
+    "real Aseprite integration: passed",
+    "MCP stdio drawing E2E: passed"
   ]
 }
