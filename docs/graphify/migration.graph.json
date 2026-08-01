@@ -2,18 +2,18 @@
   "schemaVersion": 1,
   "project": "aseprite-mcp",
   "goal": "complete-typescript-migration",
-  "generatedAt": "2026-08-01T15:03:29.105Z",
+  "generatedAt": "2026-08-01T15:10:18.137Z",
   "source": {
     "repository": "https://github.com/diivi/aseprite-mcp",
     "branch": "upstream/main",
     "commit": "90d1696a7e41edff89bbd0823ae6a5f86c114bcc"
   },
   "local": {
-    "branch": "codex/migrate/layer-management",
-    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-layer-management",
-    "baseCommit": "6d738402c6042123f4a05400759ac8b7f7bf29c0",
-    "typescriptToolCount": 70,
-    "testCount": 28
+    "branch": "codex/migrate/legacy-fx",
+    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-legacy-fx",
+    "baseCommit": "6daa83fd782bfd0f09d343c9955ff672e73f9770",
+    "typescriptToolCount": 72,
+    "testCount": 29
   },
   "tools": [
     {
@@ -813,9 +813,13 @@
       "name": "outline_cel",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "animation",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -824,9 +828,13 @@
       "name": "replace_color",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "palette",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []

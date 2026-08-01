@@ -2,16 +2,16 @@
   "project": "aseprite-mcp",
   "goal": "complete-typescript-migration",
   "continue": true,
-  "currentPhase": "layer-management",
-  "currentSlice": "layer-management-tools",
-  "lastCompletedSlice": "convolution-and-dither-tools",
-  "nextSlice": "legacy-fx-compatibility",
+  "currentPhase": "legacy-fx",
+  "currentSlice": "legacy-fx-compatibility",
+  "lastCompletedSlice": "layer-management-tools",
+  "nextSlice": "legacy-hsl-adjustment",
   "blocked": false,
   "retryCount": 0,
   "lastEvidence": [
-    "npm test: 28 passed, 0 failed",
+    "npm test: 29 passed, 0 failed",
     "upstream/main inventory: 116 tools",
-    "TypeScript server inventory: 70 tools",
+    "TypeScript server inventory: 72 tools",
     "real Aseprite integration: passed",
     "MCP stdio drawing E2E: passed"
   ]
