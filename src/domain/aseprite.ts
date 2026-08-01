@@ -50,6 +50,10 @@ export interface AsepriteGateway {
   clearCel(filename: string, layerName: string, frameIndex: number): Promise<AsepriteResult>;
   copyCel(filename: string, layerName: string, sourceFrame: number, targetFrame: number, replace?: boolean): Promise<AsepriteResult>;
   copyFrame(filename: string, sourceFrame: number, targetFrame?: number, overwrite?: boolean): Promise<AsepriteResult>;
+  setCelPosition(filename: string, layerName: string, frameIndex: number, x: number, y: number, createIfMissing?: boolean, sourceFrameIndex?: number): Promise<AsepriteResult>;
+  tweenCelPositions(filename: string, layerName: string, startFrame: number, endFrame: number, startX: number, startY: number, endX: number, endY: number, createMissingCels?: boolean, sourceFrameIndex?: number): Promise<AsepriteResult>;
+  offsetCelPositions(filename: string, layerName: string, startFrame: number, endFrame: number, dx: number, dy: number): Promise<AsepriteResult>;
+  propagateFrameToRange(filename: string, sourceFrame: number, startFrame: number, endFrame: number, overwrite?: boolean): Promise<AsepriteResult>;
   setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction?: string): Promise<AsepriteResult>;
   createTilemapLayer(filename: string, layerName: string, tileWidth: number, tileHeight: number): Promise<AsepriteResult>;
   validateScene(filename: string, requiredLayers: string[], startFrame?: number, endFrame?: number): Promise<AsepriteResult>;
