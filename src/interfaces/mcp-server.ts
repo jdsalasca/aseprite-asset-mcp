@@ -8,8 +8,6 @@ import { PixelArtAssetService } from "../application/services/PixelArtAssetServi
 import { SharpRasterCodec } from "../infrastructure/image/SharpRasterCodec.js";
 import { JsonAssetManifestWriter } from "../infrastructure/image/JsonAssetManifestWriter.js";
 import { VisualAssetService } from "../application/services/VisualAssetService.js";
-import { buildCharacterPlan, buildScenePlan } from "../workflows/plans.js";
-import type { AsepriteResult } from "../domain/aseprite.js";
 import { EnhancementToolController } from "./controllers/EnhancementToolController.js";
 import { AssetJobToolController } from "./controllers/AssetJobToolController.js";
 import { ImageAssetToolController } from "./controllers/ImageAssetToolController.js";
@@ -21,13 +19,14 @@ import { PaletteTransformToolController } from "./controllers/PaletteTransformTo
 import { TextTileSliceToolController } from "./controllers/TextTileSliceToolController.js";
 import { AnimationQualityToolController } from "./controllers/AnimationQualityToolController.js";
 import { EffectsToolController } from "./controllers/EffectsToolController.js";
+import { SceneExportToolController } from "./controllers/SceneExportToolController.js";
+import { WorkflowPlanToolController } from "./controllers/WorkflowPlanToolController.js";
 import { AssetJobService } from "../application/services/AssetJobService.js";
 import { InMemoryAssetJobStore } from "../infrastructure/jobs/InMemoryAssetJobStore.js";
 import { DeterministicEnhancementService } from "../application/services/DeterministicEnhancementService.js";
 
 const SERVER_VERSION = "1.0.0";
 const TYPESCRIPT_VERSION = "6.0.3";
-const HEX_COLOR = /^#?(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
 const TOOL_NAMES = [
   "server_capabilities",
   "create_canvas",
@@ -232,59 +231,9 @@ export class AsepriteMcpServerAdapter {
     new PaletteTransformToolController(this.assets).register(this.server);
     new TextTileSliceToolController(this.assets).register(this.server);
     new AnimationQualityToolController(this.assets).register(this.server);
-    this.server.registerTool("animation_workflow_guide", {
-      description: "Return a concise deterministic guide for character, environment, or general animation workflows.",
-      inputSchema: { use_case: z.string().default("character") },
-    }, async ({ use_case }) => this.result(await this.assets.animationWorkflowGuide(use_case)));
-
-    this.server.registerTool("run_lua_script", {
-      description: "Run a bounded, trusted Aseprite Lua script as an escape hatch; dedicated tools are preferred.",
-      inputSchema: { script: z.string().min(1).max(200000), filename: z.string().default("") },
-    }, async ({ script, filename }) => this.result(await this.assets.runLuaScript(script, filename)));
-
+    new WorkflowPlanToolController(this.assets).register(this.server);
     new EffectsToolController(this.assets).register(this.server);
-    this.server.registerTool("create_tilemap_layer", {
-      description: "Create a tilemap layer and set the Aseprite grid.",
-      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), tile_width: z.number().int().positive(), tile_height: z.number().int().positive() },
-    }, async ({ filename, layer_name, tile_width, tile_height }) => this.result(await this.assets.createTilemapLayer(filename, layer_name, tile_width, tile_height)));
-
-    this.server.registerTool("validate_scene", {
-      description: "Validate required layers and the requested frame range before export.",
-      inputSchema: { filename: z.string().min(1), required_layers: z.array(z.string().min(1)).min(1), start_frame: z.number().int().positive().default(1), end_frame: z.number().int().positive().optional() },
-    }, async ({ filename, required_layers, start_frame, end_frame }) => this.result(await this.assets.validateScene(filename, required_layers, start_frame, end_frame)));
-
-    this.server.registerTool("export_spritesheet", {
-      description: "Export a spritesheet and optional frame metadata for Godot.",
-      inputSchema: {
-        filename: z.string().min(1), output_filename: z.string().min(1), sheet_type: z.enum(["horizontal", "vertical", "rows", "columns", "packed"]).default("horizontal"),
-        data_filename: z.string().min(1).optional(), scale: z.number().int().positive().default(1), padding: z.number().int().nonnegative().default(0), tag_name: z.string().min(1).optional(),
-        data_format: z.enum(["json-array", "json-hash"]).default("json-array"), list_tags: z.boolean().default(false),
-      },
-    }, async (input) => this.result(await this.assets.exportSpritesheet({
-      filename: input.filename,
-      outputFilename: input.output_filename,
-      sheetType: input.sheet_type,
-      ...(input.data_filename ? { dataFilename: input.data_filename } : {}),
-      scale: input.scale,
-      padding: input.padding,
-      ...(input.tag_name ? { tagName: input.tag_name } : {}),
-      dataFormat: input.data_format,
-      listTags: input.list_tags,
-    })));
-
-    this.server.registerTool("create_character_plan", {
-      description: "Create a deterministic, auditable TypeScript plan for a layered character and its Godot exports.",
-      inputSchema: { asset_id: z.string().min(1), output_directory: z.string().min(1).optional() },
-    }, async ({ asset_id, output_directory }) => this.text(buildCharacterPlan(output_directory ? { assetId: asset_id, outputDirectory: output_directory } : { assetId: asset_id })));
-
-    this.server.registerTool("create_scene_plan", {
-      description: "Create a deterministic, auditable TypeScript plan for a tilemap scene and its Godot exports.",
-      inputSchema: { asset_id: z.string().min(1), output_directory: z.string().min(1).optional() },
-    }, async ({ asset_id, output_directory }) => this.text(buildScenePlan(output_directory ? { assetId: asset_id, outputDirectory: output_directory } : { assetId: asset_id })));
-  }
-
-  private result(operation: AsepriteResult): { isError?: boolean; content: [{ type: "text"; text: string }] } {
-    return { isError: !operation.ok, content: [{ type: "text", text: operation.message }] };
+    new SceneExportToolController(this.assets).register(this.server);
   }
 
   private text(value: unknown): { content: [{ type: "text"; text: string }] } {
