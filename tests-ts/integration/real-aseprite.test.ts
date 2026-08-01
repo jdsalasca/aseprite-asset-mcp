@@ -84,8 +84,16 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
         dataFilename: metadata,
         listTags: true,
       }),
+      await gateway.addLayer(source, "scratch"),
+      await gateway.renameLayer(source, "scratch", "scratch-renamed"),
+      await gateway.duplicateLayer(source, "body", "body-copy"),
+      await gateway.setLayerBlendMode(source, "body-copy", "multiply"),
+      await gateway.mergeLayerDown(source, "body-copy"),
+      await gateway.duplicateLayer(source, "body", "body-copy-reordered"),
+      await gateway.reorderLayer(source, "body-copy-reordered", 1),
+      await gateway.deleteLayer(source, "scratch-renamed"),
     ];
-    for (const step of steps) assert.equal(step.ok, true, step.message);
+    for (const [index, step] of steps.entries()) assert.equal(step.ok, true, `step ${index}: ${step.message}`);
     const matricesResult = await gateway.listConvolutionMatrices();
     assert.equal(matricesResult.ok, true, matricesResult.message);
     const matrices = JSON.parse(matricesResult.message) as string[];
@@ -107,6 +115,8 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
     const missingCel = await gateway.drawPixelsAt(source, "reference", 3, [{ x: 0, y: 0, color: "#ffffff" }], false);
     assert.equal(missingCel.ok, false);
     assert.equal(missingCel.message, "Cel not found");
+    const flattened = await gateway.flattenSprite(source);
+    assert.equal(flattened.ok, true, flattened.message);
     assert.equal(existsSync(source), true);
     assert.equal(existsSync(sheet), true);
     assert.equal(existsSync(metadata), true);

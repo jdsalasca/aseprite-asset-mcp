@@ -60,6 +60,13 @@ test("rejects traversal in every input sprite path before starting Aseprite", as
     gateway.applyConvolution("../sprite.aseprite", "blur-3x3"),
     gateway.applyDitherGradient("../sprite.aseprite", "Layer", 1, 0, 0, 2, 2, "#000000", "#ffffff"),
     gateway.applyDitherPattern("../sprite.aseprite", "Layer", 1, 0, 0, 2, 2, "#000000", "#ffffff"),
+    gateway.deleteLayer("../sprite.aseprite", "Layer"),
+    gateway.renameLayer("../sprite.aseprite", "Layer", "Renamed"),
+    gateway.duplicateLayer("../sprite.aseprite", "Layer"),
+    gateway.reorderLayer("../sprite.aseprite", "Layer", 1),
+    gateway.setLayerBlendMode("../sprite.aseprite", "Layer", "normal"),
+    gateway.mergeLayerDown("../sprite.aseprite", "Layer"),
+    gateway.flattenSprite("../sprite.aseprite"),
     gateway.setTag("../sprite.aseprite", "idle", 1, 1),
     gateway.createTilemapLayer("../sprite.aseprite", "Tiles", 16, 16),
     gateway.validateScene("../sprite.aseprite", ["Layer"]),
@@ -247,6 +254,20 @@ test("rejects invalid convolution and dithering contracts before starting Asepri
   assert.equal(badGradientSize.message, "Width and height must be positive integers");
   assert.equal(badGradientColor.message, "Colors must use hexadecimal values");
   assert.equal(badPatternDensity.message, "Density must be between 0 and 1");
+});
+
+test("rejects invalid layer management contracts before starting Aseprite", async () => {
+  const badDeleteName = await gateway.deleteLayer("sprite.aseprite", "");
+  const badRenameName = await gateway.renameLayer("sprite.aseprite", "Layer", "");
+  const badReorderPosition = await gateway.reorderLayer("sprite.aseprite", "Layer", 0);
+  const badBlendMode = await gateway.setLayerBlendMode("sprite.aseprite", "Layer", "not-a-mode");
+  const badMergeName = await gateway.mergeLayerDown("sprite.aseprite", "");
+
+  assert.equal(badDeleteName.message, "Layer name cannot be empty");
+  assert.equal(badRenameName.message, "New layer name cannot be empty");
+  assert.equal(badReorderPosition.message, "Position must be a positive integer");
+  assert.match(badBlendMode.message, /Unsupported blend mode: not-a-mode/);
+  assert.equal(badMergeName.message, "Layer name cannot be empty");
 });
 
 test("rejects invalid tag frame ranges before starting Aseprite", async () => {

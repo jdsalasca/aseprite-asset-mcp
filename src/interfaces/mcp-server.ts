@@ -14,6 +14,13 @@ const TOOL_NAMES = [
   "create_canvas",
   "add_group",
   "add_layer",
+  "delete_layer",
+  "rename_layer",
+  "duplicate_layer",
+  "reorder_layer",
+  "set_layer_blend_mode",
+  "merge_layer_down",
+  "flatten_sprite",
   "add_frame",
   "add_frames",
   "set_frame",
@@ -113,6 +120,41 @@ export class AsepriteMcpServerAdapter {
       description: "Add a named layer, optionally inside a group.",
       inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), group: z.string().default("") },
     }, async ({ filename, layer_name, group }) => this.result(await this.assets.addLayer(filename, layer_name, group)));
+
+    this.server.registerTool("delete_layer", {
+      description: "Delete a named layer from an Aseprite document.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1) },
+    }, async ({ filename, layer_name }) => this.result(await this.assets.deleteLayer(filename, layer_name)));
+
+    this.server.registerTool("rename_layer", {
+      description: "Rename a named layer.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), new_name: z.string().min(1) },
+    }, async ({ filename, layer_name, new_name }) => this.result(await this.assets.renameLayer(filename, layer_name, new_name)));
+
+    this.server.registerTool("duplicate_layer", {
+      description: "Duplicate a layer and its cels across all frames.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), new_name: z.string().default(""), group: z.string().default("") },
+    }, async ({ filename, layer_name, new_name, group }) => this.result(await this.assets.duplicateLayer(filename, layer_name, new_name, group)));
+
+    this.server.registerTool("reorder_layer", {
+      description: "Move a layer to a one-based stack position.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), position: z.number().int().positive() },
+    }, async ({ filename, layer_name, position }) => this.result(await this.assets.reorderLayer(filename, layer_name, position)));
+
+    this.server.registerTool("set_layer_blend_mode", {
+      description: "Set a layer blend mode supported by Aseprite.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), mode: z.string().min(1) },
+    }, async ({ filename, layer_name, mode }) => this.result(await this.assets.setLayerBlendMode(filename, layer_name, mode)));
+
+    this.server.registerTool("merge_layer_down", {
+      description: "Merge a layer into the layer below it.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1) },
+    }, async ({ filename, layer_name }) => this.result(await this.assets.mergeLayerDown(filename, layer_name)));
+
+    this.server.registerTool("flatten_sprite", {
+      description: "Flatten all layers into one layer.",
+      inputSchema: { filename: z.string().min(1) },
+    }, async ({ filename }) => this.result(await this.assets.flattenSprite(filename)));
 
     this.server.registerTool("add_frame", {
       description: "Add one animation frame.",
