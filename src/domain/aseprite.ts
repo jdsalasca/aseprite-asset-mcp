@@ -67,6 +67,10 @@ export interface AsepriteGateway {
   adjustHslNative(filename: string, layerName?: string, frameIndex?: number, hue?: number, saturation?: number, lightness?: number, x?: number, y?: number, width?: number, height?: number): Promise<AsepriteResult>;
   adjustBrightnessContrast(filename: string, layerName?: string, frameIndex?: number, brightness?: number, contrast?: number, x?: number, y?: number, width?: number, height?: number): Promise<AsepriteResult>;
   invertColors(filename: string, layerName?: string, frameIndex?: number, x?: number, y?: number, width?: number, height?: number): Promise<AsepriteResult>;
+  applyConvolution(filename: string, matrix: string, layerName?: string, frameIndex?: number, x?: number, y?: number, width?: number, height?: number): Promise<AsepriteResult>;
+  listConvolutionMatrices(): Promise<AsepriteResult>;
+  applyDitherGradient(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, colorStart: string, colorEnd: string, horizontal?: boolean, createIfMissing?: boolean): Promise<AsepriteResult>;
+  applyDitherPattern(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, colorA: string, colorB: string, density?: number, createIfMissing?: boolean): Promise<AsepriteResult>;
   setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction?: string): Promise<AsepriteResult>;
   createTilemapLayer(filename: string, layerName: string, tileWidth: number, tileHeight: number): Promise<AsepriteResult>;
   validateScene(filename: string, requiredLayers: string[], startFrame?: number, endFrame?: number): Promise<AsepriteResult>;
