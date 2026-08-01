@@ -205,8 +205,8 @@ export class AsepriteMcpServerAdapter {
       toolCount: TOOL_NAMES.length,
       tools: TOOL_NAMES,
       projectRepository: "https://github.com/jdsalasca/aseprite-asset-mcp",
-      migrationStatus: "in_progress",
-      controllerRegistration: "partial",
+      migrationStatus: "complete",
+      controllerRegistration: "complete",
       legacyRuntime: false,
     }));
 

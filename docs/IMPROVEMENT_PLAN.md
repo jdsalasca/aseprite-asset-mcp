@@ -18,13 +18,13 @@ Las abstracciones no contienen nombres de SDK, Aseprite, Node, HTTP ni filesyste
 
 ### Fase 1 · Foundation hexagonal — implementada en la rama de integración
 
-- separar puertos genéricos de sesión de herramientas, persistencia y procesos;
+- separar puertos genéricos de sesión de herramientas, persistencia, procesos y capacidades de asset;
 - extraer composición del servidor HTTP a controladores y servicios;
 - persistir configuración del Asset Studio en JSON local, sin secretos;
 - dividir componentes UI en módulos pequeños;
 - añadir pruebas de contratos y validación de errores.
 
-### Fase 2 · Asset enhancement application — primera vertical implementada
+### Fase 2 · Asset enhancement application — implementada
 
 - `InspectAsset`, `SuggestEnhancementPlan` y `ApplyEnhancementPlan` como casos de uso;
 - recetas de materiales, iluminación y partículas como estrategias independientes;
@@ -32,7 +32,7 @@ Las abstracciones no contienen nombres de SDK, Aseprite, Node, HTTP ni filesyste
 - jobs cancelables para operaciones largas;
 - manifiestos compactos y recursos MCP.
 
-Ya están disponibles el planificador determinista `suggest_enhancement_plan`, la ejecución segura `apply_enhancement_plan` y los jobs asíncronos `start_asset_job`, `get_asset_job_status` y `cancel_asset_job`. La ejecución escribe un PNG/GIF separado, conserva la fuente y aplica pasadas reproducibles de limpieza, granularidad, flujo de agua, iluminación, partículas y transición temporal. El registro MCP ya está separado para assets raster, generación visual, capas/frames, dibujo, exportación/animación y paletas/transformaciones; la extracción de los grupos restantes continuará por slices.
+Ya están disponibles el planificador determinista `suggest_enhancement_plan`, la ejecución segura `apply_enhancement_plan` y los jobs asíncronos `start_asset_job`, `get_asset_job_status` y `cancel_asset_job`. La ejecución escribe un PNG/GIF separado, conserva la fuente y aplica pasadas reproducibles de limpieza, granularidad, flujo de agua, iluminación, partículas y transición temporal. El registro MCP está separado en controladores por capacidad y estos consumen puertos genéricos, dejando `AsepriteCliGateway` como adaptador concreto.
 
 ### Fase 3 · Persistencia y observabilidad
 
