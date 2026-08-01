@@ -807,6 +807,45 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: `Frame ${frameIndex} exported to ${target} at ${scale}x` };
   }
 
+  public async exportLayers(filename: string, outputDirectory: string, includeHidden = false): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const directory = validatePath(outputDirectory);
+    if (typeof directory !== "string") return directory;
+    await fs.mkdir(directory, { recursive: true });
+    const before = new Set((await fs.readdir(directory)).filter((entry) => entry.toLowerCase().endsWith(".png")));
+    const args = ["--batch"];
+    if (includeHidden) args.push("--all-layers");
+    args.push("--split-layers", source, "--save-as", path.join(directory, "{layer}.png"));
+    const command = await this.commandRunner(args);
+    if (!command.ok) return result(command, `Layers exported to ${directory}`);
+    const produced = (await fs.readdir(directory)).filter((entry) => entry.toLowerCase().endsWith(".png") && !before.has(entry)).sort();
+    if (produced.length === 0) return { ok: false, message: "Aseprite exited successfully but did not create layer PNG files" };
+    return { ok: true, message: `Layers exported to ${directory}: ${produced.join(", ")}` };
+  }
+
+  public async exportTag(filename: string, tagName: string, outputFilename: string, scale = 1): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(tagName, "Tag name");
+    if (typeof name !== "string") return name;
+    const output = validatePath(outputFilename);
+    if (typeof output !== "string") return output;
+    if (!isPositiveInteger(scale) || scale > 64) return { ok: false, message: "Scale must be between 1 and 64" };
+    const tagCheck = await this.resolveTagRange(source, name);
+    if (!tagCheck.ok) return { ok: false, message: `Tag not found: ${tagCheck.output}` };
+    const target = path.extname(output) ? output : `${output}.png`;
+    const args = ["--batch", source, "--tag", name];
+    if (scale > 1) args.push("--scale", String(scale));
+    args.push("--save-as", target);
+    const command = await this.commandRunner(args);
+    if (!command.ok) return result(command, `Tag '${name}' exported to ${target}`);
+    const produced = await this.findProducedOutput(target);
+    if (!produced) return { ok: false, message: "Aseprite exited successfully but did not create the tag export" };
+    if (produced !== target) await fs.rename(produced, target);
+    return { ok: true, message: `Tag '${name}' exported to ${target}` };
+  }
+
   private async resolveTagRange(filename: string, tagName: string): Promise<CommandResult> {
     const script = `
       local spr = app.activeSprite

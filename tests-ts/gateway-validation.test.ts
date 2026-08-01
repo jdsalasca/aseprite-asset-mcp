@@ -33,6 +33,8 @@ test("rejects traversal in every input sprite path before starting Aseprite", as
     gateway.exportSprite("../sprite.aseprite", "output.png"),
     gateway.copySprite("../sprite.aseprite", "output.aseprite"),
     gateway.exportFrame("../sprite.aseprite", 1, "output.png"),
+    gateway.exportLayers("../sprite.aseprite", "output"),
+    gateway.exportTag("../sprite.aseprite", "idle", "output.png"),
     gateway.setTag("../sprite.aseprite", "idle", 1, 1),
     gateway.createTilemapLayer("../sprite.aseprite", "Tiles", 16, 16),
     gateway.validateScene("../sprite.aseprite", ["Layer"]),
@@ -118,6 +120,16 @@ test("rejects invalid ellipse and export contracts before starting Aseprite", as
   assert.equal(badFormat.message, "Format must contain only letters and numbers");
   assert.equal(badCopy.message, "Parent directory traversal is not allowed");
   assert.equal(badFrame.message, "Frame index must be a positive integer");
+  assert.equal(badScale.message, "Scale must be between 1 and 64");
+});
+
+test("rejects invalid layer and tag export contracts before starting Aseprite", async () => {
+  const badLayers = await gateway.exportLayers("sprite.aseprite", "../output");
+  const badTag = await gateway.exportTag("sprite.aseprite", "", "output.png");
+  const badScale = await gateway.exportTag("sprite.aseprite", "idle", "output.png", 65);
+
+  assert.equal(badLayers.message, "Parent directory traversal is not allowed");
+  assert.equal(badTag.message, "Tag name cannot be empty");
   assert.equal(badScale.message, "Scale must be between 1 and 64");
 });
 

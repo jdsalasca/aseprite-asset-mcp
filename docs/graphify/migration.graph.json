@@ -2,18 +2,18 @@
   "schemaVersion": 1,
   "project": "aseprite-mcp",
   "goal": "complete-typescript-migration",
-  "generatedAt": "2026-08-01T13:58:35.306Z",
+  "generatedAt": "2026-08-01T14:02:16.057Z",
   "source": {
     "repository": "https://github.com/diivi/aseprite-mcp",
     "branch": "upstream/main",
     "commit": "90d1696a7e41edff89bbd0823ae6a5f86c114bcc"
   },
   "local": {
-    "branch": "codex/migrate/ellipse-export",
-    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-ellipse-export",
-    "baseCommit": "6893385b6f2938665592ee102b4ec9666e37a78b",
-    "typescriptToolCount": 35,
-    "testCount": 19
+    "branch": "codex/migrate/layer-tag-export",
+    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-layer-tag-export",
+    "baseCommit": "9b58cf8ece28cc9da3d3d71f4c1fbc2857eba89e",
+    "typescriptToolCount": 37,
+    "testCount": 20
   },
   "tools": [
     {
@@ -708,9 +708,13 @@
       "name": "export_layers",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "layers",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -719,9 +723,13 @@
       "name": "export_tag",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "animation",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
