@@ -1,0 +1,69 @@
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import * as z from "zod/v4";
+import { AsepriteAssetService } from "../../application/services/AsepriteAssetService.js";
+import { PixelArtAssetService } from "../../application/services/PixelArtAssetService.js";
+import type { AsepriteResult } from "../../domain/aseprite.js";
+
+export class ImageAssetToolController {
+  public constructor(private readonly assets: AsepriteAssetService, private readonly imageAssets: PixelArtAssetService) {}
+
+  public register(server: McpServer): void {
+    server.registerTool("convert_image_to_pixel_art", {
+      description: "Convert one image to pixel art with a deterministic shared palette.",
+      inputSchema: {
+        input_filename: z.string().min(1), output_filename: z.string().min(1), width: z.number().int().positive(), height: z.number().int().positive(),
+        max_colors: z.number().int().min(2).max(256).default(32), resize_mode: z.enum(["box", "nearest"]).default("box"), dither: z.enum(["none", "bayer4x4"]).default("none"), alpha_threshold: z.number().int().min(0).max(255).default(1),
+      },
+    }, async ({ input_filename, output_filename, width, height, max_colors, resize_mode, dither, alpha_threshold }) => this.result(await this.imageAssets.convertImage({ inputFilename: input_filename, outputFilename: output_filename, width, height, maxColors: max_colors, resizeMode: resize_mode, dither, alphaThreshold: alpha_threshold }, false)));
+
+    server.registerTool("convert_animation_to_pixel_art", {
+      description: "Convert all image frames to pixel art and preserve animation delays.",
+      inputSchema: {
+        input_filename: z.string().min(1), output_filename: z.string().min(1), width: z.number().int().positive(), height: z.number().int().positive(),
+        max_colors: z.number().int().min(2).max(256).default(32), resize_mode: z.enum(["box", "nearest"]).default("box"), dither: z.enum(["none", "bayer4x4"]).default("none"), alpha_threshold: z.number().int().min(0).max(255).default(1),
+      },
+    }, async ({ input_filename, output_filename, width, height, max_colors, resize_mode, dither, alpha_threshold }) => this.result(await this.imageAssets.convertImage({ inputFilename: input_filename, outputFilename: output_filename, width, height, maxColors: max_colors, resizeMode: resize_mode, dither, alphaThreshold: alpha_threshold, format: "gif" }, true)));
+
+    server.registerTool("export_animation_gif", {
+      description: "Convert a PNG, GIF, or animated image into a GIF while preserving frames.",
+      inputSchema: { input_filename: z.string().min(1), output_filename: z.string().min(1) },
+    }, async ({ input_filename, output_filename }) => input_filename.toLowerCase().endsWith(".aseprite")
+      ? this.result(await this.assets.exportSprite(input_filename, output_filename, "gif"))
+      : this.result(await this.imageAssets.exportGif(input_filename, output_filename)));
+
+    server.registerTool("inspect_asset", {
+      description: "Return compact dimensions, frame, palette, transparency, and delay statistics.",
+      inputSchema: { filename: z.string().min(1) },
+    }, async ({ filename }) => this.result(await this.imageAssets.inspect(filename)));
+
+    server.registerTool("validate_asset_quality", {
+      description: "Check palette size and isolated pixels before an asset enters a game build.",
+      inputSchema: { filename: z.string().min(1), max_colors: z.number().int().min(1).max(256).default(256), max_isolated_pixels: z.number().int().nonnegative().default(9007199254740991) },
+    }, async ({ filename, max_colors, max_isolated_pixels }) => this.result(await this.imageAssets.validate({ filename, maxColors: max_colors, maxIsolatedPixels: max_isolated_pixels })));
+
+    server.registerTool("build_texture_atlas", {
+      description: "Pack equal-size image frames into one PNG texture atlas.",
+      inputSchema: { input_filenames: z.array(z.string().min(1)).min(1), output_filename: z.string().min(1), columns: z.number().int().positive().optional(), padding: z.number().int().nonnegative().default(0) },
+    }, async ({ input_filenames, output_filename, columns, padding }) => this.result(await this.imageAssets.buildAtlas({ inputFilenames: input_filenames, outputFilename: output_filename, ...(columns === undefined ? {} : { columns }), padding })));
+
+    server.registerTool("export_asset_pack", {
+      description: "Export an atlas PNG and a compact JSON manifest in one call.",
+      inputSchema: { input_filenames: z.array(z.string().min(1)).min(1), output_filename: z.string().min(1), manifest_filename: z.string().min(1), columns: z.number().int().positive().optional(), padding: z.number().int().nonnegative().default(0) },
+    }, async ({ input_filenames, output_filename, manifest_filename, columns, padding }) => this.result(await this.imageAssets.exportPack({ inputFilenames: input_filenames, outputFilename: output_filename, manifestFilename: manifest_filename, ...(columns === undefined ? {} : { columns }), padding })));
+
+    server.registerTool("run_asset_recipe", {
+      description: "Run one compact asset recipe or return its dry-run plan.",
+      inputSchema: { recipe: z.enum(["pixel_art", "animation_pixel_art", "gif", "atlas"]), input_filenames: z.array(z.string().min(1)).min(1), output_filename: z.string().min(1).optional(), width: z.number().int().positive().optional(), height: z.number().int().positive().optional(), max_colors: z.number().int().min(2).max(256).default(32), dry_run: z.boolean().default(true) },
+    }, async ({ recipe, input_filenames, output_filename, width, height, max_colors, dry_run }) => this.result(await this.imageAssets.runRecipe({ recipe, inputFilenames: input_filenames, ...(output_filename ? { outputFilename: output_filename } : {}), ...(width === undefined ? {} : { width }), ...(height === undefined ? {} : { height }), maxColors: max_colors, dryRun: dry_run })));
+
+    server.registerTool("batch_asset_job", {
+      description: "Run several compact asset recipes in order or return one batch plan.",
+      inputSchema: {
+        jobs: z.array(z.object({ recipe: z.enum(["pixel_art", "animation_pixel_art", "gif", "atlas"]), input_filenames: z.array(z.string().min(1)).min(1), output_filename: z.string().min(1).optional(), width: z.number().int().positive().optional(), height: z.number().int().positive().optional(), max_colors: z.number().int().min(2).max(256).default(32) })).min(1),
+        dry_run: z.boolean().default(true),
+      },
+    }, async ({ jobs, dry_run }) => this.result(await this.imageAssets.runBatch({ jobs: jobs.map((job) => ({ recipe: job.recipe, inputFilenames: job.input_filenames, ...(job.output_filename ? { outputFilename: job.output_filename } : {}), ...(job.width === undefined ? {} : { width: job.width }), ...(job.height === undefined ? {} : { height: job.height }), maxColors: job.max_colors })), dryRun: dry_run })));
+  }
+
+  private result(operation: AsepriteResult): { isError?: boolean; content: [{ type: "text"; text: string }] } { return { isError: !operation.ok, content: [{ type: "text", text: operation.message }] }; }
+}

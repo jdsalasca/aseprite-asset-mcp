@@ -12,6 +12,8 @@ import { buildCharacterPlan, buildScenePlan } from "../workflows/plans.js";
 import type { AsepriteResult } from "../domain/aseprite.js";
 import { EnhancementToolController } from "./controllers/EnhancementToolController.js";
 import { AssetJobToolController } from "./controllers/AssetJobToolController.js";
+import { ImageAssetToolController } from "./controllers/ImageAssetToolController.js";
+import { VisualAssetToolController } from "./controllers/VisualAssetToolController.js";
 import { AssetJobService } from "../application/services/AssetJobService.js";
 import { InMemoryAssetJobStore } from "../infrastructure/jobs/InMemoryAssetJobStore.js";
 import { DeterministicEnhancementService } from "../application/services/DeterministicEnhancementService.js";
@@ -211,106 +213,10 @@ export class AsepriteMcpServerAdapter {
       inputSchema: { folder: z.string().min(1) },
     }, async ({ folder }) => this.text({ folder, tools: this.catalog.byFolder(folder) }));
 
-    this.server.registerTool("convert_image_to_pixel_art", {
-      description: "Convert one image to pixel art with a deterministic shared palette.",
-      inputSchema: {
-        input_filename: z.string().min(1), output_filename: z.string().min(1), width: z.number().int().positive(), height: z.number().int().positive(),
-        max_colors: z.number().int().min(2).max(256).default(32), resize_mode: z.enum(["box", "nearest"]).default("box"), dither: z.enum(["none", "bayer4x4"]).default("none"), alpha_threshold: z.number().int().min(0).max(255).default(1),
-      },
-    }, async ({ input_filename, output_filename, width, height, max_colors, resize_mode, dither, alpha_threshold }) => this.result(await this.imageAssets.convertImage({ inputFilename: input_filename, outputFilename: output_filename, width, height, maxColors: max_colors, resizeMode: resize_mode, dither, alphaThreshold: alpha_threshold }, false)));
-
-    this.server.registerTool("convert_animation_to_pixel_art", {
-      description: "Convert all image frames to pixel art and preserve animation delays.",
-      inputSchema: {
-        input_filename: z.string().min(1), output_filename: z.string().min(1), width: z.number().int().positive(), height: z.number().int().positive(),
-        max_colors: z.number().int().min(2).max(256).default(32), resize_mode: z.enum(["box", "nearest"]).default("box"), dither: z.enum(["none", "bayer4x4"]).default("none"), alpha_threshold: z.number().int().min(0).max(255).default(1),
-      },
-    }, async ({ input_filename, output_filename, width, height, max_colors, resize_mode, dither, alpha_threshold }) => this.result(await this.imageAssets.convertImage({ inputFilename: input_filename, outputFilename: output_filename, width, height, maxColors: max_colors, resizeMode: resize_mode, dither, alphaThreshold: alpha_threshold, format: "gif" }, true)));
-
-    this.server.registerTool("export_animation_gif", {
-      description: "Convert a PNG, GIF, or animated image into a GIF while preserving frames.",
-      inputSchema: { input_filename: z.string().min(1), output_filename: z.string().min(1) },
-    }, async ({ input_filename, output_filename }) => input_filename.toLowerCase().endsWith(".aseprite")
-      ? this.result(await this.assets.exportSprite(input_filename, output_filename, "gif"))
-      : this.result(await this.imageAssets.exportGif(input_filename, output_filename)));
-
-    this.server.registerTool("inspect_asset", {
-      description: "Return compact dimensions, frame, palette, transparency, and delay statistics.",
-      inputSchema: { filename: z.string().min(1) },
-    }, async ({ filename }) => this.result(await this.imageAssets.inspect(filename)));
-
-    this.server.registerTool("validate_asset_quality", {
-      description: "Check palette size and isolated pixels before an asset enters a game build.",
-      inputSchema: { filename: z.string().min(1), max_colors: z.number().int().min(1).max(256).default(256), max_isolated_pixels: z.number().int().nonnegative().default(9007199254740991) },
-    }, async ({ filename, max_colors, max_isolated_pixels }) => this.result(await this.imageAssets.validate({ filename, maxColors: max_colors, maxIsolatedPixels: max_isolated_pixels })));
-
-    this.server.registerTool("build_texture_atlas", {
-      description: "Pack equal-size image frames into one PNG texture atlas.",
-      inputSchema: { input_filenames: z.array(z.string().min(1)).min(1), output_filename: z.string().min(1), columns: z.number().int().positive().optional(), padding: z.number().int().nonnegative().default(0) },
-    }, async ({ input_filenames, output_filename, columns, padding }) => this.result(await this.imageAssets.buildAtlas({ inputFilenames: input_filenames, outputFilename: output_filename, ...(columns === undefined ? {} : { columns }), padding })));
-
-    this.server.registerTool("export_asset_pack", {
-      description: "Export an atlas PNG and a compact JSON manifest in one call.",
-      inputSchema: { input_filenames: z.array(z.string().min(1)).min(1), output_filename: z.string().min(1), manifest_filename: z.string().min(1), columns: z.number().int().positive().optional(), padding: z.number().int().nonnegative().default(0) },
-    }, async ({ input_filenames, output_filename, manifest_filename, columns, padding }) => this.result(await this.imageAssets.exportPack({ inputFilenames: input_filenames, outputFilename: output_filename, manifestFilename: manifest_filename, ...(columns === undefined ? {} : { columns }), padding })));
-
-    this.server.registerTool("create_style_bible", {
-      description: "Create a deterministic visual style contract for sprites and maps.",
-      inputSchema: {
-        filename: z.string().min(1), id: z.string().min(1), base_size: z.number().int().min(4).max(256), palette: z.array(z.string().regex(HEX_COLOR)).min(2).max(256), outline_color: z.string().regex(HEX_COLOR).default("#12243A"), light_direction: z.enum(["north", "south", "east", "west", "north_east", "north_west", "south_east", "south_west"]).default("south_east"), detail_level: z.enum(["low", "medium", "high"]).default("medium"), seed: z.number().int().default(1), materials: z.record(z.string(), z.array(z.string().regex(HEX_COLOR))).default({}),
-      },
-    }, async ({ filename, id, base_size, palette, outline_color, light_direction, detail_level, seed, materials }) => this.result(await this.visualAssets.createStyleBible({ filename, style: { id, baseSize: base_size, palette, outlineColor: outline_color, lightDirection: light_direction, detailLevel: detail_level, seed, materials } })));
-
-    this.server.registerTool("inspect_reference", {
-      description: "Analyze reference dimensions, dominant colors, contrast, edges, and transparency.",
-      inputSchema: { filename: z.string().min(1) },
-    }, async ({ filename }) => this.result(await this.visualAssets.inspectReference(filename)));
+    new ImageAssetToolController(this.assets, this.imageAssets).register(this.server);
+    new VisualAssetToolController(this.visualAssets).register(this.server);
     new EnhancementToolController(this.visualAssets, this.enhancements).register(this.server);
     new AssetJobToolController(this.assetJobs).register(this.server);
-
-    this.server.registerTool("run_asset_quality_gate", {
-      description: "Run compact pixel-art quality checks before export.",
-      inputSchema: { filename: z.string().min(1), max_colors: z.number().int().min(1).max(256).default(64), max_isolated_pixels: z.number().int().nonnegative().default(4), min_contrast: z.number().min(0).max(1).default(0.08), max_banding_runs: z.number().int().nonnegative().default(9007199254740991) },
-    }, async ({ filename, max_colors, max_isolated_pixels, min_contrast, max_banding_runs }) => this.result(await this.visualAssets.runQualityGate({ filename, maxColors: max_colors, maxIsolatedPixels: max_isolated_pixels, minContrast: min_contrast, maxBandingRuns: max_banding_runs })));
-
-    this.server.registerTool("build_terrain_tileset", {
-      description: "Build a deterministic terrain tileset with adjacency variants and metadata.",
-      inputSchema: { output_filename: z.string().min(1), manifest_filename: z.string().min(1), tile_size: z.number().int().min(4).max(128), terrains: z.array(z.enum(["water", "sand", "grass", "rock", "snow", "mud"])).min(2), seed: z.number().int().default(1), palette: z.array(z.string().regex(HEX_COLOR)).min(2).max(256).optional(), outline_color: z.string().regex(HEX_COLOR).optional() },
-    }, async ({ output_filename, manifest_filename, tile_size, terrains, seed, palette, outline_color }) => this.result(await this.visualAssets.buildTerrainTileset({ outputFilename: output_filename, manifestFilename: manifest_filename, tileSize: tile_size, terrains, seed, ...(palette || outline_color ? { style: { ...(palette ? { palette } : {}), ...(outline_color ? { outlineColor: outline_color } : {}) } } : {}) })));
-
-    this.server.registerTool("generate_world_map", {
-      description: "Generate a seeded multi-biome map manifest and optional preview.",
-      inputSchema: { map_filename: z.string().min(1), preview_filename: z.string().min(1).optional(), width: z.number().int().positive().max(2048), height: z.number().int().positive().max(2048), seed: z.number().int(), biomes: z.array(z.enum(["water", "sand", "grass", "rock", "snow", "mud"])).min(2), detail_level: z.enum(["low", "medium", "high"]).default("medium"), landmark_count: z.number().int().nonnegative().optional() },
-    }, async ({ map_filename, preview_filename, width, height, seed, biomes, detail_level, landmark_count }) => this.result(await this.visualAssets.generateWorldMap({ mapFilename: map_filename, ...(preview_filename ? { previewFilename: preview_filename } : {}), width, height, seed, biomes, detailLevel: detail_level, ...(landmark_count === undefined ? {} : { landmarkCount: landmark_count }) })));
-
-    this.server.registerTool("generate_beach_scene", {
-      description: "Generate a seeded beach map, preview, and animated wave GIF.",
-      inputSchema: { map_filename: z.string().min(1), preview_filename: z.string().min(1).optional(), wave_filename: z.string().min(1), width: z.number().int().positive().max(2048), height: z.number().int().positive().max(2048), seed: z.number().int(), detail_level: z.enum(["low", "medium", "high"]).default("high"), landmark_count: z.number().int().nonnegative().optional(), wave_frames: z.number().int().min(2).max(24).default(8), wave_delay_ms: z.number().int().positive().default(140) },
-    }, async ({ map_filename, preview_filename, wave_filename, width, height, seed, detail_level, landmark_count, wave_frames, wave_delay_ms }) => this.result(await this.visualAssets.generateBeachScene({ mapFilename: map_filename, ...(preview_filename ? { previewFilename: preview_filename } : {}), waveFilename: wave_filename, width, height, seed, biomes: ["water", "sand", "grass", "rock"], detailLevel: detail_level, ...(landmark_count === undefined ? {} : { landmarkCount: landmark_count }), waveFrames: wave_frames, waveDelayMs: wave_delay_ms })));
-
-    this.server.registerTool("generate_time_of_day_pack", {
-      description: "Generate a deterministic day, sunset, night, and sunrise GIF pack.",
-      inputSchema: { input_filename: z.string().min(1), output_filename: z.string().min(1), manifest_filename: z.string().min(1).optional(), steps: z.number().int().min(2).max(24).default(8), delay_ms: z.number().int().positive().default(180) },
-    }, async ({ input_filename, output_filename, manifest_filename, steps, delay_ms }) => this.result(await this.visualAssets.generateTimeOfDayPack({ inputFilename: input_filename, outputFilename: output_filename, ...(manifest_filename ? { manifestFilename: manifest_filename } : {}), steps, delayMs: delay_ms })));
-
-    this.server.registerTool("generate_environment_pack", {
-      description: "Generate a complete beach, forest, village, or cave asset pack.",
-      inputSchema: { kind: z.enum(["beach", "forest", "village", "cave"]), output_prefix: z.string().min(1), width: z.number().int().positive().max(2048), height: z.number().int().positive().max(2048), seed: z.number().int(), tile_size: z.number().int().min(4).max(128).default(16), detail_level: z.enum(["low", "medium", "high"]).default("high") },
-    }, async ({ kind, output_prefix, width, height, seed, tile_size, detail_level }) => this.result(await this.visualAssets.generateEnvironmentPack({ kind, outputPrefix: output_prefix, width, height, seed, tileSize: tile_size, detailLevel: detail_level })));
-
-    this.server.registerTool("run_asset_recipe", {
-      description: "Run one compact asset recipe or return its dry-run plan.",
-      inputSchema: { recipe: z.enum(["pixel_art", "animation_pixel_art", "gif", "atlas"]), input_filenames: z.array(z.string().min(1)).min(1), output_filename: z.string().min(1).optional(), width: z.number().int().positive().optional(), height: z.number().int().positive().optional(), max_colors: z.number().int().min(2).max(256).default(32), dry_run: z.boolean().default(true) },
-    }, async ({ recipe, input_filenames, output_filename, width, height, max_colors, dry_run }) => this.result(await this.imageAssets.runRecipe({ recipe, inputFilenames: input_filenames, ...(output_filename ? { outputFilename: output_filename } : {}), ...(width === undefined ? {} : { width }), ...(height === undefined ? {} : { height }), maxColors: max_colors, dryRun: dry_run })));
-
-    this.server.registerTool("batch_asset_job", {
-      description: "Run several compact asset recipes in order or return one batch plan.",
-      inputSchema: {
-        jobs: z.array(z.object({ recipe: z.enum(["pixel_art", "animation_pixel_art", "gif", "atlas"]), input_filenames: z.array(z.string().min(1)).min(1), output_filename: z.string().min(1).optional(), width: z.number().int().positive().optional(), height: z.number().int().positive().optional(), max_colors: z.number().int().min(2).max(256).default(32) })).min(1),
-        dry_run: z.boolean().default(true),
-      },
-    }, async ({ jobs, dry_run }) => this.result(await this.imageAssets.runBatch({ jobs: jobs.map((job) => ({ recipe: job.recipe, inputFilenames: job.input_filenames, ...(job.output_filename ? { outputFilename: job.output_filename } : {}), ...(job.width === undefined ? {} : { width: job.width }), ...(job.height === undefined ? {} : { height: job.height }), maxColors: job.max_colors })), dryRun: dry_run })));
-
     this.server.registerTool("create_canvas", {
       description: "Create a new Aseprite canvas.",
       inputSchema: { width: z.number().int().positive(), height: z.number().int().positive(), filename: z.string().min(1) },
