@@ -72,6 +72,14 @@ export interface AnimationSanitizeInput extends AnimationAuditInput {
   ignoreFullCanvasOverlaps?: boolean | undefined;
 }
 
+export interface CopyLayersInput {
+  sourceFilename: string;
+  targetFilename: string;
+  layerNames: string[];
+  replace?: boolean | undefined;
+  createMissingFrames?: boolean | undefined;
+}
+
 export interface AsepriteGateway {
   createCanvas(width: number, height: number, filename: string): Promise<AsepriteResult>;
   addGroup(filename: string, groupName: string, parentGroup?: string): Promise<AsepriteResult>;
@@ -168,6 +176,9 @@ export interface AsepriteGateway {
   ensureLayersPresent(filename: string, layerNames: string[], startFrame?: number, endFrame?: number): Promise<AsepriteResult>;
   auditAnimation(input: AnimationAuditInput): Promise<AsepriteResult>;
   animationSanitize(input: AnimationSanitizeInput): Promise<AsepriteResult>;
+  startPreviewServer(directory: string, port?: number): Promise<AsepriteResult>;
+  stopPreviewServer(port?: number): Promise<AsepriteResult>;
+  copyLayersBetweenSprites(input: CopyLayersInput): Promise<AsepriteResult>;
   applyConvolution(filename: string, matrix: string, layerName?: string, frameIndex?: number, x?: number, y?: number, width?: number, height?: number): Promise<AsepriteResult>;
   listConvolutionMatrices(): Promise<AsepriteResult>;
   applyDitherGradient(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, colorStart: string, colorEnd: string, horizontal?: boolean, createIfMissing?: boolean): Promise<AsepriteResult>;

@@ -1,12 +1,13 @@
-import { execFile } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
 import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
-import type { AnimationAuditInput, AnimationSanitizeInput, AsepriteGateway, AsepriteResult, PixelInput, PointInput, TextDrawInput, TilePixelInput, TilePlacementInput } from "../../domain/aseprite.js";
+import type { AnimationAuditInput, AnimationSanitizeInput, AsepriteGateway, AsepriteResult, CopyLayersInput, PixelInput, PointInput, TextDrawInput, TilePixelInput, TilePlacementInput } from "../../domain/aseprite.js";
 import { availableTextFonts, measureText as rasterMeasureText, rasterizeText } from "../text/TextRasterizer.js";
 
 const execFileAsync = promisify(execFile);
+const previewServers = new Map<number, ReturnType<typeof spawn>>();
 
 interface CommandResult {
   ok: boolean;
@@ -1298,6 +1299,71 @@ export class AsepriteCliGateway implements AsepriteGateway {
     if (!line) return { ok: false, message: "No sanitize data returned" };
     const [ensured, outOfRange, opacitySet, deleted] = line.slice(10).split(",").map(Number);
     return { ok: true, message: JSON.stringify({ sanitized: { ensured, outOfRange, opacitySet, deleted }, reportOnly: Boolean(input.reportOnly) }) };
+  }
+
+  public async startPreviewServer(directory: string, port = 8000): Promise<AsepriteResult> {
+    const target = validatePath(directory);
+    if (typeof target !== "string") return target;
+    try { if (!(await fs.stat(target)).isDirectory()) return { ok: false, message: `Directory ${directory} not found` }; } catch { return { ok: false, message: `Directory ${directory} not found` }; }
+    if (!Number.isInteger(port) || port < 1024 || port > 65535) return { ok: false, message: "Port must be an integer between 1024 and 65535" };
+    const existing = previewServers.get(port);
+    if (existing && !existing.killed) return { ok: true, message: `Preview server may already be running on port ${port}` };
+    const serverCode = `const http=require("node:http"),fs=require("node:fs"),path=require("node:path");const root=path.resolve(process.argv[1]);const port=Number(process.argv[2]);http.createServer((req,res)=>{try{const pathname=decodeURIComponent(new URL(req.url,"http://localhost").pathname);const target=path.resolve(root,"."+pathname);if(target!==root&&!target.startsWith(root+path.sep)){res.writeHead(403);return res.end("Forbidden")}let file=target;if(fs.existsSync(file)&&fs.statSync(file).isDirectory())file=path.join(file,"index.html");if(!fs.existsSync(file)||!fs.statSync(file).isFile()){res.writeHead(404);return res.end("Not found")}res.writeHead(200);fs.createReadStream(file).pipe(res)}catch(e){res.writeHead(500);res.end("Server error")}}).listen(port,"127.0.0.1")`;
+    const child = spawn(process.execPath, ["-e", serverCode, target, String(port)], { cwd: target, windowsHide: true, stdio: "ignore" });
+    previewServers.set(port, child);
+    await new Promise((resolve) => setTimeout(resolve, 120));
+    if (child.exitCode !== null) { previewServers.delete(port); return { ok: false, message: `Preview server failed to start on port ${port}` }; }
+    return { ok: true, message: `Preview server started: http://localhost:${port}/` };
+  }
+
+  public async stopPreviewServer(port = 8000): Promise<AsepriteResult> {
+    if (!Number.isInteger(port) || port < 1024 || port > 65535) return { ok: false, message: "Port must be an integer between 1024 and 65535" };
+    const child = previewServers.get(port);
+    if (!child || child.killed) return { ok: false, message: `No preview server found for port ${port}` };
+    child.kill();
+    previewServers.delete(port);
+    return { ok: true, message: `Preview server stopped on port ${port}` };
+  }
+
+  public async copyLayersBetweenSprites(input: CopyLayersInput): Promise<AsepriteResult> {
+    const source = validatePath(input.sourceFilename);
+    if (typeof source !== "string") return source;
+    const target = validatePath(input.targetFilename);
+    if (typeof target !== "string") return target;
+    if (source === target) return { ok: false, message: "Source and target sprites must be different" };
+    try { await fs.access(source); await fs.access(target); } catch { return { ok: false, message: "Source or target sprite not found" }; }
+    if (!Array.isArray(input.layerNames) || input.layerNames.length === 0) return { ok: false, message: "Layer names list cannot be empty" };
+    const layers = `{${input.layerNames.map((name) => `"${luaEscape(name)}"`).join(",")}}`;
+    const script = `
+      local src = app.open("${luaEscape(source.replaceAll("\\", "/"))}")
+      if not src then print("ERROR:Source sprite not opened") return end
+      local dst = app.open("${luaEscape(target.replaceAll("\\", "/"))}")
+      if not dst then print("ERROR:Target sprite not opened") return end
+      local function find_layer(sprite, name)
+        for _, layer in ipairs(sprite.layers) do if layer.name == name then return layer end if layer.isGroup then for _, nested in ipairs(layer.layers) do if nested.name == name then return nested end end end end
+        return nil
+      end
+      local valid, missing = {}, {}
+      for _, name in ipairs(${layers}) do if find_layer(src, name) then table.insert(valid, name) else table.insert(missing, name) end end
+      if #valid == 0 then print("ERROR:None of the requested layers exist in the source") return end
+      app.activeSprite = dst
+      app.transaction(function()
+        if ${input.createMissingFrames !== false ? "true" : "false"} then while #dst.frames < #src.frames do dst:newFrame() end end
+        for _, name in ipairs(valid) do
+          local sourceLayer, targetLayer = find_layer(src, name), find_layer(dst, name)
+          if not targetLayer then targetLayer = dst:newLayer() targetLayer.name = name end
+          if ${input.replace !== false ? "true" : "false"} then for i = 1, #dst.frames do local cel = targetLayer:cel(dst.frames[i]) if cel then dst:deleteCel(cel) end end end
+          for i = 1, #src.frames do if i <= #dst.frames then local sourceCel = sourceLayer:cel(src.frames[i]) if sourceCel then local targetCel = targetLayer:cel(dst.frames[i]) if targetCel and ${input.replace !== false ? "true" : "false"} then dst:deleteCel(targetCel) targetCel = nil end if not targetCel then dst:newCel(targetLayer, dst.frames[i], sourceCel.image:clone(), sourceCel.position) end end end end
+        end
+      end)
+      dst:saveAs(dst.filename)
+      if #missing > 0 then print("MISSING:" .. table.concat(missing, ",")) end
+      print("OK")
+    `;
+    const command = await this.runLua(script);
+    if (!command.ok) return { ok: false, message: `Failed to copy layers: ${command.output}` };
+    const missing = command.output.split(/\r?\n/).find((line) => line.startsWith("MISSING:"));
+    return { ok: true, message: `Layers copied from ${source} to ${target}${missing ? ` (skipped missing layers: ${missing.slice(8)})` : ""}` };
   }
 
   public async validateScene(filename: string, requiredLayers: string[], startFrame = 1, endFrame?: number): Promise<AsepriteResult> {

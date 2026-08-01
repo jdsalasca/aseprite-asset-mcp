@@ -456,6 +456,24 @@ test("rejects invalid scene frame ranges before starting Aseprite", async () => 
   assert.equal(result.message, "Frame range must start at 1 and end at or after the start");
 });
 
+test("rejects preview and sprite-copy contracts before starting external processes", async () => {
+  const badPort = await gateway.startPreviewServer(".", 80);
+  const badCopy = await gateway.copyLayersBetweenSprites({
+    sourceFilename: "sprite.aseprite",
+    targetFilename: "sprite.aseprite",
+    layerNames: ["hero"],
+  });
+  const badLayers = await gateway.copyLayersBetweenSprites({
+    sourceFilename: "sprite.aseprite",
+    targetFilename: "target.aseprite",
+    layerNames: [],
+  });
+
+  assert.equal(badPort.message, "Port must be an integer between 1024 and 65535");
+  assert.equal(badCopy.message, "Source and target sprites must be different");
+  assert.equal(badLayers.message, "Source or target sprite not found");
+});
+
 test("rejects invalid spritesheet export options before starting Aseprite", async () => {
   const result = await gateway.exportSpritesheet({
     filename: "sprite.aseprite",

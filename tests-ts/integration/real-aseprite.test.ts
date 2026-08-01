@@ -278,3 +278,38 @@ test("real Aseprite audits and sanitizes animation cels", { skip: !existsSync(as
   assert.equal(sanitized.ok, true, sanitized.message);
   assert.equal(JSON.parse(sanitized.message).sanitized.opacitySet, 1);
 });
+
+test("real TypeScript gateway serves a preview and copies selected layers between sprites", { skip: !existsSync(asepritePath) }, async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "aseprite-mcp-preview-"));
+  const source = path.join(directory, "source.aseprite");
+  const target = path.join(directory, "target.aseprite");
+  const port = 19000 + (process.pid % 500);
+  const gateway = new AsepriteCliGateway({ executable: asepritePath });
+  let serverStarted = false;
+
+  try {
+    await fs.writeFile(path.join(directory, "index.html"), "<h1>preview-ok</h1>", "utf8");
+    const preview = await gateway.startPreviewServer(directory, port);
+    assert.equal(preview.ok, true, preview.message);
+    serverStarted = true;
+    const response = await fetch(`http://127.0.0.1:${port}/index.html`);
+    assert.equal(response.status, 200);
+    assert.equal(await response.text(), "<h1>preview-ok</h1>");
+    const stopped = await gateway.stopPreviewServer(port);
+    assert.equal(stopped.ok, true, stopped.message);
+    serverStarted = false;
+
+    assert.equal((await gateway.createCanvas(8, 8, source)).ok, true);
+    assert.equal((await gateway.addLayer(source, "hero")).ok, true);
+    assert.equal((await gateway.drawPixelsAt(source, "hero", 1, [{ x: 2, y: 3, color: "#ff0000" }], true)).ok, true);
+    assert.equal((await gateway.createCanvas(8, 8, target)).ok, true);
+    const copied = await gateway.copyLayersBetweenSprites({ sourceFilename: source, targetFilename: target, layerNames: ["hero"] });
+    assert.equal(copied.ok, true, copied.message);
+    const pixel = await gateway.getPixelColor(target, 2, 3, "hero", 1);
+    assert.equal(pixel.ok, true, pixel.message);
+    assert.match(pixel.message, /#ff0000/);
+  } finally {
+    if (serverStarted) await gateway.stopPreviewServer(port);
+    await fs.rm(directory, { recursive: true, force: true });
+  }
+});

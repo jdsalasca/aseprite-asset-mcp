@@ -99,6 +99,9 @@ const TOOL_NAMES = [
   "ensure_layers_present",
   "audit_animation",
   "animation_sanitize",
+  "start_preview_server",
+  "stop_preview_server",
+  "copy_layers_between_sprites",
   "outline_native",
   "adjust_hsl_native",
   "adjust_brightness_contrast",
@@ -640,6 +643,24 @@ export class AsepriteMcpServerAdapter {
       description: "Normalize animation cels and optionally repair out-of-range activity.",
       inputSchema: { filename: z.string().min(1), start_frame: z.number().int().positive().default(1), end_frame: z.number().int().positive().optional(), layer_names: z.array(z.string().min(1)).optional(), layer_order: z.array(z.string().min(1)).optional(), layer_frame_ranges: z.array(z.string().min(1)).optional(), ensure_layers: z.array(z.string().min(1)).optional(), out_of_range_action: z.enum(["set_opacity_zero", "delete_cels", "none"]).default("set_opacity_zero"), out_of_range_opacity: z.number().int().min(0).max(255).default(0), report_only: z.boolean().default(false), include_stats: z.boolean().default(true), ignore_full_canvas_overlaps: z.boolean().default(true), max_overlaps: z.number().int().nonnegative().default(200), overlap_pairs: z.array(z.string().min(1)).optional(), report_cels: z.boolean().default(false), report_bounds: z.boolean().default(false), max_out_of_range: z.number().int().nonnegative().default(200) },
     }, async ({ filename, start_frame, end_frame, layer_names, layer_order, layer_frame_ranges, ensure_layers, out_of_range_action, out_of_range_opacity, report_only, include_stats, ignore_full_canvas_overlaps, max_overlaps, overlap_pairs, report_cels, report_bounds, max_out_of_range }) => this.result(await this.assets.animationSanitize({ filename, startFrame: start_frame, endFrame: end_frame, layerNames: layer_names, layerOrder: layer_order, layerFrameRanges: layer_frame_ranges, ensureLayers: ensure_layers, outOfRangeAction: out_of_range_action, outOfRangeOpacity: out_of_range_opacity, reportOnly: report_only, includeStats: include_stats, ignoreFullCanvasOverlaps: ignore_full_canvas_overlaps, maxOverlaps: max_overlaps, overlapPairs: overlap_pairs, reportCels: report_cels, reportBounds: report_bounds, maxOutOfRange: max_out_of_range })));
+
+    this.server.registerTool("start_preview_server", {
+      description: "Serve a validated local directory over HTTP for visual asset preview.",
+      inputSchema: { directory: z.string().min(1), port: z.number().int().min(1024).max(65535).default(8000) },
+    }, async ({ directory, port }) => this.result(await this.assets.startPreviewServer(directory, port)));
+
+    this.server.registerTool("stop_preview_server", {
+      description: "Stop a preview server started by this MCP process.",
+      inputSchema: { port: z.number().int().min(1024).max(65535).default(8000) },
+    }, async ({ port }) => this.result(await this.assets.stopPreviewServer(port)));
+
+    this.server.registerTool("copy_layers_between_sprites", {
+      description: "Copy selected animation layers and cels from one Aseprite document into another.",
+      inputSchema: {
+        source_filename: z.string().min(1), target_filename: z.string().min(1),
+        layer_names: z.array(z.string().min(1)).min(1), replace: z.boolean().default(true), create_missing_frames: z.boolean().default(true),
+      },
+    }, async ({ source_filename, target_filename, layer_names, replace, create_missing_frames }) => this.result(await this.assets.copyLayersBetweenSprites({ sourceFilename: source_filename, targetFilename: target_filename, layerNames: layer_names, replace, createMissingFrames: create_missing_frames })));
 
     this.server.registerTool("outline_native", {
       description: "Apply Aseprite native outline to a selected layer and frame.",
