@@ -1,4 +1,4 @@
-import type { AsepriteGateway, AsepriteResult, PixelInput } from "../../domain/aseprite.js";
+import type { AsepriteGateway, AsepriteResult, PixelInput, PointInput } from "../../domain/aseprite.js";
 
 export class AsepriteAssetService {
   public constructor(private readonly gateway: AsepriteGateway) {}
@@ -85,6 +85,18 @@ export class AsepriteAssetService {
 
   public fillAreaAt(filename: string, layerName: string, frameIndex: number, x: number, y: number, color: string, createIfMissing = true): Promise<AsepriteResult> {
     return this.gateway.fillAreaAt(filename, layerName, frameIndex, x, y, color, createIfMissing);
+  }
+
+  public drawPolygon(filename: string, layerName: string, frameIndex: number, points: PointInput[], color = "#000000", fill = false, createIfMissing = true): Promise<AsepriteResult> {
+    return this.gateway.drawPolygon(filename, layerName, frameIndex, points, color, fill, createIfMissing);
+  }
+
+  public drawPath(filename: string, layerName: string, frameIndex: number, points: PointInput[], color = "#000000", thickness = 1, createIfMissing = true): Promise<AsepriteResult> {
+    return this.gateway.drawPath(filename, layerName, frameIndex, points, color, thickness, createIfMissing);
+  }
+
+  public applyGradientRect(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, colorStart: string, colorEnd: string, horizontal = true, createIfMissing = true): Promise<AsepriteResult> {
+    return this.gateway.applyGradientRect(filename, layerName, frameIndex, x, y, width, height, colorStart, colorEnd, horizontal, createIfMissing);
   }
 
   public setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction = "forward"): Promise<AsepriteResult> {

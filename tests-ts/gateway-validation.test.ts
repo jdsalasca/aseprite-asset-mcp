@@ -26,6 +26,9 @@ test("rejects traversal in every input sprite path before starting Aseprite", as
     gateway.drawRectangleAt("../sprite.aseprite", "Layer", 1, 0, 0, 1, 1, "#112233"),
     gateway.drawCircleAt("../sprite.aseprite", "Layer", 1, 0, 0, 1, "#112233"),
     gateway.fillAreaAt("../sprite.aseprite", "Layer", 1, 0, 0, "#112233"),
+    gateway.drawPolygon("../sprite.aseprite", "Layer", 1, [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }]),
+    gateway.drawPath("../sprite.aseprite", "Layer", 1, [{ x: 0, y: 0 }, { x: 1, y: 1 }]),
+    gateway.applyGradientRect("../sprite.aseprite", "Layer", 1, 0, 0, 2, 2, "#000000", "#ffffff"),
     gateway.setTag("../sprite.aseprite", "idle", 1, 1),
     gateway.createTilemapLayer("../sprite.aseprite", "Tiles", 16, 16),
     gateway.validateScene("../sprite.aseprite", ["Layer"]),
@@ -84,6 +87,20 @@ test("rejects invalid layer-frame drawing contracts before starting Aseprite", a
   assert.equal(badRectangle.message, "Width and height must be positive integers");
   assert.equal(badCircle.message, "Radius must be a positive integer");
   assert.equal(badFill.message, "Coordinates must be integers");
+});
+
+test("rejects invalid polygon, path, and gradient contracts before starting Aseprite", async () => {
+  const badPolygon = await gateway.drawPolygon("sprite.aseprite", "Layer", 1, [{ x: 0, y: 0 }, { x: 1, y: 0 }]);
+  const badPath = await gateway.drawPath("sprite.aseprite", "Layer", 1, [{ x: 0, y: 0 }]);
+  const badPoint = await gateway.drawPath("sprite.aseprite", "Layer", 1, [{ x: 0.5, y: 0 }, { x: 1, y: 1 }]);
+  const badGradientSize = await gateway.applyGradientRect("sprite.aseprite", "Layer", 1, 0, 0, 0, 2, "#000000", "#ffffff");
+  const badGradientColor = await gateway.applyGradientRect("sprite.aseprite", "Layer", 1, 0, 0, 2, 2, "#000000", "#12GG34");
+
+  assert.equal(badPolygon.message, "Polygon requires at least 3 points");
+  assert.equal(badPath.message, "Path requires at least 2 points");
+  assert.equal(badPoint.message, "Point coordinates must be integers");
+  assert.equal(badGradientSize.message, "Width and height must be positive integers");
+  assert.equal(badGradientColor.message, "Colors must use hexadecimal values");
 });
 
 test("rejects invalid tag frame ranges before starting Aseprite", async () => {

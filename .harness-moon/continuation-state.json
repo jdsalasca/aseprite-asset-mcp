@@ -2,16 +2,16 @@
   "project": "aseprite-mcp",
   "goal": "complete-typescript-migration",
   "continue": true,
-  "currentPhase": "layer-frame-drawing",
-  "currentSlice": "targeted-drawing",
-  "lastCompletedSlice": "drawing-primitives",
-  "nextSlice": "polygon-path-gradient-tools",
+  "currentPhase": "polygon-path-gradient",
+  "currentSlice": "polygon-path-gradient",
+  "lastCompletedSlice": "layer-frame-drawing",
+  "nextSlice": "ellipse-and-export-tools",
   "blocked": false,
   "retryCount": 0,
   "lastEvidence": [
-    "npm test: 17 passed, 0 failed",
+    "npm test: 18 passed, 0 failed",
     "upstream/main inventory: 116 tools",
-    "TypeScript server inventory: 28 tools",
+    "TypeScript server inventory: 31 tools",
     "real Aseprite integration: passed",
     "MCP stdio drawing E2E: passed"
   ]

@@ -2,18 +2,18 @@
   "schemaVersion": 1,
   "project": "aseprite-mcp",
   "goal": "complete-typescript-migration",
-  "generatedAt": "2026-08-01T13:47:07.138Z",
+  "generatedAt": "2026-08-01T13:53:01.968Z",
   "source": {
     "repository": "https://github.com/diivi/aseprite-mcp",
     "branch": "upstream/main",
     "commit": "90d1696a7e41edff89bbd0823ae6a5f86c114bcc"
   },
   "local": {
-    "branch": "codex/migrate/layer-frame-drawing",
-    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-layer-frame",
-    "baseCommit": "40027b59653b5a75b7b9be83d291aba60855f63a",
-    "typescriptToolCount": 28,
-    "testCount": 17
+    "branch": "codex/migrate/polygon-path-gradient",
+    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-polygon-gradient",
+    "baseCommit": "723cba828b2035c3b07e8b516c86ca07e8a04ed4",
+    "typescriptToolCount": 31,
+    "testCount": 18
   },
   "tools": [
     {
@@ -588,9 +588,13 @@
       "name": "draw_polygon",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "drawing",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -599,9 +603,13 @@
       "name": "draw_path",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "drawing",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -610,9 +618,13 @@
       "name": "apply_gradient_rect",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "core",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []

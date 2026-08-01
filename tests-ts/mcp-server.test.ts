@@ -23,6 +23,9 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("draw_rectangle_at"));
     assert.ok(tools.includes("fill_area_at"));
     assert.ok(tools.includes("draw_circle_at"));
+    assert.ok(tools.includes("draw_polygon"));
+    assert.ok(tools.includes("draw_path"));
+    assert.ok(tools.includes("apply_gradient_rect"));
     assert.ok(tools.includes("set_frame"));
     assert.ok(tools.includes("draw_rectangle"));
     assert.ok(tools.includes("create_character_plan"));
@@ -88,6 +91,9 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
     await call("draw_rectangle_at", { filename: source, layer_name: "body", frame_index: 2, x: 4, y: 4, width: 5, height: 5, color: "#654321", fill: true });
     await call("fill_area_at", { filename: source, layer_name: "body", frame_index: 2, x: 0, y: 0, color: "#222222" });
     await call("draw_circle_at", { filename: source, layer_name: "body", frame_index: 2, center_x: 8, center_y: 8, radius: 2, color: "#fed" });
+    await call("draw_polygon", { filename: source, layer_name: "body", frame_index: 2, points: [{ x: 2, y: 12 }, { x: 6, y: 8 }, { x: 10, y: 12 }], color: "#ff8800", fill: true });
+    await call("draw_path", { filename: source, layer_name: "body", frame_index: 2, points: [{ x: 1, y: 14 }, { x: 8, y: 10 }, { x: 14, y: 14 }], color: "#00ff00", thickness: 1 });
+    await call("apply_gradient_rect", { filename: source, layer_name: "body", frame_index: 2, x: 2, y: 2, width: 8, height: 4, color_start: "#0000ff", color_end: "#ff00ff", horizontal: true });
     await call("export_spritesheet", {
       filename: source,
       output_filename: sheet,
