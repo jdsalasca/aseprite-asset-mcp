@@ -26,3 +26,18 @@ test("generic domain boundaries do not expose runtime-specific contract names", 
 
   assert.deepEqual(violations, []);
 });
+
+test("the concrete gateway is a thin composition adapter", async () => {
+  const gateway = await readFile(path.resolve("src/infrastructure/aseprite/AsepriteCliGateway.ts"), "utf8");
+  assert.doesNotMatch(gateway, /^\s+public async \w+\(/m);
+  for (const capability of ["Layer", "Drawing", "Export", "Palette", "Text", "Animation", "Effects", "Scene"]) {
+    await readFile(path.resolve(`src/infrastructure/aseprite/Aseprite${capability}Adapter.ts`), "utf8");
+  }
+});
+
+test("each MCP tool name has one controller registration", async () => {
+  const controllers = await sourceFiles(path.resolve("src/interfaces/controllers"));
+  const registrations = (await Promise.all(controllers.map((filename) => readFile(filename, "utf8"))))
+    .flatMap((contents) => [...contents.matchAll(/registerTool\("([^"]+)"/g)].map((match) => match[1]));
+  assert.equal(registrations.filter((name) => name === "set_palette").length, 1);
+});

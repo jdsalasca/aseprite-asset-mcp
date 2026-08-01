@@ -17,7 +17,7 @@ Migrate the missing core frame and layer property tools.
 ## Changed files
 
 - `src/infrastructure/aseprite/AsepriteCliGateway.ts`
-- `src/domain/aseprite.ts`
+- `src/domain/asset-operations.ts`
 - `src/application/ports/AssetGatewayPort.ts`
 - `src/interfaces/mcp-server.ts`
 - `src/workflows/mcp-client.ts`

@@ -3,8 +3,6 @@ import * as z from "zod/v4";
 import type { LayerFramePort } from "../../application/ports/AssetCapabilityPorts.js";
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
 
-const HEX_COLOR = /^#?(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
-
 export class LayerFrameToolController {
   public constructor(private readonly assets: LayerFramePort) {}
 
@@ -94,10 +92,6 @@ export class LayerFrameToolController {
       inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), opacity: z.number().int().min(0).max(255) },
     }, async ({ filename, layer_name, opacity }) => this.result(await this.assets.setLayerOpacity(filename, layer_name, opacity)));
 
-    server.registerTool("set_palette", {
-      description: "Apply a controlled hexadecimal palette to a document.",
-      inputSchema: { filename: z.string().min(1), colors: z.array(z.string().regex(HEX_COLOR)).min(1) },
-    }, async ({ filename, colors }) => this.result(await this.assets.setPalette(filename, colors)));
   }
 
   private result(operation: AssetOperationResult): { isError?: boolean; content: [{ type: "text"; text: string }] } { return { isError: !operation.ok, content: [{ type: "text", text: operation.message }] }; }
