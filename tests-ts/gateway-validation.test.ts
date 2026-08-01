@@ -428,6 +428,20 @@ test("rejects invalid slice contracts before starting Aseprite", async () => {
   assert.equal(badDelete.message, "Slice name cannot be empty");
 });
 
+test("rejects invalid animation quality contracts before starting Aseprite", async () => {
+  const badEnsure = await gateway.ensureLayersPresent("sprite.aseprite", [], 1);
+  const badAuditRange = await gateway.auditAnimation({ filename: "sprite.aseprite", startFrame: 2, endFrame: 1 });
+  const badAuditLimit = await gateway.auditAnimation({ filename: "sprite.aseprite", maxOverlaps: -1 });
+  const badSanitizeAction = await gateway.animationSanitize({ filename: "sprite.aseprite", outOfRangeAction: "invalid" as never });
+  const badSanitizeOpacity = await gateway.animationSanitize({ filename: "sprite.aseprite", outOfRangeOpacity: 256 });
+
+  assert.equal(badEnsure.message, "Layer names list cannot be empty");
+  assert.equal(badAuditRange.message, "Frame range must start at 1 and end at or after the start");
+  assert.equal(badAuditLimit.message, "Max limits must be >= 0");
+  assert.equal(badSanitizeAction.message, "Unsupported out_of_range_action");
+  assert.equal(badSanitizeOpacity.message, "out_of_range_opacity must be 0-255");
+});
+
 test("rejects invalid tag frame ranges before starting Aseprite", async () => {
   const result = await gateway.setTag("sprite.aseprite", "idle", 0, 2);
 

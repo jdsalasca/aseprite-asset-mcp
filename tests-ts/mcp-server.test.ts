@@ -94,6 +94,9 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("set_slice_pivot"));
     assert.ok(tools.includes("list_slices"));
     assert.ok(tools.includes("delete_slice"));
+    assert.ok(tools.includes("ensure_layers_present"));
+    assert.ok(tools.includes("audit_animation"));
+    assert.ok(tools.includes("animation_sanitize"));
     assert.ok(tools.includes("draw_rectangle"));
     assert.ok(tools.includes("create_character_plan"));
     assert.ok(tools.includes("create_scene_plan"));
@@ -145,6 +148,7 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
   const textSource = path.join(directory, "text.aseprite");
   const tileSource = path.join(directory, "tilemap.aseprite");
   const sliceSource = path.join(directory, "slices.aseprite");
+  const qualitySource = path.join(directory, "quality.aseprite");
   const client = new AsepriteMcpClient({
     cwd: process.cwd(),
     environment: { ASEPRITE_PATH: asepritePath },
@@ -253,6 +257,11 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
     await call("set_slice_pivot", { filename: sliceSource, name: "hud", x: 3, y: 2 });
     await call("list_slices", { filename: sliceSource });
     await call("delete_slice", { filename: sliceSource, name: "hud" });
+    await call("create_canvas", { width: 16, height: 16, filename: qualitySource });
+    await call("add_layer", { filename: qualitySource, layer_name: "hero" });
+    await call("ensure_layers_present", { filename: qualitySource, layer_names: ["hero"], start_frame: 1, end_frame: 1 });
+    await call("audit_animation", { filename: qualitySource, layer_names: ["hero"], report_cels: true, report_bounds: true });
+    await call("animation_sanitize", { filename: qualitySource, layer_names: ["hero"], report_only: true });
     await call("flatten_sprite", { filename: source });
     await call("export_spritesheet", {
       filename: source,
