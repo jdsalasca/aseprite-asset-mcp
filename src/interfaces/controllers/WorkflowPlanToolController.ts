@@ -1,11 +1,11 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
-import { AsepriteAssetService } from "../../application/services/AsepriteAssetService.js";
+import type { WorkflowPort } from "../../application/ports/AsepriteCapabilityPorts.js";
 import { buildCharacterPlan, buildScenePlan } from "../../workflows/plans.js";
 import type { AsepriteResult } from "../../domain/aseprite.js";
 
 export class WorkflowPlanToolController {
-  public constructor(private readonly assets: AsepriteAssetService) {}
+  public constructor(private readonly assets: WorkflowPort) {}
 
   public register(server: McpServer): void {
     server.registerTool("animation_workflow_guide", { description: "Return a concise deterministic guide for character, environment, or general animation workflows.", inputSchema: { use_case: z.string().default("character") } }, async ({ use_case }) => this.result(await this.assets.animationWorkflowGuide(use_case)));

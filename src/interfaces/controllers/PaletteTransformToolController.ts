@@ -1,12 +1,12 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
-import { AsepriteAssetService } from "../../application/services/AsepriteAssetService.js";
+import type { PaletteTransformPort } from "../../application/ports/AsepriteCapabilityPorts.js";
 import type { AsepriteResult } from "../../domain/aseprite.js";
 
 const HEX_COLOR = /^#?(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
 
 export class PaletteTransformToolController {
-  public constructor(private readonly assets: AsepriteAssetService) {}
+  public constructor(private readonly assets: PaletteTransformPort) {}
 
   public register(server: McpServer): void {
     server.registerTool("get_color_stats", { description: "Return JSON color usage statistics for one flattened frame.", inputSchema: { filename: z.string().min(1), frame_index: z.number().int().positive().default(1), top: z.number().int().positive().default(16) } }, async ({ filename, frame_index, top }) => this.result(await this.assets.getColorStats(filename, frame_index, top)));

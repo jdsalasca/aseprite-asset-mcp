@@ -1,10 +1,10 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
-import { AsepriteAssetService } from "../../application/services/AsepriteAssetService.js";
+import type { ExportAnimationPort } from "../../application/ports/AsepriteCapabilityPorts.js";
 import type { AsepriteResult } from "../../domain/aseprite.js";
 
 export class ExportAnimationToolController {
-  public constructor(private readonly assets: AsepriteAssetService) {}
+  public constructor(private readonly assets: ExportAnimationPort) {}
 
   public register(server: McpServer): void {
     server.registerTool("export_sprite", {

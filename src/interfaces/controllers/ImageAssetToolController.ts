@@ -1,11 +1,11 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
-import { AsepriteAssetService } from "../../application/services/AsepriteAssetService.js";
+import type { ExportAnimationPort } from "../../application/ports/AsepriteCapabilityPorts.js";
 import { PixelArtAssetService } from "../../application/services/PixelArtAssetService.js";
 import type { AsepriteResult } from "../../domain/aseprite.js";
 
 export class ImageAssetToolController {
-  public constructor(private readonly assets: AsepriteAssetService, private readonly imageAssets: PixelArtAssetService) {}
+  public constructor(private readonly assets: ExportAnimationPort, private readonly imageAssets: PixelArtAssetService) {}
 
   public register(server: McpServer): void {
     server.registerTool("convert_image_to_pixel_art", {

@@ -1,12 +1,12 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
-import { AsepriteAssetService } from "../../application/services/AsepriteAssetService.js";
+import type { EffectsPort } from "../../application/ports/AsepriteCapabilityPorts.js";
 import type { AsepriteResult } from "../../domain/aseprite.js";
 
 const HEX_COLOR = /^#?(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
 
 export class EffectsToolController {
-  public constructor(private readonly assets: AsepriteAssetService) {}
+  public constructor(private readonly assets: EffectsPort) {}
 
   public register(server: McpServer): void {
     server.registerTool("outline_native", {
