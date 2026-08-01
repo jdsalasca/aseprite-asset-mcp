@@ -43,8 +43,8 @@ Blind every input before process execution.
 ## Status
 
 - Integration status: verified.
-- Commit: pending.
-- Merge status: pending.
+- Commit: 2cb135e.
+- Merge status: merged into develop through 524e66d.
 - Risk level: best.
 - Blockers: none.
 - Next phase: layer and frame drawing tools.
