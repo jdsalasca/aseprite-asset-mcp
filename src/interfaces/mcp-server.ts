@@ -17,6 +17,7 @@ import { VisualAssetToolController } from "./controllers/VisualAssetToolControll
 import { LayerFrameToolController } from "./controllers/LayerFrameToolController.js";
 import { DrawingToolController } from "./controllers/DrawingToolController.js";
 import { ExportAnimationToolController } from "./controllers/ExportAnimationToolController.js";
+import { PaletteTransformToolController } from "./controllers/PaletteTransformToolController.js";
 import { AssetJobService } from "../application/services/AssetJobService.js";
 import { InMemoryAssetJobStore } from "../infrastructure/jobs/InMemoryAssetJobStore.js";
 import { DeterministicEnhancementService } from "../application/services/DeterministicEnhancementService.js";
@@ -224,111 +225,7 @@ export class AsepriteMcpServerAdapter {
 
     new DrawingToolController(this.assets).register(this.server);
     new ExportAnimationToolController(this.assets).register(this.server);
-    this.server.registerTool("get_color_stats", {
-      description: "Return JSON color usage statistics for one flattened frame.",
-      inputSchema: { filename: z.string().min(1), frame_index: z.number().int().positive().default(1), top: z.number().int().positive().default(16) },
-    }, async ({ filename, frame_index, top }) => this.result(await this.assets.getColorStats(filename, frame_index, top)));
-
-    this.server.registerTool("get_palette", {
-      description: "Return the active sprite palette as a JSON color array.",
-      inputSchema: { filename: z.string().min(1) },
-    }, async ({ filename }) => this.result(await this.assets.getPalette(filename)));
-
-    this.server.registerTool("extract_palette", {
-      description: "Extract and persist an optimized palette with a bounded color count.",
-      inputSchema: { filename: z.string().min(1), max_colors: z.number().int().min(1).max(256).default(16), with_alpha: z.boolean().default(false) },
-    }, async ({ filename, max_colors, with_alpha }) => this.result(await this.assets.extractPalette(filename, max_colors, with_alpha)));
-
-    this.server.registerTool("remap_colors_in_cel_range", {
-      description: "Remap explicit RGB colors across a layer frame range while preserving alpha.",
-      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), start_frame: z.number().int().positive(), end_frame: z.number().int().positive(), mappings: z.array(z.object({ from: z.string().regex(HEX_COLOR), to: z.string().regex(HEX_COLOR) })).min(1), create_missing_cels: z.boolean().default(false), source_frame_index: z.number().int().positive().optional() },
-    }, async ({ filename, layer_name, start_frame, end_frame, mappings, create_missing_cels, source_frame_index }) => this.result(await this.assets.remapColorsInCelRange(filename, layer_name, start_frame, end_frame, mappings, create_missing_cels, source_frame_index)));
-
-    this.server.registerTool("list_palette_presets", {
-      description: "List built-in retro palette presets.",
-      inputSchema: {},
-    }, async () => this.result(await this.assets.listPalettePresets()));
-
-    this.server.registerTool("apply_palette_preset", {
-      description: "Apply a built-in retro palette preset to the sprite.",
-      inputSchema: { filename: z.string().min(1), preset: z.string().min(1) },
-    }, async ({ filename, preset }) => this.result(await this.assets.applyPalettePreset(filename, preset)));
-
-    this.server.registerTool("generate_color_ramp", {
-      description: "Generate a hue-shifted dark-to-light pixel-art color ramp.",
-      inputSchema: { base_color: z.string().regex(HEX_COLOR), steps: z.number().int().min(2).max(16).default(5), hue_shift_degrees: z.number().default(20), lightness_range: z.number().min(0).max(1).default(0.5) },
-    }, async ({ base_color, steps, hue_shift_degrees, lightness_range }) => this.result(await this.assets.generateColorRamp(base_color, steps, hue_shift_degrees, lightness_range)));
-
-    this.server.registerTool("quantize_to_palette", {
-      description: "Snap opaque pixels to the nearest color in the active palette.",
-      inputSchema: { filename: z.string().min(1), layer_name: z.string().default(""), start_frame: z.number().int().positive().default(1), end_frame: z.number().int().nonnegative().default(0) },
-    }, async ({ filename, layer_name, start_frame, end_frame }) => this.result(await this.assets.quantizeToPalette(filename, layer_name, start_frame, end_frame)));
-
-    this.server.registerTool("set_color_mode", {
-      description: "Convert a sprite to RGB, grayscale, or indexed color mode.",
-      inputSchema: { filename: z.string().min(1), mode: z.enum(["rgb", "grayscale", "indexed"]) },
-    }, async ({ filename, mode }) => this.result(await this.assets.setColorMode(filename, mode)));
-
-    this.server.registerTool("get_pixel_color", {
-      description: "Read one RGBA pixel from a cel.",
-      inputSchema: { filename: z.string().min(1), x: z.number().int(), y: z.number().int(), layer_name: z.string().default(""), frame_index: z.number().int().positive().default(1) },
-    }, async ({ filename, x, y, layer_name, frame_index }) => this.result(await this.assets.getPixelColor(filename, x, y, layer_name, frame_index)));
-
-    this.server.registerTool("get_pixels_rect", {
-      description: "Read a rectangular RGBA region from a cel as JSON.",
-      inputSchema: { filename: z.string().min(1), x: z.number().int(), y: z.number().int(), width: z.number().int().positive(), height: z.number().int().positive(), layer_name: z.string().default(""), frame_index: z.number().int().positive().default(1) },
-    }, async ({ filename, x, y, width, height, layer_name, frame_index }) => this.result(await this.assets.getPixelsRect(filename, x, y, width, height, layer_name, frame_index)));
-
-    this.server.registerTool("get_composite_pixel", {
-      description: "Read one RGBA pixel from the visible flattened composite.",
-      inputSchema: { filename: z.string().min(1), x: z.number().int(), y: z.number().int(), frame_index: z.number().int().positive().default(1) },
-    }, async ({ filename, x, y, frame_index }) => this.result(await this.assets.getCompositePixel(filename, x, y, frame_index)));
-
-    this.server.registerTool("get_composite_rect", {
-      description: "Read a visible flattened composite region as JSON.",
-      inputSchema: { filename: z.string().min(1), x: z.number().int(), y: z.number().int(), width: z.number().int().positive(), height: z.number().int().positive(), frame_index: z.number().int().positive().default(1) },
-    }, async ({ filename, x, y, width, height, frame_index }) => this.result(await this.assets.getCompositeRect(filename, x, y, width, height, frame_index)));
-
-    this.server.registerTool("move_region", {
-      description: "Move a rectangular region within a cel, clearing its source.",
-      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(), x: z.number().int(), y: z.number().int(), width: z.number().int().positive(), height: z.number().int().positive(), dest_x: z.number().int(), dest_y: z.number().int() },
-    }, async ({ filename, layer_name, frame_index, x, y, width, height, dest_x, dest_y }) => this.result(await this.assets.moveRegion(filename, layer_name, frame_index, x, y, width, height, dest_x, dest_y)));
-
-    this.server.registerTool("copy_region", {
-      description: "Copy a rectangular region to a layer and frame destination.",
-      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(), x: z.number().int(), y: z.number().int(), width: z.number().int().positive(), height: z.number().int().positive(), dest_x: z.number().int(), dest_y: z.number().int(), target_layer_name: z.string().default(""), target_frame_index: z.number().int().nonnegative().default(0) },
-    }, async ({ filename, layer_name, frame_index, x, y, width, height, dest_x, dest_y, target_layer_name, target_frame_index }) => this.result(await this.assets.copyRegion(filename, layer_name, frame_index, x, y, width, height, dest_x, dest_y, target_layer_name, target_frame_index)));
-
-    this.server.registerTool("erase_region", {
-      description: "Erase a rectangular region to transparency.",
-      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(), x: z.number().int(), y: z.number().int(), width: z.number().int().positive(), height: z.number().int().positive() },
-    }, async ({ filename, layer_name, frame_index, x, y, width, height }) => this.result(await this.assets.eraseRegion(filename, layer_name, frame_index, x, y, width, height)));
-
-    this.server.registerTool("erase_color", {
-      description: "Erase opaque pixels matching a color within channel tolerance.",
-      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(), color: z.string().regex(HEX_COLOR), tolerance: z.number().int().min(0).max(255).default(0) },
-    }, async ({ filename, layer_name, frame_index, color, tolerance }) => this.result(await this.assets.eraseColor(filename, layer_name, frame_index, color, tolerance)));
-
-    this.server.registerTool("flip_layer", {
-      description: "Flip a layer cel horizontally or vertically.",
-      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(), direction: z.enum(["horizontal", "vertical"]).default("horizontal") },
-    }, async ({ filename, layer_name, frame_index, direction }) => this.result(await this.assets.flipLayer(filename, layer_name, frame_index, direction)));
-
-    this.server.registerTool("rotate_layer", {
-      description: "Rotate a layer cel 90, 180, or 270 degrees clockwise.",
-      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(), angle: z.union([z.literal(90), z.literal(180), z.literal(270)]).default(90) },
-    }, async ({ filename, layer_name, frame_index, angle }) => this.result(await this.assets.rotateLayer(filename, layer_name, frame_index, angle)));
-
-    this.server.registerTool("resize_canvas", {
-      description: "Resize the sprite canvas and its content.",
-      inputSchema: { filename: z.string().min(1), width: z.number().int().positive(), height: z.number().int().positive() },
-    }, async ({ filename, width, height }) => this.result(await this.assets.resizeCanvas(filename, width, height)));
-
-    this.server.registerTool("crop_canvas", {
-      description: "Crop the sprite canvas to a rectangle.",
-      inputSchema: { filename: z.string().min(1), x: z.number().int(), y: z.number().int(), width: z.number().int().positive(), height: z.number().int().positive() },
-    }, async ({ filename, x, y, width, height }) => this.result(await this.assets.cropCanvas(filename, x, y, width, height)));
-
+    new PaletteTransformToolController(this.assets).register(this.server);
     this.server.registerTool("list_text_fonts", {
       description: "List discoverable TrueType and OpenType fonts.",
       inputSchema: {},
