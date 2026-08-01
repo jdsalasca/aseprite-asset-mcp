@@ -6,10 +6,6 @@ services:
     image: aseprite-mcp:latest
     container_name: aseprite-mcp-server
     restart: unless-stopped
-    volumes:
-      - .:/app
-      # Mount a host Aseprite installation if the MCP must edit files.
-      # - /path/to/Aseprite:/opt/aseprite:ro
     environment:
       ASEPRITE_PATH: /opt/aseprite/Aseprite
     stdin_open: true
@@ -24,8 +20,12 @@ services:
     container_name: aseprite-mcp-dev
     volumes:
       - .:/app
+      - node_modules:/app/node_modules
     command: ["npm", "run", "test"]
     stdin_open: true
     tty: true
     profiles:
       - dev
+
+volumes:
+  node_modules:
