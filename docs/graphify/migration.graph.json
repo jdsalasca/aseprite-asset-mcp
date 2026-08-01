@@ -2,17 +2,17 @@
   "schemaVersion": 1,
   "project": "aseprite-mcp",
   "goal": "complete-typescript-migration",
-  "generatedAt": "2026-08-01T05:29:17.038Z",
+  "generatedAt": "2026-08-01T05:33:09.415Z",
   "source": {
     "repository": "https://github.com/diivi/aseprite-mcp",
     "branch": "upstream/main",
     "commit": "90d1696a7e41edff89bbd0823ae6a5f86c114bcc"
   },
   "local": {
-    "branch": "codex/migrate/bug-hunt-validation",
-    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-bug-hunt",
-    "baseCommit": "4032357e2da086b4da3a3d31ac17c26d257b6861",
-    "typescriptToolCount": 18,
+    "branch": "codex/migrate/drawing-validation",
+    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-drawing",
+    "baseCommit": "6a34f27d3166ff6ab6767f64c8aa43999220799d",
+    "typescriptToolCount": 19,
     "testCount": 13
   },
   "tools": [
@@ -449,9 +449,12 @@
       "name": "draw_rectangle",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "drawing",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []

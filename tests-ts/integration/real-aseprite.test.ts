@@ -21,6 +21,7 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
       await gateway.createCanvas(16, 16, source),
       await gateway.addGroup(source, "Character"),
       await gateway.addLayer(source, "body", "Character"),
+      await gateway.drawRectangle(source, 2, 2, 8, 8, "#112233", true),
       await gateway.addFrame(source),
       await gateway.addFrames(source, 2, 120),
       await gateway.setFrame(source, 2),

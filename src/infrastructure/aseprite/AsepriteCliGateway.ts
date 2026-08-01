@@ -218,9 +218,13 @@ export class AsepriteCliGateway implements AsepriteGateway {
   }
 
   public async drawRectangle(filename: string, x: number, y: number, width: number, height: number, color: string, fill = false): Promise<AsepriteResult> {
-    if (width <= 0 || height <= 0) return { ok: false, message: "Width and height must be > 0" };
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (!Number.isInteger(x) || !Number.isInteger(y) || !isPositiveInteger(width) || !isPositiveInteger(height)) {
+      return { ok: false, message: "Width and height must be positive integers" };
+    }
     const rgba = this.parseHexColor(color);
-    if (!rgba) return { ok: false, message: `Invalid color value: ${color}` };
+    if (!rgba) return { ok: false, message: "Colors must use hexadecimal values" };
     const [red, green, blue, alpha] = rgba;
     const x2 = x + width - 1;
     const y2 = y + height - 1;
@@ -353,8 +357,9 @@ export class AsepriteCliGateway implements AsepriteGateway {
   }
 
   private parseHexColor(value: string): [number, number, number, number] | undefined {
-    const normalized = value.trim().replace("#", "");
-    if (!/^[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/.test(normalized)) return undefined;
+    let normalized = value.trim().replace("#", "");
+    if (!/^[0-9a-fA-F]{3,4}$|^[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/.test(normalized)) return undefined;
+    if (normalized.length === 3 || normalized.length === 4) normalized = [...normalized].map((component) => component + component).join("");
     return [
       Number.parseInt(normalized.slice(0, 2), 16),
       Number.parseInt(normalized.slice(2, 4), 16),
