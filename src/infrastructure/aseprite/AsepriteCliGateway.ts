@@ -99,6 +99,26 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, filename), `Palette applied to ${filename}`);
   }
 
+  public async drawRectangle(filename: string, x: number, y: number, width: number, height: number, color: string, fill = false): Promise<AsepriteResult> {
+    if (width <= 0 || height <= 0) return { ok: false, message: "Width and height must be > 0" };
+    const rgba = this.parseHexColor(color);
+    if (!rgba) return { ok: false, message: `Invalid color value: ${color}` };
+    const [red, green, blue, alpha] = rgba;
+    const x2 = x + width - 1;
+    const y2 = y + height - 1;
+    const tool = fill ? "filled_rectangle" : "rectangle";
+    const script = this.openScript(filename, `
+      local cel = app.activeCel
+      if not cel then print("ERROR:No active cel") return end
+      app.useTool({
+        tool="${tool}",
+        color=Color(${red}, ${green}, ${blue}, ${alpha}),
+        points={Point(${x}, ${y}), Point(${x2}, ${y2})}
+      })
+    `);
+    return result(await this.runLua(script, filename), `Rectangle drawn in ${filename}`);
+  }
+
   public async setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction = "forward"): Promise<AsepriteResult> {
     const directions: Record<string, string> = { forward: "AniDir.FORWARD", reverse: "AniDir.REVERSE", pingpong: "AniDir.PING_PONG", pingpong_reverse: "AniDir.PING_PONG_REVERSE" };
     const luaDirection = directions[direction];
@@ -178,6 +198,17 @@ export class AsepriteCliGateway implements AsepriteGateway {
 
   private layerScript(filename: string, body: string): string {
     return this.openScript(filename, body);
+  }
+
+  private parseHexColor(value: string): [number, number, number, number] | undefined {
+    const normalized = value.trim().replace("#", "");
+    if (!/^[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/.test(normalized)) return undefined;
+    return [
+      Number.parseInt(normalized.slice(0, 2), 16),
+      Number.parseInt(normalized.slice(2, 4), 16),
+      Number.parseInt(normalized.slice(4, 6), 16),
+      normalized.length === 8 ? Number.parseInt(normalized.slice(6, 8), 16) : 255,
+    ];
   }
 
   private openScript(filename: string, body: string): string {

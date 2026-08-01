@@ -15,7 +15,8 @@
     "test": "npm run typecheck && npm run test:ts",
     "test:ts": "tsx --test tests-ts/*.test.ts",
     "asset:character": "tsx scripts/character-workflow.ts",
-    "asset:scene": "tsx scripts/scene-workflow.ts"
+    "asset:scene": "tsx scripts/scene-workflow.ts",
+    "asset:paint": "tsx scripts/paint-godot-assets.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",

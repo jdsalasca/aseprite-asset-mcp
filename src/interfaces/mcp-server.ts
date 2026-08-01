@@ -21,7 +21,7 @@ export class AsepriteMcpServerAdapter {
     }, async () => this.text({
       runtime: "Node.js + TypeScript",
       architecture: "hexagonal",
-      tools: ["create_canvas", "add_group", "add_layer", "add_frames", "set_palette", "set_tag", "create_tilemap_layer", "validate_scene", "export_spritesheet", "create_character_plan", "create_scene_plan"],
+      tools: ["create_canvas", "add_group", "add_layer", "add_frames", "set_palette", "draw_rectangle", "set_tag", "create_tilemap_layer", "validate_scene", "export_spritesheet", "create_character_plan", "create_scene_plan"],
       legacyRuntime: false,
     }));
 
@@ -49,6 +49,14 @@ export class AsepriteMcpServerAdapter {
       description: "Apply a controlled hexadecimal palette to a document.",
       inputSchema: { filename: z.string().min(1), colors: z.array(z.string().min(4)).min(1) },
     }, async ({ filename, colors }) => this.result(await this.assets.setPalette(filename, colors)));
+
+    this.server.registerTool("draw_rectangle", {
+      description: "Draw a filled or outlined pixel-art rectangle on the active Aseprite layer.",
+      inputSchema: {
+        filename: z.string().min(1), x: z.number().int(), y: z.number().int(), width: z.number().int().positive(), height: z.number().int().positive(),
+        color: z.string().regex(/^#?[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/), fill: z.boolean().default(false),
+      },
+    }, async ({ filename, x, y, width, height, color, fill }) => this.result(await this.assets.drawRectangle(filename, x, y, width, height, color, fill)));
 
     this.server.registerTool("set_tag", {
       description: "Create or update an animation tag.",

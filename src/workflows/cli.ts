@@ -9,12 +9,17 @@ export interface CliOptions {
   root: string;
 }
 
+function optionValue(args: string[], name: string): string | undefined {
+  const exactIndex = args.indexOf(name);
+  if (exactIndex >= 0) return args[exactIndex + 1];
+  const prefix = `${name}=`;
+  return args.find((argument) => argument.startsWith(prefix))?.slice(prefix.length);
+}
+
 export function parseCliOptions(args: string[]): CliOptions {
   const execute = args.includes("--execute");
-  const outputIndex = args.indexOf("--output");
-  const rootIndex = args.indexOf("--root");
-  const outputArgument = outputIndex >= 0 ? args[outputIndex + 1] : undefined;
-  const rootArgument = rootIndex >= 0 ? args[rootIndex + 1] : undefined;
+  const outputArgument = optionValue(args, "--output");
+  const rootArgument = optionValue(args, "--root");
   return {
     execute,
     outputDirectory: outputArgument || path.join("artifacts", "aseprite"),

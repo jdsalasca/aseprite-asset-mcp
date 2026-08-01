@@ -18,7 +18,7 @@ tests-ts/          TDD unitario y handshake MCP
 
 ## Estado de la migración
 
-La rama `develop` elimina el servidor anterior y usa solo el runtime TypeScript. El núcleo disponible incluye canvas, grupos, capas, frames, tags, paletas, tilemaps, validación, exportación, planes deterministas para personajes y escenarios, y handshake MCP real por stdio.
+La rama `develop` elimina el servidor anterior y usa solo el runtime TypeScript. El núcleo disponible incluye canvas, grupos, capas, frames, tags, paletas, dibujo pixelado, tilemaps, validación, exportación, planes deterministas para personajes y escenarios, y handshake MCP real por stdio.
 
 La base pública se sincronizó con `diivi/aseprite-mcp:main` antes de reconstruir. La rama experimental del upstream no se usó como base porque no es `main` y elimina herramientas durante su trabajo en progreso.
 

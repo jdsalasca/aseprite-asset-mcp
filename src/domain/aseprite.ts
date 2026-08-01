@@ -9,6 +9,7 @@ export interface AsepriteGateway {
   addLayer(filename: string, layerName: string, group?: string): Promise<AsepriteResult>;
   addFrames(filename: string, count: number, durationMs?: number): Promise<AsepriteResult>;
   setPalette(filename: string, colors: string[]): Promise<AsepriteResult>;
+  drawRectangle(filename: string, x: number, y: number, width: number, height: number, color: string, fill?: boolean): Promise<AsepriteResult>;
   setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction?: string): Promise<AsepriteResult>;
   createTilemapLayer(filename: string, layerName: string, tileWidth: number, tileHeight: number): Promise<AsepriteResult>;
   validateScene(filename: string, requiredLayers: string[], startFrame?: number, endFrame?: number): Promise<AsepriteResult>;

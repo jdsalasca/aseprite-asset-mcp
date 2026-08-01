@@ -23,6 +23,10 @@ export class AsepriteAssetService {
     return this.gateway.setPalette(filename, colors);
   }
 
+  public drawRectangle(filename: string, x: number, y: number, width: number, height: number, color: string, fill = false): Promise<AsepriteResult> {
+    return this.gateway.drawRectangle(filename, x, y, width, height, color, fill);
+  }
+
   public setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction = "forward"): Promise<AsepriteResult> {
     return this.gateway.setTag(filename, name, fromFrame, toFrame, direction);
   }
