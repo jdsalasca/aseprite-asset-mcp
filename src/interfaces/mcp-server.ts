@@ -39,6 +39,8 @@ const TOOL_NAMES = [
   "export_sprite",
   "copy_sprite",
   "export_frame",
+  "export_layers",
+  "export_tag",
   "set_tag",
   "create_tilemap_layer",
   "validate_scene",
@@ -266,6 +268,16 @@ export class AsepriteMcpServerAdapter {
       description: "Export one animation frame as a PNG with nearest-neighbor integer scaling.",
       inputSchema: { filename: z.string().min(1), frame_index: z.number().int().positive(), output_filename: z.string().min(1), scale: z.number().int().min(1).max(64).default(1) },
     }, async ({ filename, frame_index, output_filename, scale }) => this.result(await this.assets.exportFrame(filename, frame_index, output_filename, scale)));
+
+    this.server.registerTool("export_layers", {
+      description: "Export each layer as a PNG and confirm that at least one new layer file was written.",
+      inputSchema: { filename: z.string().min(1), output_directory: z.string().min(1), include_hidden: z.boolean().default(false) },
+    }, async ({ filename, output_directory, include_hidden }) => this.result(await this.assets.exportLayers(filename, output_directory, include_hidden)));
+
+    this.server.registerTool("export_tag", {
+      description: "Export an animation tag as an image or animation file after validating that the tag exists.",
+      inputSchema: { filename: z.string().min(1), tag_name: z.string().min(1), output_filename: z.string().min(1), scale: z.number().int().min(1).max(64).default(1) },
+    }, async ({ filename, tag_name, output_filename, scale }) => this.result(await this.assets.exportTag(filename, tag_name, output_filename, scale)));
 
     this.server.registerTool("set_tag", {
       description: "Create or update an animation tag.",

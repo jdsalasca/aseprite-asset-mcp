@@ -17,6 +17,8 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
   const exportedSprite = path.join(directory, "hero-copy.png");
   const copiedSprite = path.join(directory, "hero-copy.aseprite");
   const exportedFrame = path.join(directory, "hero-frame.png");
+  const exportedLayers = path.join(directory, "layers");
+  const exportedTag = path.join(directory, "hero-idle.gif");
   const gateway = new AsepriteCliGateway({ executable: asepritePath });
 
   try {
@@ -43,6 +45,7 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
       await gateway.exportSprite(source, exportedSprite, "png"),
       await gateway.copySprite(source, copiedSprite),
       await gateway.exportFrame(source, 2, exportedFrame, 2),
+      await gateway.exportLayers(source, exportedLayers),
       await gateway.setFrame(source, 2),
       await gateway.setFrameDuration(source, 2, 150),
       await gateway.setFrameDurationAll(source, 120),
@@ -50,6 +53,7 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
       await gateway.setLayerOpacity(source, "body", 220),
       await gateway.setPalette(source, ["112233", "#abcdef"]),
       await gateway.setTag(source, "idle", 1, 3),
+      await gateway.exportTag(source, "idle", exportedTag),
       await gateway.validateScene(source, ["body"], 1, 3),
       await gateway.exportSpritesheet({
         filename: source,
@@ -68,6 +72,8 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
     assert.equal(existsSync(exportedSprite), true);
     assert.equal(existsSync(copiedSprite), true);
     assert.equal(existsSync(exportedFrame), true);
+    assert.ok(existsSync(exportedLayers));
+    assert.equal(existsSync(exportedTag), true);
   } finally {
     await fs.rm(directory, { recursive: true, force: true });
   }

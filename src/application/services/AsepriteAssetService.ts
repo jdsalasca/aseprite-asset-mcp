@@ -115,6 +115,14 @@ export class AsepriteAssetService {
     return this.gateway.exportFrame(filename, frameIndex, outputFilename, scale);
   }
 
+  public exportLayers(filename: string, outputDirectory: string, includeHidden = false): Promise<AsepriteResult> {
+    return this.gateway.exportLayers(filename, outputDirectory, includeHidden);
+  }
+
+  public exportTag(filename: string, tagName: string, outputFilename: string, scale = 1): Promise<AsepriteResult> {
+    return this.gateway.exportTag(filename, tagName, outputFilename, scale);
+  }
+
   public setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction = "forward"): Promise<AsepriteResult> {
     return this.gateway.setTag(filename, name, fromFrame, toFrame, direction);
   }

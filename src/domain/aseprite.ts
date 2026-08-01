@@ -43,6 +43,8 @@ export interface AsepriteGateway {
   exportSprite(filename: string, outputFilename: string, format?: string): Promise<AsepriteResult>;
   copySprite(filename: string, outputFilename: string, overwrite?: boolean): Promise<AsepriteResult>;
   exportFrame(filename: string, frameIndex: number, outputFilename: string, scale?: number): Promise<AsepriteResult>;
+  exportLayers(filename: string, outputDirectory: string, includeHidden?: boolean): Promise<AsepriteResult>;
+  exportTag(filename: string, tagName: string, outputFilename: string, scale?: number): Promise<AsepriteResult>;
   setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction?: string): Promise<AsepriteResult>;
   createTilemapLayer(filename: string, layerName: string, tileWidth: number, tileHeight: number): Promise<AsepriteResult>;
   validateScene(filename: string, requiredLayers: string[], startFrame?: number, endFrame?: number): Promise<AsepriteResult>;

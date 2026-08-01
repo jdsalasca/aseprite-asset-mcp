@@ -30,6 +30,8 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("export_sprite"));
     assert.ok(tools.includes("copy_sprite"));
     assert.ok(tools.includes("export_frame"));
+    assert.ok(tools.includes("export_layers"));
+    assert.ok(tools.includes("export_tag"));
     assert.ok(tools.includes("set_frame"));
     assert.ok(tools.includes("draw_rectangle"));
     assert.ok(tools.includes("create_character_plan"));
@@ -75,6 +77,8 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
   const exportedSprite = path.join(directory, "primitive-copy.png");
   const copiedSprite = path.join(directory, "primitive-copy.aseprite");
   const exportedFrame = path.join(directory, "primitive-frame.png");
+  const exportedLayers = path.join(directory, "layers");
+  const exportedTag = path.join(directory, "primitive-idle.gif");
   const client = new AsepriteMcpClient({
     cwd: process.cwd(),
     environment: { ASEPRITE_PATH: asepritePath },
@@ -105,6 +109,9 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
     await call("export_sprite", { filename: source, output_filename: exportedSprite, format: "png" });
     await call("copy_sprite", { filename: source, output_filename: copiedSprite });
     await call("export_frame", { filename: source, frame_index: 2, output_filename: exportedFrame, scale: 2 });
+    await call("set_tag", { filename: source, name: "idle", from_frame: 1, to_frame: 2 });
+    await call("export_layers", { filename: source, output_directory: exportedLayers });
+    await call("export_tag", { filename: source, tag_name: "idle", output_filename: exportedTag, scale: 1 });
     await call("export_spritesheet", {
       filename: source,
       output_filename: sheet,
@@ -117,6 +124,8 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
     assert.equal(existsSync(exportedSprite), true);
     assert.equal(existsSync(copiedSprite), true);
     assert.equal(existsSync(exportedFrame), true);
+    assert.ok(existsSync(exportedLayers));
+    assert.equal(existsSync(exportedTag), true);
   } finally {
     await client.close();
     await fs.rm(directory, { recursive: true, force: true });
