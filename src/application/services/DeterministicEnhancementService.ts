@@ -1,3 +1,4 @@
+import path from "node:path";
 import type { RasterCodec } from "../../domain/image-assets.js";
 import type { EnhancementApplyInput, EnhancementApplyReport, EnhancementPlan, EnhancementPass } from "../../domain/enhancement.js";
 import type { RasterFrame } from "../../domain/pixel-art.js";
@@ -96,6 +97,12 @@ export class DeterministicEnhancementService {
   public constructor(private readonly codec: RasterCodec) {}
 
   public async apply(plan: EnhancementPlan, input: EnhancementApplyInput): Promise<EnhancementApplyReport> {
+    const sourcePath = path.resolve(plan.filename);
+    const outputPath = path.resolve(input.outputFilename);
+    const pathsMatch = process.platform === "win32"
+      ? sourcePath.toLowerCase() === outputPath.toLowerCase()
+      : sourcePath === outputPath;
+    if (pathsMatch) throw new Error("Enhancement output must be different from the source asset");
     const frames = await this.codec.decode(plan.filename);
     const enhanced = frames.map((frame) => ({ ...frame, pixels: new Uint8ClampedArray(frame.pixels) }));
     for (let index = 0; index < enhanced.length; index += 1) {

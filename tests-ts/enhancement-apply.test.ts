@@ -41,3 +41,16 @@ test("enhancement execution is deterministic, non-destructive, and writes a sepa
   assert.equal(outputMetadata.width, 32);
   assert.equal(outputMetadata.height, 32);
 });
+
+test("enhancement refuses to overwrite the source asset", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "enhancement-overwrite-"));
+  const source = path.join(directory, "source.png");
+  const pixels = new Uint8ClampedArray(4 * 4 * 4).fill(255);
+  await sharp(Buffer.from(pixels), { raw: { width: 4, height: 4, channels: 4 } }).png().toFile(source);
+  const plan: EnhancementPlan = {
+    planId: "plan-overwrite", algorithmVersion: "enhancement-plan-v1", filename: source, seed: 1,
+    detectedSignals: [], warnings: [], destructive: false, passes: [{ id: "quality_gate", reason: "test", parameters: {} }],
+  };
+  const service = new DeterministicEnhancementService(new SharpRasterCodec());
+  await assert.rejects(() => service.apply(plan, { outputFilename: source.toUpperCase(), format: "png" }), /different from the source asset/);
+});

@@ -48,7 +48,10 @@ export class EnhancementToolController {
         const analysis = JSON.parse(analysisResult.message) as ReferenceAnalysis;
         const plan = this.plans.suggest({ filename, analysis, ...(goals ? { goals: goals as EnhancementGoal[] } : {}), maxColors: max_colors, seed });
         const applied = await this.enhancements.apply(plan, { outputFilename: output_filename, format });
-        return this.text({ plan, applied });
+        const qualityResult = await this.visualAssets.runQualityGate({ filename: output_filename, maxColors: max_colors, maxIsolatedPixels: 4, minContrast: 0.08 });
+        let quality: unknown;
+        try { quality = JSON.parse(qualityResult.message); } catch { quality = { valid: qualityResult.ok, violations: qualityResult.ok ? [] : [qualityResult.message] }; }
+        return this.text({ plan, applied, quality });
       } catch (error) {
         return this.result({ ok: false, message: error instanceof Error ? error.message : String(error) });
       }

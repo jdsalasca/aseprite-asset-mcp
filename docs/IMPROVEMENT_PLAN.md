@@ -32,7 +32,7 @@ Las abstracciones no contienen nombres de SDK, Aseprite, Node, HTTP ni filesyste
 - jobs cancelables para operaciones largas;
 - manifiestos compactos y recursos MCP.
 
-Ya están disponibles el planificador determinista `suggest_enhancement_plan`, la ejecución segura `apply_enhancement_plan` y los jobs asíncronos `start_asset_job`, `get_asset_job_status` y `cancel_asset_job`. La ejecución escribe un PNG/GIF separado, conserva la fuente y aplica pasadas reproducibles de limpieza, granularidad, flujo de agua, iluminación, partículas y transición temporal. El registro MCP está separado en controladores por capacidad y estos consumen puertos genéricos, dejando `AsepriteCliGateway` como adaptador concreto.
+Ya están disponibles el planificador determinista `suggest_enhancement_plan`, la ejecución segura `apply_enhancement_plan` y los jobs asíncronos `start_asset_job`, `get_asset_job_status` y `cancel_asset_job`. La ejecución rechaza sobrescribir la fuente, escribe un PNG/GIF separado, ejecuta automáticamente el quality gate y aplica pasadas reproducibles de limpieza, granularidad, flujo de agua, iluminación, partículas y transición temporal. El registro MCP está separado en controladores por capacidad y estos consumen puertos genéricos, dejando `AsepriteCliGateway` como adaptador concreto.
 
 ### Fase 3 · Persistencia y observabilidad
 
