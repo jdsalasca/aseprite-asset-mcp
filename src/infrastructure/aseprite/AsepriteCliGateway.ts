@@ -1581,6 +1581,69 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: `Replaced ${count} pixels ${fromColor} -> ${toColor} on '${name}' frame ${frameIndex} in ${source}` };
   }
 
+  public async adjustHsl(filename: string, layerName: string, frameIndex: number, hueShift = 0, saturationShift = 0, lightnessShift = 0): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    if (![hueShift, saturationShift, lightnessShift].every(Number.isFinite)) return { ok: false, message: "HSL shifts must be finite numbers" };
+    if (hueShift < -360 || hueShift > 360) return { ok: false, message: "Hue shift must be between -360 and 360" };
+    if (saturationShift < -100 || saturationShift > 100) return { ok: false, message: "Saturation shift must be between -100 and 100" };
+    if (lightnessShift < -100 || lightnessShift > 100) return { ok: false, message: "Lightness shift must be between -100 and 100" };
+    const body = this.layerFrameScript(name, frameIndex, false, `
+      local function rgb_to_hsl(red, green, blue)
+        red, green, blue = red / 255, green / 255, blue / 255
+        local maxc = math.max(red, green, blue)
+        local minc = math.min(red, green, blue)
+        local lightness = (maxc + minc) / 2
+        if maxc == minc then return 0, 0, lightness end
+        local delta = maxc - minc
+        local saturation
+        if lightness > 0.5 then saturation = delta / (2 - maxc - minc) else saturation = delta / (maxc + minc) end
+        local hue
+        if maxc == red then
+          hue = (green - blue) / delta
+          if green < blue then hue = hue + 6 end
+        elseif maxc == green then hue = (blue - red) / delta + 2
+        else hue = (red - green) / delta + 4 end
+        return hue * 60, saturation, lightness
+      end
+      local function hsl_to_rgb(hue, saturation, lightness)
+        hue = hue % 360
+        if saturation <= 0 then
+          local value = math.floor(lightness * 255 + 0.5)
+          return value, value, value
+        end
+        local chroma = (1 - math.abs(2 * lightness - 1)) * saturation
+        local sector = hue / 60
+        local secondary = chroma * (1 - math.abs(sector % 2 - 1))
+        local red1, green1, blue1 = 0, 0, 0
+        if sector < 1 then red1, green1, blue1 = chroma, secondary, 0
+        elseif sector < 2 then red1, green1, blue1 = secondary, chroma, 0
+        elseif sector < 3 then red1, green1, blue1 = 0, chroma, secondary
+        elseif sector < 4 then red1, green1, blue1 = 0, secondary, chroma
+        elseif sector < 5 then red1, green1, blue1 = secondary, 0, chroma
+        else red1, green1, blue1 = chroma, 0, secondary end
+        local match = lightness - chroma / 2
+        return math.floor((red1 + match) * 255 + 0.5), math.floor((green1 + match) * 255 + 0.5), math.floor((blue1 + match) * 255 + 0.5)
+      end
+      local img = cel.image
+      for py = 0, img.height - 1 do
+        for px = 0, img.width - 1 do
+          local value = img:getPixel(px, py)
+          local alpha = app.pixelColor.rgbaA(value)
+          if alpha > 0 then
+            local hue, saturation, lightness = rgb_to_hsl(app.pixelColor.rgbaR(value), app.pixelColor.rgbaG(value), app.pixelColor.rgbaB(value))
+            local red, green, blue = hsl_to_rgb(hue + ${hueShift}, math.min(1, math.max(0, saturation + (${saturationShift}) / 100)), math.min(1, math.max(0, lightness + (${lightnessShift}) / 100)))
+            img:putPixel(px, py, app.pixelColor.rgba(red, green, blue, alpha))
+          end
+        end
+      end
+    `);
+    return result(await this.runLua(this.openScript(source, body), source), `Adjusted HSL (h${hueShift >= 0 ? "+" : ""}${hueShift}, s${saturationShift >= 0 ? "+" : ""}${saturationShift}, l${lightnessShift >= 0 ? "+" : ""}${lightnessShift}) on '${name}' frame ${frameIndex} in ${source}`);
+  }
+
   public async applyConvolution(filename: string, matrix: string, layerName = "", frameIndex = 1, x = 0, y = 0, width = 0, height = 0): Promise<AsepriteResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;

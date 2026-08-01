@@ -75,6 +75,7 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
       await gateway.invertColors(source, "body", 2),
       await gateway.outlineCel(source, "body", 2, "#00ff00", true),
       await gateway.replaceColor(source, "body", 2, "#00ff00", "#ff00ff", 0),
+      await gateway.adjustHsl(source, "body", 2, 5, 0, 0),
       await gateway.listConvolutionMatrices(),
       await gateway.applyConvolution(source, "blur-3x3", "body", 2),
       await gateway.applyDitherGradient(source, "body", 2, 2, 2, 6, 4, "#000000", "#ffffff", true, true),
