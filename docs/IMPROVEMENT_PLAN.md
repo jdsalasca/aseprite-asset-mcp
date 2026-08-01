@@ -1,0 +1,66 @@
+# Plan de mejoras cohesionadas
+
+## Objetivo arquitectónico
+
+Los tres repositorios colaboran mediante contratos estables, pero cada uno conserva una responsabilidad clara:
+
+```text
+pixel-art-ui       UX presentacional y accesible
+        ↓
+asset-studio       casos de uso, persistencia de configuración y gateway humano
+        ↓
+aseprite-mcp       dominio de assets, generación determinista y adaptadores externos
+```
+
+Las abstracciones no contienen nombres de SDK, Aseprite, Node, HTTP ni filesystem. Los nombres concretos viven en adaptadores.
+
+## Fases
+
+### Fase 1 · Foundation hexagonal — en implementación
+
+- separar puertos genéricos de sesión de herramientas, persistencia y procesos;
+- extraer composición del servidor HTTP a controladores y servicios;
+- persistir configuración del Asset Studio en JSON local, sin secretos;
+- dividir componentes UI en módulos pequeños;
+- añadir pruebas de contratos y validación de errores.
+
+### Fase 2 · Asset enhancement application
+
+- `InspectAsset`, `SuggestEnhancementPlan` y `ApplyEnhancementPlan` como casos de uso;
+- recetas de materiales, iluminación y partículas como estrategias independientes;
+- caché por hash de input, receta, estilo y versión;
+- jobs cancelables para operaciones largas;
+- manifiestos compactos y recursos MCP.
+
+### Fase 3 · Persistencia y observabilidad
+
+- repositorio de artifacts y jobs;
+- logs estructurados con correlación;
+- límites de rutas y tamaño;
+- health checks y métricas de duración, caché y errores.
+
+### Fase 4 · UX de producción
+
+- editor de recetas;
+- preview antes/después y frames;
+- informes de calidad accionables;
+- accesibilidad, teclado, alto contraste y reduced motion;
+- pruebas visuales y E2E contra el gateway real.
+
+### Fase 5 · Releases
+
+- build reproducible;
+- `npm pack --dry-run` e instalación desde tarball;
+- publicación versionada de `@jdsalas/pixel-ui`;
+- CI para los tres repositorios;
+- releases y documentación cruzada.
+
+## Criterios de diseño
+
+- dominio puro y pequeño;
+- casos de uso que dependan de puertos, no de adaptadores;
+- adaptadores concretos para MCP SDK, Node, Aseprite CLI, filesystem y browser;
+- controladores delgados: traducen entrada/salida y delegan;
+- componentes UX sin lógica de negocio;
+- ningún singleton global salvo la composición raíz;
+- pruebas unitarias antes de cada extracción y pruebas de integración después.
