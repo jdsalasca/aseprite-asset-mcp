@@ -32,6 +32,9 @@ const TOOL_NAMES = [
   "draw_rectangle_at",
   "fill_area_at",
   "draw_circle_at",
+  "draw_polygon",
+  "draw_path",
+  "apply_gradient_rect",
   "set_tag",
   "create_tilemap_layer",
   "validate_scene",
@@ -208,6 +211,33 @@ export class AsepriteMcpServerAdapter {
         color: z.string().regex(HEX_COLOR).default("#000000"), fill: z.boolean().default(false), create_if_missing: z.boolean().default(true),
       },
     }, async ({ filename, layer_name, frame_index, center_x, center_y, radius, color, fill, create_if_missing }) => this.result(await this.assets.drawCircleAt(filename, layer_name, frame_index, center_x, center_y, radius, color, fill, create_if_missing)));
+
+    this.server.registerTool("draw_polygon", {
+      description: "Draw a filled or outlined polygon on a named layer and animation frame.",
+      inputSchema: {
+        filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(),
+        points: z.array(z.object({ x: z.number().int(), y: z.number().int() })).min(3),
+        color: z.string().regex(HEX_COLOR).default("#000000"), fill: z.boolean().default(false), create_if_missing: z.boolean().default(true),
+      },
+    }, async ({ filename, layer_name, frame_index, points, color, fill, create_if_missing }) => this.result(await this.assets.drawPolygon(filename, layer_name, frame_index, points, color, fill, create_if_missing)));
+
+    this.server.registerTool("draw_path", {
+      description: "Draw a polyline on a named layer and animation frame.",
+      inputSchema: {
+        filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(),
+        points: z.array(z.object({ x: z.number().int(), y: z.number().int() })).min(2),
+        color: z.string().regex(HEX_COLOR).default("#000000"), thickness: z.number().int().positive().default(1), create_if_missing: z.boolean().default(true),
+      },
+    }, async ({ filename, layer_name, frame_index, points, color, thickness, create_if_missing }) => this.result(await this.assets.drawPath(filename, layer_name, frame_index, points, color, thickness, create_if_missing)));
+
+    this.server.registerTool("apply_gradient_rect", {
+      description: "Apply a horizontal or vertical linear gradient to a rectangle on a named layer and animation frame.",
+      inputSchema: {
+        filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(),
+        x: z.number().int(), y: z.number().int(), width: z.number().int().positive(), height: z.number().int().positive(),
+        color_start: z.string().regex(HEX_COLOR), color_end: z.string().regex(HEX_COLOR), horizontal: z.boolean().default(true), create_if_missing: z.boolean().default(true),
+      },
+    }, async ({ filename, layer_name, frame_index, x, y, width, height, color_start, color_end, horizontal, create_if_missing }) => this.result(await this.assets.applyGradientRect(filename, layer_name, frame_index, x, y, width, height, color_start, color_end, horizontal, create_if_missing)));
 
     this.server.registerTool("set_tag", {
       description: "Create or update an animation tag.",

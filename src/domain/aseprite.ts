@@ -9,6 +9,11 @@ export interface PixelInput {
   color: string;
 }
 
+export interface PointInput {
+  x: number;
+  y: number;
+}
+
 export interface AsepriteGateway {
   createCanvas(width: number, height: number, filename: string): Promise<AsepriteResult>;
   addGroup(filename: string, groupName: string, parentGroup?: string): Promise<AsepriteResult>;
@@ -31,6 +36,9 @@ export interface AsepriteGateway {
   drawRectangleAt(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, color: string, fill?: boolean, createIfMissing?: boolean): Promise<AsepriteResult>;
   drawCircleAt(filename: string, layerName: string, frameIndex: number, centerX: number, centerY: number, radius: number, color: string, fill?: boolean, createIfMissing?: boolean): Promise<AsepriteResult>;
   fillAreaAt(filename: string, layerName: string, frameIndex: number, x: number, y: number, color: string, createIfMissing?: boolean): Promise<AsepriteResult>;
+  drawPolygon(filename: string, layerName: string, frameIndex: number, points: PointInput[], color?: string, fill?: boolean, createIfMissing?: boolean): Promise<AsepriteResult>;
+  drawPath(filename: string, layerName: string, frameIndex: number, points: PointInput[], color?: string, thickness?: number, createIfMissing?: boolean): Promise<AsepriteResult>;
+  applyGradientRect(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, colorStart: string, colorEnd: string, horizontal?: boolean, createIfMissing?: boolean): Promise<AsepriteResult>;
   setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction?: string): Promise<AsepriteResult>;
   createTilemapLayer(filename: string, layerName: string, tileWidth: number, tileHeight: number): Promise<AsepriteResult>;
   validateScene(filename: string, requiredLayers: string[], startFrame?: number, endFrame?: number): Promise<AsepriteResult>;
