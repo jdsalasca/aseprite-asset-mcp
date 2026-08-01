@@ -26,6 +26,11 @@ export interface AsepriteGateway {
   drawRectangle(filename: string, x: number, y: number, width: number, height: number, color: string, fill?: boolean): Promise<AsepriteResult>;
   fillArea(filename: string, x: number, y: number, color: string): Promise<AsepriteResult>;
   drawCircle(filename: string, centerX: number, centerY: number, radius: number, color: string, fill?: boolean): Promise<AsepriteResult>;
+  drawPixelsAt(filename: string, layerName: string, frameIndex: number, pixels: PixelInput[], createIfMissing?: boolean): Promise<AsepriteResult>;
+  drawLineAt(filename: string, layerName: string, frameIndex: number, x1: number, y1: number, x2: number, y2: number, color: string, thickness?: number, createIfMissing?: boolean): Promise<AsepriteResult>;
+  drawRectangleAt(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, color: string, fill?: boolean, createIfMissing?: boolean): Promise<AsepriteResult>;
+  drawCircleAt(filename: string, layerName: string, frameIndex: number, centerX: number, centerY: number, radius: number, color: string, fill?: boolean, createIfMissing?: boolean): Promise<AsepriteResult>;
+  fillAreaAt(filename: string, layerName: string, frameIndex: number, x: number, y: number, color: string, createIfMissing?: boolean): Promise<AsepriteResult>;
   setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction?: string): Promise<AsepriteResult>;
   createTilemapLayer(filename: string, layerName: string, tileWidth: number, tileHeight: number): Promise<AsepriteResult>;
   validateScene(filename: string, requiredLayers: string[], startFrame?: number, endFrame?: number): Promise<AsepriteResult>;

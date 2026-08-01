@@ -27,6 +27,11 @@ const TOOL_NAMES = [
   "draw_rectangle",
   "fill_area",
   "draw_circle",
+  "draw_pixels_at",
+  "draw_line_at",
+  "draw_rectangle_at",
+  "fill_area_at",
+  "draw_circle_at",
   "set_tag",
   "create_tilemap_layer",
   "validate_scene",
@@ -159,6 +164,50 @@ export class AsepriteMcpServerAdapter {
         fill: z.boolean().default(false),
       },
     }, async ({ filename, center_x, center_y, radius, color, fill }) => this.result(await this.assets.drawCircle(filename, center_x, center_y, radius, color, fill)));
+
+    this.server.registerTool("draw_pixels_at", {
+      description: "Draw explicit pixels on a named layer and animation frame, creating the cel when requested.",
+      inputSchema: {
+        filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(),
+        pixels: z.array(z.object({ x: z.number().int(), y: z.number().int(), color: z.string().regex(HEX_COLOR) })).min(1),
+        create_if_missing: z.boolean().default(true),
+      },
+    }, async ({ filename, layer_name, frame_index, pixels, create_if_missing }) => this.result(await this.assets.drawPixelsAt(filename, layer_name, frame_index, pixels, create_if_missing)));
+
+    this.server.registerTool("draw_line_at", {
+      description: "Draw a Bresenham line on a named layer and animation frame.",
+      inputSchema: {
+        filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(),
+        x1: z.number().int(), y1: z.number().int(), x2: z.number().int(), y2: z.number().int(),
+        color: z.string().regex(HEX_COLOR).default("#000000"), thickness: z.number().int().positive().default(1), create_if_missing: z.boolean().default(true),
+      },
+    }, async ({ filename, layer_name, frame_index, x1, y1, x2, y2, color, thickness, create_if_missing }) => this.result(await this.assets.drawLineAt(filename, layer_name, frame_index, x1, y1, x2, y2, color, thickness, create_if_missing)));
+
+    this.server.registerTool("draw_rectangle_at", {
+      description: "Draw a filled or outlined rectangle on a named layer and animation frame.",
+      inputSchema: {
+        filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(),
+        x: z.number().int(), y: z.number().int(), width: z.number().int().positive(), height: z.number().int().positive(),
+        color: z.string().regex(HEX_COLOR).default("#000000"), fill: z.boolean().default(false), create_if_missing: z.boolean().default(true),
+      },
+    }, async ({ filename, layer_name, frame_index, x, y, width, height, color, fill, create_if_missing }) => this.result(await this.assets.drawRectangleAt(filename, layer_name, frame_index, x, y, width, height, color, fill, create_if_missing)));
+
+    this.server.registerTool("fill_area_at", {
+      description: "Fill a contiguous area on a named layer and animation frame.",
+      inputSchema: {
+        filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(),
+        x: z.number().int(), y: z.number().int(), color: z.string().regex(HEX_COLOR).default("#000000"), create_if_missing: z.boolean().default(true),
+      },
+    }, async ({ filename, layer_name, frame_index, x, y, color, create_if_missing }) => this.result(await this.assets.fillAreaAt(filename, layer_name, frame_index, x, y, color, create_if_missing)));
+
+    this.server.registerTool("draw_circle_at", {
+      description: "Draw an ellipse-bounded circle on a named layer and animation frame.",
+      inputSchema: {
+        filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(),
+        center_x: z.number().int(), center_y: z.number().int(), radius: z.number().int().positive(),
+        color: z.string().regex(HEX_COLOR).default("#000000"), fill: z.boolean().default(false), create_if_missing: z.boolean().default(true),
+      },
+    }, async ({ filename, layer_name, frame_index, center_x, center_y, radius, color, fill, create_if_missing }) => this.result(await this.assets.drawCircleAt(filename, layer_name, frame_index, center_x, center_y, radius, color, fill, create_if_missing)));
 
     this.server.registerTool("set_tag", {
       description: "Create or update an animation tag.",

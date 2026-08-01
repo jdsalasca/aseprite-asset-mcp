@@ -2,18 +2,18 @@
   "schemaVersion": 1,
   "project": "aseprite-mcp",
   "goal": "complete-typescript-migration",
-  "generatedAt": "2026-08-01T13:39:41.154Z",
+  "generatedAt": "2026-08-01T13:47:07.138Z",
   "source": {
     "repository": "https://github.com/diivi/aseprite-mcp",
     "branch": "upstream/main",
     "commit": "90d1696a7e41edff89bbd0823ae6a5f86c114bcc"
   },
   "local": {
-    "branch": "codex/migrate/drawing-primitives",
-    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-drawing-primitives",
-    "baseCommit": "b98d34d30256a945dd3c2d30c7c188cdb7be7426",
-    "typescriptToolCount": 23,
-    "testCount": 16
+    "branch": "codex/migrate/layer-frame-drawing",
+    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-layer-frame",
+    "baseCommit": "40027b59653b5a75b7b9be83d291aba60855f63a",
+    "typescriptToolCount": 28,
+    "testCount": 17
   },
   "tools": [
     {
@@ -513,9 +513,13 @@
       "name": "draw_pixels_at",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "drawing",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -524,9 +528,13 @@
       "name": "draw_line_at",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "drawing",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -535,9 +543,13 @@
       "name": "draw_rectangle_at",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "drawing",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -546,9 +558,13 @@
       "name": "draw_circle_at",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "drawing",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -557,9 +573,13 @@
       "name": "fill_area_at",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "drawing",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
