@@ -55,6 +55,10 @@ const TOOL_NAMES = [
   "set_onion_skin",
   "render_onion_skin",
   "compare_frames",
+  "set_cel_opacity",
+  "get_color_stats",
+  "get_palette",
+  "extract_palette",
   "set_tag",
   "create_tilemap_layer",
   "validate_scene",
@@ -362,6 +366,26 @@ export class AsepriteMcpServerAdapter {
       description: "Compare two flattened animation frames and return changed-pixel metrics as JSON.",
       inputSchema: { filename: z.string().min(1), frame_a: z.number().int().positive(), frame_b: z.number().int().positive() },
     }, async ({ filename, frame_a, frame_b }) => this.result(await this.assets.compareFrames(filename, frame_a, frame_b)));
+
+    this.server.registerTool("set_cel_opacity", {
+      description: "Set one cel opacity from 0 to 255.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(), opacity: z.number().int().min(0).max(255) },
+    }, async ({ filename, layer_name, frame_index, opacity }) => this.result(await this.assets.setCelOpacity(filename, layer_name, frame_index, opacity)));
+
+    this.server.registerTool("get_color_stats", {
+      description: "Return JSON color usage statistics for one flattened frame.",
+      inputSchema: { filename: z.string().min(1), frame_index: z.number().int().positive().default(1), top: z.number().int().positive().default(16) },
+    }, async ({ filename, frame_index, top }) => this.result(await this.assets.getColorStats(filename, frame_index, top)));
+
+    this.server.registerTool("get_palette", {
+      description: "Return the active sprite palette as a JSON color array.",
+      inputSchema: { filename: z.string().min(1) },
+    }, async ({ filename }) => this.result(await this.assets.getPalette(filename)));
+
+    this.server.registerTool("extract_palette", {
+      description: "Extract and persist an optimized palette with a bounded color count.",
+      inputSchema: { filename: z.string().min(1), max_colors: z.number().int().min(1).max(256).default(16), with_alpha: z.boolean().default(false) },
+    }, async ({ filename, max_colors, with_alpha }) => this.result(await this.assets.extractPalette(filename, max_colors, with_alpha)));
 
     this.server.registerTool("set_tag", {
       description: "Create or update an animation tag.",

@@ -68,6 +68,7 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
       await gateway.deleteFrame(source, 4),
       await gateway.setOnionSkin(source, true, 2, 2, 128),
       await gateway.renderOnionSkin(source, 2, onionRender, 1, 1, 2, 100),
+      await gateway.setCelOpacity(source, "body", 2, 200),
       await gateway.validateScene(source, ["body"], 1, 3),
       await gateway.exportSpritesheet({
         filename: source,
@@ -82,6 +83,15 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
     const metrics = JSON.parse(comparison.message) as { changedPixels?: number; totalPixels?: number; bounds?: unknown };
     assert.equal(typeof metrics.changedPixels, "number");
     assert.equal(typeof metrics.totalPixels, "number");
+    const stats = await gateway.getColorStats(source, 2, 4);
+    assert.equal(stats.ok, true, stats.message);
+    assert.equal(typeof (JSON.parse(stats.message) as { uniqueColors?: number }).uniqueColors, "number");
+    const palette = await gateway.getPalette(source);
+    assert.equal(palette.ok, true, palette.message);
+    assert.ok(Array.isArray(JSON.parse(palette.message)));
+    const extracted = await gateway.extractPalette(source, 8, false);
+    assert.equal(extracted.ok, true, extracted.message);
+    assert.equal(typeof (JSON.parse(extracted.message) as { count?: number }).count, "number");
     const missingCel = await gateway.drawPixelsAt(source, "reference", 3, [{ x: 0, y: 0, color: "#ffffff" }], false);
     assert.equal(missingCel.ok, false);
     assert.equal(missingCel.message, "Cel not found");

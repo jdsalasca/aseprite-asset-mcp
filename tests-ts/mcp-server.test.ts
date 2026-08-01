@@ -46,6 +46,10 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("set_onion_skin"));
     assert.ok(tools.includes("render_onion_skin"));
     assert.ok(tools.includes("compare_frames"));
+    assert.ok(tools.includes("set_cel_opacity"));
+    assert.ok(tools.includes("get_color_stats"));
+    assert.ok(tools.includes("get_palette"));
+    assert.ok(tools.includes("extract_palette"));
     assert.ok(tools.includes("set_frame"));
     assert.ok(tools.includes("draw_rectangle"));
     assert.ok(tools.includes("create_character_plan"));
@@ -138,6 +142,10 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
     await call("propagate_frame_to_range", { filename: source, source_frame: 2, start_frame: 1, end_frame: 2, overwrite: true });
     await call("render_onion_skin", { filename: source, frame_index: 2, output_filename: onionRender, before: 1, after: 1, scale: 2, ghost_opacity: 100 });
     await call("compare_frames", { filename: source, frame_a: 1, frame_b: 2 });
+    await call("set_cel_opacity", { filename: source, layer_name: "body", frame_index: 2, opacity: 200 });
+    await call("get_color_stats", { filename: source, frame_index: 2, top: 4 });
+    await call("get_palette", { filename: source });
+    await call("extract_palette", { filename: source, max_colors: 8, with_alpha: false });
     await call("delete_tag", { filename: source, name: "idle" });
     await call("delete_frame", { filename: source, frame_index: 2 });
     await call("set_onion_skin", { filename: source, enabled: true, before: 2, after: 2, opacity: 128 });

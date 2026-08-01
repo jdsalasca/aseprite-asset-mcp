@@ -179,6 +179,22 @@ export class AsepriteAssetService {
     return this.gateway.compareFrames(filename, frameA, frameB);
   }
 
+  public setCelOpacity(filename: string, layerName: string, frameIndex: number, opacity: number): Promise<AsepriteResult> {
+    return this.gateway.setCelOpacity(filename, layerName, frameIndex, opacity);
+  }
+
+  public getColorStats(filename: string, frameIndex = 1, top = 16): Promise<AsepriteResult> {
+    return this.gateway.getColorStats(filename, frameIndex, top);
+  }
+
+  public getPalette(filename: string): Promise<AsepriteResult> {
+    return this.gateway.getPalette(filename);
+  }
+
+  public extractPalette(filename: string, maxColors = 16, withAlpha = false): Promise<AsepriteResult> {
+    return this.gateway.extractPalette(filename, maxColors, withAlpha);
+  }
+
   public setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction = "forward"): Promise<AsepriteResult> {
     return this.gateway.setTag(filename, name, fromFrame, toFrame, direction);
   }

@@ -59,6 +59,10 @@ export interface AsepriteGateway {
   setOnionSkin(filename: string, enabled?: boolean, before?: number, after?: number, opacity?: number): Promise<AsepriteResult>;
   renderOnionSkin(filename: string, frameIndex: number, outputFilename: string, before?: number, after?: number, scale?: number, ghostOpacity?: number): Promise<AsepriteResult>;
   compareFrames(filename: string, frameA: number, frameB: number): Promise<AsepriteResult>;
+  setCelOpacity(filename: string, layerName: string, frameIndex: number, opacity: number): Promise<AsepriteResult>;
+  getColorStats(filename: string, frameIndex?: number, top?: number): Promise<AsepriteResult>;
+  getPalette(filename: string): Promise<AsepriteResult>;
+  extractPalette(filename: string, maxColors?: number, withAlpha?: boolean): Promise<AsepriteResult>;
   setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction?: string): Promise<AsepriteResult>;
   createTilemapLayer(filename: string, layerName: string, tileWidth: number, tileHeight: number): Promise<AsepriteResult>;
   validateScene(filename: string, requiredLayers: string[], startFrame?: number, endFrame?: number): Promise<AsepriteResult>;

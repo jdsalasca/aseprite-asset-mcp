@@ -1201,6 +1201,110 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return line ? { ok: true, message: line.slice("COMPARE:".length) } : { ok: false, message: "Frame comparison returned no metrics" };
   }
 
+  public async setCelOpacity(filename: string, layerName: string, frameIndex: number, opacity: number): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    if (!Number.isInteger(opacity) || opacity < 0 || opacity > 255) return { ok: false, message: "Opacity must be between 0 and 255" };
+    const script = this.openScript(source, `
+      if ${frameIndex} > #spr.frames then print("ERROR:Frame index out of range") return end
+      local target = find_layer(spr, "${luaEscape(name)}")
+      if not target or target.isGroup then print("ERROR:Layer not found") return end
+      local cel = target:cel(spr.frames[${frameIndex}])
+      if not cel then print("ERROR:No cel at that layer/frame") return end
+      cel.opacity = ${opacity}
+    `);
+    return result(await this.runLua(script, source), `Cel opacity set to ${opacity} on '${name}' frame ${frameIndex} in ${source}`);
+  }
+
+  public async getColorStats(filename: string, frameIndex = 1, top = 16): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    if (!isPositiveInteger(top)) return { ok: false, message: "Top must be a positive integer" };
+    const script = `
+      local spr = app.activeSprite
+      if not spr then print("ERROR:No active sprite") return end
+      if ${frameIndex} > #spr.frames then print("ERROR:Frame index out of range") return end
+      local clone = Sprite(spr)
+      clone:flatten()
+      local layer = clone.layers[#clone.layers]
+      local image = Image(clone.width, clone.height, ColorMode.RGB)
+      local cel = layer:cel(clone.frames[${frameIndex}])
+      if cel then image:drawImage(cel.image, cel.position) end
+      local counts = {}
+      local opaque = 0
+      for py = 0, image.height - 1 do
+        for px = 0, image.width - 1 do
+          local value = image:getPixel(px, py)
+          if app.pixelColor.rgbaA(value) > 0 then
+            opaque = opaque + 1
+            local hex = string.format("#%02X%02X%02X", app.pixelColor.rgbaR(value), app.pixelColor.rgbaG(value), app.pixelColor.rgbaB(value))
+            counts[hex] = (counts[hex] or 0) + 1
+          end
+        end
+      end
+      local unique = 0
+      for hex, count in pairs(counts) do unique = unique + 1 print("COLOR:" .. hex .. "," .. count) end
+      print("OPAQUE:" .. opaque)
+      print("UNIQUE:" .. unique)
+    `;
+    const command = await this.runLua(script, source);
+    if (!command.ok) return result(command, "Color stats failed");
+    const colors: Array<{ color: string; count: number }> = [];
+    let opaque = 0;
+    let unique = 0;
+    for (const line of command.output.split(/\r?\n/)) {
+      if (line.startsWith("COLOR:")) {
+        const [color, count] = line.slice(6).split(",");
+        if (color && count) colors.push({ color, count: Number.parseInt(count, 10) });
+      } else if (line.startsWith("OPAQUE:")) opaque = Number.parseInt(line.slice(7), 10);
+      else if (line.startsWith("UNIQUE:")) unique = Number.parseInt(line.slice(7), 10);
+    }
+    colors.sort((left, right) => right.count - left.count);
+    return { ok: true, message: JSON.stringify({ frame: frameIndex, uniqueColors: unique, opaquePixels: opaque, colors: colors.slice(0, top) }) };
+  }
+
+  public async getPalette(filename: string): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const script = `
+      local spr = app.activeSprite
+      if not spr then print("ERROR:No active sprite") return end
+      local palette = spr.palettes[1]
+      if not palette then print("ERROR:No palette") return end
+      for index = 0, #palette - 1 do
+        local color = palette:getColor(index)
+        print(string.format("PALETTE:#%02X%02X%02X", color.red, color.green, color.blue))
+      end
+    `;
+    const command = await this.runLua(script, source);
+    if (!command.ok) return result(command, "Palette read failed");
+    const colors = command.output.split(/\r?\n/).filter((line) => line.startsWith("PALETTE:")).map((line) => line.slice(8));
+    return colors.length ? { ok: true, message: JSON.stringify(colors) } : { ok: false, message: "Palette read returned no colors" };
+  }
+
+  public async extractPalette(filename: string, maxColors = 16, withAlpha = false): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (!Number.isInteger(maxColors) || maxColors < 1 || maxColors > 256) return { ok: false, message: "Max colors must be between 1 and 256" };
+    const script = this.openScript(source, `
+      app.command.ColorQuantization { ui = false, maxColors = ${maxColors}, withAlpha = ${withAlpha ? "true" : "false"} }
+      local palette = spr.palettes[1]
+      if not palette then print("ERROR:No palette") return end
+      for index = 0, #palette - 1 do
+        local color = palette:getColor(index)
+        print(string.format("PALETTE:#%02X%02X%02X", color.red, color.green, color.blue))
+      end
+    `);
+    const command = await this.runLua(script, source);
+    if (!command.ok) return result(command, "Palette extraction failed");
+    const colors = command.output.split(/\r?\n/).filter((line) => line.startsWith("PALETTE:")).map((line) => line.slice(8));
+    return colors.length ? { ok: true, message: JSON.stringify({ colors, count: colors.length }) } : { ok: false, message: "Palette extraction returned no colors" };
+  }
+
   private async resolveTagRange(filename: string, tagName: string): Promise<CommandResult> {
     const script = `
       local spr = app.activeSprite
