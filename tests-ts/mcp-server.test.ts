@@ -100,6 +100,16 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("start_preview_server"));
     assert.ok(tools.includes("stop_preview_server"));
     assert.ok(tools.includes("copy_layers_between_sprites"));
+    assert.ok(tools.includes("get_sprite_info"));
+    assert.ok(tools.includes("duplicate_frame_range"));
+    assert.ok(tools.includes("propagate_cels"));
+    assert.ok(tools.includes("tween_cel_positions_eased"));
+    assert.ok(tools.includes("oscillate_cel_positions"));
+    assert.ok(tools.includes("tween_cel_opacity_eased"));
+    assert.ok(tools.includes("tween_cel_scale_eased"));
+    assert.ok(tools.includes("set_layer"));
+    assert.ok(tools.includes("animation_workflow_guide"));
+    assert.ok(tools.includes("run_lua_script"));
     assert.ok(tools.includes("draw_rectangle"));
     assert.ok(tools.includes("create_character_plan"));
     assert.ok(tools.includes("create_scene_plan"));

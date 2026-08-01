@@ -3,7 +3,7 @@ import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
-import type { AnimationAuditInput, AnimationSanitizeInput, AsepriteGateway, AsepriteResult, CopyLayersInput, PixelInput, PointInput, TextDrawInput, TilePixelInput, TilePlacementInput } from "../../domain/aseprite.js";
+import type { AnimationAuditInput, AnimationEasing, AnimationSanitizeInput, AsepriteGateway, AsepriteResult, CopyLayersInput, PixelInput, PointInput, ScaleAnchor, TextDrawInput, TilePixelInput, TilePlacementInput } from "../../domain/aseprite.js";
 import { availableTextFonts, measureText as rasterMeasureText, rasterizeText } from "../text/TextRasterizer.js";
 
 const execFileAsync = promisify(execFile);
@@ -18,6 +18,9 @@ type PathValidation = string | AsepriteResult;
 
 const SHEET_TYPES = new Set(["horizontal", "vertical", "rows", "columns", "packed"]);
 const DATA_FORMATS = new Set(["json-array", "json-hash"]);
+const ANIMATION_EASINGS = new Set(["linear", "ease_in", "ease_out", "ease_in_out", "smoothstep"]);
+const SCALE_ANCHORS = new Set(["center", "topleft"]);
+const UNSAFE_LUA_PATTERNS = /\b(?:os\.(?:execute|remove|rename|exit)|io\.(?:open|popen|output)|dofile|loadfile|load)\b/;
 const BLEND_MODES: Record<string, string> = {
   normal: "BlendMode.NORMAL",
   darken: "BlendMode.DARKEN",
@@ -1299,6 +1302,260 @@ export class AsepriteCliGateway implements AsepriteGateway {
     if (!line) return { ok: false, message: "No sanitize data returned" };
     const [ensured, outOfRange, opacitySet, deleted] = line.slice(10).split(",").map(Number);
     return { ok: true, message: JSON.stringify({ sanitized: { ensured, outOfRange, opacitySet, deleted }, reportOnly: Boolean(input.reportOnly) }) };
+  }
+
+  public async getSpriteInfo(filename: string): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    try { await fs.access(source); } catch { return { ok: false, message: `File ${filename} not found` }; }
+    const script = this.readOnlyScript(`
+      local mode = "unknown"
+      if spr.colorMode == ColorMode.RGB then mode = "rgb" elseif spr.colorMode == ColorMode.INDEXED then mode = "indexed" elseif spr.colorMode == ColorMode.GRAY then mode = "gray" end
+      local parts = {"{"}
+      table.insert(parts, "\\\"width\\\":" .. spr.width .. ",")
+      table.insert(parts, "\\\"height\\\":" .. spr.height .. ",")
+      table.insert(parts, "\\\"color_mode\\\":\\\"" .. mode .. "\\\",")
+      table.insert(parts, "\\\"frames\\\":" .. #spr.frames .. ",\\\"durations_ms\\\":[")
+      for i, frame in ipairs(spr.frames) do table.insert(parts, tostring(math.floor(frame.duration * 1000 + 0.5))) if i < #spr.frames then table.insert(parts, ",") end end
+      table.insert(parts, "],\\\"layers\\\":[")
+      local first = true
+      local function walk(layers, parent)
+        for _, layer in ipairs(layers) do
+          if not first then table.insert(parts, ",") end
+          first = false
+          local parentJson = parent and string.format("%q", parent) or "null"
+          table.insert(parts, "{\\\"name\\\":" .. string.format("%q", layer.name) .. ",\\\"visible\\\":" .. tostring(layer.isVisible) .. ",\\\"opacity\\\":" .. tostring(layer.opacity or 255) .. ",\\\"is_group\\\":" .. tostring(layer.isGroup) .. ",\\\"parent\\\":" .. parentJson .. "}")
+          if layer.isGroup then walk(layer.layers, layer.name) end
+        end
+      end
+      walk(spr.layers, nil)
+      table.insert(parts, "],\\\"tags\\\":[")
+      local directions = {[0]="forward", "reverse", "pingpong", "pingpong_reverse"}
+      for i, tag in ipairs(spr.tags) do
+        table.insert(parts, "{\\\"name\\\":" .. string.format("%q", tag.name) .. ",\\\"from\\\":" .. tag.fromFrame.frameNumber .. ",\\\"to\\\":" .. tag.toFrame.frameNumber .. ",\\\"direction\\\":\\\"" .. (directions[tonumber(tag.aniDir)] or tostring(tag.aniDir)) .. "\\\"}")
+        if i < #spr.tags then table.insert(parts, ",") end
+      end
+      table.insert(parts, "]}")
+      print(table.concat(parts))
+    `);
+    const command = await this.runLua(script, source);
+    if (!command.ok) return { ok: false, message: `Failed to get sprite info: ${command.output}` };
+    const json = command.output.split(/\r?\n/).find((line) => line.trim().startsWith("{"));
+    return json ? { ok: true, message: json.trim() } : { ok: false, message: "No sprite info returned" };
+  }
+
+  public async duplicateFrameRange(filename: string, startFrame: number, endFrame: number, times = 1): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (validateFrameRange(startFrame, endFrame)) return { ok: false, message: "Frame range must start at 1 and end at or after the start" };
+    if (!isPositiveInteger(times)) return { ok: false, message: "Times must be >= 1" };
+    const script = this.openScript(source, `
+      local start_idx, end_idx, repetitions = ${startFrame}, ${endFrame}, ${times}
+      if end_idx > #spr.frames then print("ERROR:Frame range out of bounds") return end
+      for _ = 1, repetitions do
+        for fi = start_idx, end_idx do
+          local newFrame = spr:newFrame()
+          for _, layer in ipairs(spr.layers) do
+            if not layer.isGroup then
+              local cel = layer:cel(spr.frames[fi])
+              if cel then spr:newCel(layer, newFrame, cel.image:clone(), cel.position) end
+            end
+          end
+        end
+      end
+    `);
+    return result(await this.runLua(script, source), `Frames ${startFrame}-${endFrame} duplicated ${times} time(s) in ${filename}`);
+  }
+
+  public async propagateCels(filename: string, layerNames: string[], sourceFrame: number, startFrame: number, endFrame: number, replace = true): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (!Array.isArray(layerNames) || layerNames.length === 0) return { ok: false, message: "Layer names list cannot be empty" };
+    if (!isPositiveInteger(sourceFrame) || validateFrameRange(startFrame, endFrame)) return { ok: false, message: "Frame range must start at 1 and end at or after the start" };
+    const names = `{${layerNames.map((name) => `"${luaEscape(name)}"`).join(",")}}`;
+    const script = this.openScript(source, `
+      if ${sourceFrame} > #spr.frames or ${endFrame} > #spr.frames then print("ERROR:Frame range out of bounds") return end
+      local names, targets = ${names}, {}
+      for _, name in ipairs(names) do local layer = find_layer(spr, name) if layer and not layer.isGroup then table.insert(targets, layer) end end
+      if #targets == 0 then print("ERROR:No layers found") return end
+      for frameIndex = ${startFrame}, ${endFrame} do
+        if frameIndex ~= ${sourceFrame} then
+          for _, layer in ipairs(targets) do
+            local srcCel, dstCel = layer:cel(spr.frames[${sourceFrame}]), layer:cel(spr.frames[frameIndex])
+            if srcCel then
+              if dstCel and ${replace ? "true" : "false"} then spr:deleteCel(dstCel) dstCel = nil end
+              if not dstCel then spr:newCel(layer, spr.frames[frameIndex], srcCel.image:clone(), srcCel.position) end
+            end
+          end
+        end
+      end
+    `);
+    return result(await this.runLua(script, source), `Cels propagated from frame ${sourceFrame} to ${startFrame}-${endFrame} in ${filename}`);
+  }
+
+  public async tweenCelPositionsEased(filename: string, layerName: string, startFrame: number, endFrame: number, startX: number, startY: number, endX: number, endY: number, easing: AnimationEasing = "smoothstep", createMissingCels = false, sourceFrameIndex?: number): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (validateFrameRange(startFrame, endFrame)) return { ok: false, message: "Frame range must start at 1 and end at or after the start" };
+    if (![startX, startY, endX, endY].every(Number.isInteger)) return { ok: false, message: "Position values must be integers" };
+    if (!ANIMATION_EASINGS.has(easing)) return { ok: false, message: "Unsupported easing (linear, ease_in, ease_out, ease_in_out, smoothstep)" };
+    const sourceIndex = sourceFrameIndex === undefined ? "nil" : String(sourceFrameIndex);
+    const script = this.openScript(source, `
+      local target = find_layer(spr, "${luaEscape(name)}")
+      if not target or target.isGroup then print("ERROR:Layer not found") return end
+      if ${endFrame} > #spr.frames then print("ERROR:Frame range out of bounds") return end
+      local function ease(t) local mode = "${easing}" if mode == "linear" then return t elseif mode == "ease_in" then return t*t elseif mode == "ease_out" then return 1-(1-t)*(1-t) elseif mode == "ease_in_out" then if t < 0.5 then return 2*t*t end local u = -2*t+2 return 1-(u*u)/2 end return t*t*(3-2*t) end
+      local span = ${endFrame} - ${startFrame}
+      for fi = ${startFrame}, ${endFrame} do
+        local t = span > 0 and (fi-${startFrame})/span or 0
+        local e = ease(t)
+        local cel = target:cel(spr.frames[fi])
+        if not cel and ${createMissingCels ? "true" : "false"} then
+          local sourceCel = target:cel(spr.frames[${sourceIndex === "nil" ? String(startFrame) : sourceIndex}])
+          local image = sourceCel and sourceCel.image:clone() or Image(spr.width, spr.height, spr.colorMode)
+          cel = spr:newCel(target, spr.frames[fi], image, sourceCel and sourceCel.position or Point(0, 0))
+        end
+        if cel then cel.position = Point(math.floor(${startX} + (${endX}-${startX})*e + 0.5), math.floor(${startY} + (${endY}-${startY})*e + 0.5)) end
+      end
+    `);
+    return result(await this.runLua(script, source), `Tweened cel positions (${easing}) on '${name}' frames ${startFrame}-${endFrame} in ${filename}`);
+  }
+
+  public async oscillateCelPositions(filename: string, layerName: string, startFrame: number, endFrame: number, amplitudeX = 0, amplitudeY = 0, cycles = 1, phaseDeg = 0, createMissingCels = false, sourceFrameIndex?: number): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (validateFrameRange(startFrame, endFrame)) return { ok: false, message: "Frame range must start at 1 and end at or after the start" };
+    if (![amplitudeX, amplitudeY, cycles, phaseDeg].every(Number.isFinite)) return { ok: false, message: "Oscillation values must be finite" };
+    const sourceIndex = sourceFrameIndex === undefined ? startFrame : sourceFrameIndex;
+    const script = this.openScript(source, `
+      local target = find_layer(spr, "${luaEscape(name)}")
+      if not target or target.isGroup then print("ERROR:Layer not found") return end
+      if ${endFrame} > #spr.frames then print("ERROR:Frame range out of bounds") return end
+      local span = ${endFrame} - ${startFrame}
+      for fi = ${startFrame}, ${endFrame} do
+        local t = span > 0 and (fi-${startFrame})/span or 0
+        local angle = 2 * math.pi * ${cycles} * t + (${phaseDeg}) * math.pi / 180
+        local cel = target:cel(spr.frames[fi])
+        if not cel and ${createMissingCels ? "true" : "false"} then
+          local sourceCel = target:cel(spr.frames[${sourceIndex}])
+          local image = sourceCel and sourceCel.image:clone() or Image(spr.width, spr.height, spr.colorMode)
+          cel = spr:newCel(target, spr.frames[fi], image, sourceCel and sourceCel.position or Point(0, 0))
+        end
+        if cel then cel.position = Point(cel.position.x + math.floor(${amplitudeX}*math.sin(angle)+0.5), cel.position.y + math.floor(${amplitudeY}*math.cos(angle)+0.5)) end
+      end
+    `);
+    return result(await this.runLua(script, source), `Oscillated cel positions on '${name}' frames ${startFrame}-${endFrame} in ${filename}`);
+  }
+
+  public async tweenCelOpacityEased(filename: string, layerName: string, startFrame: number, endFrame: number, startOpacity: number, endOpacity: number, easing: AnimationEasing = "smoothstep", createMissingCels = false, sourceFrameIndex?: number): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (validateFrameRange(startFrame, endFrame)) return { ok: false, message: "Frame range must start at 1 and end at or after the start" };
+    if (![startOpacity, endOpacity].every((value) => Number.isInteger(value) && value >= 0 && value <= 255)) return { ok: false, message: "Opacity must be between 0 and 255" };
+    if (!ANIMATION_EASINGS.has(easing)) return { ok: false, message: "Unsupported easing (linear, ease_in, ease_out, ease_in_out, smoothstep)" };
+    const sourceIndex = sourceFrameIndex === undefined ? startFrame : sourceFrameIndex;
+    const script = this.openScript(source, `
+      local target = find_layer(spr, "${luaEscape(name)}")
+      if not target or target.isGroup then print("ERROR:Layer not found") return end
+      if ${endFrame} > #spr.frames then print("ERROR:Frame range out of bounds") return end
+      local function ease(t) local mode = "${easing}" if mode == "linear" then return t elseif mode == "ease_in" then return t*t elseif mode == "ease_out" then return 1-(1-t)*(1-t) elseif mode == "ease_in_out" then if t < 0.5 then return 2*t*t end local u = -2*t+2 return 1-(u*u)/2 end return t*t*(3-2*t) end
+      local span = ${endFrame} - ${startFrame}
+      for fi = ${startFrame}, ${endFrame} do
+        local t = span > 0 and (fi-${startFrame})/span or 0
+        local e = ease(t)
+        local cel = target:cel(spr.frames[fi])
+        if not cel and ${createMissingCels ? "true" : "false"} then
+          local sourceCel = target:cel(spr.frames[${sourceIndex}])
+          local image = sourceCel and sourceCel.image:clone() or Image(spr.width, spr.height, spr.colorMode)
+          cel = spr:newCel(target, spr.frames[fi], image, sourceCel and sourceCel.position or Point(0, 0))
+        end
+        if cel then cel.opacity = math.max(0, math.min(255, math.floor(${startOpacity} + (${endOpacity}-${startOpacity})*e + 0.5))) end
+      end
+    `);
+    return result(await this.runLua(script, source), `Tweened cel opacity (${easing}) on '${name}' frames ${startFrame}-${endFrame} in ${filename}`);
+  }
+
+  public async tweenCelScaleEased(filename: string, layerName: string, startFrame: number, endFrame: number, startScale: number, endScale: number, easing: AnimationEasing = "smoothstep", anchor: ScaleAnchor = "center", replace = true, createMissingCels = true, sourceFrameIndex?: number): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (validateFrameRange(startFrame, endFrame)) return { ok: false, message: "Frame range must start at 1 and end at or after the start" };
+    if (![startScale, endScale].every((value) => Number.isFinite(value) && value > 0)) return { ok: false, message: "Scale must be > 0" };
+    if (!ANIMATION_EASINGS.has(easing)) return { ok: false, message: "Unsupported easing (linear, ease_in, ease_out, ease_in_out, smoothstep)" };
+    if (!SCALE_ANCHORS.has(anchor)) return { ok: false, message: "Unsupported anchor (center, topleft)" };
+    const sourceIndex = sourceFrameIndex ?? startFrame;
+    const script = this.openScript(source, `
+      local target = find_layer(spr, "${luaEscape(name)}")
+      if not target or target.isGroup then print("ERROR:Layer not found") return end
+      if ${endFrame} > #spr.frames or ${sourceIndex} > #spr.frames then print("ERROR:Frame range out of bounds") return end
+      local sourceCel = target:cel(spr.frames[${sourceIndex}])
+      if not sourceCel then print("ERROR:Source cel not found") return end
+      local baseImage, baseWidth, baseHeight, basePosition = sourceCel.image:clone(), sourceCel.image.width, sourceCel.image.height, sourceCel.position
+      local function ease(t) local mode = "${easing}" if mode == "linear" then return t elseif mode == "ease_in" then return t*t elseif mode == "ease_out" then return 1-(1-t)*(1-t) elseif mode == "ease_in_out" then if t < 0.5 then return 2*t*t end local u = -2*t+2 return 1-(u*u)/2 end return t*t*(3-2*t) end
+      local span = ${endFrame} - ${startFrame}
+      for fi = ${startFrame}, ${endFrame} do
+        local t = span > 0 and (fi-${startFrame})/span or 0
+        local scale = ${startScale} + (${endScale}-${startScale}) * ease(t)
+        local width, height = math.max(1, math.floor(baseWidth*scale+0.5)), math.max(1, math.floor(baseHeight*scale+0.5))
+        local cel = target:cel(spr.frames[fi])
+        if cel and ${replace ? "true" : "false"} then spr:deleteCel(cel) cel = nil end
+        if not cel and ${createMissingCels ? "true" : "false"} then
+          local image = baseImage:clone() image:resize(width, height)
+          local x, y = basePosition.x, basePosition.y
+          if "${anchor}" == "center" then x = math.floor(basePosition.x + baseWidth/2 - width/2 + 0.5) y = math.floor(basePosition.y + baseHeight/2 - height/2 + 0.5) end
+          spr:newCel(target, spr.frames[fi], image, Point(x, y))
+        end
+      end
+    `);
+    return result(await this.runLua(script, source), `Tweened cel scale (${easing}) on '${name}' frames ${startFrame}-${endFrame} in ${filename}`);
+  }
+
+  public async setLayer(filename: string, layerName: string, createIfMissing = false): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    const script = this.layerScript(source, `
+      local target = find_layer(spr, "${luaEscape(name)}")
+      if not target and ${createIfMissing ? "true" : "false"} then target = spr:newLayer() target.name = "${luaEscape(name)}" end
+      if not target then print("ERROR:Layer not found") return end
+      app.activeLayer = target
+    `);
+    return result(await this.runLua(script, source), `Active layer set to '${name}' in ${filename}`);
+  }
+
+  public async animationWorkflowGuide(useCase = "character"): Promise<AsepriteResult> {
+    const normalized = (useCase || "character").trim().toLowerCase();
+    const guides: Record<string, string[]> = {
+      character: ["Block key poses on frame 1, then use copy_frame or copy_cel for the base.", "Use propagate_cels for static layers across the range.", "Use tween_cel_positions_eased or offset_cel_positions for motion.", "Keep secondary motion on separate layers.", "Use layer visibility/opacity and *_at drawing tools deterministically.", "Finish with set_tag, export_sprite, and audit_animation."],
+      environment: ["Build the base scene once and use copy_sprite for variants.", "Use propagate_cels for static sky, mountains, and ground layers.", "Animate only moving layers such as clouds, birds, or water.", "Use gradients and palette tools to keep a consistent mood.", "Reuse layers across scenes with copy_layers_between_sprites.", "Tag loops, export previews, and run animation_sanitize."],
+      general: ["Create a stable base frame before adding motion.", "Move or propagate cels instead of redrawing every frame.", "Target explicit layers and frames to avoid active-state drift.", "Use tags for loops and export previews early.", "Audit coverage and overlaps before delivery."],
+    };
+    const bullets = guides[normalized] ?? guides.general ?? [];
+    return { ok: true, message: ["Animation Workflow Guide", `Use case: ${normalized}`, ...bullets.map((bullet) => `- ${bullet}`)].join("\n") };
+  }
+
+  public async runLuaScript(script: string, filename = ""): Promise<AsepriteResult> {
+    if (typeof script !== "string" || !script.trim()) return { ok: false, message: "Script cannot be empty" };
+    if (script.length > 200_000) return { ok: false, message: "Script exceeds the 200000 character limit" };
+    if (UNSAFE_LUA_PATTERNS.test(script)) return { ok: false, message: "Script uses blocked host file/process APIs; use the curated tools instead" };
+    let source: string | undefined;
+    if (filename) {
+      const validated = validatePath(filename);
+      if (typeof validated !== "string") return validated;
+      try { await fs.access(validated); } catch { return { ok: false, message: `File ${filename} not found` }; }
+      source = validated;
+    }
+    const command = await this.runLua(script, source);
+    if (command.ok) return { ok: true, message: command.output.trim() || "Script executed (no output printed)" };
+    return { ok: false, message: `Script failed: ${command.output}` };
   }
 
   public async startPreviewServer(directory: string, port = 8000): Promise<AsepriteResult> {

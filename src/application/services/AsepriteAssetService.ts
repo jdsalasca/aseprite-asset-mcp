@@ -1,4 +1,4 @@
-import type { AnimationAuditInput, AnimationSanitizeInput, AsepriteGateway, AsepriteResult, CopyLayersInput, PixelInput, PointInput, TextDrawInput, TilePixelInput, TilePlacementInput } from "../../domain/aseprite.js";
+import type { AnimationAuditInput, AnimationEasing, AnimationSanitizeInput, AsepriteGateway, AsepriteResult, CopyLayersInput, PixelInput, PointInput, ScaleAnchor, TextDrawInput, TilePixelInput, TilePlacementInput } from "../../domain/aseprite.js";
 
 export class AsepriteAssetService {
   public constructor(private readonly gateway: AsepriteGateway) {}
@@ -394,6 +394,17 @@ export class AsepriteAssetService {
   public copyLayersBetweenSprites(input: CopyLayersInput): Promise<AsepriteResult> {
     return this.gateway.copyLayersBetweenSprites(input);
   }
+
+  public getSpriteInfo(filename: string): Promise<AsepriteResult> { return this.gateway.getSpriteInfo(filename); }
+  public duplicateFrameRange(filename: string, startFrame: number, endFrame: number, times = 1): Promise<AsepriteResult> { return this.gateway.duplicateFrameRange(filename, startFrame, endFrame, times); }
+  public propagateCels(filename: string, layerNames: string[], sourceFrame: number, startFrame: number, endFrame: number, replace = true): Promise<AsepriteResult> { return this.gateway.propagateCels(filename, layerNames, sourceFrame, startFrame, endFrame, replace); }
+  public tweenCelPositionsEased(filename: string, layerName: string, startFrame: number, endFrame: number, startX: number, startY: number, endX: number, endY: number, easing: AnimationEasing = "smoothstep", createMissingCels = false, sourceFrameIndex?: number): Promise<AsepriteResult> { return this.gateway.tweenCelPositionsEased(filename, layerName, startFrame, endFrame, startX, startY, endX, endY, easing, createMissingCels, sourceFrameIndex); }
+  public oscillateCelPositions(filename: string, layerName: string, startFrame: number, endFrame: number, amplitudeX = 0, amplitudeY = 0, cycles = 1, phaseDeg = 0, createMissingCels = false, sourceFrameIndex?: number): Promise<AsepriteResult> { return this.gateway.oscillateCelPositions(filename, layerName, startFrame, endFrame, amplitudeX, amplitudeY, cycles, phaseDeg, createMissingCels, sourceFrameIndex); }
+  public tweenCelOpacityEased(filename: string, layerName: string, startFrame: number, endFrame: number, startOpacity: number, endOpacity: number, easing: AnimationEasing = "smoothstep", createMissingCels = false, sourceFrameIndex?: number): Promise<AsepriteResult> { return this.gateway.tweenCelOpacityEased(filename, layerName, startFrame, endFrame, startOpacity, endOpacity, easing, createMissingCels, sourceFrameIndex); }
+  public tweenCelScaleEased(filename: string, layerName: string, startFrame: number, endFrame: number, startScale: number, endScale: number, easing: AnimationEasing = "smoothstep", anchor: ScaleAnchor = "center", replace = true, createMissingCels = true, sourceFrameIndex?: number): Promise<AsepriteResult> { return this.gateway.tweenCelScaleEased(filename, layerName, startFrame, endFrame, startScale, endScale, easing, anchor, replace, createMissingCels, sourceFrameIndex); }
+  public setLayer(filename: string, layerName: string, createIfMissing = false): Promise<AsepriteResult> { return this.gateway.setLayer(filename, layerName, createIfMissing); }
+  public animationWorkflowGuide(useCase = "character"): Promise<AsepriteResult> { return this.gateway.animationWorkflowGuide(useCase); }
+  public runLuaScript(script: string, filename = ""): Promise<AsepriteResult> { return this.gateway.runLuaScript(script, filename); }
 
   public applyConvolution(filename: string, matrix: string, layerName = "", frameIndex = 1, x = 0, y = 0, width = 0, height = 0): Promise<AsepriteResult> {
     return this.gateway.applyConvolution(filename, matrix, layerName, frameIndex, x, y, width, height);

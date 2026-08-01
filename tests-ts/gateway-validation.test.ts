@@ -488,6 +488,32 @@ test("rejects invalid spritesheet export options before starting Aseprite", asyn
   assert.equal(result.message, "Unsupported spritesheet type: invalid");
 });
 
+test("rejects invalid remaining animation and script contracts before starting Aseprite", async () => {
+  const badInfo = await gateway.getSpriteInfo("../sprite.aseprite");
+  const badDuplicate = await gateway.duplicateFrameRange("sprite.aseprite", 2, 1, 1);
+  const badTimes = await gateway.duplicateFrameRange("sprite.aseprite", 1, 1, 0);
+  const badPropagate = await gateway.propagateCels("sprite.aseprite", [], 1, 1, 1);
+  const badTween = await gateway.tweenCelPositionsEased("sprite.aseprite", "hero", 1, 2, 0, 0, 1, 1, "invalid" as never);
+  const badOscillation = await gateway.oscillateCelPositions("sprite.aseprite", "hero", 1, 2, 0, 0, Number.NaN);
+  const badOpacity = await gateway.tweenCelOpacityEased("sprite.aseprite", "hero", 1, 2, -1, 255);
+  const badScale = await gateway.tweenCelScaleEased("sprite.aseprite", "hero", 1, 2, 0, 1);
+  const badAnchor = await gateway.tweenCelScaleEased("sprite.aseprite", "hero", 1, 2, 1, 2, "linear", "invalid" as never);
+  const badLayer = await gateway.setLayer("sprite.aseprite", "");
+  const badScript = await gateway.runLuaScript("os.execute('whoami')");
+
+  assert.match(badInfo.message, /Parent directory traversal/);
+  assert.equal(badDuplicate.message, "Frame range must start at 1 and end at or after the start");
+  assert.equal(badTimes.message, "Times must be >= 1");
+  assert.equal(badPropagate.message, "Layer names list cannot be empty");
+  assert.match(badTween.message, /Unsupported easing/);
+  assert.equal(badOscillation.message, "Oscillation values must be finite");
+  assert.equal(badOpacity.message, "Opacity must be between 0 and 255");
+  assert.equal(badScale.message, "Scale must be > 0");
+  assert.equal(badAnchor.message, "Unsupported anchor (center, topleft)");
+  assert.equal(badLayer.message, "Layer name cannot be empty");
+  assert.match(badScript.message, /blocked host file\/process APIs/);
+});
+
 test("rejects a successful Aseprite exit when the spritesheet file is missing", async () => {
   const result = await new AsepriteCliGateway({
     executable: "unused",

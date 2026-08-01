@@ -80,6 +80,9 @@ export interface CopyLayersInput {
   createMissingFrames?: boolean | undefined;
 }
 
+export type AnimationEasing = "linear" | "ease_in" | "ease_out" | "ease_in_out" | "smoothstep";
+export type ScaleAnchor = "center" | "topleft";
+
 export interface AsepriteGateway {
   createCanvas(width: number, height: number, filename: string): Promise<AsepriteResult>;
   addGroup(filename: string, groupName: string, parentGroup?: string): Promise<AsepriteResult>;
@@ -179,6 +182,16 @@ export interface AsepriteGateway {
   startPreviewServer(directory: string, port?: number): Promise<AsepriteResult>;
   stopPreviewServer(port?: number): Promise<AsepriteResult>;
   copyLayersBetweenSprites(input: CopyLayersInput): Promise<AsepriteResult>;
+  getSpriteInfo(filename: string): Promise<AsepriteResult>;
+  duplicateFrameRange(filename: string, startFrame: number, endFrame: number, times?: number): Promise<AsepriteResult>;
+  propagateCels(filename: string, layerNames: string[], sourceFrame: number, startFrame: number, endFrame: number, replace?: boolean): Promise<AsepriteResult>;
+  tweenCelPositionsEased(filename: string, layerName: string, startFrame: number, endFrame: number, startX: number, startY: number, endX: number, endY: number, easing?: AnimationEasing, createMissingCels?: boolean, sourceFrameIndex?: number): Promise<AsepriteResult>;
+  oscillateCelPositions(filename: string, layerName: string, startFrame: number, endFrame: number, amplitudeX?: number, amplitudeY?: number, cycles?: number, phaseDeg?: number, createMissingCels?: boolean, sourceFrameIndex?: number): Promise<AsepriteResult>;
+  tweenCelOpacityEased(filename: string, layerName: string, startFrame: number, endFrame: number, startOpacity: number, endOpacity: number, easing?: AnimationEasing, createMissingCels?: boolean, sourceFrameIndex?: number): Promise<AsepriteResult>;
+  tweenCelScaleEased(filename: string, layerName: string, startFrame: number, endFrame: number, startScale: number, endScale: number, easing?: AnimationEasing, anchor?: ScaleAnchor, replace?: boolean, createMissingCels?: boolean, sourceFrameIndex?: number): Promise<AsepriteResult>;
+  setLayer(filename: string, layerName: string, createIfMissing?: boolean): Promise<AsepriteResult>;
+  animationWorkflowGuide(useCase?: string): Promise<AsepriteResult>;
+  runLuaScript(script: string, filename?: string): Promise<AsepriteResult>;
   applyConvolution(filename: string, matrix: string, layerName?: string, frameIndex?: number, x?: number, y?: number, width?: number, height?: number): Promise<AsepriteResult>;
   listConvolutionMatrices(): Promise<AsepriteResult>;
   applyDitherGradient(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, colorStart: string, colorEnd: string, horizontal?: boolean, createIfMissing?: boolean): Promise<AsepriteResult>;

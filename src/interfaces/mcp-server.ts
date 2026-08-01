@@ -102,6 +102,16 @@ const TOOL_NAMES = [
   "start_preview_server",
   "stop_preview_server",
   "copy_layers_between_sprites",
+  "get_sprite_info",
+  "duplicate_frame_range",
+  "propagate_cels",
+  "tween_cel_positions_eased",
+  "oscillate_cel_positions",
+  "tween_cel_opacity_eased",
+  "tween_cel_scale_eased",
+  "set_layer",
+  "animation_workflow_guide",
+  "run_lua_script",
   "outline_native",
   "adjust_hsl_native",
   "adjust_brightness_contrast",
@@ -661,6 +671,56 @@ export class AsepriteMcpServerAdapter {
         layer_names: z.array(z.string().min(1)).min(1), replace: z.boolean().default(true), create_missing_frames: z.boolean().default(true),
       },
     }, async ({ source_filename, target_filename, layer_names, replace, create_missing_frames }) => this.result(await this.assets.copyLayersBetweenSprites({ sourceFilename: source_filename, targetFilename: target_filename, layerNames: layer_names, replace, createMissingFrames: create_missing_frames })));
+
+    this.server.registerTool("get_sprite_info", {
+      description: "Read sprite dimensions, color mode, frame durations, layers, and tags as JSON.",
+      inputSchema: { filename: z.string().min(1) },
+    }, async ({ filename }) => this.result(await this.assets.getSpriteInfo(filename)));
+
+    this.server.registerTool("duplicate_frame_range", {
+      description: "Append one or more copies of an inclusive animation frame range.",
+      inputSchema: { filename: z.string().min(1), start_frame: z.number().int().positive(), end_frame: z.number().int().positive(), times: z.number().int().positive().default(1) },
+    }, async ({ filename, start_frame, end_frame, times }) => this.result(await this.assets.duplicateFrameRange(filename, start_frame, end_frame, times)));
+
+    this.server.registerTool("propagate_cels", {
+      description: "Copy selected layer cels from one source frame across a frame range.",
+      inputSchema: { filename: z.string().min(1), layer_names: z.array(z.string().min(1)).min(1), source_frame: z.number().int().positive(), start_frame: z.number().int().positive(), end_frame: z.number().int().positive(), replace: z.boolean().default(true) },
+    }, async ({ filename, layer_names, source_frame, start_frame, end_frame, replace }) => this.result(await this.assets.propagateCels(filename, layer_names, source_frame, start_frame, end_frame, replace)));
+
+    this.server.registerTool("tween_cel_positions_eased", {
+      description: "Tween cel positions across frames with deterministic easing.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), start_frame: z.number().int().positive(), end_frame: z.number().int().positive(), start_x: z.number().int(), start_y: z.number().int(), end_x: z.number().int(), end_y: z.number().int(), easing: z.enum(["linear", "ease_in", "ease_out", "ease_in_out", "smoothstep"]).default("smoothstep"), create_missing_cels: z.boolean().default(false), source_frame_index: z.number().int().positive().optional() },
+    }, async ({ filename, layer_name, start_frame, end_frame, start_x, start_y, end_x, end_y, easing, create_missing_cels, source_frame_index }) => this.result(await this.assets.tweenCelPositionsEased(filename, layer_name, start_frame, end_frame, start_x, start_y, end_x, end_y, easing, create_missing_cels, source_frame_index)));
+
+    this.server.registerTool("oscillate_cel_positions", {
+      description: "Apply sine-wave position offsets to cels across frames.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), start_frame: z.number().int().positive(), end_frame: z.number().int().positive(), amplitude_x: z.number().int().default(0), amplitude_y: z.number().int().default(0), cycles: z.number().finite().default(1), phase_deg: z.number().finite().default(0), create_missing_cels: z.boolean().default(false), source_frame_index: z.number().int().positive().optional() },
+    }, async ({ filename, layer_name, start_frame, end_frame, amplitude_x, amplitude_y, cycles, phase_deg, create_missing_cels, source_frame_index }) => this.result(await this.assets.oscillateCelPositions(filename, layer_name, start_frame, end_frame, amplitude_x, amplitude_y, cycles, phase_deg, create_missing_cels, source_frame_index)));
+
+    this.server.registerTool("tween_cel_opacity_eased", {
+      description: "Tween cel opacity from 0 to 255 across frames with easing.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), start_frame: z.number().int().positive(), end_frame: z.number().int().positive(), start_opacity: z.number().int().min(0).max(255), end_opacity: z.number().int().min(0).max(255), easing: z.enum(["linear", "ease_in", "ease_out", "ease_in_out", "smoothstep"]).default("smoothstep"), create_missing_cels: z.boolean().default(false), source_frame_index: z.number().int().positive().optional() },
+    }, async ({ filename, layer_name, start_frame, end_frame, start_opacity, end_opacity, easing, create_missing_cels, source_frame_index }) => this.result(await this.assets.tweenCelOpacityEased(filename, layer_name, start_frame, end_frame, start_opacity, end_opacity, easing, create_missing_cels, source_frame_index)));
+
+    this.server.registerTool("tween_cel_scale_eased", {
+      description: "Scale a source cel across frames with easing and a stable anchor.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), start_frame: z.number().int().positive(), end_frame: z.number().int().positive(), start_scale: z.number().positive(), end_scale: z.number().positive(), easing: z.enum(["linear", "ease_in", "ease_out", "ease_in_out", "smoothstep"]).default("smoothstep"), anchor: z.enum(["center", "topleft"]).default("center"), replace: z.boolean().default(true), create_missing_cels: z.boolean().default(true), source_frame_index: z.number().int().positive().optional() },
+    }, async ({ filename, layer_name, start_frame, end_frame, start_scale, end_scale, easing, anchor, replace, create_missing_cels, source_frame_index }) => this.result(await this.assets.tweenCelScaleEased(filename, layer_name, start_frame, end_frame, start_scale, end_scale, easing, anchor, replace, create_missing_cels, source_frame_index)));
+
+    this.server.registerTool("set_layer", {
+      description: "Set the active layer by name, optionally creating it.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), create_if_missing: z.boolean().default(false) },
+    }, async ({ filename, layer_name, create_if_missing }) => this.result(await this.assets.setLayer(filename, layer_name, create_if_missing)));
+
+    this.server.registerTool("animation_workflow_guide", {
+      description: "Return a concise deterministic guide for character, environment, or general animation workflows.",
+      inputSchema: { use_case: z.string().default("character") },
+    }, async ({ use_case }) => this.result(await this.assets.animationWorkflowGuide(use_case)));
+
+    this.server.registerTool("run_lua_script", {
+      description: "Run a bounded, trusted Aseprite Lua script as an escape hatch; dedicated tools are preferred.",
+      inputSchema: { script: z.string().min(1).max(200000), filename: z.string().default("") },
+    }, async ({ script, filename }) => this.result(await this.assets.runLuaScript(script, filename)));
 
     this.server.registerTool("outline_native", {
       description: "Apply Aseprite native outline to a selected layer and frame.",

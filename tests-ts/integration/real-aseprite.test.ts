@@ -279,6 +279,41 @@ test("real Aseprite audits and sanitizes animation cels", { skip: !existsSync(as
   assert.equal(JSON.parse(sanitized.message).sanitized.opacitySet, 1);
 });
 
+test("real Aseprite supports the remaining typed animation controls", { skip: !existsSync(asepritePath) }, async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "aseprite-mcp-animation-extra-"));
+  const source = path.join(directory, "animation-extra.aseprite");
+  const gateway = new AsepriteCliGateway({ executable: asepritePath });
+
+  try {
+    assert.equal((await gateway.createCanvas(8, 8, source)).ok, true);
+    assert.equal((await gateway.addLayer(source, "actor")).ok, true);
+    assert.equal((await gateway.drawPixelsAt(source, "actor", 1, [{ x: 1, y: 1, color: "#ff0000" }], true)).ok, true);
+    assert.equal((await gateway.addFrames(source, 3, 100)).ok, true);
+
+    const info = await gateway.getSpriteInfo(source);
+    assert.equal(info.ok, true, info.message);
+    const parsed = JSON.parse(info.message) as { width: number; height: number; frames: number; durations_ms: number[]; layers: Array<{ name: string }> };
+    assert.deepEqual({ width: parsed.width, height: parsed.height, frames: parsed.frames }, { width: 8, height: 8, frames: 4 });
+    assert.equal(parsed.durations_ms.length, 4);
+    assert.ok(parsed.layers.some((layer) => layer.name === "actor"));
+
+    assert.equal((await gateway.duplicateFrameRange(source, 1, 2, 1)).ok, true);
+    assert.equal(JSON.parse((await gateway.getSpriteInfo(source)).message).frames, 6);
+    assert.equal((await gateway.propagateCels(source, ["actor"], 1, 2, 4, true)).ok, true);
+    assert.equal((await gateway.tweenCelPositionsEased(source, "actor", 1, 4, 0, 0, 3, 2, "ease_in_out", true)).ok, true);
+    assert.equal((await gateway.oscillateCelPositions(source, "actor", 1, 4, 1, 1, 1, 0, true)).ok, true);
+    assert.equal((await gateway.tweenCelOpacityEased(source, "actor", 1, 4, 64, 255, "linear", true)).ok, true);
+    assert.equal((await gateway.tweenCelScaleEased(source, "actor", 1, 4, 1, 1.5, "linear", "center", true, true)).ok, true);
+    assert.equal((await gateway.setLayer(source, "actor")).ok, true);
+    assert.match((await gateway.animationWorkflowGuide("environment")).message, /Use case: environment/);
+    const script = await gateway.runLuaScript('print("SCRIPT_OK")');
+    assert.equal(script.ok, true, script.message);
+    assert.match(script.message, /SCRIPT_OK/);
+  } finally {
+    await fs.rm(directory, { recursive: true, force: true });
+  }
+});
+
 test("real TypeScript gateway serves a preview and copies selected layers between sprites", { skip: !existsSync(asepritePath) }, async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "aseprite-mcp-preview-"));
   const source = path.join(directory, "source.aseprite");
