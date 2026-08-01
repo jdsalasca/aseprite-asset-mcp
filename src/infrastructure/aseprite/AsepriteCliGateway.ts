@@ -1101,6 +1101,106 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: `Onion skin settings are UI-only in batch mode; no changes applied (enabled=${enabled}, before=${before}, after=${after}, opacity=${opacity})` };
   }
 
+  public async renderOnionSkin(filename: string, frameIndex: number, outputFilename: string, before = 1, after = 1, scale = 4, ghostOpacity = 100): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const output = validatePath(outputFilename);
+    if (typeof output !== "string") return output;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    if (!Number.isInteger(before) || !Number.isInteger(after) || before < 0 || after < 0) return { ok: false, message: "Before and after must be non-negative integers" };
+    if (!Number.isInteger(scale) || scale < 1 || scale > 64) return { ok: false, message: "Scale must be between 1 and 64" };
+    if (!Number.isInteger(ghostOpacity) || ghostOpacity < 0 || ghostOpacity > 255) return { ok: false, message: "Ghost opacity must be between 0 and 255" };
+    const target = output.toLowerCase().endsWith(".png") ? output : `${output}.png`;
+    const script = `
+      local spr = app.activeSprite
+      if not spr then print("ERROR:No active sprite") return end
+      if ${frameIndex} > #spr.frames then print("ERROR:Frame index out of range") return end
+      local clone = Sprite(spr)
+      clone:flatten()
+      local layer = clone.layers[#clone.layers]
+      local function frame_image(index)
+        local image = Image(clone.width, clone.height, ColorMode.RGB)
+        local cel = layer:cel(clone.frames[index])
+        if cel then image:drawImage(cel.image, cel.position) end
+        return image
+      end
+      local composite = Image(clone.width, clone.height, ColorMode.RGB)
+      local white = Color(255, 255, 255, 255)
+      for py = 0, composite.height - 1 do for px = 0, composite.width - 1 do composite:putPixel(px, py, white) end end
+      for offset = ${before}, 1, -1 do
+        local index = ${frameIndex} - offset
+        if index >= 1 then composite:drawImage(frame_image(index), Point(0, 0), ${ghostOpacity}, BlendMode.NORMAL) end
+      end
+      for offset = ${after}, 1, -1 do
+        local index = ${frameIndex} + offset
+        if index <= #clone.frames then composite:drawImage(frame_image(index), Point(0, 0), ${ghostOpacity}, BlendMode.NORMAL) end
+      end
+      composite:drawImage(frame_image(${frameIndex}), Point(0, 0), 255, BlendMode.NORMAL)
+      local large = Image(composite.width * ${scale}, composite.height * ${scale}, ColorMode.RGB)
+      for py = 0, composite.height - 1 do
+        for px = 0, composite.width - 1 do
+          local value = composite:getPixel(px, py)
+          for oy = 0, ${scale - 1} do for ox = 0, ${scale - 1} do large:putPixel(px * ${scale} + ox, py * ${scale} + oy, value) end end
+        end
+      end
+      large:saveAs("${luaEscape(target.replaceAll("\\", "/"))}")
+      print("OK")
+    `;
+    const command = await this.runLua(script, source);
+    if (!command.ok) return result(command, `Onion-skin render saved to ${target}`);
+    const produced = await this.findProducedOutput(target);
+    if (!produced) return { ok: false, message: `Aseprite exited successfully but did not create ${target}` };
+    if (produced !== target) await fs.rename(produced, target);
+    return { ok: true, message: `Onion-skin render of frame ${frameIndex} saved to ${target} at ${scale}x` };
+  }
+
+  public async compareFrames(filename: string, frameA: number, frameB: number): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (!isPositiveInteger(frameA) || !isPositiveInteger(frameB)) return { ok: false, message: "Frame A and frame B must be positive integers" };
+    const script = `
+      local spr = app.activeSprite
+      if not spr then print("ERROR:No active sprite") return end
+      if ${frameA} > #spr.frames or ${frameB} > #spr.frames then print("ERROR:Frame index out of range") return end
+      local clone = Sprite(spr)
+      clone:flatten()
+      local layer = clone.layers[#clone.layers]
+      local function frame_image(index)
+        local image = Image(clone.width, clone.height, ColorMode.RGB)
+        local cel = layer:cel(clone.frames[index])
+        if cel then image:drawImage(cel.image, cel.position) end
+        return image
+      end
+      local first = frame_image(${frameA})
+      local second = frame_image(${frameB})
+      local changed = 0
+      local minX, minY = math.huge, math.huge
+      local maxX, maxY = -1, -1
+      for py = 0, first.height - 1 do
+        for px = 0, first.width - 1 do
+          local left = first:getPixel(px, py)
+          local right = second:getPixel(px, py)
+          local different = app.pixelColor.rgbaR(left) ~= app.pixelColor.rgbaR(right) or app.pixelColor.rgbaG(left) ~= app.pixelColor.rgbaG(right) or app.pixelColor.rgbaB(left) ~= app.pixelColor.rgbaB(right) or app.pixelColor.rgbaA(left) ~= app.pixelColor.rgbaA(right)
+          if different then
+            changed = changed + 1
+            if px < minX then minX = px end
+            if py < minY then minY = py end
+            if px > maxX then maxX = px end
+            if py > maxY then maxY = py end
+          end
+        end
+      end
+      local total = first.width * first.height
+      local percent = total > 0 and (changed * 100.0 / total) or 0
+      local bounds = changed > 0 and string.format("{\\"minX\\":%d,\\"minY\\":%d,\\"maxX\\":%d,\\"maxY\\":%d}", minX, minY, maxX, maxY) or "null"
+      print(string.format("COMPARE:{\\"frameA\\":%d,\\"frameB\\":%d,\\"changedPixels\\":%d,\\"totalPixels\\":%d,\\"percentChanged\\":%.2f,\\"bounds\\":%s}", ${frameA}, ${frameB}, changed, total, percent, bounds))
+    `;
+    const command = await this.runLua(script, source);
+    if (!command.ok) return result(command, "Frame comparison failed");
+    const line = command.output.split(/\r?\n/).find((entry) => entry.startsWith("COMPARE:"));
+    return line ? { ok: true, message: line.slice("COMPARE:".length) } : { ok: false, message: "Frame comparison returned no metrics" };
+  }
+
   private async resolveTagRange(filename: string, tagName: string): Promise<CommandResult> {
     const script = `
       local spr = app.activeSprite

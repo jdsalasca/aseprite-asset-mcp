@@ -171,6 +171,14 @@ export class AsepriteAssetService {
     return this.gateway.setOnionSkin(filename, enabled, before, after, opacity);
   }
 
+  public renderOnionSkin(filename: string, frameIndex: number, outputFilename: string, before = 1, after = 1, scale = 4, ghostOpacity = 100): Promise<AsepriteResult> {
+    return this.gateway.renderOnionSkin(filename, frameIndex, outputFilename, before, after, scale, ghostOpacity);
+  }
+
+  public compareFrames(filename: string, frameA: number, frameB: number): Promise<AsepriteResult> {
+    return this.gateway.compareFrames(filename, frameA, frameB);
+  }
+
   public setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction = "forward"): Promise<AsepriteResult> {
     return this.gateway.setTag(filename, name, fromFrame, toFrame, direction);
   }

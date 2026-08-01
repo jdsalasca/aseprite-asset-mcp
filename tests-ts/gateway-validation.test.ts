@@ -47,6 +47,8 @@ test("rejects traversal in every input sprite path before starting Aseprite", as
     gateway.deleteFrame("../sprite.aseprite", 1),
     gateway.deleteTag("../sprite.aseprite", "idle"),
     gateway.setOnionSkin("../sprite.aseprite"),
+    gateway.renderOnionSkin("../sprite.aseprite", 1, "output.png"),
+    gateway.compareFrames("../sprite.aseprite", 1, 2),
     gateway.setTag("../sprite.aseprite", "idle", 1, 1),
     gateway.createTilemapLayer("../sprite.aseprite", "Tiles", 16, 16),
     gateway.validateScene("../sprite.aseprite", ["Layer"]),
@@ -181,6 +183,18 @@ test("rejects invalid animation control contracts before starting Aseprite", asy
   assert.equal(badTag.message, "Tag name cannot be empty");
   assert.equal(badOnionRange.message, "Before and after must be non-negative integers");
   assert.equal(badOnionOpacity.message, "Opacity must be between 0 and 255");
+});
+
+test("rejects invalid visual analysis contracts before starting Aseprite", async () => {
+  const badRenderRange = await gateway.renderOnionSkin("sprite.aseprite", 1, "output.png", -1, 1);
+  const badRenderScale = await gateway.renderOnionSkin("sprite.aseprite", 1, "output.png", 1, 1, 0);
+  const badOpacity = await gateway.renderOnionSkin("sprite.aseprite", 1, "output.png", 1, 1, 1, 256);
+  const badCompare = await gateway.compareFrames("sprite.aseprite", 0, 2);
+
+  assert.equal(badRenderRange.message, "Before and after must be non-negative integers");
+  assert.equal(badRenderScale.message, "Scale must be between 1 and 64");
+  assert.equal(badOpacity.message, "Ghost opacity must be between 0 and 255");
+  assert.equal(badCompare.message, "Frame A and frame B must be positive integers");
 });
 
 test("rejects invalid tag frame ranges before starting Aseprite", async () => {

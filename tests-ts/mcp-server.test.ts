@@ -44,6 +44,8 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("delete_frame"));
     assert.ok(tools.includes("delete_tag"));
     assert.ok(tools.includes("set_onion_skin"));
+    assert.ok(tools.includes("render_onion_skin"));
+    assert.ok(tools.includes("compare_frames"));
     assert.ok(tools.includes("set_frame"));
     assert.ok(tools.includes("draw_rectangle"));
     assert.ok(tools.includes("create_character_plan"));
@@ -91,6 +93,7 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
   const exportedFrame = path.join(directory, "primitive-frame.png");
   const exportedLayers = path.join(directory, "layers");
   const exportedTag = path.join(directory, "primitive-idle.gif");
+  const onionRender = path.join(directory, "primitive-onion.png");
   const client = new AsepriteMcpClient({
     cwd: process.cwd(),
     environment: { ASEPRITE_PATH: asepritePath },
@@ -133,6 +136,8 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
     await call("tween_cel_positions", { filename: source, layer_name: "body", start_frame: 1, end_frame: 2, start_x: 1, start_y: 1, end_x: 4, end_y: 4, create_missing_cels: false });
     await call("offset_cel_positions", { filename: source, layer_name: "body", start_frame: 1, end_frame: 2, dx: 1, dy: -1 });
     await call("propagate_frame_to_range", { filename: source, source_frame: 2, start_frame: 1, end_frame: 2, overwrite: true });
+    await call("render_onion_skin", { filename: source, frame_index: 2, output_filename: onionRender, before: 1, after: 1, scale: 2, ghost_opacity: 100 });
+    await call("compare_frames", { filename: source, frame_a: 1, frame_b: 2 });
     await call("delete_tag", { filename: source, name: "idle" });
     await call("delete_frame", { filename: source, frame_index: 2 });
     await call("set_onion_skin", { filename: source, enabled: true, before: 2, after: 2, opacity: 128 });
@@ -150,6 +155,7 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
     assert.equal(existsSync(exportedFrame), true);
     assert.ok(existsSync(exportedLayers));
     assert.equal(existsSync(exportedTag), true);
+    assert.equal(existsSync(onionRender), true);
   } finally {
     await client.close();
     await fs.rm(directory, { recursive: true, force: true });

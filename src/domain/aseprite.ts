@@ -57,6 +57,8 @@ export interface AsepriteGateway {
   deleteFrame(filename: string, frameIndex: number): Promise<AsepriteResult>;
   deleteTag(filename: string, name: string): Promise<AsepriteResult>;
   setOnionSkin(filename: string, enabled?: boolean, before?: number, after?: number, opacity?: number): Promise<AsepriteResult>;
+  renderOnionSkin(filename: string, frameIndex: number, outputFilename: string, before?: number, after?: number, scale?: number, ghostOpacity?: number): Promise<AsepriteResult>;
+  compareFrames(filename: string, frameA: number, frameB: number): Promise<AsepriteResult>;
   setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction?: string): Promise<AsepriteResult>;
   createTilemapLayer(filename: string, layerName: string, tileWidth: number, tileHeight: number): Promise<AsepriteResult>;
   validateScene(filename: string, requiredLayers: string[], startFrame?: number, endFrame?: number): Promise<AsepriteResult>;
