@@ -2,18 +2,18 @@
   "schemaVersion": 1,
   "project": "aseprite-mcp",
   "goal": "complete-typescript-migration",
-  "generatedAt": "2026-08-01T16:10:44.109Z",
+  "generatedAt": "2026-08-01T16:18:32.441Z",
   "source": {
     "repository": "https://github.com/diivi/aseprite-mcp",
     "branch": "upstream/main",
     "commit": "90d1696a7e41edff89bbd0823ae6a5f86c114bcc"
   },
   "local": {
-    "branch": "codex/migrate/tilemap",
-    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-tilemap",
-    "baseCommit": "fde35d3a76d8f9d81141aa6ce94d070576726378",
-    "typescriptToolCount": 98,
-    "testCount": 39
+    "branch": "codex/migrate/slices",
+    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-slices",
+    "baseCommit": "8ad686c3641ff8ebfbb97860d74de44121169174",
+    "typescriptToolCount": 103,
+    "testCount": 41
   },
   "tools": [
     {
@@ -1441,9 +1441,13 @@
       "name": "create_slice",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "slices",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -1452,9 +1456,13 @@
       "name": "set_slice_center",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "slices",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -1463,9 +1471,13 @@
       "name": "set_slice_pivot",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "slices",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -1474,9 +1486,13 @@
       "name": "list_slices",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "slices",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -1485,9 +1501,13 @@
       "name": "delete_slice",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "slices",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []

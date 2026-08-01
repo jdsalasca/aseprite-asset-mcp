@@ -239,3 +239,19 @@ test("real Aseprite creates, edits, places, and reads tilemap data", { skip: !ex
   assert.equal(infoAfter.ok, true, infoAfter.message);
   assert.equal(JSON.parse(infoAfter.message).tile_count, 1);
 });
+
+test("real Aseprite creates, updates, lists, and deletes slices", { skip: !existsSync(asepritePath) }, async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "aseprite-mcp-slices-"));
+  const source = path.join(directory, "slices.aseprite");
+  const gateway = new AsepriteCliGateway({ executable: asepritePath });
+
+  assert.equal((await gateway.createCanvas(16, 16, source)).ok, true);
+  assert.equal((await gateway.createSlice(source, "hud|panel", 1, 2, 8, 6)).ok, true);
+  assert.equal((await gateway.setSliceCenter(source, "hud|panel", 2, 1, 4, 3)).ok, true);
+  assert.equal((await gateway.setSlicePivot(source, "hud|panel", 3, 2)).ok, true);
+  const listed = await gateway.listSlices(source);
+  assert.equal(listed.ok, true, listed.message);
+  assert.deepEqual(JSON.parse(listed.message), [{ name: "hud|panel", x: 1, y: 2, width: 8, height: 6, center: { x: 2, y: 1, width: 4, height: 3 }, pivot: { x: 3, y: 2 } }]);
+  assert.equal((await gateway.deleteSlice(source, "hud|panel")).ok, true);
+  assert.deepEqual(JSON.parse((await gateway.listSlices(source)).message), []);
+});

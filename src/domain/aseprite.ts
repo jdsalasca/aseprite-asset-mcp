@@ -137,6 +137,11 @@ export interface AsepriteGateway {
   setTiles(filename: string, layerName: string, frameIndex: number, tiles: TilePlacementInput[]): Promise<AsepriteResult>;
   getTileAt(filename: string, layerName: string, frameIndex: number, col: number, row: number): Promise<AsepriteResult>;
   getTilemapInfo(filename: string, layerName: string): Promise<AsepriteResult>;
+  createSlice(filename: string, name: string, x: number, y: number, width: number, height: number): Promise<AsepriteResult>;
+  setSliceCenter(filename: string, name: string, x: number, y: number, width: number, height: number): Promise<AsepriteResult>;
+  setSlicePivot(filename: string, name: string, x: number, y: number): Promise<AsepriteResult>;
+  listSlices(filename: string): Promise<AsepriteResult>;
+  deleteSlice(filename: string, name: string): Promise<AsepriteResult>;
   applyConvolution(filename: string, matrix: string, layerName?: string, frameIndex?: number, x?: number, y?: number, width?: number, height?: number): Promise<AsepriteResult>;
   listConvolutionMatrices(): Promise<AsepriteResult>;
   applyDitherGradient(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, colorStart: string, colorEnd: string, horizontal?: boolean, createIfMissing?: boolean): Promise<AsepriteResult>;

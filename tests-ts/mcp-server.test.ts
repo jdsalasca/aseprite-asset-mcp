@@ -89,6 +89,11 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("set_tiles"));
     assert.ok(tools.includes("get_tile_at"));
     assert.ok(tools.includes("get_tilemap_info"));
+    assert.ok(tools.includes("create_slice"));
+    assert.ok(tools.includes("set_slice_center"));
+    assert.ok(tools.includes("set_slice_pivot"));
+    assert.ok(tools.includes("list_slices"));
+    assert.ok(tools.includes("delete_slice"));
     assert.ok(tools.includes("draw_rectangle"));
     assert.ok(tools.includes("create_character_plan"));
     assert.ok(tools.includes("create_scene_plan"));
@@ -139,6 +144,7 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
   const transformSource = path.join(directory, "transform.aseprite");
   const textSource = path.join(directory, "text.aseprite");
   const tileSource = path.join(directory, "tilemap.aseprite");
+  const sliceSource = path.join(directory, "slices.aseprite");
   const client = new AsepriteMcpClient({
     cwd: process.cwd(),
     environment: { ASEPRITE_PATH: asepritePath },
@@ -241,6 +247,12 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
     await call("set_tiles", { filename: tileSource, layer_name: "terrain", frame_index: 1, tiles: [{ col: 0, row: 0, tile_index: 1 }] });
     await call("get_tile_at", { filename: tileSource, layer_name: "terrain", frame_index: 1, col: 0, row: 0 });
     await call("get_tilemap_info", { filename: tileSource, layer_name: "terrain" });
+    await call("create_canvas", { width: 16, height: 16, filename: sliceSource });
+    await call("create_slice", { filename: sliceSource, name: "hud", x: 1, y: 2, width: 8, height: 6 });
+    await call("set_slice_center", { filename: sliceSource, name: "hud", x: 2, y: 1, width: 4, height: 3 });
+    await call("set_slice_pivot", { filename: sliceSource, name: "hud", x: 3, y: 2 });
+    await call("list_slices", { filename: sliceSource });
+    await call("delete_slice", { filename: sliceSource, name: "hud" });
     await call("flatten_sprite", { filename: source });
     await call("export_spritesheet", {
       filename: source,
