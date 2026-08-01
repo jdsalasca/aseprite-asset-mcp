@@ -20,11 +20,13 @@
     "asset:creatures": "tsx scripts/paint-creature-assets.ts",
     "asset:odiseum-style": "tsx scripts/boost-odiseum-style.ts",
     "asset:odiseum-world": "tsx scripts/paint-odiseum-world.ts",
-    "asset:library": "tsx scripts/paint-reusable-asset-library.ts"
+    "asset:library": "tsx scripts/paint-reusable-asset-library.ts",
+    "asset:cozy-nature": "tsx scripts/paint-cozy-nature-assets.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",
     "pureimage": "^0.4.20",
+    "sharp": "^0.35.3",
     "zod": "^4.0.0"
   },
   "devDependencies": {

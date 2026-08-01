@@ -83,6 +83,23 @@ Secuencia: canvas; grupos y capas semánticas; paleta; frames y tags; validació
 
 La biblioteca se exporta en `art/library/odiseum-cozy-kit.png` junto con `asset-library.json`. El manifiesto documenta el índice de cada frame, categoría, paleta, escala y regla de renderizado nearest para reutilizar el kit en otros juegos originales.
 
+## Herramientas compactas para agentes
+
+El agente puede descubrir capacidades por carpetas antes de cargar detalles:
+
+- `get_tools_list`: devuelve carpetas y conteos sin repetir los más de cien nombres.
+- `get_tools_by_folder`: carga solo una familia, por ejemplo `asset/animation` o `asset/quality`.
+- `run_asset_recipe`: ejecuta o previsualiza recetas `pixel_art`, `animation_pixel_art`, `gif` y `atlas`.
+- `batch_asset_job`: agrupa varias recetas en una sola llamada y devuelve un resultado compacto.
+- `convert_image_to_pixel_art`: convierte PNG, JPG, WebP y otros formatos soportados por Sharp con resize box/nearest, paleta limitada, transparencia y dithering Bayer opcional.
+- `convert_animation_to_pixel_art`: procesa todos los frames con una paleta global y conserva sus delays en GIF.
+- `export_animation_gif`: exporta una imagen animada o un `.aseprite` a GIF.
+- `inspect_asset` y `validate_asset_quality`: reportan dimensiones, frames, colores, transparencia, delays y pixeles aislados antes de exportar.
+- `build_texture_atlas`: empaqueta imágenes del mismo tamaño en un atlas PNG con columnas y padding.
+- `export_asset_pack`: entrega el atlas y un manifiesto JSON con la posición de cada asset.
+
+Las operaciones de imagen no necesitan abrir Aseprite; eso reduce latencia y tokens para conversiones masivas. Las operaciones sobre `.aseprite` siguen pasando por el adaptador CLI hexagonal y mantienen la compatibilidad con Godot.
+
 ## TDD y calidad
 
 ```bash

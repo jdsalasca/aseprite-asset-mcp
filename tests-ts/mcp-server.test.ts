@@ -113,7 +113,29 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("draw_rectangle"));
     assert.ok(tools.includes("create_character_plan"));
     assert.ok(tools.includes("create_scene_plan"));
+    assert.ok(tools.includes("convert_image_to_pixel_art"));
+    assert.ok(tools.includes("convert_animation_to_pixel_art"));
+    assert.ok(tools.includes("export_animation_gif"));
+    assert.ok(tools.includes("inspect_asset"));
+    assert.ok(tools.includes("validate_asset_quality"));
+    assert.ok(tools.includes("build_texture_atlas"));
+    assert.ok(tools.includes("run_asset_recipe"));
+    assert.ok(tools.includes("batch_asset_job"));
+    assert.ok(tools.includes("export_asset_pack"));
     assert.ok(!tools.includes("legacy_server"));
+
+    const folderIndex = await client.callTool("get_tools_list", {}) as { content: Array<{ type: string; text?: string }> };
+    const folderText = folderIndex.content.find((item) => item.type === "text")?.text ?? "";
+    const folderData = JSON.parse(folderText) as { toolCount?: number; folders?: Array<{ folder: string; toolCount: number }> ; tools?: string[] };
+    assert.ok((folderData.toolCount ?? 0) > 100);
+    assert.ok((folderData.folders ?? []).some((folder) => folder.folder === "asset/animation"));
+    assert.equal(folderData.tools, undefined);
+
+    const drawingTools = await client.callTool("get_tools_by_folder", { folder: "asset/drawing" }) as { content: Array<{ type: string; text?: string }> };
+    const drawingText = drawingTools.content.find((item) => item.type === "text")?.text ?? "";
+    const drawingData = JSON.parse(drawingText) as { tools?: Array<{ name: string; folder: string; description: string }> };
+    assert.ok(drawingData.tools?.some((tool) => tool.name === "draw_pixels"));
+    assert.ok(drawingData.tools?.every((tool) => tool.folder === "asset/drawing"));
   } finally {
     await client.close();
   }
@@ -140,7 +162,7 @@ test("server capabilities report the current typed runtime and complete tool cou
     assert.match(capabilities.nodeVersion ?? "", /^v?24\./);
     assert.equal(capabilities.toolCount, capabilities.tools?.length);
     assert.deepEqual([...capabilities.tools ?? []].sort(), [...registeredTools].sort());
-    assert.equal(capabilities.migrationStatus, "partial");
+    assert.equal(capabilities.migrationStatus, "complete");
   } finally {
     await client.close();
   }
@@ -152,6 +174,7 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
   const sheet = path.join(directory, "primitive.png");
   const metadata = path.join(directory, "primitive.json");
   const exportedSprite = path.join(directory, "primitive-copy.png");
+  const exportedAnimationGif = path.join(directory, "primitive-animation.gif");
   const copiedSprite = path.join(directory, "primitive-copy.aseprite");
   const exportedFrame = path.join(directory, "primitive-frame.png");
   const exportedLayers = path.join(directory, "layers");
@@ -190,6 +213,7 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
     await call("apply_gradient_rect", { filename: source, layer_name: "body", frame_index: 2, x: 2, y: 2, width: 8, height: 4, color_start: "#0000ff", color_end: "#ff00ff", horizontal: true });
     await call("draw_ellipse_at", { filename: source, layer_name: "body", frame_index: 2, center_x: 8, center_y: 8, radius_x: 4, radius_y: 2, color: "#ffffff", fill: false });
     await call("export_sprite", { filename: source, output_filename: exportedSprite, format: "png" });
+    await call("export_animation_gif", { input_filename: source, output_filename: exportedAnimationGif });
     await call("copy_sprite", { filename: source, output_filename: copiedSprite });
     await call("export_frame", { filename: source, frame_index: 2, output_filename: exportedFrame, scale: 2 });
     await call("set_tag", { filename: source, name: "idle", from_frame: 1, to_frame: 2 });
@@ -286,6 +310,7 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
     assert.equal(existsSync(sheet), true);
     assert.equal(existsSync(metadata), true);
     assert.equal(existsSync(exportedSprite), true);
+    assert.equal(existsSync(exportedAnimationGif), true);
     assert.equal(existsSync(copiedSprite), true);
     assert.equal(existsSync(exportedFrame), true);
     assert.ok(existsSync(exportedLayers));
