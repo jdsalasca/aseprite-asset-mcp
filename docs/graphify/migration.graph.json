@@ -2,18 +2,18 @@
   "schemaVersion": 1,
   "project": "aseprite-mcp",
   "goal": "complete-typescript-migration",
-  "generatedAt": "2026-08-01T15:42:08.212Z",
+  "generatedAt": "2026-08-01T15:51:04.328Z",
   "source": {
     "repository": "https://github.com/diivi/aseprite-mcp",
     "branch": "upstream/main",
     "commit": "90d1696a7e41edff89bbd0823ae6a5f86c114bcc"
   },
   "local": {
-    "branch": "codex/migrate/selection",
-    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-selection",
-    "baseCommit": "ea00e53a72181f83df9390b67ad78dd6c615566a",
-    "typescriptToolCount": 87,
-    "testCount": 33
+    "branch": "codex/migrate/transform",
+    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-transform",
+    "baseCommit": "e9887e737b3120ef3b7a9dce07b74248e48ac6f3",
+    "typescriptToolCount": 91,
+    "testCount": 35
   },
   "tools": [
     {
@@ -1588,9 +1588,13 @@
       "name": "flip_layer",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "layers",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -1599,9 +1603,13 @@
       "name": "rotate_layer",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "layers",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -1610,9 +1618,13 @@
       "name": "resize_canvas",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "core",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -1621,9 +1633,13 @@
       "name": "crop_canvas",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "core",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []

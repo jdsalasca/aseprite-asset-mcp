@@ -163,3 +163,36 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
     await fs.rm(directory, { recursive: true, force: true });
   }
 });
+
+test("real Aseprite applies layer transforms without losing pixel data", { skip: !existsSync(asepritePath) }, async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "aseprite-mcp-transform-"));
+  const source = path.join(directory, "transform.aseprite");
+  const gateway = new AsepriteCliGateway({ executable: asepritePath });
+  const pixel = async (x: number, y: number) => {
+    const result = await gateway.getPixelColor(source, x, y, "pixels", 1);
+    assert.equal(result.ok, true, result.message);
+    return result.message;
+  };
+
+  const created = await gateway.createCanvas(4, 2, source);
+  assert.equal(created.ok, true, created.message);
+  assert.equal((await gateway.addLayer(source, "pixels")).ok, true);
+  assert.equal((await gateway.drawPixelsAt(source, "pixels", 1, [
+    { x: 0, y: 0, color: "#ff0000" },
+    { x: 1, y: 0, color: "#00ff00" },
+    { x: 3, y: 1, color: "#0000ff" },
+  ], true)).ok, true);
+
+  assert.equal((await gateway.flipLayer(source, "pixels", 1, "horizontal")).ok, true);
+  assert.match(await pixel(3, 0), /#ff0000/);
+  assert.match(await pixel(2, 0), /#00ff00/);
+  assert.match(await pixel(0, 1), /#0000ff/);
+
+  assert.equal((await gateway.rotateLayer(source, "pixels", 1, 180)).ok, true);
+  assert.match(await pixel(0, 1), /#ff0000/);
+  assert.match(await pixel(1, 1), /#00ff00/);
+  assert.match(await pixel(3, 0), /#0000ff/);
+
+  assert.equal((await gateway.resizeCanvas(source, 6, 4)).ok, true);
+  assert.equal((await gateway.cropCanvas(source, 1, 1, 4, 2)).ok, true);
+});

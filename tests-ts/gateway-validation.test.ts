@@ -358,6 +358,24 @@ test("rejects invalid selection contracts before starting Aseprite", async () =>
   assert.equal(badTolerance.message, "Tolerance must be between 0 and 255");
 });
 
+test("rejects invalid transform contracts before starting Aseprite", async () => {
+  const badDirection = await gateway.flipLayer("sprite.aseprite", "Layer", 1, "diagonal" as never);
+  const badFrame = await gateway.rotateLayer("sprite.aseprite", "Layer", 0, 90);
+  const badAngle = await gateway.rotateLayer("sprite.aseprite", "Layer", 1, 45 as never);
+  const badResize = await gateway.resizeCanvas("sprite.aseprite", 0, 8);
+  const badResizeFraction = await gateway.resizeCanvas("sprite.aseprite", 8.5, 8);
+  const badCropSize = await gateway.cropCanvas("sprite.aseprite", 0, 0, 0, 8);
+  const badCropCoordinates = await gateway.cropCanvas("sprite.aseprite", 0.5, 0, 8, 8);
+
+  assert.equal(badDirection.message, "Direction must be 'horizontal' or 'vertical'");
+  assert.equal(badFrame.message, "Frame index must be a positive integer");
+  assert.equal(badAngle.message, "Angle must be 90, 180, or 270");
+  assert.equal(badResize.message, "Width and height must be positive integers");
+  assert.equal(badResizeFraction.message, "Width and height must be positive integers");
+  assert.equal(badCropSize.message, "Width and height must be positive integers");
+  assert.equal(badCropCoordinates.message, "Crop coordinates must be integers");
+});
+
 test("rejects invalid tag frame ranges before starting Aseprite", async () => {
   const result = await gateway.setTag("sprite.aseprite", "idle", 0, 2);
 

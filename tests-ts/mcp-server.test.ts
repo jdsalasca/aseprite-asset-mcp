@@ -77,6 +77,10 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("copy_region"));
     assert.ok(tools.includes("erase_region"));
     assert.ok(tools.includes("erase_color"));
+    assert.ok(tools.includes("flip_layer"));
+    assert.ok(tools.includes("rotate_layer"));
+    assert.ok(tools.includes("resize_canvas"));
+    assert.ok(tools.includes("crop_canvas"));
     assert.ok(tools.includes("draw_rectangle"));
     assert.ok(tools.includes("create_character_plan"));
     assert.ok(tools.includes("create_scene_plan"));
@@ -124,6 +128,7 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
   const exportedLayers = path.join(directory, "layers");
   const exportedTag = path.join(directory, "primitive-idle.gif");
   const onionRender = path.join(directory, "primitive-onion.png");
+  const transformSource = path.join(directory, "transform.aseprite");
   const client = new AsepriteMcpClient({
     cwd: process.cwd(),
     environment: { ASEPRITE_PATH: asepritePath },
@@ -209,6 +214,13 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
     await call("copy_region", { filename: source, layer_name: "body", frame_index: 1, x: 2, y: 2, width: 2, height: 2, dest_x: 4, dest_y: 4 });
     await call("erase_region", { filename: source, layer_name: "body", frame_index: 1, x: 4, y: 4, width: 1, height: 1 });
     await call("erase_color", { filename: source, layer_name: "body", frame_index: 1, color: "#abcdef", tolerance: 0 });
+    await call("create_canvas", { width: 8, height: 8, filename: transformSource });
+    await call("add_layer", { filename: transformSource, layer_name: "pixels" });
+    await call("draw_pixels_at", { filename: transformSource, layer_name: "pixels", frame_index: 1, pixels: [{ x: 1, y: 1, color: "#ff0000" }], create_if_missing: true });
+    await call("flip_layer", { filename: transformSource, layer_name: "pixels", frame_index: 1, direction: "horizontal" });
+    await call("rotate_layer", { filename: transformSource, layer_name: "pixels", frame_index: 1, angle: 90 });
+    await call("resize_canvas", { filename: transformSource, width: 10, height: 10 });
+    await call("crop_canvas", { filename: transformSource, x: 1, y: 1, width: 8, height: 8 });
     await call("flatten_sprite", { filename: source });
     await call("export_spritesheet", {
       filename: source,

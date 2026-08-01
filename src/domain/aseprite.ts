@@ -91,6 +91,10 @@ export interface AsepriteGateway {
   copyRegion(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, destX: number, destY: number, targetLayerName?: string, targetFrameIndex?: number): Promise<AsepriteResult>;
   eraseRegion(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number): Promise<AsepriteResult>;
   eraseColor(filename: string, layerName: string, frameIndex: number, color: string, tolerance?: number): Promise<AsepriteResult>;
+  flipLayer(filename: string, layerName: string, frameIndex: number, direction?: "horizontal" | "vertical"): Promise<AsepriteResult>;
+  rotateLayer(filename: string, layerName: string, frameIndex: number, angle?: 90 | 180 | 270): Promise<AsepriteResult>;
+  resizeCanvas(filename: string, width: number, height: number): Promise<AsepriteResult>;
+  cropCanvas(filename: string, x: number, y: number, width: number, height: number): Promise<AsepriteResult>;
   applyConvolution(filename: string, matrix: string, layerName?: string, frameIndex?: number, x?: number, y?: number, width?: number, height?: number): Promise<AsepriteResult>;
   listConvolutionMatrices(): Promise<AsepriteResult>;
   applyDitherGradient(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, colorStart: string, colorEnd: string, horizontal?: boolean, createIfMissing?: boolean): Promise<AsepriteResult>;

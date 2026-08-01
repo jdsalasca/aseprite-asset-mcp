@@ -1970,6 +1970,92 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: `Erased ${count} pixels of ${color} on '${name}' frame ${frameIndex} in ${source}` };
   }
 
+  public async flipLayer(filename: string, layerName: string, frameIndex: number, direction: "horizontal" | "vertical" = "horizontal"): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    if (direction !== "horizontal" && direction !== "vertical") return { ok: false, message: "Direction must be 'horizontal' or 'vertical'" };
+    const body = `
+      if ${frameIndex} > #spr.frames then print("ERROR:Frame index out of range") return end
+      local target = find_layer(spr, "${luaEscape(name)}")
+      if not target or target.isGroup then print("ERROR:Layer not found") return end
+      local cel = target:cel(spr.frames[${frameIndex}])
+      if not cel then print("ERROR:No cel at that layer/frame") return end
+      local img = cel.image
+      local pixels = {}
+      for py = 0, img.height - 1 do
+        pixels[py] = {}
+        for px = 0, img.width - 1 do pixels[py][px] = img:getPixel(px, py) end
+      end
+      for py = 0, img.height - 1 do
+        for px = 0, img.width - 1 do
+          ${direction === "horizontal" ? "img:putPixel(px, py, pixels[py][img.width - 1 - px])" : "img:putPixel(px, py, pixels[img.height - 1 - py][px])"}
+        end
+      end
+    `;
+    return result(await this.runLua(this.openScript(source, body), source), `Layer '${name}' flipped ${direction}ly in ${source}`);
+  }
+
+  public async rotateLayer(filename: string, layerName: string, frameIndex: number, angle: 90 | 180 | 270 = 90): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    if (angle !== 90 && angle !== 180 && angle !== 270) return { ok: false, message: "Angle must be 90, 180, or 270" };
+    const rotateBody = angle === 180 ? `
+      local img = cel.image
+      local pixels = {}
+      for py = 0, img.height - 1 do
+        pixels[py] = {}
+        for px = 0, img.width - 1 do pixels[py][px] = img:getPixel(px, py) end
+      end
+      for py = 0, img.height - 1 do
+        for px = 0, img.width - 1 do img:putPixel(px, py, pixels[img.height - 1 - py][img.width - 1 - px]) end
+      end
+    ` : `
+      local img = cel.image
+      local new_img = Image(img.height, img.width, img.colorMode)
+      for py = 0, img.height - 1 do
+        for px = 0, img.width - 1 do
+          ${angle === 90 ? "new_img:putPixel(img.height - 1 - py, px, img:getPixel(px, py))" : "new_img:putPixel(py, img.width - 1 - px, img:getPixel(px, py))"}
+        end
+      end
+      cel.image = new_img
+    `;
+    const body = `
+      if ${frameIndex} > #spr.frames then print("ERROR:Frame index out of range") return end
+      local target = find_layer(spr, "${luaEscape(name)}")
+      if not target or target.isGroup then print("ERROR:Layer not found") return end
+      local cel = target:cel(spr.frames[${frameIndex}])
+      if not cel then print("ERROR:No cel at that layer/frame") return end
+      ${rotateBody}
+    `;
+    return result(await this.runLua(this.openScript(source, body), source), `Layer '${name}' rotated ${angle}° clockwise in ${source}`);
+  }
+
+  public async resizeCanvas(filename: string, width: number, height: number): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (!isPositiveInteger(width) || !isPositiveInteger(height)) return { ok: false, message: "Width and height must be positive integers" };
+    const script = this.openScript(source, `spr:resize(${width}, ${height})`);
+    return result(await this.runLua(script, source), `Canvas resized to ${width}x${height} in ${source}`);
+  }
+
+  public async cropCanvas(filename: string, x: number, y: number, width: number, height: number): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (![x, y].every(Number.isInteger)) return { ok: false, message: "Crop coordinates must be integers" };
+    if (!isPositiveInteger(width) || !isPositiveInteger(height)) return { ok: false, message: "Width and height must be positive integers" };
+    const script = this.openScript(source, `
+      if ${x} >= spr.width or ${y} >= spr.height or ${x + width} <= 0 or ${y + height} <= 0 then print("ERROR:Crop rect is fully outside the canvas") return end
+      spr:crop(${x}, ${y}, ${width}, ${height})
+    `);
+    return result(await this.runLua(script, source), `Canvas cropped to (${x},${y}) ${width}x${height} in ${source}`);
+  }
+
   public async outlineNative(filename: string, layerName = "", frameIndex = 1, color = "#000000", place = "outside", matrix = "circle"): Promise<AsepriteResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
