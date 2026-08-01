@@ -175,7 +175,7 @@ test("server capabilities report the current typed runtime and complete tool cou
     assert.match(capabilities.nodeVersion ?? "", /^v?24\./);
     assert.equal(capabilities.toolCount, capabilities.tools?.length);
     assert.deepEqual([...capabilities.tools ?? []].sort(), [...registeredTools].sort());
-    assert.equal(capabilities.migrationStatus, "complete");
+    assert.equal(capabilities.migrationStatus, "in_progress");
   } finally {
     await client.close();
   }

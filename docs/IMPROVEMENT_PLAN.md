@@ -32,7 +32,7 @@ Las abstracciones no contienen nombres de SDK, Aseprite, Node, HTTP ni filesyste
 - jobs cancelables para operaciones largas;
 - manifiestos compactos y recursos MCP.
 
-Ya están disponibles el planificador determinista `suggest_enhancement_plan`, la ejecución segura `apply_enhancement_plan` y los jobs asíncronos `start_asset_job`, `get_asset_job_status` y `cancel_asset_job`. La ejecución escribe un PNG/GIF separado, conserva la fuente y aplica pasadas reproducibles de limpieza, granularidad, flujo de agua, iluminación, partículas y transición temporal. La extracción del registro legacy continuará por slices para evitar una migración riesgosa de una sola vez.
+Ya están disponibles el planificador determinista `suggest_enhancement_plan`, la ejecución segura `apply_enhancement_plan` y los jobs asíncronos `start_asset_job`, `get_asset_job_status` y `cancel_asset_job`. La ejecución escribe un PNG/GIF separado, conserva la fuente y aplica pasadas reproducibles de limpieza, granularidad, flujo de agua, iluminación, partículas y transición temporal. El registro MCP ya está separado para assets raster, generación visual, capas/frames, dibujo, exportación/animación y paletas/transformaciones; la extracción de los grupos restantes continuará por slices.
 
 ### Fase 3 · Persistencia y observabilidad
 
