@@ -67,6 +67,8 @@ test("rejects traversal in every input sprite path before starting Aseprite", as
     gateway.setLayerBlendMode("../sprite.aseprite", "Layer", "normal"),
     gateway.mergeLayerDown("../sprite.aseprite", "Layer"),
     gateway.flattenSprite("../sprite.aseprite"),
+    gateway.outlineCel("../sprite.aseprite", "Layer", 1),
+    gateway.replaceColor("../sprite.aseprite", "Layer", 1, "#000000", "#ffffff"),
     gateway.setTag("../sprite.aseprite", "idle", 1, 1),
     gateway.createTilemapLayer("../sprite.aseprite", "Tiles", 16, 16),
     gateway.validateScene("../sprite.aseprite", ["Layer"]),
@@ -268,6 +270,18 @@ test("rejects invalid layer management contracts before starting Aseprite", asyn
   assert.equal(badReorderPosition.message, "Position must be a positive integer");
   assert.match(badBlendMode.message, /Unsupported blend mode: not-a-mode/);
   assert.equal(badMergeName.message, "Layer name cannot be empty");
+});
+
+test("rejects invalid legacy FX contracts before starting Aseprite", async () => {
+  const badOutlineColor = await gateway.outlineCel("sprite.aseprite", "Layer", 1, "invalid");
+  const badOutlineFrame = await gateway.outlineCel("sprite.aseprite", "Layer", 0);
+  const badReplaceColor = await gateway.replaceColor("sprite.aseprite", "Layer", 1, "invalid", "#ffffff");
+  const badTolerance = await gateway.replaceColor("sprite.aseprite", "Layer", 1, "#000000", "#ffffff", 256);
+
+  assert.equal(badOutlineColor.message, "Colors must use hexadecimal values");
+  assert.equal(badOutlineFrame.message, "Frame index must be a positive integer");
+  assert.equal(badReplaceColor.message, "Colors must use hexadecimal values");
+  assert.equal(badTolerance.message, "Tolerance must be between 0 and 255");
 });
 
 test("rejects invalid tag frame ranges before starting Aseprite", async () => {

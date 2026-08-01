@@ -239,6 +239,14 @@ export class AsepriteAssetService {
     return this.gateway.invertColors(filename, layerName, frameIndex, x, y, width, height);
   }
 
+  public outlineCel(filename: string, layerName: string, frameIndex: number, color = "#000000", includeDiagonals = false): Promise<AsepriteResult> {
+    return this.gateway.outlineCel(filename, layerName, frameIndex, color, includeDiagonals);
+  }
+
+  public replaceColor(filename: string, layerName: string, frameIndex: number, fromColor: string, toColor: string, tolerance = 0): Promise<AsepriteResult> {
+    return this.gateway.replaceColor(filename, layerName, frameIndex, fromColor, toColor, tolerance);
+  }
+
   public applyConvolution(filename: string, matrix: string, layerName = "", frameIndex = 1, x = 0, y = 0, width = 0, height = 0): Promise<AsepriteResult> {
     return this.gateway.applyConvolution(filename, matrix, layerName, frameIndex, x, y, width, height);
   }

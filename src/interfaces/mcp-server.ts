@@ -70,6 +70,8 @@ const TOOL_NAMES = [
   "adjust_hsl_native",
   "adjust_brightness_contrast",
   "invert_colors",
+  "outline_cel",
+  "replace_color",
   "apply_convolution",
   "list_convolution_matrices",
   "apply_dither_gradient",
@@ -456,6 +458,16 @@ export class AsepriteMcpServerAdapter {
       description: "Apply Aseprite native color inversion.",
       inputSchema: { filename: z.string().min(1), layer_name: z.string().default(""), frame_index: z.number().int().positive().default(1), x: z.number().int().default(0), y: z.number().int().default(0), width: z.number().int().nonnegative().default(0), height: z.number().int().nonnegative().default(0) },
     }, async ({ filename, layer_name, frame_index, x, y, width, height }) => this.result(await this.assets.invertColors(filename, layer_name, frame_index, x, y, width, height)));
+
+    this.server.registerTool("outline_cel", {
+      description: "Add a one-pixel outline around opaque cel pixels.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(), color: z.string().regex(HEX_COLOR).default("#000000"), include_diagonals: z.boolean().default(false) },
+    }, async ({ filename, layer_name, frame_index, color, include_diagonals }) => this.result(await this.assets.outlineCel(filename, layer_name, frame_index, color, include_diagonals)));
+
+    this.server.registerTool("replace_color", {
+      description: "Replace a cel color while preserving alpha and allowing channel tolerance.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(), from_color: z.string().regex(HEX_COLOR), to_color: z.string().regex(HEX_COLOR), tolerance: z.number().int().min(0).max(255).default(0) },
+    }, async ({ filename, layer_name, frame_index, from_color, to_color, tolerance }) => this.result(await this.assets.replaceColor(filename, layer_name, frame_index, from_color, to_color, tolerance)));
 
     this.server.registerTool("apply_convolution", {
       description: "Apply a built-in Aseprite convolution matrix to a layer and frame.",

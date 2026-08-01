@@ -1511,6 +1511,76 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Inverted colours on ${layerName || "active layer"} in ${source}`);
   }
 
+  public async outlineCel(filename: string, layerName: string, frameIndex: number, color = "#000000", includeDiagonals = false): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    const rgba = this.parseHexColor(color);
+    if (!rgba) return { ok: false, message: "Colors must use hexadecimal values" };
+    const [red, green, blue] = rgba;
+    const body = this.layerFrameScript(name, frameIndex, false, `
+      local img = cel.image
+      local src = img:clone()
+      local outline = Color(${red}, ${green}, ${blue}, 255)
+      local function opaque(px, py)
+        if px < 0 or py < 0 or px >= src.width or py >= src.height then return false end
+        return app.pixelColor.rgbaA(src:getPixel(px, py)) > 0
+      end
+      for py = 0, img.height - 1 do
+        for px = 0, img.width - 1 do
+          if app.pixelColor.rgbaA(src:getPixel(px, py)) == 0 then
+            local touch = opaque(px - 1, py) or opaque(px + 1, py) or opaque(px, py - 1) or opaque(px, py + 1)
+            if not touch and ${includeDiagonals ? "true" : "false"} then
+              touch = opaque(px - 1, py - 1) or opaque(px + 1, py - 1) or opaque(px - 1, py + 1) or opaque(px + 1, py + 1)
+            end
+            if touch then img:putPixel(px, py, outline) end
+          end
+        end
+      end
+    `);
+    return result(await this.runLua(this.openScript(source, body), source), `Outline added to '${name}' frame ${frameIndex} in ${source}`);
+  }
+
+  public async replaceColor(filename: string, layerName: string, frameIndex: number, fromColor: string, toColor: string, tolerance = 0): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    if (!Number.isInteger(tolerance) || tolerance < 0 || tolerance > 255) return { ok: false, message: "Tolerance must be between 0 and 255" };
+    const from = this.parseHexColor(fromColor);
+    const to = this.parseHexColor(toColor);
+    if (!from || !to) return { ok: false, message: "Colors must use hexadecimal values" };
+    const [fromRed, fromGreen, fromBlue] = from;
+    const [toRed, toGreen, toBlue] = to;
+    const body = this.layerFrameScript(name, frameIndex, false, `
+      local count = 0
+      local img = cel.image
+      for py = 0, img.height - 1 do
+        for px = 0, img.width - 1 do
+          local value = img:getPixel(px, py)
+          local alpha = app.pixelColor.rgbaA(value)
+          if alpha > 0 then
+            local redDistance = math.abs(app.pixelColor.rgbaR(value) - ${fromRed})
+            local greenDistance = math.abs(app.pixelColor.rgbaG(value) - ${fromGreen})
+            local blueDistance = math.abs(app.pixelColor.rgbaB(value) - ${fromBlue})
+            if redDistance <= ${tolerance} and greenDistance <= ${tolerance} and blueDistance <= ${tolerance} then
+              img:putPixel(px, py, app.pixelColor.rgba(${toRed}, ${toGreen}, ${toBlue}, alpha))
+              count = count + 1
+            end
+          end
+        end
+      end
+      print("COUNT:" .. count)
+    `);
+    const command = await this.runLua(this.openScript(source, body), source);
+    if (!command.ok) return { ok: false, message: command.output };
+    const count = command.output.split(/\r?\n/).find((line) => line.startsWith("COUNT:"))?.slice(6) ?? "?";
+    return { ok: true, message: `Replaced ${count} pixels ${fromColor} -> ${toColor} on '${name}' frame ${frameIndex} in ${source}` };
+  }
+
   public async applyConvolution(filename: string, matrix: string, layerName = "", frameIndex = 1, x = 0, y = 0, width = 0, height = 0): Promise<AsepriteResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
