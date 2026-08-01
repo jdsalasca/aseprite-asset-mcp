@@ -19,6 +19,7 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
   const exportedFrame = path.join(directory, "hero-frame.png");
   const exportedLayers = path.join(directory, "layers");
   const exportedTag = path.join(directory, "hero-idle.gif");
+  const onionRender = path.join(directory, "hero-onion.png");
   const gateway = new AsepriteCliGateway({ executable: asepritePath });
 
   try {
@@ -66,6 +67,7 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
       await gateway.deleteTag(source, "idle"),
       await gateway.deleteFrame(source, 4),
       await gateway.setOnionSkin(source, true, 2, 2, 128),
+      await gateway.renderOnionSkin(source, 2, onionRender, 1, 1, 2, 100),
       await gateway.validateScene(source, ["body"], 1, 3),
       await gateway.exportSpritesheet({
         filename: source,
@@ -75,6 +77,11 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
       }),
     ];
     for (const step of steps) assert.equal(step.ok, true, step.message);
+    const comparison = await gateway.compareFrames(source, 1, 2);
+    assert.equal(comparison.ok, true, comparison.message);
+    const metrics = JSON.parse(comparison.message) as { changedPixels?: number; totalPixels?: number; bounds?: unknown };
+    assert.equal(typeof metrics.changedPixels, "number");
+    assert.equal(typeof metrics.totalPixels, "number");
     const missingCel = await gateway.drawPixelsAt(source, "reference", 3, [{ x: 0, y: 0, color: "#ffffff" }], false);
     assert.equal(missingCel.ok, false);
     assert.equal(missingCel.message, "Cel not found");
@@ -86,6 +93,7 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
     assert.equal(existsSync(exportedFrame), true);
     assert.ok(existsSync(exportedLayers));
     assert.equal(existsSync(exportedTag), true);
+    assert.equal(existsSync(onionRender), true);
   } finally {
     await fs.rm(directory, { recursive: true, force: true });
   }

@@ -53,6 +53,8 @@ const TOOL_NAMES = [
   "delete_frame",
   "delete_tag",
   "set_onion_skin",
+  "render_onion_skin",
+  "compare_frames",
   "set_tag",
   "create_tilemap_layer",
   "validate_scene",
@@ -350,6 +352,16 @@ export class AsepriteMcpServerAdapter {
       description: "Validate onion-skin settings for batch workflows; Aseprite UI-only settings are reported explicitly.",
       inputSchema: { filename: z.string().min(1), enabled: z.boolean().default(true), before: z.number().int().nonnegative().default(2), after: z.number().int().nonnegative().default(2), opacity: z.number().int().min(0).max(255).default(128) },
     }, async ({ filename, enabled, before, after, opacity }) => this.result(await this.assets.setOnionSkin(filename, enabled, before, after, opacity)));
+
+    this.server.registerTool("render_onion_skin", {
+      description: "Render neighboring animation frames as translucent onion-skin ghosts into a PNG.",
+      inputSchema: { filename: z.string().min(1), frame_index: z.number().int().positive(), output_filename: z.string().min(1), before: z.number().int().nonnegative().default(1), after: z.number().int().nonnegative().default(1), scale: z.number().int().min(1).max(64).default(4), ghost_opacity: z.number().int().min(0).max(255).default(100) },
+    }, async ({ filename, frame_index, output_filename, before, after, scale, ghost_opacity }) => this.result(await this.assets.renderOnionSkin(filename, frame_index, output_filename, before, after, scale, ghost_opacity)));
+
+    this.server.registerTool("compare_frames", {
+      description: "Compare two flattened animation frames and return changed-pixel metrics as JSON.",
+      inputSchema: { filename: z.string().min(1), frame_a: z.number().int().positive(), frame_b: z.number().int().positive() },
+    }, async ({ filename, frame_a, frame_b }) => this.result(await this.assets.compareFrames(filename, frame_a, frame_b)));
 
     this.server.registerTool("set_tag", {
       description: "Create or update an animation tag.",
