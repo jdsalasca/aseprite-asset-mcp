@@ -643,6 +643,28 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(this.openScript(source, body), source), `Gradient applied on '${name}' frame ${frameIndex} in ${source}`);
   }
 
+  public async drawEllipseAt(filename: string, layerName: string, frameIndex: number, centerX: number, centerY: number, radiusX: number, radiusY: number, color = "#000000", fill = false, createIfMissing = true): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    if (![centerX, centerY].every((coordinate) => Number.isInteger(coordinate))) return { ok: false, message: "Coordinates must be integers" };
+    if (!isPositiveInteger(radiusX) || !isPositiveInteger(radiusY)) return { ok: false, message: "Radius X and radius Y must be positive integers" };
+    const rgba = this.parseHexColor(color);
+    if (!rgba) return { ok: false, message: "Colors must use hexadecimal values" };
+    const [red, green, blue, alpha] = rgba;
+    const tool = fill ? "filled_ellipse" : "ellipse";
+    const body = this.layerFrameScript(name, frameIndex, createIfMissing, `
+      app.useTool({
+        tool = "${tool}",
+        color = Color(${red}, ${green}, ${blue}, ${alpha}),
+        points = { Point(${centerX - radiusX}, ${centerY - radiusY}), Point(${centerX + radiusX}, ${centerY + radiusY}) }
+      })
+    `);
+    return result(await this.runLua(this.openScript(source, body), source), `Ellipse drawn on '${name}' frame ${frameIndex} in ${source}`);
+  }
+
   public async setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction = "forward"): Promise<AsepriteResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
@@ -736,6 +758,55 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(command, `Sprite sheet exported to ${output}`);
   }
 
+  public async exportSprite(filename: string, outputFilename: string, format = "png"): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const output = validatePath(outputFilename);
+    if (typeof output !== "string") return output;
+    const normalizedFormat = format.trim().toLowerCase();
+    if (!/^[a-z0-9]+$/.test(normalizedFormat)) return { ok: false, message: "Format must contain only letters and numbers" };
+    const target = output.toLowerCase().endsWith(`.${normalizedFormat}`) ? output : `${output}.${normalizedFormat}`;
+    const command = await this.commandRunner(["--batch", source, "--save-as", target]);
+    if (!command.ok) return result(command, `Sprite exported to ${target}`);
+    const produced = await this.findProducedOutput(target);
+    if (!produced) return { ok: false, message: "Aseprite exited successfully but did not create the exported sprite" };
+    if (produced !== target) await fs.rename(produced, target);
+    return { ok: true, message: `Sprite exported successfully to ${target}` };
+  }
+
+  public async copySprite(filename: string, outputFilename: string, overwrite = false): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const output = validatePath(outputFilename);
+    if (typeof output !== "string") return output;
+    const target = output.toLowerCase().endsWith(".aseprite") ? output : `${output}.aseprite`;
+    if (!overwrite && await this.findProducedOutput(target)) return { ok: false, message: `Output file ${target} already exists` };
+    const script = `
+      if not app.activeSprite then print("ERROR:No active sprite") return end
+      app.activeSprite:saveAs("${luaEscape(target.replaceAll("\\", "/"))}")
+    `;
+    const command = await this.runLua(script, source);
+    if (!command.ok) return result(command, `Sprite copied to ${target}`);
+    if (!(await this.findProducedOutput(target))) return { ok: false, message: "Aseprite exited successfully but did not create the copied sprite" };
+    return { ok: true, message: `Sprite copied to ${target}` };
+  }
+
+  public async exportFrame(filename: string, frameIndex: number, outputFilename: string, scale = 1): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const output = validatePath(outputFilename);
+    if (typeof output !== "string") return output;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    if (!Number.isInteger(scale) || scale < 1 || scale > 64) return { ok: false, message: "Scale must be between 1 and 64" };
+    const target = output.toLowerCase().endsWith(".png") ? output : `${output}.png`;
+    const command = await this.commandRunner(["--batch", source, "--frame-range", `${frameIndex - 1},${frameIndex - 1}`, "--scale", String(scale), "--save-as", target]);
+    if (!command.ok) return result(command, `Frame ${frameIndex} exported to ${target}`);
+    const produced = await this.findProducedOutput(target);
+    if (!produced) return { ok: false, message: `Export reported success but ${target} was not created` };
+    if (produced !== target) await fs.rename(produced, target);
+    return { ok: true, message: `Frame ${frameIndex} exported to ${target} at ${scale}x` };
+  }
+
   private async resolveTagRange(filename: string, tagName: string): Promise<CommandResult> {
     const script = `
       local spr = app.activeSprite
@@ -752,6 +823,24 @@ export class AsepriteCliGateway implements AsepriteGateway {
     if (!command.ok) return command;
     const line = command.output.split(/\r?\n/).find((entry) => entry.startsWith("RANGE:"));
     return line ? { ok: true, output: line.slice("RANGE:".length) } : { ok: false, output: "Tag range was not returned by Aseprite" };
+  }
+
+  private async findProducedOutput(target: string): Promise<string | undefined> {
+    try {
+      await fs.access(target);
+      return target;
+    } catch {
+      const directory = path.dirname(target);
+      const extension = path.extname(target).toLowerCase();
+      const base = path.basename(target, path.extname(target));
+      try {
+        const entries = await fs.readdir(directory);
+        const sibling = entries.find((entry) => entry.toLowerCase().startsWith(base.toLowerCase()) && path.extname(entry).toLowerCase() === extension);
+        return sibling ? path.join(directory, sibling) : undefined;
+      } catch {
+        return undefined;
+      }
+    }
   }
 
   private layerScript(filename: string, body: string): string {

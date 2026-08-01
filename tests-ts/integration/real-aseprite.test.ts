@@ -14,6 +14,9 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
   const source = path.join(directory, "hero.aseprite");
   const sheet = path.join(directory, "hero.png");
   const metadata = path.join(directory, "hero.json");
+  const exportedSprite = path.join(directory, "hero-copy.png");
+  const copiedSprite = path.join(directory, "hero-copy.aseprite");
+  const exportedFrame = path.join(directory, "hero-frame.png");
   const gateway = new AsepriteCliGateway({ executable: asepritePath });
 
   try {
@@ -36,6 +39,10 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
       await gateway.drawPolygon(source, "body", 2, [{ x: 2, y: 12 }, { x: 6, y: 8 }, { x: 10, y: 12 }], "#ff8800", true, true),
       await gateway.drawPath(source, "body", 2, [{ x: 1, y: 14 }, { x: 8, y: 10 }, { x: 14, y: 14 }], "#00ff00", 1, true),
       await gateway.applyGradientRect(source, "body", 2, 2, 2, 8, 4, "#0000ff", "#ff00ff", true, true),
+      await gateway.drawEllipseAt(source, "body", 2, 8, 8, 4, 2, "#ffffff", false, true),
+      await gateway.exportSprite(source, exportedSprite, "png"),
+      await gateway.copySprite(source, copiedSprite),
+      await gateway.exportFrame(source, 2, exportedFrame, 2),
       await gateway.setFrame(source, 2),
       await gateway.setFrameDuration(source, 2, 150),
       await gateway.setFrameDurationAll(source, 120),
@@ -58,6 +65,9 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
     assert.equal(existsSync(source), true);
     assert.equal(existsSync(sheet), true);
     assert.equal(existsSync(metadata), true);
+    assert.equal(existsSync(exportedSprite), true);
+    assert.equal(existsSync(copiedSprite), true);
+    assert.equal(existsSync(exportedFrame), true);
   } finally {
     await fs.rm(directory, { recursive: true, force: true });
   }

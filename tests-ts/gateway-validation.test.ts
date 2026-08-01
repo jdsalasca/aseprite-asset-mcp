@@ -29,6 +29,10 @@ test("rejects traversal in every input sprite path before starting Aseprite", as
     gateway.drawPolygon("../sprite.aseprite", "Layer", 1, [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }]),
     gateway.drawPath("../sprite.aseprite", "Layer", 1, [{ x: 0, y: 0 }, { x: 1, y: 1 }]),
     gateway.applyGradientRect("../sprite.aseprite", "Layer", 1, 0, 0, 2, 2, "#000000", "#ffffff"),
+    gateway.drawEllipseAt("../sprite.aseprite", "Layer", 1, 0, 0, 1, 1),
+    gateway.exportSprite("../sprite.aseprite", "output.png"),
+    gateway.copySprite("../sprite.aseprite", "output.aseprite"),
+    gateway.exportFrame("../sprite.aseprite", 1, "output.png"),
     gateway.setTag("../sprite.aseprite", "idle", 1, 1),
     gateway.createTilemapLayer("../sprite.aseprite", "Tiles", 16, 16),
     gateway.validateScene("../sprite.aseprite", ["Layer"]),
@@ -101,6 +105,20 @@ test("rejects invalid polygon, path, and gradient contracts before starting Asep
   assert.equal(badPoint.message, "Point coordinates must be integers");
   assert.equal(badGradientSize.message, "Width and height must be positive integers");
   assert.equal(badGradientColor.message, "Colors must use hexadecimal values");
+});
+
+test("rejects invalid ellipse and export contracts before starting Aseprite", async () => {
+  const badEllipse = await gateway.drawEllipseAt("sprite.aseprite", "Layer", 1, 0, 0, 0, 1);
+  const badFormat = await gateway.exportSprite("sprite.aseprite", "output", "bad/format");
+  const badCopy = await gateway.copySprite("sprite.aseprite", "../output.aseprite");
+  const badFrame = await gateway.exportFrame("sprite.aseprite", 0, "output.png");
+  const badScale = await gateway.exportFrame("sprite.aseprite", 1, "output.png", 65);
+
+  assert.equal(badEllipse.message, "Radius X and radius Y must be positive integers");
+  assert.equal(badFormat.message, "Format must contain only letters and numbers");
+  assert.equal(badCopy.message, "Parent directory traversal is not allowed");
+  assert.equal(badFrame.message, "Frame index must be a positive integer");
+  assert.equal(badScale.message, "Scale must be between 1 and 64");
 });
 
 test("rejects invalid tag frame ranges before starting Aseprite", async () => {

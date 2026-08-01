@@ -35,6 +35,10 @@ const TOOL_NAMES = [
   "draw_polygon",
   "draw_path",
   "apply_gradient_rect",
+  "draw_ellipse_at",
+  "export_sprite",
+  "copy_sprite",
+  "export_frame",
   "set_tag",
   "create_tilemap_layer",
   "validate_scene",
@@ -238,6 +242,30 @@ export class AsepriteMcpServerAdapter {
         color_start: z.string().regex(HEX_COLOR), color_end: z.string().regex(HEX_COLOR), horizontal: z.boolean().default(true), create_if_missing: z.boolean().default(true),
       },
     }, async ({ filename, layer_name, frame_index, x, y, width, height, color_start, color_end, horizontal, create_if_missing }) => this.result(await this.assets.applyGradientRect(filename, layer_name, frame_index, x, y, width, height, color_start, color_end, horizontal, create_if_missing)));
+
+    this.server.registerTool("draw_ellipse_at", {
+      description: "Draw a filled or outlined ellipse on a named layer and animation frame.",
+      inputSchema: {
+        filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(),
+        center_x: z.number().int(), center_y: z.number().int(), radius_x: z.number().int().positive(), radius_y: z.number().int().positive(),
+        color: z.string().regex(HEX_COLOR).default("#000000"), fill: z.boolean().default(false), create_if_missing: z.boolean().default(true),
+      },
+    }, async ({ filename, layer_name, frame_index, center_x, center_y, radius_x, radius_y, color, fill, create_if_missing }) => this.result(await this.assets.drawEllipseAt(filename, layer_name, frame_index, center_x, center_y, radius_x, radius_y, color, fill, create_if_missing)));
+
+    this.server.registerTool("export_sprite", {
+      description: "Export a sprite to a selected image format and confirm that Aseprite wrote an output file.",
+      inputSchema: { filename: z.string().min(1), output_filename: z.string().min(1), format: z.string().regex(/^[a-z0-9]+$/i).default("png") },
+    }, async ({ filename, output_filename, format }) => this.result(await this.assets.exportSprite(filename, output_filename, format)));
+
+    this.server.registerTool("copy_sprite", {
+      description: "Copy a sprite to another Aseprite document, refusing to overwrite by default.",
+      inputSchema: { filename: z.string().min(1), output_filename: z.string().min(1), overwrite: z.boolean().default(false) },
+    }, async ({ filename, output_filename, overwrite }) => this.result(await this.assets.copySprite(filename, output_filename, overwrite)));
+
+    this.server.registerTool("export_frame", {
+      description: "Export one animation frame as a PNG with nearest-neighbor integer scaling.",
+      inputSchema: { filename: z.string().min(1), frame_index: z.number().int().positive(), output_filename: z.string().min(1), scale: z.number().int().min(1).max(64).default(1) },
+    }, async ({ filename, frame_index, output_filename, scale }) => this.result(await this.assets.exportFrame(filename, frame_index, output_filename, scale)));
 
     this.server.registerTool("set_tag", {
       description: "Create or update an animation tag.",

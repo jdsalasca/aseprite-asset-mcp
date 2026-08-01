@@ -26,6 +26,10 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("draw_polygon"));
     assert.ok(tools.includes("draw_path"));
     assert.ok(tools.includes("apply_gradient_rect"));
+    assert.ok(tools.includes("draw_ellipse_at"));
+    assert.ok(tools.includes("export_sprite"));
+    assert.ok(tools.includes("copy_sprite"));
+    assert.ok(tools.includes("export_frame"));
     assert.ok(tools.includes("set_frame"));
     assert.ok(tools.includes("draw_rectangle"));
     assert.ok(tools.includes("create_character_plan"));
@@ -68,6 +72,9 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
   const source = path.join(directory, "primitive.aseprite");
   const sheet = path.join(directory, "primitive.png");
   const metadata = path.join(directory, "primitive.json");
+  const exportedSprite = path.join(directory, "primitive-copy.png");
+  const copiedSprite = path.join(directory, "primitive-copy.aseprite");
+  const exportedFrame = path.join(directory, "primitive-frame.png");
   const client = new AsepriteMcpClient({
     cwd: process.cwd(),
     environment: { ASEPRITE_PATH: asepritePath },
@@ -94,6 +101,10 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
     await call("draw_polygon", { filename: source, layer_name: "body", frame_index: 2, points: [{ x: 2, y: 12 }, { x: 6, y: 8 }, { x: 10, y: 12 }], color: "#ff8800", fill: true });
     await call("draw_path", { filename: source, layer_name: "body", frame_index: 2, points: [{ x: 1, y: 14 }, { x: 8, y: 10 }, { x: 14, y: 14 }], color: "#00ff00", thickness: 1 });
     await call("apply_gradient_rect", { filename: source, layer_name: "body", frame_index: 2, x: 2, y: 2, width: 8, height: 4, color_start: "#0000ff", color_end: "#ff00ff", horizontal: true });
+    await call("draw_ellipse_at", { filename: source, layer_name: "body", frame_index: 2, center_x: 8, center_y: 8, radius_x: 4, radius_y: 2, color: "#ffffff", fill: false });
+    await call("export_sprite", { filename: source, output_filename: exportedSprite, format: "png" });
+    await call("copy_sprite", { filename: source, output_filename: copiedSprite });
+    await call("export_frame", { filename: source, frame_index: 2, output_filename: exportedFrame, scale: 2 });
     await call("export_spritesheet", {
       filename: source,
       output_filename: sheet,
@@ -103,6 +114,9 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
     assert.equal(existsSync(source), true);
     assert.equal(existsSync(sheet), true);
     assert.equal(existsSync(metadata), true);
+    assert.equal(existsSync(exportedSprite), true);
+    assert.equal(existsSync(copiedSprite), true);
+    assert.equal(existsSync(exportedFrame), true);
   } finally {
     await client.close();
     await fs.rm(directory, { recursive: true, force: true });
