@@ -66,6 +66,12 @@ const TOOL_NAMES = [
   "get_color_stats",
   "get_palette",
   "extract_palette",
+  "remap_colors_in_cel_range",
+  "list_palette_presets",
+  "apply_palette_preset",
+  "generate_color_ramp",
+  "quantize_to_palette",
+  "set_color_mode",
   "outline_native",
   "adjust_hsl_native",
   "adjust_brightness_contrast",
@@ -439,6 +445,36 @@ export class AsepriteMcpServerAdapter {
       description: "Extract and persist an optimized palette with a bounded color count.",
       inputSchema: { filename: z.string().min(1), max_colors: z.number().int().min(1).max(256).default(16), with_alpha: z.boolean().default(false) },
     }, async ({ filename, max_colors, with_alpha }) => this.result(await this.assets.extractPalette(filename, max_colors, with_alpha)));
+
+    this.server.registerTool("remap_colors_in_cel_range", {
+      description: "Remap explicit RGB colors across a layer frame range while preserving alpha.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), start_frame: z.number().int().positive(), end_frame: z.number().int().positive(), mappings: z.array(z.object({ from: z.string().regex(HEX_COLOR), to: z.string().regex(HEX_COLOR) })).min(1), create_missing_cels: z.boolean().default(false), source_frame_index: z.number().int().positive().optional() },
+    }, async ({ filename, layer_name, start_frame, end_frame, mappings, create_missing_cels, source_frame_index }) => this.result(await this.assets.remapColorsInCelRange(filename, layer_name, start_frame, end_frame, mappings, create_missing_cels, source_frame_index)));
+
+    this.server.registerTool("list_palette_presets", {
+      description: "List built-in retro palette presets.",
+      inputSchema: {},
+    }, async () => this.result(await this.assets.listPalettePresets()));
+
+    this.server.registerTool("apply_palette_preset", {
+      description: "Apply a built-in retro palette preset to the sprite.",
+      inputSchema: { filename: z.string().min(1), preset: z.string().min(1) },
+    }, async ({ filename, preset }) => this.result(await this.assets.applyPalettePreset(filename, preset)));
+
+    this.server.registerTool("generate_color_ramp", {
+      description: "Generate a hue-shifted dark-to-light pixel-art color ramp.",
+      inputSchema: { base_color: z.string().regex(HEX_COLOR), steps: z.number().int().min(2).max(16).default(5), hue_shift_degrees: z.number().default(20), lightness_range: z.number().min(0).max(1).default(0.5) },
+    }, async ({ base_color, steps, hue_shift_degrees, lightness_range }) => this.result(await this.assets.generateColorRamp(base_color, steps, hue_shift_degrees, lightness_range)));
+
+    this.server.registerTool("quantize_to_palette", {
+      description: "Snap opaque pixels to the nearest color in the active palette.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().default(""), start_frame: z.number().int().positive().default(1), end_frame: z.number().int().nonnegative().default(0) },
+    }, async ({ filename, layer_name, start_frame, end_frame }) => this.result(await this.assets.quantizeToPalette(filename, layer_name, start_frame, end_frame)));
+
+    this.server.registerTool("set_color_mode", {
+      description: "Convert a sprite to RGB, grayscale, or indexed color mode.",
+      inputSchema: { filename: z.string().min(1), mode: z.enum(["rgb", "grayscale", "indexed"]) },
+    }, async ({ filename, mode }) => this.result(await this.assets.setColorMode(filename, mode)));
 
     this.server.registerTool("outline_native", {
       description: "Apply Aseprite native outline to a selected layer and frame.",

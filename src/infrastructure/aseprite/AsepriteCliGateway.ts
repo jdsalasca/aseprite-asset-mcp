@@ -37,6 +37,52 @@ const BLEND_MODES: Record<string, string> = {
   color: "BlendMode.HSL_COLOR",
   luminosity: "BlendMode.HSL_LUMINOSITY",
 };
+const PALETTE_PRESETS: Record<string, string[]> = {
+  gameboy: ["#0F380F", "#306230", "#8BAC0F", "#9BBC0F"],
+  monochrome: ["#000000", "#FFFFFF"],
+  grayscale_4: ["#000000", "#555555", "#AAAAAA", "#FFFFFF"],
+  cga: ["#000000", "#55FFFF", "#FF55FF", "#FFFFFF"],
+  pico8: ["#000000", "#1D2B53", "#7E2553", "#008751", "#AB5236", "#5F574F", "#C2C3C7", "#FFF1E8", "#FF004D", "#FFA300", "#FFEC27", "#00E436", "#29ADFF", "#83769C", "#FF77A8", "#FFCCAA"],
+  c64: ["#000000", "#FFFFFF", "#880000", "#AAFFEE", "#CC44CC", "#00CC55", "#0000AA", "#EEEE77", "#DD8855", "#664400", "#FF7777", "#333333", "#777777", "#AAFF66", "#0088FF", "#BBBBBB"],
+  dawnbringer16: ["#140C1C", "#442434", "#30346D", "#4E4A4E", "#854C30", "#346524", "#D04648", "#757161", "#597DCE", "#D27D2C", "#8595A1", "#6DAA2C", "#D2AA99", "#6DC2CA", "#DAD45E", "#DEEED6"],
+  dawnbringer32: ["#000000", "#222034", "#45283C", "#663931", "#8F563B", "#DF7126", "#D9A066", "#EEC39A", "#FBF236", "#99E550", "#6ABE30", "#37946E", "#4B692F", "#524B24", "#323C39", "#3F3F74", "#306082", "#5B6EE1", "#639BFF", "#5FCDE4", "#CBDBFC", "#FFFFFF", "#9BADB7", "#847E87", "#696A6A", "#595652", "#76428A", "#AC3232", "#D95763", "#D77BBA", "#8F974A", "#8A6F30"],
+};
+
+function rgbToHsl(red: number, green: number, blue: number): [number, number, number] {
+  red /= 255; green /= 255; blue /= 255;
+  const max = Math.max(red, green, blue);
+  const min = Math.min(red, green, blue);
+  const lightness = (max + min) / 2;
+  if (max === min) return [0, 0, lightness];
+  const delta = max - min;
+  const saturation = lightness > 0.5 ? delta / (2 - max - min) : delta / (max + min);
+  let hue: number;
+  if (max === red) hue = (green - blue) / delta + (green < blue ? 6 : 0);
+  else if (max === green) hue = (blue - red) / delta + 2;
+  else hue = (red - green) / delta + 4;
+  return [hue / 6, saturation, lightness];
+}
+
+function hslToHex(hue: number, saturation: number, lightness: number): string {
+  if (saturation === 0) {
+    const value = Math.floor(lightness * 255 + 0.5);
+    return `#${value.toString(16).padStart(2, "0")}${value.toString(16).padStart(2, "0")}${value.toString(16).padStart(2, "0")}`.toUpperCase();
+  }
+  const hueToRgb = (p: number, q: number, t: number): number => {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+  };
+  const q = lightness < 0.5 ? lightness * (1 + saturation) : lightness + saturation - lightness * saturation;
+  const p = 2 * lightness - q;
+  const red = Math.floor(hueToRgb(p, q, hue + 1 / 3) * 255 + 0.5);
+  const green = Math.floor(hueToRgb(p, q, hue) * 255 + 0.5);
+  const blue = Math.floor(hueToRgb(p, q, hue - 1 / 3) * 255 + 0.5);
+  return `#${red.toString(16).padStart(2, "0")}${green.toString(16).padStart(2, "0")}${blue.toString(16).padStart(2, "0")}`.toUpperCase();
+}
 const CONVOLUTION_MATRICES = new Set([
   "brightness", "contrast", "negative",
   "blur-3x3", "blur-3x3-hard", "blur-5x5", "blur-7x7", "blur-9x9", "blur-17x17",
@@ -1460,6 +1506,162 @@ export class AsepriteCliGateway implements AsepriteGateway {
     if (!command.ok) return result(command, "Palette extraction failed");
     const colors = command.output.split(/\r?\n/).filter((line) => line.startsWith("PALETTE:")).map((line) => line.slice(8));
     return colors.length ? { ok: true, message: JSON.stringify({ colors, count: colors.length }) } : { ok: false, message: "Palette extraction returned no colors" };
+  }
+
+  public async remapColorsInCelRange(filename: string, layerName: string, startFrame: number, endFrame: number, mappings: Array<{ from: string; to: string }>, createMissingCels = false, sourceFrameIndex?: number): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    const rangeError = validateFrameRange(startFrame, endFrame);
+    if (rangeError) return { ok: false, message: rangeError };
+    if (!Array.isArray(mappings) || mappings.length === 0) return { ok: false, message: "Mappings list cannot be empty" };
+    if (sourceFrameIndex !== undefined && !isPositiveInteger(sourceFrameIndex)) return { ok: false, message: "Source frame index must be a positive integer" };
+    const parsedMappings: number[][] = [];
+    for (const mapping of mappings) {
+      const from = this.parseHexColor(mapping.from);
+      const to = this.parseHexColor(mapping.to);
+      if (!from || !to) return { ok: false, message: "Mappings must use hexadecimal values" };
+      parsedMappings.push([from[0], from[1], from[2], to[0], to[1], to[2]]);
+    }
+    const map = parsedMappings.map((mapping) => `{${mapping.join(",")}}`).join(", ");
+    const sourceIndex = sourceFrameIndex ?? startFrame;
+    const script = this.openScript(source, `
+      if ${endFrame} > #spr.frames then print("ERROR:Frame range out of bounds") return end
+      if ${sourceIndex} < 1 or ${sourceIndex} > #spr.frames then print("ERROR:Source frame out of range") return end
+      local target = find_layer(spr, "${luaEscape(name)}")
+      if not target or target.isGroup then print("ERROR:Layer not found") return end
+      local mappings = { ${map} }
+      for frameIndex = ${startFrame}, ${endFrame} do
+        local cel = target:cel(spr.frames[frameIndex])
+        if not cel and ${createMissingCels ? "true" : "false"} then
+          local sourceCel = target:cel(spr.frames[${sourceIndex}])
+          if sourceCel then cel = spr:newCel(target, spr.frames[frameIndex], sourceCel.image:clone(), sourceCel.position)
+          else cel = spr:newCel(target, spr.frames[frameIndex], Image(spr.width, spr.height, spr.colorMode), Point(0, 0)) end
+        end
+        if cel then
+          local img = cel.image
+          for py = 0, img.height - 1 do
+            for px = 0, img.width - 1 do
+              local value = img:getPixel(px, py)
+              local alpha = app.pixelColor.rgbaA(value)
+              if alpha > 0 then
+                local red, green, blue = app.pixelColor.rgbaR(value), app.pixelColor.rgbaG(value), app.pixelColor.rgbaB(value)
+                for _, mapping in ipairs(mappings) do
+                  if red == mapping[1] and green == mapping[2] and blue == mapping[3] then
+                    img:putPixel(px, py, app.pixelColor.rgba(mapping[4], mapping[5], mapping[6], alpha))
+                    break
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    `);
+    return result(await this.runLua(script, source), `Remapped colors on '${name}' frames ${startFrame}-${endFrame} in ${source}`);
+  }
+
+  public async listPalettePresets(): Promise<AsepriteResult> {
+    return { ok: true, message: JSON.stringify(PALETTE_PRESETS) };
+  }
+
+  public async applyPalettePreset(filename: string, preset: string): Promise<AsepriteResult> {
+    const colors = PALETTE_PRESETS[preset.trim().toLowerCase()];
+    if (!colors) return { ok: false, message: `Unknown palette preset: ${preset}` };
+    const applied = await this.setPalette(filename, colors);
+    return applied.ok ? { ok: true, message: `Palette preset '${preset}' (${colors.length} colors) applied to ${filename}` } : applied;
+  }
+
+  public async generateColorRamp(baseColor: string, steps = 5, hueShiftDegrees = 20, lightnessRange = 0.5): Promise<AsepriteResult> {
+    const rgb = this.parseHexColor(baseColor);
+    if (!rgb) return { ok: false, message: "Colors must use hexadecimal values" };
+    if (!Number.isInteger(steps) || steps < 2 || steps > 16) return { ok: false, message: "Steps must be between 2 and 16" };
+    if (!Number.isFinite(hueShiftDegrees)) return { ok: false, message: "Hue shift must be a finite number" };
+    if (!Number.isFinite(lightnessRange) || lightnessRange < 0 || lightnessRange > 1) return { ok: false, message: "Lightness range must be between 0 and 1" };
+    const [hue, saturation, lightness] = rgbToHsl(rgb[0], rgb[1], rgb[2]);
+    const middle = (steps - 1) / 2;
+    const ramp = Array.from({ length: steps }, (_, index) => {
+      const t = (index - middle) / (steps - 1);
+      const shiftedHue = ((hue - t * (hueShiftDegrees / 360)) % 1 + 1) % 1;
+      const shiftedLightness = Math.min(1, Math.max(0, lightness + t * lightnessRange));
+      const shiftedSaturation = Math.min(1, Math.max(0, saturation - t * 0.15));
+      return hslToHex(shiftedHue, shiftedSaturation, shiftedLightness);
+    });
+    return { ok: true, message: JSON.stringify(ramp) };
+  }
+
+  public async quantizeToPalette(filename: string, layerName = "", startFrame = 1, endFrame = 0): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (!isPositiveInteger(startFrame) || !Number.isInteger(endFrame) || endFrame < 0 || (endFrame > 0 && endFrame < startFrame)) return { ok: false, message: "Frame range must start at 1 and end at or after the start" };
+    const lastFrame = endFrame > 0 ? endFrame : "#spr.frames";
+    const escapedLayer = luaEscape(layerName);
+    const script = this.openScript(source, `
+      local palette = spr.palettes[1]
+      if not palette or #palette == 0 then print("ERROR:No palette") return end
+      if ${startFrame} < 1 or ${lastFrame} > #spr.frames then print("ERROR:Frame range out of bounds") return end
+      local layers = {}
+      if "${escapedLayer}" ~= "" then
+        local target = find_layer(spr, "${escapedLayer}")
+        if not target or target.isGroup then print("ERROR:Layer not found") return end
+        table.insert(layers, target)
+      else
+        for _, layer in ipairs(spr.layers) do if layer.isImage then table.insert(layers, layer) end end
+      end
+      local colors = {}
+      for index = 0, #palette - 1 do local color = palette:getColor(index) table.insert(colors, {color.red, color.green, color.blue}) end
+      local cache = {}
+      local function nearest(red, green, blue)
+        local key = red * 65536 + green * 256 + blue
+        if cache[key] then return cache[key] end
+        local best, bestDistance = colors[1], math.huge
+        for _, color in ipairs(colors) do
+          local dr, dg, db = red - color[1], green - color[2], blue - color[3]
+          local distance = dr * dr + dg * dg + db * db
+          if distance < bestDistance then best, bestDistance = color, distance end
+        end
+        cache[key] = best
+        return best
+      end
+      local count = 0
+      for _, layer in ipairs(layers) do
+        for frameIndex = ${startFrame}, ${lastFrame} do
+          local cel = layer:cel(spr.frames[frameIndex])
+          if cel then
+            local img = cel.image
+            for py = 0, img.height - 1 do
+              for px = 0, img.width - 1 do
+                local value = img:getPixel(px, py)
+                local alpha = app.pixelColor.rgbaA(value)
+                if alpha > 0 then
+                  local red, green, blue = app.pixelColor.rgbaR(value), app.pixelColor.rgbaG(value), app.pixelColor.rgbaB(value)
+                  local nearestColor = nearest(red, green, blue)
+                  if nearestColor[1] ~= red or nearestColor[2] ~= green or nearestColor[3] ~= blue then
+                    img:putPixel(px, py, app.pixelColor.rgba(nearestColor[1], nearestColor[2], nearestColor[3], alpha))
+                    count = count + 1
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+      print("COUNT:" .. count)
+    `);
+    const command = await this.runLua(script, source);
+    if (!command.ok) return { ok: false, message: command.output };
+    const count = command.output.split(/\r?\n/).find((line) => line.startsWith("COUNT:"))?.slice(6) ?? "?";
+    return { ok: true, message: `Quantized ${count} pixels to the palette in ${source}` };
+  }
+
+  public async setColorMode(filename: string, mode: string): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const normalizedMode = mode.trim().toLowerCase();
+    if (!["rgb", "grayscale", "indexed"].includes(normalizedMode)) return { ok: false, message: "Mode must be 'rgb', 'grayscale', or 'indexed'" };
+    const script = this.openScript(source, `app.command.ChangePixelFormat { format = "${normalizedMode}" }`);
+    return result(await this.runLua(script, source), `Color mode set to ${normalizedMode} in ${source}`);
   }
 
   public async outlineNative(filename: string, layerName = "", frameIndex = 1, color = "#000000", place = "outside", matrix = "circle"): Promise<AsepriteResult> {

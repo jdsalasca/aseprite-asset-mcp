@@ -186,6 +186,13 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
     await call("duplicate_layer", { filename: source, layer_name: "body", new_name: "body-copy-reordered" });
     await call("reorder_layer", { filename: source, layer_name: "body-copy-reordered", position: 1 });
     await call("delete_layer", { filename: source, layer_name: "scratch-renamed" });
+    await call("remap_colors_in_cel_range", { filename: source, layer_name: "body", start_frame: 1, end_frame: 1, mappings: [{ from: "#112233", to: "#abcdef" }], create_missing_cels: true, source_frame_index: 1 });
+    await call("list_palette_presets", {});
+    await call("apply_palette_preset", { filename: source, preset: "gameboy" });
+    await call("generate_color_ramp", { base_color: "#D04648", steps: 5 });
+    await call("quantize_to_palette", { filename: source, layer_name: "body", start_frame: 1, end_frame: 1 });
+    await call("set_color_mode", { filename: source, mode: "grayscale" });
+    await call("set_color_mode", { filename: source, mode: "rgb" });
     await call("flatten_sprite", { filename: source });
     await call("export_spritesheet", {
       filename: source,

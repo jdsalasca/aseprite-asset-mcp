@@ -95,12 +95,25 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
       await gateway.duplicateLayer(source, "body", "body-copy-reordered"),
       await gateway.reorderLayer(source, "body-copy-reordered", 1),
       await gateway.deleteLayer(source, "scratch-renamed"),
+      await gateway.remapColorsInCelRange(source, "body", 1, 3, [{ from: "#112233", to: "#abcdef" }], true, 2),
+      await gateway.listPalettePresets(),
+      await gateway.applyPalettePreset(source, "gameboy"),
+      await gateway.generateColorRamp("#D04648", 5, 20, 0.5),
+      await gateway.quantizeToPalette(source, "body", 1, 3),
+      await gateway.setColorMode(source, "grayscale"),
+      await gateway.setColorMode(source, "rgb"),
     ];
     for (const [index, step] of steps.entries()) assert.equal(step.ok, true, `step ${index}: ${step.message}`);
     const matricesResult = await gateway.listConvolutionMatrices();
     assert.equal(matricesResult.ok, true, matricesResult.message);
     const matrices = JSON.parse(matricesResult.message) as string[];
     assert.ok(matrices.includes("blur-3x3"));
+    const presets = await gateway.listPalettePresets();
+    assert.equal(presets.ok, true, presets.message);
+    assert.ok(JSON.parse(presets.message).gameboy);
+    const ramp = await gateway.generateColorRamp("#D04648", 5);
+    assert.equal(ramp.ok, true, ramp.message);
+    assert.equal(JSON.parse(ramp.message).length, 5);
     const comparison = await gateway.compareFrames(source, 1, 2);
     assert.equal(comparison.ok, true, comparison.message);
     const metrics = JSON.parse(comparison.message) as { changedPixels?: number; totalPixels?: number; bounds?: unknown };
