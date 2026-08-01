@@ -307,6 +307,22 @@ export class AsepriteAssetService {
     return this.gateway.eraseColor(filename, layerName, frameIndex, color, tolerance);
   }
 
+  public flipLayer(filename: string, layerName: string, frameIndex: number, direction: "horizontal" | "vertical" = "horizontal"): Promise<AsepriteResult> {
+    return this.gateway.flipLayer(filename, layerName, frameIndex, direction);
+  }
+
+  public rotateLayer(filename: string, layerName: string, frameIndex: number, angle: 90 | 180 | 270 = 90): Promise<AsepriteResult> {
+    return this.gateway.rotateLayer(filename, layerName, frameIndex, angle);
+  }
+
+  public resizeCanvas(filename: string, width: number, height: number): Promise<AsepriteResult> {
+    return this.gateway.resizeCanvas(filename, width, height);
+  }
+
+  public cropCanvas(filename: string, x: number, y: number, width: number, height: number): Promise<AsepriteResult> {
+    return this.gateway.cropCanvas(filename, x, y, width, height);
+  }
+
   public applyConvolution(filename: string, matrix: string, layerName = "", frameIndex = 1, x = 0, y = 0, width = 0, height = 0): Promise<AsepriteResult> {
     return this.gateway.applyConvolution(filename, matrix, layerName, frameIndex, x, y, width, height);
   }

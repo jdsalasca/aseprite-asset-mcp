@@ -80,6 +80,10 @@ const TOOL_NAMES = [
   "copy_region",
   "erase_region",
   "erase_color",
+  "flip_layer",
+  "rotate_layer",
+  "resize_canvas",
+  "crop_canvas",
   "outline_native",
   "adjust_hsl_native",
   "adjust_brightness_contrast",
@@ -523,6 +527,26 @@ export class AsepriteMcpServerAdapter {
       description: "Erase opaque pixels matching a color within channel tolerance.",
       inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(), color: z.string().regex(HEX_COLOR), tolerance: z.number().int().min(0).max(255).default(0) },
     }, async ({ filename, layer_name, frame_index, color, tolerance }) => this.result(await this.assets.eraseColor(filename, layer_name, frame_index, color, tolerance)));
+
+    this.server.registerTool("flip_layer", {
+      description: "Flip a layer cel horizontally or vertically.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(), direction: z.enum(["horizontal", "vertical"]).default("horizontal") },
+    }, async ({ filename, layer_name, frame_index, direction }) => this.result(await this.assets.flipLayer(filename, layer_name, frame_index, direction)));
+
+    this.server.registerTool("rotate_layer", {
+      description: "Rotate a layer cel 90, 180, or 270 degrees clockwise.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(), angle: z.union([z.literal(90), z.literal(180), z.literal(270)]).default(90) },
+    }, async ({ filename, layer_name, frame_index, angle }) => this.result(await this.assets.rotateLayer(filename, layer_name, frame_index, angle)));
+
+    this.server.registerTool("resize_canvas", {
+      description: "Resize the sprite canvas and its content.",
+      inputSchema: { filename: z.string().min(1), width: z.number().int().positive(), height: z.number().int().positive() },
+    }, async ({ filename, width, height }) => this.result(await this.assets.resizeCanvas(filename, width, height)));
+
+    this.server.registerTool("crop_canvas", {
+      description: "Crop the sprite canvas to a rectangle.",
+      inputSchema: { filename: z.string().min(1), x: z.number().int(), y: z.number().int(), width: z.number().int().positive(), height: z.number().int().positive() },
+    }, async ({ filename, x, y, width, height }) => this.result(await this.assets.cropCanvas(filename, x, y, width, height)));
 
     this.server.registerTool("outline_native", {
       description: "Apply Aseprite native outline to a selected layer and frame.",
