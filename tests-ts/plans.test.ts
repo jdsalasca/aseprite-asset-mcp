@@ -27,3 +27,8 @@ test("invalid specs fail before an MCP process can be started", () => {
   assert.throws(() => buildCharacterPlan({ assetId: "", width: 0 }), /assetId/);
   assert.throws(() => buildScenePlan({ assetId: "map", animations: [{ name: "broken", fromFrame: 3, toFrame: 1 }] }), /invalid frame range/);
 });
+
+test("workflow plans reject blank layer names before execution", () => {
+  assert.throws(() => buildCharacterPlan({ assetId: "hero", layers: ["body", ""] }), /layer name cannot be empty/);
+  assert.throws(() => buildScenePlan({ assetId: "harbor", layers: ["background", "   "] }), /layer name cannot be empty/);
+});

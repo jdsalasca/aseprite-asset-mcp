@@ -12,13 +12,48 @@ interface CommandResult {
   output: string;
 }
 
+type PathValidation = string | AsepriteResult;
+
+const SHEET_TYPES = new Set(["horizontal", "vertical", "rows", "columns", "packed"]);
+const DATA_FORMATS = new Set(["json-array", "json-hash"]);
+
 function luaEscape(value: string): string {
   return value.replaceAll("\\", "\\\\").replaceAll('"', '\\"').replaceAll("\n", "\\n").replaceAll("\r", "\\r").replaceAll("\0", "\\0");
 }
 
 function safePath(value: string): string {
-  const normalized = path.normalize(value).replaceAll("\\", "/");
-  if (normalized.split("/").includes("..")) throw new Error("Parent directory traversal is not allowed");
+  const segments = value.replaceAll("\\", "/").split("/");
+  if (segments.includes("..")) throw new Error("Parent directory traversal is not allowed");
+  if (value.includes("\0")) throw new Error("Null bytes are not allowed in paths");
+  return value;
+}
+
+function validatePath(value: string): PathValidation {
+  if (typeof value !== "string" || !value.trim()) return { ok: false, message: "Path cannot be empty" };
+  try {
+    return safePath(value);
+  } catch (error) {
+    return { ok: false, message: error instanceof Error ? error.message : String(error) };
+  }
+}
+
+function isPositiveInteger(value: number): boolean {
+  return Number.isInteger(value) && value > 0;
+}
+
+function validateFrameRange(fromFrame: number, toFrame: number): string | undefined {
+  if (!Number.isInteger(fromFrame) || !Number.isInteger(toFrame) || fromFrame < 1 || toFrame < fromFrame) {
+    return "Frame range must start at 1 and end at or after the start";
+  }
+  return undefined;
+}
+
+function isHexColor(value: string): boolean {
+  return typeof value === "string" && /^#?(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(value.trim());
+}
+
+function validateName(value: string, label: string): string | AsepriteResult {
+  if (typeof value !== "string" || !value.trim()) return { ok: false, message: `${label} cannot be empty` };
   return value;
 }
 
@@ -30,25 +65,31 @@ function result(command: CommandResult, successMessage: string): AsepriteResult 
 export interface AsepriteCliGatewayOptions {
   executable?: string;
   tempDirectory?: string;
+  commandRunner?: (args: string[]) => Promise<CommandResult>;
 }
 
 export class AsepriteCliGateway implements AsepriteGateway {
   private readonly executable: string;
   private readonly tempDirectory: string;
+  private readonly commandRunner: (args: string[]) => Promise<CommandResult>;
 
   public constructor(options: AsepriteCliGatewayOptions = {}) {
     this.executable = options.executable ?? process.env.ASEPRITE_PATH ?? "aseprite";
     this.tempDirectory = options.tempDirectory ?? os.tmpdir();
+    this.commandRunner = options.commandRunner ?? ((args) => this.run(args));
   }
 
   public async createCanvas(width: number, height: number, filename: string): Promise<AsepriteResult> {
-    if (width <= 0 || height <= 0) return { ok: false, message: "Width and height must be > 0" };
-    const target = safePath(filename);
+    if (!isPositiveInteger(width) || !isPositiveInteger(height)) return { ok: false, message: "Width and height must be positive integers" };
+    const target = validatePath(filename);
+    if (typeof target !== "string") return target;
     const script = `local spr = Sprite(${width}, ${height})\nspr:saveAs("${luaEscape(target.replaceAll("\\", "/"))}")\nprint("OK")`;
     return result(await this.runLua(script), `Canvas created successfully: ${filename}`);
   }
 
   public async addGroup(filename: string, groupName: string, parentGroup = ""): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
     const script = this.layerScript(filename, `
       local group = spr:newGroup()
       group.name = "${luaEscape(groupName)}"
@@ -62,6 +103,8 @@ export class AsepriteCliGateway implements AsepriteGateway {
   }
 
   public async addLayer(filename: string, layerName: string, group = ""): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
     const script = this.layerScript(filename, `
       local parent = nil
       if "${luaEscape(group)}" ~= "" then
@@ -75,8 +118,18 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, filename), `Layer '${layerName}' added to ${filename}`);
   }
 
+  public async addFrame(filename: string): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const script = this.openScript(filename, "spr:newFrame()");
+    return result(await this.runLua(script, filename), `New frame added to ${filename}`);
+  }
+
   public async addFrames(filename: string, count: number, durationMs?: number): Promise<AsepriteResult> {
-    if (count < 1) return { ok: false, message: "Count must be >= 1" };
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (!isPositiveInteger(count)) return { ok: false, message: "Count must be a positive integer" };
+    if (durationMs !== undefined && !isPositiveInteger(durationMs)) return { ok: false, message: "Duration must be a positive integer" };
     const duration = durationMs && durationMs > 0 ? `spr.frames[#spr.frames].duration = ${durationMs} / 1000.0` : "";
     const script = this.openScript(filename, `
       for i = 1, ${count} do
@@ -87,8 +140,73 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, filename), `Added ${count} frames to ${filename}`);
   }
 
+  public async setFrame(filename: string, frameIndex: number): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    const script = this.openScript(filename, `
+      if ${frameIndex} > #spr.frames then print("ERROR:Frame index out of range") return end
+      app.activeFrame = spr.frames[${frameIndex}]
+    `);
+    return result(await this.runLua(script, filename), `Active frame set to ${frameIndex} in ${filename}`);
+  }
+
+  public async setFrameDuration(filename: string, frameIndex: number, durationMs: number): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    if (!isPositiveInteger(durationMs)) return { ok: false, message: "Duration must be a positive integer" };
+    const script = this.openScript(filename, `
+      if ${frameIndex} > #spr.frames then print("ERROR:Frame index out of range") return end
+      spr.frames[${frameIndex}].duration = ${durationMs} / 1000.0
+    `);
+    return result(await this.runLua(script, filename), `Frame ${frameIndex} duration set to ${durationMs}ms in ${filename}`);
+  }
+
+  public async setFrameDurationAll(filename: string, durationMs: number): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (!isPositiveInteger(durationMs)) return { ok: false, message: "Duration must be a positive integer" };
+    const script = this.openScript(filename, `
+      for i = 1, #spr.frames do
+        spr.frames[i].duration = ${durationMs} / 1000.0
+      end
+    `);
+    return result(await this.runLua(script, filename), `All frame durations set to ${durationMs}ms in ${filename}`);
+  }
+
+  public async setLayerVisibility(filename: string, layerName: string, visible = true): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    const script = this.openScript(filename, `
+      local target = find_layer(spr, "${luaEscape(name)}")
+      if not target then print("ERROR:Layer not found") return end
+      target.isVisible = ${visible ? "true" : "false"}
+    `);
+    return result(await this.runLua(script, filename), `Layer '${name}' visibility set to ${visible} in ${filename}`);
+  }
+
+  public async setLayerOpacity(filename: string, layerName: string, opacity: number): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (!Number.isInteger(opacity) || opacity < 0 || opacity > 255) return { ok: false, message: "Opacity must be between 0 and 255" };
+    const script = this.openScript(filename, `
+      local target = find_layer(spr, "${luaEscape(name)}")
+      if not target then print("ERROR:Layer not found") return end
+      target.opacity = ${opacity}
+    `);
+    return result(await this.runLua(script, filename), `Layer '${name}' opacity set to ${opacity} in ${filename}`);
+  }
+
   public async setPalette(filename: string, colors: string[]): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
     if (!colors.length) return { ok: false, message: "Colors list cannot be empty" };
+    if (colors.some((color) => !isHexColor(color))) return { ok: false, message: "Colors must use hexadecimal values" };
     const luaColors = colors.map((color) => `Color("${luaEscape(color)}")`).join(", ");
     const script = this.openScript(filename, `
       local palette = Palette(0, ${colors.length})
@@ -120,6 +238,10 @@ export class AsepriteCliGateway implements AsepriteGateway {
   }
 
   public async setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction = "forward"): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const rangeError = validateFrameRange(fromFrame, toFrame);
+    if (rangeError) return { ok: false, message: rangeError };
     const directions: Record<string, string> = { forward: "AniDir.FORWARD", reverse: "AniDir.REVERSE", pingpong: "AniDir.PING_PONG", pingpong_reverse: "AniDir.PING_PONG_REVERSE" };
     const luaDirection = directions[direction];
     if (!luaDirection) return { ok: false, message: `Unsupported direction: ${direction}` };
@@ -137,7 +259,9 @@ export class AsepriteCliGateway implements AsepriteGateway {
   }
 
   public async createTilemapLayer(filename: string, layerName: string, tileWidth: number, tileHeight: number): Promise<AsepriteResult> {
-    if (tileWidth <= 0 || tileHeight <= 0) return { ok: false, message: "Tile dimensions must be > 0" };
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (!isPositiveInteger(tileWidth) || !isPositiveInteger(tileHeight)) return { ok: false, message: "Tile dimensions must be positive integers" };
     const script = this.openScript(filename, `
       spr.gridBounds = Rectangle(0, 0, ${tileWidth}, ${tileHeight})
       app.command.NewLayer { tilemap = true }
@@ -147,7 +271,12 @@ export class AsepriteCliGateway implements AsepriteGateway {
   }
 
   public async validateScene(filename: string, requiredLayers: string[], startFrame = 1, endFrame?: number): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
     if (!requiredLayers.length) return { ok: false, message: "Required layers list cannot be empty" };
+    if (!Number.isInteger(startFrame) || startFrame < 1 || (endFrame !== undefined && (!Number.isInteger(endFrame) || endFrame < startFrame))) {
+      return { ok: false, message: "Frame range must start at 1 and end at or after the start" };
+    }
     const layerList = `{${requiredLayers.map((layer) => `"${luaEscape(layer)}"`).join(",")}}`;
     const lastFrame = endFrame ?? "#spr.frames";
     const script = this.openScript(filename, `
@@ -161,20 +290,43 @@ export class AsepriteCliGateway implements AsepriteGateway {
   }
 
   public async exportSpritesheet(input: Parameters<AsepriteGateway["exportSpritesheet"]>[0]): Promise<AsepriteResult> {
-    const output = safePath(input.outputFilename);
+    const source = validatePath(input.filename);
+    if (typeof source !== "string") return source;
+    const output = validatePath(input.outputFilename);
+    if (typeof output !== "string") return output;
+    if (!SHEET_TYPES.has(input.sheetType ?? "horizontal")) return { ok: false, message: `Unsupported spritesheet type: ${input.sheetType}` };
+    if (!Number.isInteger(input.scale ?? 1) || (input.scale ?? 1) < 1 || (input.scale ?? 1) > 64) return { ok: false, message: "Scale must be between 1 and 64" };
+    if (!Number.isInteger(input.padding ?? 0) || (input.padding ?? 0) < 0) return { ok: false, message: "Padding must be a non-negative integer" };
+    if (!DATA_FORMATS.has(input.dataFormat ?? "json-array")) return { ok: false, message: `Unsupported data format: ${input.dataFormat}` };
+    const data = input.dataFilename ? validatePath(input.dataFilename) : undefined;
+    if (data !== undefined && typeof data !== "string") return data;
     const args = ["--batch"];
     if (input.tagName) {
       const range = await this.resolveTagRange(input.filename, input.tagName);
       if (!range.ok) return { ok: false, message: range.output };
       args.push("--frame-range", range.output);
     }
-    args.push(input.filename, "--sheet-type", input.sheetType ?? "horizontal");
+    args.push(source, "--sheet-type", input.sheetType ?? "horizontal");
     if ((input.scale ?? 1) > 1) args.push("--scale", String(input.scale));
     if ((input.padding ?? 0) > 0) args.push("--shape-padding", String(input.padding));
-    if (input.dataFilename) args.push("--data", safePath(input.dataFilename), "--format", input.dataFormat ?? "json-array");
+    if (data) args.push("--data", data, "--format", input.dataFormat ?? "json-array");
     if (input.listTags) args.push("--list-tags");
     args.push("--sheet", output);
-    const command = await this.run(args);
+    const command = await this.commandRunner(args);
+    if (command.ok) {
+      try {
+        await fs.access(output);
+      } catch {
+        return { ok: false, message: "Aseprite exited successfully but did not create the spritesheet" };
+      }
+      if (data) {
+        try {
+          await fs.access(data);
+        } catch {
+          return { ok: false, message: "Aseprite exited successfully but did not create the metadata file" };
+        }
+      }
+    }
     return result(command, `Sprite sheet exported to ${output}`);
   }
 
@@ -235,7 +387,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
       const args = ["--batch"];
       if (filename) args.push(filename);
       args.push("--script", temporary);
-      return await this.run(args);
+      return await this.commandRunner(args);
     } finally {
       await fs.rm(temporary, { force: true });
     }

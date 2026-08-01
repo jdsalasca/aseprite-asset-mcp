@@ -50,6 +50,11 @@ export class AsepriteMcpClient {
     return available.tools.map((tool) => tool.name);
   }
 
+  public async callTool(name: string, arguments_: Record<string, unknown> = {}) {
+    if (!this.transport) await this.connect();
+    return this.client.callTool({ name, arguments: arguments_ });
+  }
+
   public async close(): Promise<void> {
     await this.client.close();
     this.transport = undefined;

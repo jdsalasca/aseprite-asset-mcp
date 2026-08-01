@@ -38,6 +38,12 @@ function positiveInteger(value: number | undefined, fallback: number, label: str
   return resolved;
 }
 
+function validateLayerNames(layers: string[], workflow: string): void {
+  for (const layer of layers) {
+    if (typeof layer !== "string" || !layer.trim()) throw new Error(`${workflow} layer name cannot be empty`);
+  }
+}
+
 function normalizeAnimations(
   animations: AnimationTagSpec[] | undefined,
   defaults: AnimationTagSpec[],
@@ -145,6 +151,7 @@ export function buildCharacterPlan(spec: CharacterSpec): WorkflowPlan {
   const layers = spec.layers ?? ["silhouette", "body", "details", "fx"];
   const animations = normalizeAnimations(spec.animations, DEFAULT_CHARACTER_ANIMATIONS);
   if (!layers.length) throw new Error("Character layers cannot be empty");
+  validateLayerNames(layers, "Character");
 
   const calls: ToolCall[] = [
     call("create_canvas", { width, height, filename: sourceFile }, "Create a reproducible pixel-art canvas"),
@@ -188,6 +195,7 @@ export function buildScenePlan(spec: SceneSpec): WorkflowPlan {
   const layers = spec.layers ?? ["background", "terrain", "props", "collision", "foreground"];
   const animations = normalizeAnimations(spec.animations, DEFAULT_SCENE_ANIMATIONS);
   if (!layers.length) throw new Error("Scene layers cannot be empty");
+  validateLayerNames(layers, "Scene");
 
   const calls: ToolCall[] = [
     call("create_canvas", { width, height, filename: sourceFile }, "Create the scene canvas"),

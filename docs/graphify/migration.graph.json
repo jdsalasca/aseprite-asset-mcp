@@ -1,0 +1,1413 @@
+{
+  "schemaVersion": 1,
+  "project": "aseprite-mcp",
+  "goal": "complete-typescript-migration",
+  "generatedAt": "2026-08-01T05:29:17.038Z",
+  "source": {
+    "repository": "https://github.com/diivi/aseprite-mcp",
+    "branch": "upstream/main",
+    "commit": "90d1696a7e41edff89bbd0823ae6a5f86c114bcc"
+  },
+  "local": {
+    "branch": "codex/migrate/bug-hunt-validation",
+    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-bug-hunt",
+    "baseCommit": "4032357e2da086b4da3a3d31ac17c26d257b6861",
+    "typescriptToolCount": 18,
+    "testCount": 13
+  },
+  "tools": [
+    {
+      "name": "render_onion_skin",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "core",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "compare_frames",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "animation",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "get_color_stats",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "palette",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "add_frames",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "verified",
+      "domain": "animation",
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts"
+      ],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "set_frame_duration_all",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "verified",
+      "domain": "animation",
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts"
+      ],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "set_layer_visibility",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "verified",
+      "domain": "layers",
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts"
+      ],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "set_layer_opacity",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "verified",
+      "domain": "layers",
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts"
+      ],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "get_sprite_info",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "core",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "duplicate_frame_range",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "animation",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "set_cel_position",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "animation",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "tween_cel_positions",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "animation",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "offset_cel_positions",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "animation",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "create_cel",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "animation",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "clear_cel",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "animation",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "copy_cel",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "animation",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "copy_frame",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "animation",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "propagate_frame_to_range",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "animation",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "set_tag",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "verified",
+      "domain": "animation",
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts"
+      ],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "set_onion_skin",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "core",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "propagate_cels",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "animation",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "tween_cel_positions_eased",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "animation",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "oscillate_cel_positions",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "animation",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "tween_cel_opacity_eased",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "animation",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "tween_cel_scale_eased",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "animation",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "delete_frame",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "animation",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "delete_tag",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "animation",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "set_cel_opacity",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "animation",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "create_canvas",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "verified",
+      "domain": "core",
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts"
+      ],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "add_layer",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "verified",
+      "domain": "layers",
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts"
+      ],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "add_group",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "verified",
+      "domain": "layers",
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts"
+      ],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "add_frame",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "verified",
+      "domain": "animation",
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts"
+      ],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "set_frame",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "verified",
+      "domain": "animation",
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts"
+      ],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "set_frame_duration",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "verified",
+      "domain": "animation",
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts"
+      ],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "set_layer",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "layers",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "draw_pixels",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "drawing",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "draw_line",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "drawing",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "draw_rectangle",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "drawing",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "fill_area",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "drawing",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "draw_circle",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "drawing",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "draw_pixels_at",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "drawing",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "draw_line_at",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "drawing",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "draw_rectangle_at",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "drawing",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "draw_circle_at",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "drawing",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "fill_area_at",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "drawing",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "draw_polygon",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "drawing",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "draw_path",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "drawing",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "apply_gradient_rect",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "core",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "draw_ellipse_at",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "drawing",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "export_sprite",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "export",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "copy_sprite",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "core",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "export_frame",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "animation",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "export_spritesheet",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "verified",
+      "domain": "export",
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts"
+      ],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "export_layers",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "layers",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "export_tag",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "animation",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "import_image_as_layer",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "layers",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "outline_cel",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "animation",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "replace_color",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "palette",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "adjust_hsl",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "core",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "apply_dither_gradient",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "core",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "apply_dither_pattern",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "core",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "animation_workflow_guide",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "animation",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "delete_layer",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "layers",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "rename_layer",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "layers",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "duplicate_layer",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "layers",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "reorder_layer",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "layers",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "set_layer_blend_mode",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "layers",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "merge_layer_down",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "layers",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "flatten_sprite",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "core",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "outline_native",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "core",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "adjust_hsl_native",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "core",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "adjust_brightness_contrast",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "core",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "invert_colors",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "palette",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "apply_convolution",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "core",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "list_convolution_matrices",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "core",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "extract_palette",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "palette",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "get_palette",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "palette",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "set_palette",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "verified",
+      "domain": "palette",
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts"
+      ],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "remap_colors_in_cel_range",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "animation",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "list_palette_presets",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "palette",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "apply_palette_preset",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "palette",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "generate_color_ramp",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "palette",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "quantize_to_palette",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "palette",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "set_color_mode",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "palette",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "get_pixel_color",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "palette",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "get_pixels_rect",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "core",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "get_composite_pixel",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "core",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "get_composite_rect",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "core",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "start_preview_server",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "preview",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "stop_preview_server",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "preview",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "ensure_layers_present",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "layers",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "validate_scene",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "verified",
+      "domain": "quality",
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts"
+      ],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "audit_animation",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "animation",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "animation_sanitize",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "animation",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "copy_layers_between_sprites",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "layers",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "run_lua_script",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "core",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "move_region",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "selection",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "copy_region",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "selection",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "erase_region",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "drawing",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "erase_color",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "drawing",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "create_slice",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "slices",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "set_slice_center",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "slices",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "set_slice_pivot",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "slices",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "list_slices",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "slices",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "delete_slice",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "slices",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "list_text_fonts",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "text",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "measure_text",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "text",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "draw_text",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "drawing",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "create_tilemap_layer",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "verified",
+      "domain": "layers",
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts"
+      ],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "draw_on_tile",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "drawing",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "set_tiles",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "tilemap",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "get_tile_at",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "tilemap",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "get_tilemap_info",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "tilemap",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "flip_layer",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "layers",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "rotate_layer",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "layers",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "resize_canvas",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "core",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    },
+    {
+      "name": "crop_canvas",
+      "source": "upstream",
+      "target": "typescript",
+      "status": "pending",
+      "domain": "core",
+      "tests": [],
+      "dependencies": [],
+      "commit": null,
+      "evidence": []
+    }
+  ],
+  "nodes": [
+    {
+      "id": "mcp-schemas",
+      "type": "mcp-schemas",
+      "status": "planned"
+    },
+    {
+      "id": "asset-service",
+      "type": "application-service",
+      "status": "implemented"
+    },
+    {
+      "id": "aseprite-gateway",
+      "type": "adapter",
+      "status": "implemented"
+    },
+    {
+      "id": "unit-tests",
+      "type": "unit-tests",
+      "status": "verified"
+    },
+    {
+      "id": "integration-tests",
+      "type": "integration-tests",
+      "status": "verified"
+    },
+    {
+      "id": "e2e-tests",
+      "type": "e2e-tests",
+      "status": "pending"
+    },
+    {
+      "id": "godot-exports",
+      "type": "godot-exports",
+      "status": "planned"
+    },
+    {
+      "id": "harness-moon",
+      "type": "orchestrator-records",
+      "status": "planned"
+    }
+  ],
+  "edges": [
+    [
+      "mcp-schemas",
+      "asset-service"
+    ],
+    [
+      "asset-service",
+      "aseprite-gateway"
+    ],
+    [
+      "aseprite-gateway",
+      "unit-tests"
+    ],
+    [
+      "aseprite-gateway",
+      "integration-tests"
+    ],
+    [
+      "asset-service",
+      "e2e-tests"
+    ],
+    [
+      "export_spritesheet",
+      "godot-exports"
+    ],
+    [
+      "e2e-tests",
+      "harness-moon"
+    ]
+  ]
+}
