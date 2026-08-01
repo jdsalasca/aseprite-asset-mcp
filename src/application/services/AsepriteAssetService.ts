@@ -211,6 +211,22 @@ export class AsepriteAssetService {
     return this.gateway.invertColors(filename, layerName, frameIndex, x, y, width, height);
   }
 
+  public applyConvolution(filename: string, matrix: string, layerName = "", frameIndex = 1, x = 0, y = 0, width = 0, height = 0): Promise<AsepriteResult> {
+    return this.gateway.applyConvolution(filename, matrix, layerName, frameIndex, x, y, width, height);
+  }
+
+  public listConvolutionMatrices(): Promise<AsepriteResult> {
+    return this.gateway.listConvolutionMatrices();
+  }
+
+  public applyDitherGradient(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, colorStart: string, colorEnd: string, horizontal = false, createIfMissing = true): Promise<AsepriteResult> {
+    return this.gateway.applyDitherGradient(filename, layerName, frameIndex, x, y, width, height, colorStart, colorEnd, horizontal, createIfMissing);
+  }
+
+  public applyDitherPattern(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, colorA: string, colorB: string, density = 0.5, createIfMissing = true): Promise<AsepriteResult> {
+    return this.gateway.applyDitherPattern(filename, layerName, frameIndex, x, y, width, height, colorA, colorB, density, createIfMissing);
+  }
+
   public setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction = "forward"): Promise<AsepriteResult> {
     return this.gateway.setTag(filename, name, fromFrame, toFrame, direction);
   }

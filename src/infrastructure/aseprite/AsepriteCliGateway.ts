@@ -16,6 +16,20 @@ type PathValidation = string | AsepriteResult;
 
 const SHEET_TYPES = new Set(["horizontal", "vertical", "rows", "columns", "packed"]);
 const DATA_FORMATS = new Set(["json-array", "json-hash"]);
+const CONVOLUTION_MATRICES = new Set([
+  "brightness", "contrast", "negative",
+  "blur-3x3", "blur-3x3-hard", "blur-5x5", "blur-7x7", "blur-9x9", "blur-17x17",
+  "blur-5x3-left", "blur-17x3-left", "blur-3x17-top",
+  "blur-5x5-diagonal(\\)", "blur-5x5-diagonal(/)",
+  "sharpen-3x3", "sharpen-5x5", "sharpen-7x7",
+  "edges-find", "edges-find-horizontal", "edges-find-vertical",
+  "misc-contour", "misc-texturize", "misc-emboss", "misc-marmolize",
+  "misc-rock", "misc-rock-edges",
+  "drunk-3x3_x", "drunk-3x3_+", "drunk-5x5_x", "drunk-5x5_+",
+  "drunk-7x7_x", "drunk-7x7_+", "drunk-9x9_x", "drunk-9x9_+",
+  "drunk-17x17_x", "drunk-17x17_+", "drunk-17x17_o",
+  "outline-transparent-layer-(cross)", "outline-transparent-layer-(square)",
+]);
 
 function luaEscape(value: string): string {
   return value.replaceAll("\\", "\\\\").replaceAll('"', '\\"').replaceAll("\n", "\\n").replaceAll("\r", "\\r").replaceAll("\0", "\\0");
@@ -1358,6 +1372,94 @@ export class AsepriteCliGateway implements AsepriteGateway {
     const region = width > 0 ? [x, y, width, height] as [number, number, number, number] : undefined;
     const script = this.nativeScript(layerName, frameIndex, "app.command.InvertColor { ui = false }", region);
     return result(await this.runLua(script, source), `Inverted colours on ${layerName || "active layer"} in ${source}`);
+  }
+
+  public async applyConvolution(filename: string, matrix: string, layerName = "", frameIndex = 1, x = 0, y = 0, width = 0, height = 0): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (!CONVOLUTION_MATRICES.has(matrix)) return { ok: false, message: `Unknown convolution matrix: ${matrix}` };
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    const regionError = validateNativeRegion(x, y, width, height);
+    if (regionError) return regionError;
+    const region = width > 0 ? [x, y, width, height] as [number, number, number, number] : undefined;
+    const script = this.nativeScript(layerName, frameIndex, `app.command.ConvolutionMatrix { ui = false, fromResource = "${luaEscape(matrix)}" }`, region);
+    return result(await this.runLua(script, source), `Applied convolution '${matrix}' on ${layerName || "active layer"} in ${source}`);
+  }
+
+  public async listConvolutionMatrices(): Promise<AsepriteResult> {
+    return { ok: true, message: JSON.stringify([...CONVOLUTION_MATRICES].sort()) };
+  }
+
+  public async applyDitherGradient(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, colorStart: string, colorEnd: string, horizontal = false, createIfMissing = true): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    if (![x, y].every((coordinate) => Number.isInteger(coordinate))) return { ok: false, message: "Coordinates must be integers" };
+    if (!isPositiveInteger(width) || !isPositiveInteger(height)) return { ok: false, message: "Width and height must be positive integers" };
+    const start = this.parseHexColor(colorStart);
+    const end = this.parseHexColor(colorEnd);
+    if (!start || !end) return { ok: false, message: "Colors must use hexadecimal values" };
+    const [startRed, startGreen, startBlue, startAlpha] = start;
+    const [endRed, endGreen, endBlue, endAlpha] = end;
+    const body = this.layerFrameScript(name, frameIndex, createIfMissing, `
+      local img = cel.image
+      local function pset(image, px, py, value)
+        if px >= 0 and py >= 0 and px < image.width and py < image.height then image:putPixel(px, py, value) end
+      end
+      local bayer = {
+        { 0, 8, 2, 10 },
+        { 12, 4, 14, 6 },
+        { 3, 11, 1, 9 },
+        { 15, 7, 13, 5 },
+      }
+      for offsetY = 0, ${height - 1} do
+        for offsetX = 0, ${width - 1} do
+          local progress = ${horizontal ? `((${width} > 1) and (offsetX / (${width} - 1)) or 0)` : `((${height} > 1) and (offsetY / (${height} - 1)) or 0)`}
+          local threshold = (bayer[(${y} + offsetY) % 4 + 1][(${x} + offsetX) % 4 + 1] + 0.5) / 16
+          local color = progress >= threshold and Color(${endRed}, ${endGreen}, ${endBlue}, ${endAlpha}) or Color(${startRed}, ${startGreen}, ${startBlue}, ${startAlpha})
+          pset(img, ${x} + offsetX, ${y} + offsetY, color)
+        end
+      end
+    `);
+    return result(await this.runLua(this.openScript(source, body), source), `Dithered gradient applied on '${name}' frame ${frameIndex} in ${source}`);
+  }
+
+  public async applyDitherPattern(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, colorA: string, colorB: string, density = 0.5, createIfMissing = true): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    if (![x, y].every((coordinate) => Number.isInteger(coordinate))) return { ok: false, message: "Coordinates must be integers" };
+    if (!isPositiveInteger(width) || !isPositiveInteger(height)) return { ok: false, message: "Width and height must be positive integers" };
+    if (!Number.isFinite(density) || density < 0 || density > 1) return { ok: false, message: "Density must be between 0 and 1" };
+    const first = this.parseHexColor(colorA);
+    const second = this.parseHexColor(colorB);
+    if (!first || !second) return { ok: false, message: "Colors must use hexadecimal values" };
+    const [firstRed, firstGreen, firstBlue, firstAlpha] = first;
+    const [secondRed, secondGreen, secondBlue, secondAlpha] = second;
+    const body = this.layerFrameScript(name, frameIndex, createIfMissing, `
+      local img = cel.image
+      local function pset(image, px, py, value)
+        if px >= 0 and py >= 0 and px < image.width and py < image.height then image:putPixel(px, py, value) end
+      end
+      local bayer = {
+        { 0, 8, 2, 10 },
+        { 12, 4, 14, 6 },
+        { 3, 11, 1, 9 },
+        { 15, 7, 13, 5 },
+      }
+      for offsetY = 0, ${height - 1} do
+        for offsetX = 0, ${width - 1} do
+          local threshold = (bayer[(${y} + offsetY) % 4 + 1][(${x} + offsetX) % 4 + 1] + 0.5) / 16
+          local color = ${density} > threshold and Color(${secondRed}, ${secondGreen}, ${secondBlue}, ${secondAlpha}) or Color(${firstRed}, ${firstGreen}, ${firstBlue}, ${firstAlpha})
+          pset(img, ${x} + offsetX, ${y} + offsetY, color)
+        end
+      end
+    `);
+    return result(await this.runLua(this.openScript(source, body), source), `Dither pattern applied on '${name}' frame ${frameIndex} in ${source}`);
   }
 
   private nativeScript(layerName: string, frameIndex: number, command: string, region?: [number, number, number, number]): string {

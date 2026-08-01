@@ -2,16 +2,16 @@
   "project": "aseprite-mcp",
   "goal": "complete-typescript-migration",
   "continue": true,
-  "currentPhase": "native-fx",
-  "currentSlice": "native-color-effects",
-  "lastCompletedSlice": "opacity-and-palette-analysis",
-  "nextSlice": "convolution-and-dither-tools",
+  "currentPhase": "convolution-dither",
+  "currentSlice": "convolution-and-dither-tools",
+  "lastCompletedSlice": "native-color-effects",
+  "nextSlice": "layer-management-tools",
   "blocked": false,
   "retryCount": 0,
   "lastEvidence": [
-    "npm test: 26 passed, 0 failed",
+    "npm test: 27 passed, 0 failed",
     "upstream/main inventory: 116 tools",
-    "TypeScript server inventory: 59 tools",
+    "TypeScript server inventory: 63 tools",
     "real Aseprite integration: passed",
     "MCP stdio drawing E2E: passed"
   ]

@@ -2,18 +2,18 @@
   "schemaVersion": 1,
   "project": "aseprite-mcp",
   "goal": "complete-typescript-migration",
-  "generatedAt": "2026-08-01T14:35:36.894Z",
+  "generatedAt": "2026-08-01T14:47:46.842Z",
   "source": {
     "repository": "https://github.com/diivi/aseprite-mcp",
     "branch": "upstream/main",
     "commit": "90d1696a7e41edff89bbd0823ae6a5f86c114bcc"
   },
   "local": {
-    "branch": "codex/migrate/native-fx",
-    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-native-fx",
-    "baseCommit": "d91a87c4bfc73ebaedbc6dd4ed9f9f8348ab93ee",
-    "typescriptToolCount": 59,
-    "testCount": 26
+    "branch": "codex/migrate/convolution-dither",
+    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-convolution-dither",
+    "baseCommit": "030814e6a036defcf0e3889eb13b3cb90e73b95f",
+    "typescriptToolCount": 63,
+    "testCount": 27
   },
   "tools": [
     {
@@ -846,9 +846,13 @@
       "name": "apply_dither_gradient",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "core",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -857,9 +861,13 @@
       "name": "apply_dither_pattern",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "core",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -1016,9 +1024,13 @@
       "name": "apply_convolution",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "core",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -1027,9 +1039,13 @@
       "name": "list_convolution_matrices",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "core",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []

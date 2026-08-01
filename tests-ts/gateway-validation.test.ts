@@ -57,6 +57,9 @@ test("rejects traversal in every input sprite path before starting Aseprite", as
     gateway.adjustHslNative("../sprite.aseprite"),
     gateway.adjustBrightnessContrast("../sprite.aseprite"),
     gateway.invertColors("../sprite.aseprite"),
+    gateway.applyConvolution("../sprite.aseprite", "blur-3x3"),
+    gateway.applyDitherGradient("../sprite.aseprite", "Layer", 1, 0, 0, 2, 2, "#000000", "#ffffff"),
+    gateway.applyDitherPattern("../sprite.aseprite", "Layer", 1, 0, 0, 2, 2, "#000000", "#ffffff"),
     gateway.setTag("../sprite.aseprite", "idle", 1, 1),
     gateway.createTilemapLayer("../sprite.aseprite", "Tiles", 16, 16),
     gateway.validateScene("../sprite.aseprite", ["Layer"]),
@@ -227,6 +230,23 @@ test("rejects invalid native effect contracts before starting Aseprite", async (
   assert.equal(badHsl.message, "Hue must be between -180 and 180");
   assert.equal(badContrast.message, "Brightness and contrast must be between -100 and 100");
   assert.equal(badRegion.message, "Region width and height must both be zero or positive integers");
+});
+
+test("rejects invalid convolution and dithering contracts before starting Aseprite", async () => {
+  const badMatrix = await gateway.applyConvolution("sprite.aseprite", "not-a-matrix");
+  const badConvolutionRegion = await gateway.applyConvolution("sprite.aseprite", "blur-3x3", "Layer", 1, 0, 0, 2, 0);
+  const matrices = await gateway.listConvolutionMatrices();
+  const badGradientSize = await gateway.applyDitherGradient("sprite.aseprite", "Layer", 1, 0, 0, 0, 2, "#000000", "#ffffff");
+  const badGradientColor = await gateway.applyDitherGradient("sprite.aseprite", "Layer", 1, 0, 0, 2, 2, "invalid", "#ffffff");
+  const badPatternDensity = await gateway.applyDitherPattern("sprite.aseprite", "Layer", 1, 0, 0, 2, 2, "#000000", "#ffffff", 1.1);
+
+  assert.equal(badMatrix.message, "Unknown convolution matrix: not-a-matrix");
+  assert.equal(badConvolutionRegion.message, "Region width and height must both be zero or positive integers");
+  assert.equal(matrices.ok, true);
+  assert.match(matrices.message, /blur-3x3/);
+  assert.equal(badGradientSize.message, "Width and height must be positive integers");
+  assert.equal(badGradientColor.message, "Colors must use hexadecimal values");
+  assert.equal(badPatternDensity.message, "Density must be between 0 and 1");
 });
 
 test("rejects invalid tag frame ranges before starting Aseprite", async () => {

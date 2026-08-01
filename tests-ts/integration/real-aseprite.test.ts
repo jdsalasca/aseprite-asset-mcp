@@ -73,6 +73,10 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
       await gateway.adjustHslNative(source, "body", 2, 5, 0, 0),
       await gateway.adjustBrightnessContrast(source, "body", 2, 0, 0),
       await gateway.invertColors(source, "body", 2),
+      await gateway.listConvolutionMatrices(),
+      await gateway.applyConvolution(source, "blur-3x3", "body", 2),
+      await gateway.applyDitherGradient(source, "body", 2, 2, 2, 6, 4, "#000000", "#ffffff", true, true),
+      await gateway.applyDitherPattern(source, "body", 2, 8, 8, 4, 4, "#112233", "#abcdef", 0.5, true),
       await gateway.validateScene(source, ["body"], 1, 3),
       await gateway.exportSpritesheet({
         filename: source,
@@ -82,6 +86,10 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
       }),
     ];
     for (const step of steps) assert.equal(step.ok, true, step.message);
+    const matricesResult = await gateway.listConvolutionMatrices();
+    assert.equal(matricesResult.ok, true, matricesResult.message);
+    const matrices = JSON.parse(matricesResult.message) as string[];
+    assert.ok(matrices.includes("blur-3x3"));
     const comparison = await gateway.compareFrames(source, 1, 2);
     assert.equal(comparison.ok, true, comparison.message);
     const metrics = JSON.parse(comparison.message) as { changedPixels?: number; totalPixels?: number; bounds?: unknown };

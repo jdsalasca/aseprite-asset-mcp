@@ -63,6 +63,10 @@ const TOOL_NAMES = [
   "adjust_hsl_native",
   "adjust_brightness_contrast",
   "invert_colors",
+  "apply_convolution",
+  "list_convolution_matrices",
+  "apply_dither_gradient",
+  "apply_dither_pattern",
   "set_tag",
   "create_tilemap_layer",
   "validate_scene",
@@ -410,6 +414,32 @@ export class AsepriteMcpServerAdapter {
       description: "Apply Aseprite native color inversion.",
       inputSchema: { filename: z.string().min(1), layer_name: z.string().default(""), frame_index: z.number().int().positive().default(1), x: z.number().int().default(0), y: z.number().int().default(0), width: z.number().int().nonnegative().default(0), height: z.number().int().nonnegative().default(0) },
     }, async ({ filename, layer_name, frame_index, x, y, width, height }) => this.result(await this.assets.invertColors(filename, layer_name, frame_index, x, y, width, height)));
+
+    this.server.registerTool("apply_convolution", {
+      description: "Apply a built-in Aseprite convolution matrix to a layer and frame.",
+      inputSchema: { filename: z.string().min(1), matrix: z.string().min(1), layer_name: z.string().default(""), frame_index: z.number().int().positive().default(1), x: z.number().int().default(0), y: z.number().int().default(0), width: z.number().int().nonnegative().default(0), height: z.number().int().nonnegative().default(0) },
+    }, async ({ filename, matrix, layer_name, frame_index, x, y, width, height }) => this.result(await this.assets.applyConvolution(filename, matrix, layer_name, frame_index, x, y, width, height)));
+
+    this.server.registerTool("list_convolution_matrices", {
+      description: "List the built-in convolution matrices supported by Aseprite.",
+      inputSchema: {},
+    }, async () => this.result(await this.assets.listConvolutionMatrices()));
+
+    this.server.registerTool("apply_dither_gradient", {
+      description: "Fill a rectangle with a two-color Bayer-dithered gradient.",
+      inputSchema: {
+        filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(), x: z.number().int(), y: z.number().int(), width: z.number().int().positive(), height: z.number().int().positive(),
+        color_start: z.string().regex(HEX_COLOR), color_end: z.string().regex(HEX_COLOR), horizontal: z.boolean().default(false), create_if_missing: z.boolean().default(true),
+      },
+    }, async ({ filename, layer_name, frame_index, x, y, width, height, color_start, color_end, horizontal, create_if_missing }) => this.result(await this.assets.applyDitherGradient(filename, layer_name, frame_index, x, y, width, height, color_start, color_end, horizontal, create_if_missing)));
+
+    this.server.registerTool("apply_dither_pattern", {
+      description: "Fill a rectangle with a uniform Bayer-dithered mix of two colors.",
+      inputSchema: {
+        filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(), x: z.number().int(), y: z.number().int(), width: z.number().int().positive(), height: z.number().int().positive(),
+        color_a: z.string().regex(HEX_COLOR), color_b: z.string().regex(HEX_COLOR), density: z.number().min(0).max(1).default(0.5), create_if_missing: z.boolean().default(true),
+      },
+    }, async ({ filename, layer_name, frame_index, x, y, width, height, color_a, color_b, density, create_if_missing }) => this.result(await this.assets.applyDitherPattern(filename, layer_name, frame_index, x, y, width, height, color_a, color_b, density, create_if_missing)));
 
     this.server.registerTool("set_tag", {
       description: "Create or update an animation tag.",

@@ -54,6 +54,10 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("adjust_hsl_native"));
     assert.ok(tools.includes("adjust_brightness_contrast"));
     assert.ok(tools.includes("invert_colors"));
+    assert.ok(tools.includes("apply_convolution"));
+    assert.ok(tools.includes("list_convolution_matrices"));
+    assert.ok(tools.includes("apply_dither_gradient"));
+    assert.ok(tools.includes("apply_dither_pattern"));
     assert.ok(tools.includes("set_frame"));
     assert.ok(tools.includes("draw_rectangle"));
     assert.ok(tools.includes("create_character_plan"));
@@ -154,6 +158,10 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
     await call("adjust_hsl_native", { filename: source, layer_name: "body", frame_index: 2, hue: 5, saturation: 0, lightness: 0 });
     await call("adjust_brightness_contrast", { filename: source, layer_name: "body", frame_index: 2, brightness: 0, contrast: 0 });
     await call("invert_colors", { filename: source, layer_name: "body", frame_index: 2 });
+    await call("list_convolution_matrices", {});
+    await call("apply_convolution", { filename: source, matrix: "blur-3x3", layer_name: "body", frame_index: 2 });
+    await call("apply_dither_gradient", { filename: source, layer_name: "body", frame_index: 2, x: 2, y: 2, width: 6, height: 4, color_start: "#000000", color_end: "#ffffff", horizontal: true });
+    await call("apply_dither_pattern", { filename: source, layer_name: "body", frame_index: 2, x: 8, y: 8, width: 4, height: 4, color_a: "#112233", color_b: "#abcdef", density: 0.5 });
     await call("delete_tag", { filename: source, name: "idle" });
     await call("delete_frame", { filename: source, frame_index: 2 });
     await call("set_onion_skin", { filename: source, enabled: true, before: 2, after: 2, opacity: 128 });
