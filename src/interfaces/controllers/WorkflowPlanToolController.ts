@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
-import type { WorkflowPort } from "../../application/ports/AsepriteCapabilityPorts.js";
+import type { WorkflowPort } from "../../application/ports/AssetCapabilityPorts.js";
 import { buildCharacterPlan, buildScenePlan } from "../../workflows/plans.js";
 import type { AsepriteResult } from "../../domain/aseprite.js";
 

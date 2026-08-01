@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
-import type { ExportAnimationPort } from "../../application/ports/AsepriteCapabilityPorts.js";
+import type { ExportAnimationPort } from "../../application/ports/AssetCapabilityPorts.js";
 import { PixelArtAssetService } from "../../application/services/PixelArtAssetService.js";
 import type { AsepriteResult } from "../../domain/aseprite.js";
 
