@@ -1,8 +1,8 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import * as z from "zod/v4";
-import { AsepriteAssetService } from "../application/services/AsepriteAssetService.js";
 import { AsepriteCliGateway } from "../infrastructure/aseprite/AsepriteCliGateway.js";
+import type { AssetGatewayPort } from "../application/ports/AssetGatewayPort.js";
 import { ToolCatalogService } from "../application/services/ToolCatalogService.js";
 import { PixelArtAssetService } from "../application/services/PixelArtAssetService.js";
 import { SharpRasterCodec } from "../infrastructure/image/SharpRasterCodec.js";
@@ -182,7 +182,7 @@ export class AsepriteMcpServerAdapter {
   private readonly enhancements: DeterministicEnhancementService;
   private readonly assetJobs: AssetJobService;
 
-  public constructor(private readonly assets: AsepriteAssetService, imageAssets?: PixelArtAssetService) {
+  public constructor(private readonly assets: AssetGatewayPort, imageAssets?: PixelArtAssetService) {
     const rasterCodec = new SharpRasterCodec();
     const manifestWriter = new JsonAssetManifestWriter();
     this.imageAssets = imageAssets ?? new PixelArtAssetService(rasterCodec, manifestWriter);
@@ -243,7 +243,7 @@ export class AsepriteMcpServerAdapter {
 
 async function main(): Promise<void> {
   const gateway = new AsepriteCliGateway();
-  const adapter = new AsepriteMcpServerAdapter(new AsepriteAssetService(gateway));
+  const adapter = new AsepriteMcpServerAdapter(gateway);
   await adapter.server.connect(new StdioServerTransport());
   console.error("Aseprite MCP TypeScript server running on stdio");
 }
