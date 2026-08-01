@@ -69,6 +69,7 @@ test("rejects traversal in every input sprite path before starting Aseprite", as
     gateway.flattenSprite("../sprite.aseprite"),
     gateway.outlineCel("../sprite.aseprite", "Layer", 1),
     gateway.replaceColor("../sprite.aseprite", "Layer", 1, "#000000", "#ffffff"),
+    gateway.adjustHsl("../sprite.aseprite", "Layer", 1),
     gateway.setTag("../sprite.aseprite", "idle", 1, 1),
     gateway.createTilemapLayer("../sprite.aseprite", "Tiles", 16, 16),
     gateway.validateScene("../sprite.aseprite", ["Layer"]),
@@ -282,6 +283,18 @@ test("rejects invalid legacy FX contracts before starting Aseprite", async () =>
   assert.equal(badOutlineFrame.message, "Frame index must be a positive integer");
   assert.equal(badReplaceColor.message, "Colors must use hexadecimal values");
   assert.equal(badTolerance.message, "Tolerance must be between 0 and 255");
+});
+
+test("rejects invalid legacy HSL contracts before starting Aseprite", async () => {
+  const badHue = await gateway.adjustHsl("sprite.aseprite", "Layer", 1, 361);
+  const badSaturation = await gateway.adjustHsl("sprite.aseprite", "Layer", 1, 0, -101);
+  const badLightness = await gateway.adjustHsl("sprite.aseprite", "Layer", 1, 0, 0, 101);
+  const badFrame = await gateway.adjustHsl("sprite.aseprite", "Layer", 0);
+
+  assert.equal(badHue.message, "Hue shift must be between -360 and 360");
+  assert.equal(badSaturation.message, "Saturation shift must be between -100 and 100");
+  assert.equal(badLightness.message, "Lightness shift must be between -100 and 100");
+  assert.equal(badFrame.message, "Frame index must be a positive integer");
 });
 
 test("rejects invalid tag frame ranges before starting Aseprite", async () => {

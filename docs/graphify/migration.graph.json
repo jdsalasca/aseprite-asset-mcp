@@ -2,18 +2,18 @@
   "schemaVersion": 1,
   "project": "aseprite-mcp",
   "goal": "complete-typescript-migration",
-  "generatedAt": "2026-08-01T15:10:18.137Z",
+  "generatedAt": "2026-08-01T15:15:22.668Z",
   "source": {
     "repository": "https://github.com/diivi/aseprite-mcp",
     "branch": "upstream/main",
     "commit": "90d1696a7e41edff89bbd0823ae6a5f86c114bcc"
   },
   "local": {
-    "branch": "codex/migrate/legacy-fx",
-    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-legacy-fx",
-    "baseCommit": "6daa83fd782bfd0f09d343c9955ff672e73f9770",
-    "typescriptToolCount": 72,
-    "testCount": 29
+    "branch": "codex/migrate/legacy-hsl",
+    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-legacy-hsl",
+    "baseCommit": "56bc820bec61a835b2bb8467c7ec68e1cd763afa",
+    "typescriptToolCount": 73,
+    "testCount": 30
   },
   "tools": [
     {
@@ -843,9 +843,13 @@
       "name": "adjust_hsl",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "core",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []

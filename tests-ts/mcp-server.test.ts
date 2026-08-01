@@ -63,6 +63,7 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("invert_colors"));
     assert.ok(tools.includes("outline_cel"));
     assert.ok(tools.includes("replace_color"));
+    assert.ok(tools.includes("adjust_hsl"));
     assert.ok(tools.includes("apply_convolution"));
     assert.ok(tools.includes("list_convolution_matrices"));
     assert.ok(tools.includes("apply_dither_gradient"));
@@ -169,6 +170,7 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
     await call("invert_colors", { filename: source, layer_name: "body", frame_index: 2 });
     await call("outline_cel", { filename: source, layer_name: "body", frame_index: 2, color: "#00ff00", include_diagonals: true });
     await call("replace_color", { filename: source, layer_name: "body", frame_index: 2, from_color: "#00ff00", to_color: "#ff00ff", tolerance: 0 });
+    await call("adjust_hsl", { filename: source, layer_name: "body", frame_index: 2, hue_shift: 5, saturation_shift: 0, lightness_shift: 0 });
     await call("list_convolution_matrices", {});
     await call("apply_convolution", { filename: source, matrix: "blur-3x3", layer_name: "body", frame_index: 2 });
     await call("apply_dither_gradient", { filename: source, layer_name: "body", frame_index: 2, x: 2, y: 2, width: 6, height: 4, color_start: "#000000", color_end: "#ffffff", horizontal: true });

@@ -76,6 +76,7 @@ export interface AsepriteGateway {
   invertColors(filename: string, layerName?: string, frameIndex?: number, x?: number, y?: number, width?: number, height?: number): Promise<AsepriteResult>;
   outlineCel(filename: string, layerName: string, frameIndex: number, color?: string, includeDiagonals?: boolean): Promise<AsepriteResult>;
   replaceColor(filename: string, layerName: string, frameIndex: number, fromColor: string, toColor: string, tolerance?: number): Promise<AsepriteResult>;
+  adjustHsl(filename: string, layerName: string, frameIndex: number, hueShift?: number, saturationShift?: number, lightnessShift?: number): Promise<AsepriteResult>;
   applyConvolution(filename: string, matrix: string, layerName?: string, frameIndex?: number, x?: number, y?: number, width?: number, height?: number): Promise<AsepriteResult>;
   listConvolutionMatrices(): Promise<AsepriteResult>;
   applyDitherGradient(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, colorStart: string, colorEnd: string, horizontal?: boolean, createIfMissing?: boolean): Promise<AsepriteResult>;

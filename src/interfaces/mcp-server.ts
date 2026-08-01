@@ -72,6 +72,7 @@ const TOOL_NAMES = [
   "invert_colors",
   "outline_cel",
   "replace_color",
+  "adjust_hsl",
   "apply_convolution",
   "list_convolution_matrices",
   "apply_dither_gradient",
@@ -468,6 +469,11 @@ export class AsepriteMcpServerAdapter {
       description: "Replace a cel color while preserving alpha and allowing channel tolerance.",
       inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(), from_color: z.string().regex(HEX_COLOR), to_color: z.string().regex(HEX_COLOR), tolerance: z.number().int().min(0).max(255).default(0) },
     }, async ({ filename, layer_name, frame_index, from_color, to_color, tolerance }) => this.result(await this.assets.replaceColor(filename, layer_name, frame_index, from_color, to_color, tolerance)));
+
+    this.server.registerTool("adjust_hsl", {
+      description: "Shift hue, saturation, and lightness on an opaque cel while preserving alpha.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(), hue_shift: z.number().min(-360).max(360).default(0), saturation_shift: z.number().min(-100).max(100).default(0), lightness_shift: z.number().min(-100).max(100).default(0) },
+    }, async ({ filename, layer_name, frame_index, hue_shift, saturation_shift, lightness_shift }) => this.result(await this.assets.adjustHsl(filename, layer_name, frame_index, hue_shift, saturation_shift, lightness_shift)));
 
     this.server.registerTool("apply_convolution", {
       description: "Apply a built-in Aseprite convolution matrix to a layer and frame.",
