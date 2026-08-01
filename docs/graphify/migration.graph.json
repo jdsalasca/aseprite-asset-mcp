@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "aseprite-mcp",
   "goal": "complete-typescript-migration",
-  "generatedAt": "2026-08-01T05:28:44.667Z",
+  "generatedAt": "2026-08-01T05:29:17.038Z",
   "source": {
     "repository": "https://github.com/diivi/aseprite-mcp",
     "branch": "upstream/main",
@@ -11,7 +11,7 @@
   "local": {
     "branch": "codex/migrate/bug-hunt-validation",
     "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-bug-hunt",
-    "baseCommit": "1cebf0fe39813a5b5610835a1fbd2dbe496c1c52",
+    "baseCommit": "4032357e2da086b4da3a3d31ac17c26d257b6861",
     "typescriptToolCount": 18,
     "testCount": 13
   },
