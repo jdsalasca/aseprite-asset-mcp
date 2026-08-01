@@ -255,3 +255,26 @@ test("real Aseprite creates, updates, lists, and deletes slices", { skip: !exist
   assert.equal((await gateway.deleteSlice(source, "hud|panel")).ok, true);
   assert.deepEqual(JSON.parse((await gateway.listSlices(source)).message), []);
 });
+
+test("real Aseprite audits and sanitizes animation cels", { skip: !existsSync(asepritePath) }, async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "aseprite-mcp-quality-"));
+  const source = path.join(directory, "quality.aseprite");
+  const gateway = new AsepriteCliGateway({ executable: asepritePath });
+
+  assert.equal((await gateway.createCanvas(16, 16, source)).ok, true);
+  assert.equal((await gateway.addLayer(source, "hero")).ok, true);
+  assert.equal((await gateway.addLayer(source, "shadow")).ok, true);
+  assert.equal((await gateway.addFrame(source)).ok, true);
+  assert.equal((await gateway.drawPixelsAt(source, "hero", 1, [{ x: 1, y: 1, color: "#ff0000" }], true)).ok, true);
+  assert.equal((await gateway.drawPixelsAt(source, "shadow", 1, [{ x: 2, y: 2, color: "#000000" }], true)).ok, true);
+  const ensured = await gateway.ensureLayersPresent(source, ["hero", "shadow"], 1, 2);
+  assert.equal(ensured.ok, true, ensured.message);
+  const audit = await gateway.auditAnimation({ filename: source, startFrame: 1, endFrame: 2, layerNames: ["hero", "shadow"], overlapPairs: ["hero,shadow"], layerFrameRanges: ["hero:2-2"], reportCels: true, reportBounds: true });
+  assert.equal(audit.ok, true, audit.message);
+  const report = JSON.parse(audit.message) as { summary?: { totalCels?: number; overlapsTotal?: number; outOfRange?: number } };
+  assert.ok((report.summary?.totalCels ?? 0) >= 4);
+  assert.ok((report.summary?.outOfRange ?? 0) >= 1);
+  const sanitized = await gateway.animationSanitize({ filename: source, startFrame: 1, endFrame: 2, layerNames: ["hero", "shadow"], layerFrameRanges: ["hero:2-2"], outOfRangeAction: "set_opacity_zero", outOfRangeOpacity: 0 });
+  assert.equal(sanitized.ok, true, sanitized.message);
+  assert.equal(JSON.parse(sanitized.message).sanitized.opacitySet, 1);
+});

@@ -96,6 +96,9 @@ const TOOL_NAMES = [
   "set_slice_pivot",
   "list_slices",
   "delete_slice",
+  "ensure_layers_present",
+  "audit_animation",
+  "animation_sanitize",
   "outline_native",
   "adjust_hsl_native",
   "adjust_brightness_contrast",
@@ -622,6 +625,21 @@ export class AsepriteMcpServerAdapter {
       description: "Delete a named slice.",
       inputSchema: { filename: z.string().min(1), name: z.string().min(1) },
     }, async ({ filename, name }) => this.result(await this.assets.deleteSlice(filename, name)));
+
+    this.server.registerTool("ensure_layers_present", {
+      description: "Ensure cels exist for named layers across a frame range.",
+      inputSchema: { filename: z.string().min(1), layer_names: z.array(z.string().min(1)).min(1), start_frame: z.number().int().positive().default(1), end_frame: z.number().int().positive().optional() },
+    }, async ({ filename, layer_names, start_frame, end_frame }) => this.result(await this.assets.ensureLayersPresent(filename, layer_names, start_frame, end_frame)));
+
+    this.server.registerTool("audit_animation", {
+      description: "Audit animation cels, overlaps, and declared frame ranges.",
+      inputSchema: { filename: z.string().min(1), start_frame: z.number().int().positive().default(1), end_frame: z.number().int().positive().optional(), layer_names: z.array(z.string().min(1)).optional(), overlap_pairs: z.array(z.string().min(1)).optional(), layer_frame_ranges: z.array(z.string().min(1)).optional(), report_cels: z.boolean().default(false), report_bounds: z.boolean().default(false), max_overlaps: z.number().int().nonnegative().default(200), max_out_of_range: z.number().int().nonnegative().default(200) },
+    }, async ({ filename, start_frame, end_frame, layer_names, overlap_pairs, layer_frame_ranges, report_cels, report_bounds, max_overlaps, max_out_of_range }) => this.result(await this.assets.auditAnimation({ filename, startFrame: start_frame, endFrame: end_frame, layerNames: layer_names, overlapPairs: overlap_pairs, layerFrameRanges: layer_frame_ranges, reportCels: report_cels, reportBounds: report_bounds, maxOverlaps: max_overlaps, maxOutOfRange: max_out_of_range })));
+
+    this.server.registerTool("animation_sanitize", {
+      description: "Normalize animation cels and optionally repair out-of-range activity.",
+      inputSchema: { filename: z.string().min(1), start_frame: z.number().int().positive().default(1), end_frame: z.number().int().positive().optional(), layer_names: z.array(z.string().min(1)).optional(), layer_order: z.array(z.string().min(1)).optional(), layer_frame_ranges: z.array(z.string().min(1)).optional(), ensure_layers: z.array(z.string().min(1)).optional(), out_of_range_action: z.enum(["set_opacity_zero", "delete_cels", "none"]).default("set_opacity_zero"), out_of_range_opacity: z.number().int().min(0).max(255).default(0), report_only: z.boolean().default(false), include_stats: z.boolean().default(true), ignore_full_canvas_overlaps: z.boolean().default(true), max_overlaps: z.number().int().nonnegative().default(200), overlap_pairs: z.array(z.string().min(1)).optional(), report_cels: z.boolean().default(false), report_bounds: z.boolean().default(false), max_out_of_range: z.number().int().nonnegative().default(200) },
+    }, async ({ filename, start_frame, end_frame, layer_names, layer_order, layer_frame_ranges, ensure_layers, out_of_range_action, out_of_range_opacity, report_only, include_stats, ignore_full_canvas_overlaps, max_overlaps, overlap_pairs, report_cels, report_bounds, max_out_of_range }) => this.result(await this.assets.animationSanitize({ filename, startFrame: start_frame, endFrame: end_frame, layerNames: layer_names, layerOrder: layer_order, layerFrameRanges: layer_frame_ranges, ensureLayers: ensure_layers, outOfRangeAction: out_of_range_action, outOfRangeOpacity: out_of_range_opacity, reportOnly: report_only, includeStats: include_stats, ignoreFullCanvasOverlaps: ignore_full_canvas_overlaps, maxOverlaps: max_overlaps, overlapPairs: overlap_pairs, reportCels: report_cels, reportBounds: report_bounds, maxOutOfRange: max_out_of_range })));
 
     this.server.registerTool("outline_native", {
       description: "Apply Aseprite native outline to a selected layer and frame.",

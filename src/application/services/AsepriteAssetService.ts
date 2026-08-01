@@ -1,4 +1,4 @@
-import type { AsepriteGateway, AsepriteResult, PixelInput, PointInput, TextDrawInput, TilePixelInput, TilePlacementInput } from "../../domain/aseprite.js";
+import type { AnimationAuditInput, AnimationSanitizeInput, AsepriteGateway, AsepriteResult, PixelInput, PointInput, TextDrawInput, TilePixelInput, TilePlacementInput } from "../../domain/aseprite.js";
 
 export class AsepriteAssetService {
   public constructor(private readonly gateway: AsepriteGateway) {}
@@ -369,6 +369,18 @@ export class AsepriteAssetService {
 
   public deleteSlice(filename: string, name: string): Promise<AsepriteResult> {
     return this.gateway.deleteSlice(filename, name);
+  }
+
+  public ensureLayersPresent(filename: string, layerNames: string[], startFrame = 1, endFrame?: number): Promise<AsepriteResult> {
+    return this.gateway.ensureLayersPresent(filename, layerNames, startFrame, endFrame);
+  }
+
+  public auditAnimation(input: AnimationAuditInput): Promise<AsepriteResult> {
+    return this.gateway.auditAnimation(input);
+  }
+
+  public animationSanitize(input: AnimationSanitizeInput): Promise<AsepriteResult> {
+    return this.gateway.animationSanitize(input);
   }
 
   public applyConvolution(filename: string, matrix: string, layerName = "", frameIndex = 1, x = 0, y = 0, width = 0, height = 0): Promise<AsepriteResult> {

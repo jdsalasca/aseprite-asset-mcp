@@ -3,7 +3,7 @@ import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
-import type { AsepriteGateway, AsepriteResult, PixelInput, PointInput, TextDrawInput, TilePixelInput, TilePlacementInput } from "../../domain/aseprite.js";
+import type { AnimationAuditInput, AnimationSanitizeInput, AsepriteGateway, AsepriteResult, PixelInput, PointInput, TextDrawInput, TilePixelInput, TilePlacementInput } from "../../domain/aseprite.js";
 import { availableTextFonts, measureText as rasterMeasureText, rasterizeText } from "../text/TextRasterizer.js";
 
 const execFileAsync = promisify(execFile);
@@ -1132,6 +1132,172 @@ export class AsepriteCliGateway implements AsepriteGateway {
       spr:deleteSlice(slice)
     `);
     return result(await this.runLua(script, source), `Slice '${sliceName}' deleted from ${source}`);
+  }
+
+  public async ensureLayersPresent(filename: string, layerNames: string[], startFrame = 1, endFrame?: number): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (!Array.isArray(layerNames) || layerNames.length === 0) return { ok: false, message: "Layer names list cannot be empty" };
+    if (!isPositiveInteger(startFrame) || (endFrame !== undefined && (!isPositiveInteger(endFrame) || endFrame < startFrame))) return { ok: false, message: "Frame range must start at 1 and end at or after the start" };
+    const layers = `{${layerNames.map((name) => `"${luaEscape(name)}"`).join(",")}}`;
+    const end = endFrame ?? "#spr.frames";
+    const script = this.openScript(source, `
+      if ${startFrame} < 1 or ${end} > #spr.frames then print("ERROR:Frame range out of bounds") return end
+      local names = ${layers}
+      local targets = {}
+      for _, layerName in ipairs(names) do local target = find_layer(spr, layerName) if target and not target.isGroup then table.insert(targets, target) end end
+      if #targets == 0 then print("ERROR:No layers found") return end
+      for frameIndex = ${startFrame}, ${end} do
+        for _, target in ipairs(targets) do
+          if not target:cel(spr.frames[frameIndex]) then spr:newCel(target, spr.frames[frameIndex], Image(spr.width, spr.height, spr.colorMode), Point(0, 0)) end
+        end
+      end
+    `);
+    return result(await this.runLua(script, source), `Ensured cels for layers ${layerNames.join(", ")} on frames ${startFrame}-${endFrame ?? "end"} in ${source}`);
+  }
+
+  public async auditAnimation(input: AnimationAuditInput): Promise<AsepriteResult> {
+    const source = validatePath(input.filename);
+    if (typeof source !== "string") return source;
+    const startFrame = input.startFrame ?? 1;
+    const endFrame = input.endFrame;
+    const maxOverlaps = input.maxOverlaps ?? 200;
+    const maxOutOfRange = input.maxOutOfRange ?? 200;
+    if (!isPositiveInteger(startFrame) || (endFrame !== undefined && (!isPositiveInteger(endFrame) || endFrame < startFrame))) return { ok: false, message: "Frame range must start at 1 and end at or after the start" };
+    if (!Number.isInteger(maxOverlaps) || maxOverlaps < 0 || !Number.isInteger(maxOutOfRange) || maxOutOfRange < 0) return { ok: false, message: "Max limits must be >= 0" };
+    const names = input.layerNames?.length ? `{${input.layerNames.map((name) => `"${luaEscape(name)}"`).join(",")}}` : "nil";
+    const pairs = (input.overlapPairs ?? []).map((entry) => entry.includes(",") ? entry.split(",", 2) : entry.split(":", 2)).filter((entry) => entry.length === 2 && entry.every((value) => value.trim())).map((entry) => `{\"${luaEscape(entry[0] ?? "")}\",\"${luaEscape(entry[1] ?? "")}\"}`).join(",");
+    const ranges: string[] = [];
+    for (const entry of input.layerFrameRanges ?? []) {
+      const [layer, spans] = entry.split(":", 2);
+      const parsed = (spans ?? "").split(",").map((span) => { const [left, right] = span.split("-", 2); return [Number(left), Number(right)] as [number, number]; }).filter(([left, right]) => isPositiveInteger(left) && right >= left);
+      if (layer?.trim() && parsed.length) ranges.push(`["${luaEscape(layer.trim())}"]={${parsed.map(([a, b]) => `{${a},${b}}`).join(",")}}`);
+    }
+    const end = endFrame ?? "#spr.frames";
+    const reportCels = input.reportCels ? "true" : "false";
+    const reportBounds = input.reportBounds ? "true" : "false";
+    const script = this.readOnlyScript(`
+      if ${startFrame} < 1 or ${end} > #spr.frames then print("ERROR:Frame range out of bounds") return end
+      local targetNames = ${names}
+      local targets = {}
+      if targetNames == nil then for _, layer in ipairs(spr.layers) do if not layer.isGroup then table.insert(targets, layer) end end else for _, layerName in ipairs(targetNames) do local layer = find_layer(spr, layerName) if layer and not layer.isGroup then table.insert(targets, layer) end end end
+      local pairs = {${pairs}}
+      local ranges = {${ranges.join(",")}}
+      local totalCels, overlapsTotal, outOfRange = 0, 0, 0
+      for frameIndex = ${startFrame}, ${end} do
+        for _, layer in ipairs(targets) do
+          local cel = layer:cel(spr.frames[frameIndex])
+          if cel then
+            totalCels = totalCels + 1
+            local allowed = ranges[layer.name]
+            local inRange = true
+            if allowed then inRange = false for _, span in ipairs(allowed) do if frameIndex >= span[1] and frameIndex <= span[2] then inRange = true break end end end
+            if not inRange then outOfRange = outOfRange + 1 if outOfRange <= ${maxOutOfRange} then print("OUT:" .. frameIndex .. "," .. layer.name) end end
+            if ${reportCels} then print(string.format("CEL:%d,%s,%d,%d,%d,%d", frameIndex, layer.name, cel.position.x, cel.position.y, cel.image.width, cel.image.height)) end
+          end
+        end
+        for _, pair in ipairs(pairs) do
+          local a, b = find_layer(spr, pair[1]), find_layer(spr, pair[2])
+          local ca, cb = a and a:cel(spr.frames[frameIndex]), b and b:cel(spr.frames[frameIndex])
+          if ca and cb then
+            local ap, bp = ca.position, cb.position
+            local overlap = ap.x < bp.x + cb.image.width and ap.x + ca.image.width > bp.x and ap.y < bp.y + cb.image.height and ap.y + ca.image.height > bp.y
+            if overlap then overlapsTotal = overlapsTotal + 1 if overlapsTotal <= ${maxOverlaps} then print(string.format("OVERLAP:%d,%s,%s", frameIndex, pair[1], pair[2])) end end
+          end
+        end
+      end
+      print(string.format("SUMMARY:%d,%d,%d,%d,%d", ${startFrame}, ${end}, #targets, totalCels, overlapsTotal))
+    `);
+    const command = await this.runLua(script, source);
+    if (!command.ok) return { ok: false, message: `Failed to audit animation: ${command.output}` };
+    const overlaps: Array<Record<string, unknown>> = [];
+    const outOfRange: Array<Record<string, unknown>> = [];
+    const cels: Array<Record<string, unknown>> = [];
+    let summary = { frames: { start: startFrame, end: endFrame ?? 0 }, layersChecked: 0, totalCels: 0, overlapsTotal: 0 };
+    for (const line of command.output.split(/\r?\n/)) {
+      if (line.startsWith("SUMMARY:")) { const [start = startFrame, end = endFrame ?? startFrame, layersChecked = 0, totalCels = 0, overlapsTotal = 0] = line.slice(8).split(",").map(Number); summary = { frames: { start, end }, layersChecked, totalCels, overlapsTotal }; }
+      else if (line.startsWith("OVERLAP:")) { const [frame, a, b] = line.slice(8).split(","); overlaps.push({ frame: Number(frame), a, b }); }
+      else if (line.startsWith("OUT:")) { const [frame, layer] = line.slice(4).split(","); outOfRange.push({ frame: Number(frame), layer }); }
+      else if (line.startsWith("CEL:")) { const [frame, layer, x, y, w, h] = line.slice(4).split(","); cels.push(input.reportBounds ? { frame: Number(frame), layer, x: Number(x), y: Number(y), w: Number(w), h: Number(h) } : { frame: Number(frame), layer }); }
+    }
+    return { ok: true, message: JSON.stringify({ summary: { ...summary, outOfRange: outOfRange.length, overlaps: overlaps.length }, overlaps, outOfRange, ...(input.reportCels ? { cels } : {}) }) };
+  }
+
+  public async animationSanitize(input: AnimationSanitizeInput): Promise<AsepriteResult> {
+    const source = validatePath(input.filename);
+    if (typeof source !== "string") return source;
+    const startFrame = input.startFrame ?? 1;
+    const endFrame = input.endFrame;
+    const action = input.outOfRangeAction ?? "set_opacity_zero";
+    const opacity = input.outOfRangeOpacity ?? 0;
+    if (!isPositiveInteger(startFrame) || (endFrame !== undefined && (!isPositiveInteger(endFrame) || endFrame < startFrame))) return { ok: false, message: "Frame range must start at 1 and end at or after the start" };
+    if (!["set_opacity_zero", "delete_cels", "none"].includes(action)) return { ok: false, message: "Unsupported out_of_range_action" };
+    if (!Number.isInteger(opacity) || opacity < 0 || opacity > 255) return { ok: false, message: "out_of_range_opacity must be 0-255" };
+    const names = input.layerNames?.length ? `{${input.layerNames.map((name) => `"${luaEscape(name)}"`).join(",")}}` : "nil";
+    const ensure = input.ensureLayers?.length ? `{${input.ensureLayers.map((name) => `"${luaEscape(name)}"`).join(",")}}` : "nil";
+    const ranges: string[] = [];
+    for (const entry of input.layerFrameRanges ?? []) { const [layer, spans] = entry.split(":", 2); const parsed = (spans ?? "").split(",").map((span) => { const [left, right] = span.split("-", 2); return [Number(left), Number(right)] as [number, number]; }).filter(([left, right]) => isPositiveInteger(left) && right >= left); if (layer?.trim() && parsed.length) ranges.push(`["${luaEscape(layer.trim())}"]={${parsed.map(([a, b]) => `{${a},${b}}`).join(",")}}`); }
+    const end = endFrame ?? "#spr.frames";
+    const scriptBody = `
+      if ${startFrame} < 1 or ${end} > #spr.frames then print("ERROR:Frame range out of bounds") return end
+      local targetNames, ensureNames, ranges = ${names}, ${ensure}, {${ranges.join(",")}}
+      local targets = {}
+      if targetNames == nil then
+        for _, layer in ipairs(spr.layers) do if not layer.isGroup then table.insert(targets, layer) end end
+      else
+        for _, layerName in ipairs(targetNames) do
+          local layer = find_layer(spr, layerName)
+          if layer and not layer.isGroup then table.insert(targets, layer) end
+        end
+      end
+      local ensured, outOfRange, opacitySet, deleted = 0, 0, 0, 0
+      if ensureNames ~= nil and not ${input.reportOnly ? "true" : "false"} then
+        for _, layerName in ipairs(ensureNames) do
+          local layer = find_layer(spr, layerName)
+          if layer and not layer.isGroup then
+            for fi = ${startFrame}, ${end} do
+              if not layer:cel(spr.frames[fi]) then
+                spr:newCel(layer, spr.frames[fi], Image(spr.width, spr.height, spr.colorMode), Point(0, 0))
+                ensured = ensured + 1
+              end
+            end
+          end
+        end
+      end
+      for _, layer in ipairs(targets) do
+        local allowed = ranges[layer.name]
+        if allowed then
+          for fi = ${startFrame}, ${end} do
+            local cel = layer:cel(spr.frames[fi])
+            if cel then
+              local inRange = false
+              for _, span in ipairs(allowed) do
+                if fi >= span[1] and fi <= span[2] then inRange = true break end
+              end
+              if not inRange then
+                outOfRange = outOfRange + 1
+                if not ${input.reportOnly ? "true" : "false"} then
+                  if "${action}" == "delete_cels" then
+                    spr:deleteCel(cel)
+                    deleted = deleted + 1
+                  elseif "${action}" == "set_opacity_zero" then
+                    cel.opacity = ${opacity}
+                    opacitySet = opacitySet + 1
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+      print(string.format("SANITIZED:%d,%d,%d,%d", ensured, outOfRange, opacitySet, deleted))
+    `;
+    const command = await this.runLua(input.reportOnly ? this.readOnlyScript(scriptBody) : this.openScript(source, scriptBody), source);
+    if (!command.ok) return { ok: false, message: `Failed to sanitize animation: ${command.output}` };
+    const line = command.output.split(/\r?\n/).find((entry) => entry.startsWith("SANITIZED:"));
+    if (!line) return { ok: false, message: "No sanitize data returned" };
+    const [ensured, outOfRange, opacitySet, deleted] = line.slice(10).split(",").map(Number);
+    return { ok: true, message: JSON.stringify({ sanitized: { ensured, outOfRange, opacitySet, deleted }, reportOnly: Boolean(input.reportOnly) }) };
   }
 
   public async validateScene(filename: string, requiredLayers: string[], startFrame = 1, endFrame?: number): Promise<AsepriteResult> {
@@ -2808,7 +2974,8 @@ export class AsepriteCliGateway implements AsepriteGateway {
       return error ? { ok: false, output: error.slice("ERROR:".length) } : { ok: true, output: text };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      return { ok: false, output: message };
+      const details = typeof error === "object" && error !== null ? `${String((error as { stdout?: unknown }).stdout ?? "")} ${String((error as { stderr?: unknown }).stderr ?? "")}`.trim() : "";
+      return { ok: false, output: details || message };
     }
   }
 }

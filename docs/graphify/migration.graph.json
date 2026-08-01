@@ -2,18 +2,18 @@
   "schemaVersion": 1,
   "project": "aseprite-mcp",
   "goal": "complete-typescript-migration",
-  "generatedAt": "2026-08-01T16:18:32.441Z",
+  "generatedAt": "2026-08-01T16:29:39.849Z",
   "source": {
     "repository": "https://github.com/diivi/aseprite-mcp",
     "branch": "upstream/main",
     "commit": "90d1696a7e41edff89bbd0823ae6a5f86c114bcc"
   },
   "local": {
-    "branch": "codex/migrate/slices",
-    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-slices",
-    "baseCommit": "8ad686c3641ff8ebfbb97860d74de44121169174",
-    "typescriptToolCount": 103,
-    "testCount": 41
+    "branch": "codex/migrate/quality",
+    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-quality",
+    "baseCommit": "a409b10a79ce57b7ae91de81f7c1b0059e13cd01",
+    "typescriptToolCount": 106,
+    "testCount": 43
   },
   "tools": [
     {
@@ -1311,9 +1311,13 @@
       "name": "ensure_layers_present",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "layers",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -1337,9 +1341,13 @@
       "name": "audit_animation",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "animation",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -1348,9 +1356,13 @@
       "name": "animation_sanitize",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "animation",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []

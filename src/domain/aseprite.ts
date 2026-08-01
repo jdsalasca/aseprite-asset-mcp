@@ -49,6 +49,29 @@ export interface TilePlacementInput {
   tileIndex: number;
 }
 
+export interface AnimationAuditInput {
+  filename: string;
+  startFrame?: number | undefined;
+  endFrame?: number | undefined;
+  layerNames?: string[] | undefined;
+  overlapPairs?: string[] | undefined;
+  layerFrameRanges?: string[] | undefined;
+  reportCels?: boolean | undefined;
+  reportBounds?: boolean | undefined;
+  maxOverlaps?: number | undefined;
+  maxOutOfRange?: number | undefined;
+}
+
+export interface AnimationSanitizeInput extends AnimationAuditInput {
+  layerOrder?: string[] | undefined;
+  ensureLayers?: string[] | undefined;
+  outOfRangeAction?: "set_opacity_zero" | "delete_cels" | "none" | undefined;
+  outOfRangeOpacity?: number | undefined;
+  reportOnly?: boolean | undefined;
+  includeStats?: boolean | undefined;
+  ignoreFullCanvasOverlaps?: boolean | undefined;
+}
+
 export interface AsepriteGateway {
   createCanvas(width: number, height: number, filename: string): Promise<AsepriteResult>;
   addGroup(filename: string, groupName: string, parentGroup?: string): Promise<AsepriteResult>;
@@ -142,6 +165,9 @@ export interface AsepriteGateway {
   setSlicePivot(filename: string, name: string, x: number, y: number): Promise<AsepriteResult>;
   listSlices(filename: string): Promise<AsepriteResult>;
   deleteSlice(filename: string, name: string): Promise<AsepriteResult>;
+  ensureLayersPresent(filename: string, layerNames: string[], startFrame?: number, endFrame?: number): Promise<AsepriteResult>;
+  auditAnimation(input: AnimationAuditInput): Promise<AsepriteResult>;
+  animationSanitize(input: AnimationSanitizeInput): Promise<AsepriteResult>;
   applyConvolution(filename: string, matrix: string, layerName?: string, frameIndex?: number, x?: number, y?: number, width?: number, height?: number): Promise<AsepriteResult>;
   listConvolutionMatrices(): Promise<AsepriteResult>;
   applyDitherGradient(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, colorStart: string, colorEnd: string, horizontal?: boolean, createIfMissing?: boolean): Promise<AsepriteResult>;
