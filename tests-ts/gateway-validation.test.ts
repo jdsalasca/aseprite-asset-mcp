@@ -17,6 +17,10 @@ test("rejects traversal in every input sprite path before starting Aseprite", as
     gateway.setLayerVisibility("../sprite.aseprite", "Layer"),
     gateway.setLayerOpacity("../sprite.aseprite", "Layer", 255),
     gateway.setPalette("../sprite.aseprite", ["#112233"]),
+    gateway.drawPixels("../sprite.aseprite", [{ x: 0, y: 0, color: "#112233" }]),
+    gateway.drawLine("../sprite.aseprite", 0, 0, 1, 1, "#112233"),
+    gateway.fillArea("../sprite.aseprite", 0, 0, "#112233"),
+    gateway.drawCircle("../sprite.aseprite", 0, 0, 1, "#112233"),
     gateway.setTag("../sprite.aseprite", "idle", 1, 1),
     gateway.createTilemapLayer("../sprite.aseprite", "Tiles", 16, 16),
     gateway.validateScene("../sprite.aseprite", ["Layer"]),
@@ -41,6 +45,22 @@ test("rejects invalid drawing dimensions and colors before starting Aseprite", a
 
   assert.equal(invalidDimensions.message, "Width and height must be positive integers");
   assert.equal(invalidColor.message, "Colors must use hexadecimal values");
+});
+
+test("rejects invalid primitive drawing contracts before starting Aseprite", async () => {
+  const emptyPixels = await gateway.drawPixels("sprite.aseprite", []);
+  const badPixel = await gateway.drawPixels("sprite.aseprite", [{ x: 0.5, y: 0, color: "#112233" }]);
+  const badLine = await gateway.drawLine("sprite.aseprite", 0, 0, 4, 4, "#112233", 0);
+  const badFill = await gateway.fillArea("sprite.aseprite", 0.5, 0, "#112233");
+  const badCircle = await gateway.drawCircle("sprite.aseprite", 0, 0, 0, "#112233");
+  const badColor = await gateway.drawLine("sprite.aseprite", 0, 0, 4, 4, "#12GG34");
+
+  assert.equal(emptyPixels.message, "Pixels list cannot be empty");
+  assert.equal(badPixel.message, "Pixel coordinates must be integers");
+  assert.equal(badLine.message, "Thickness must be a positive integer");
+  assert.equal(badFill.message, "Coordinates must be integers");
+  assert.equal(badCircle.message, "Radius must be a positive integer");
+  assert.equal(badColor.message, "Colors must use hexadecimal values");
 });
 
 test("rejects invalid tag frame ranges before starting Aseprite", async () => {

@@ -3,6 +3,12 @@ export interface AsepriteResult {
   message: string;
 }
 
+export interface PixelInput {
+  x: number;
+  y: number;
+  color: string;
+}
+
 export interface AsepriteGateway {
   createCanvas(width: number, height: number, filename: string): Promise<AsepriteResult>;
   addGroup(filename: string, groupName: string, parentGroup?: string): Promise<AsepriteResult>;
@@ -15,7 +21,11 @@ export interface AsepriteGateway {
   setLayerVisibility(filename: string, layerName: string, visible?: boolean): Promise<AsepriteResult>;
   setLayerOpacity(filename: string, layerName: string, opacity: number): Promise<AsepriteResult>;
   setPalette(filename: string, colors: string[]): Promise<AsepriteResult>;
+  drawPixels(filename: string, pixels: PixelInput[]): Promise<AsepriteResult>;
+  drawLine(filename: string, x1: number, y1: number, x2: number, y2: number, color: string, thickness?: number): Promise<AsepriteResult>;
   drawRectangle(filename: string, x: number, y: number, width: number, height: number, color: string, fill?: boolean): Promise<AsepriteResult>;
+  fillArea(filename: string, x: number, y: number, color: string): Promise<AsepriteResult>;
+  drawCircle(filename: string, centerX: number, centerY: number, radius: number, color: string, fill?: boolean): Promise<AsepriteResult>;
   setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction?: string): Promise<AsepriteResult>;
   createTilemapLayer(filename: string, layerName: string, tileWidth: number, tileHeight: number): Promise<AsepriteResult>;
   validateScene(filename: string, requiredLayers: string[], startFrame?: number, endFrame?: number): Promise<AsepriteResult>;

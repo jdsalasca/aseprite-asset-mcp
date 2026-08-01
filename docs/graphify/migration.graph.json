@@ -2,18 +2,18 @@
   "schemaVersion": 1,
   "project": "aseprite-mcp",
   "goal": "complete-typescript-migration",
-  "generatedAt": "2026-08-01T05:33:09.415Z",
+  "generatedAt": "2026-08-01T13:39:41.154Z",
   "source": {
     "repository": "https://github.com/diivi/aseprite-mcp",
     "branch": "upstream/main",
     "commit": "90d1696a7e41edff89bbd0823ae6a5f86c114bcc"
   },
   "local": {
-    "branch": "codex/migrate/drawing-validation",
-    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-drawing",
-    "baseCommit": "6a34f27d3166ff6ab6767f64c8aa43999220799d",
-    "typescriptToolCount": 19,
-    "testCount": 13
+    "branch": "codex/migrate/drawing-primitives",
+    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-drawing-primitives",
+    "baseCommit": "b98d34d30256a945dd3c2d30c7c188cdb7be7426",
+    "typescriptToolCount": 23,
+    "testCount": 16
   },
   "tools": [
     {
@@ -57,7 +57,8 @@
       "domain": "animation",
       "tests": [
         "tests-ts/gateway-validation.test.ts",
-        "tests-ts/integration/real-aseprite.test.ts"
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
       ],
       "dependencies": [],
       "commit": null,
@@ -71,7 +72,8 @@
       "domain": "animation",
       "tests": [
         "tests-ts/gateway-validation.test.ts",
-        "tests-ts/integration/real-aseprite.test.ts"
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
       ],
       "dependencies": [],
       "commit": null,
@@ -85,7 +87,8 @@
       "domain": "layers",
       "tests": [
         "tests-ts/gateway-validation.test.ts",
-        "tests-ts/integration/real-aseprite.test.ts"
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
       ],
       "dependencies": [],
       "commit": null,
@@ -99,7 +102,8 @@
       "domain": "layers",
       "tests": [
         "tests-ts/gateway-validation.test.ts",
-        "tests-ts/integration/real-aseprite.test.ts"
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
       ],
       "dependencies": [],
       "commit": null,
@@ -223,7 +227,8 @@
       "domain": "animation",
       "tests": [
         "tests-ts/gateway-validation.test.ts",
-        "tests-ts/integration/real-aseprite.test.ts"
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
       ],
       "dependencies": [],
       "commit": null,
@@ -336,7 +341,8 @@
       "domain": "core",
       "tests": [
         "tests-ts/gateway-validation.test.ts",
-        "tests-ts/integration/real-aseprite.test.ts"
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
       ],
       "dependencies": [],
       "commit": null,
@@ -350,7 +356,8 @@
       "domain": "layers",
       "tests": [
         "tests-ts/gateway-validation.test.ts",
-        "tests-ts/integration/real-aseprite.test.ts"
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
       ],
       "dependencies": [],
       "commit": null,
@@ -364,7 +371,8 @@
       "domain": "layers",
       "tests": [
         "tests-ts/gateway-validation.test.ts",
-        "tests-ts/integration/real-aseprite.test.ts"
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
       ],
       "dependencies": [],
       "commit": null,
@@ -378,7 +386,8 @@
       "domain": "animation",
       "tests": [
         "tests-ts/gateway-validation.test.ts",
-        "tests-ts/integration/real-aseprite.test.ts"
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
       ],
       "dependencies": [],
       "commit": null,
@@ -392,7 +401,8 @@
       "domain": "animation",
       "tests": [
         "tests-ts/gateway-validation.test.ts",
-        "tests-ts/integration/real-aseprite.test.ts"
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
       ],
       "dependencies": [],
       "commit": null,
@@ -406,7 +416,8 @@
       "domain": "animation",
       "tests": [
         "tests-ts/gateway-validation.test.ts",
-        "tests-ts/integration/real-aseprite.test.ts"
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
       ],
       "dependencies": [],
       "commit": null,
@@ -427,9 +438,13 @@
       "name": "draw_pixels",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "drawing",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -438,9 +453,13 @@
       "name": "draw_line",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "drawing",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -453,7 +472,8 @@
       "domain": "drawing",
       "tests": [
         "tests-ts/gateway-validation.test.ts",
-        "tests-ts/integration/real-aseprite.test.ts"
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
       ],
       "dependencies": [],
       "commit": null,
@@ -463,9 +483,13 @@
       "name": "fill_area",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "drawing",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -474,9 +498,13 @@
       "name": "draw_circle",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "drawing",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -621,7 +649,8 @@
       "domain": "export",
       "tests": [
         "tests-ts/gateway-validation.test.ts",
-        "tests-ts/integration/real-aseprite.test.ts"
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
       ],
       "dependencies": [],
       "commit": null,
@@ -899,7 +928,8 @@
       "domain": "palette",
       "tests": [
         "tests-ts/gateway-validation.test.ts",
-        "tests-ts/integration/real-aseprite.test.ts"
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
       ],
       "dependencies": [],
       "commit": null,
@@ -1056,7 +1086,8 @@
       "domain": "quality",
       "tests": [
         "tests-ts/gateway-validation.test.ts",
-        "tests-ts/integration/real-aseprite.test.ts"
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
       ],
       "dependencies": [],
       "commit": null,
@@ -1246,7 +1277,8 @@
       "domain": "layers",
       "tests": [
         "tests-ts/gateway-validation.test.ts",
-        "tests-ts/integration/real-aseprite.test.ts"
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
       ],
       "dependencies": [],
       "commit": null,
@@ -1370,7 +1402,7 @@
     {
       "id": "e2e-tests",
       "type": "e2e-tests",
-      "status": "pending"
+      "status": "verified"
     },
     {
       "id": "godot-exports",

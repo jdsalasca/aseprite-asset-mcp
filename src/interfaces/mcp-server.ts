@@ -8,6 +8,7 @@ import type { AsepriteResult } from "../domain/aseprite.js";
 
 const SERVER_VERSION = "1.0.0";
 const TYPESCRIPT_VERSION = "6.0.3";
+const HEX_COLOR = /^#?(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
 const TOOL_NAMES = [
   "server_capabilities",
   "create_canvas",
@@ -21,7 +22,11 @@ const TOOL_NAMES = [
   "set_layer_visibility",
   "set_layer_opacity",
   "set_palette",
+  "draw_pixels",
+  "draw_line",
   "draw_rectangle",
+  "fill_area",
+  "draw_circle",
   "set_tag",
   "create_tilemap_layer",
   "validate_scene",
@@ -106,16 +111,54 @@ export class AsepriteMcpServerAdapter {
 
     this.server.registerTool("set_palette", {
       description: "Apply a controlled hexadecimal palette to a document.",
-      inputSchema: { filename: z.string().min(1), colors: z.array(z.string().min(4)).min(1) },
+      inputSchema: { filename: z.string().min(1), colors: z.array(z.string().regex(HEX_COLOR)).min(1) },
     }, async ({ filename, colors }) => this.result(await this.assets.setPalette(filename, colors)));
+
+    this.server.registerTool("draw_pixels", {
+      description: "Draw explicit pixels on the active cel.",
+      inputSchema: {
+        filename: z.string().min(1),
+        pixels: z.array(z.object({ x: z.number().int(), y: z.number().int(), color: z.string().regex(HEX_COLOR) })).min(1),
+      },
+    }, async ({ filename, pixels }) => this.result(await this.assets.drawPixels(filename, pixels)));
+
+    this.server.registerTool("draw_line", {
+      description: "Draw a Bresenham line with optional pixel thickness.",
+      inputSchema: {
+        filename: z.string().min(1),
+        x1: z.number().int(),
+        y1: z.number().int(),
+        x2: z.number().int(),
+        y2: z.number().int(),
+        color: z.string().regex(HEX_COLOR).default("#000000"),
+        thickness: z.number().int().positive().default(1),
+      },
+    }, async ({ filename, x1, y1, x2, y2, color, thickness }) => this.result(await this.assets.drawLine(filename, x1, y1, x2, y2, color, thickness)));
 
     this.server.registerTool("draw_rectangle", {
       description: "Draw a filled or outlined pixel-art rectangle on the active Aseprite layer.",
       inputSchema: {
         filename: z.string().min(1), x: z.number().int(), y: z.number().int(), width: z.number().int().positive(), height: z.number().int().positive(),
-        color: z.string().regex(/^#?[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/), fill: z.boolean().default(false),
+        color: z.string().regex(HEX_COLOR), fill: z.boolean().default(false),
       },
     }, async ({ filename, x, y, width, height, color, fill }) => this.result(await this.assets.drawRectangle(filename, x, y, width, height, color, fill)));
+
+    this.server.registerTool("fill_area", {
+      description: "Fill a contiguous area from a seed pixel.",
+      inputSchema: { filename: z.string().min(1), x: z.number().int(), y: z.number().int(), color: z.string().regex(HEX_COLOR).default("#000000") },
+    }, async ({ filename, x, y, color }) => this.result(await this.assets.fillArea(filename, x, y, color)));
+
+    this.server.registerTool("draw_circle", {
+      description: "Draw an ellipse-bounded circle.",
+      inputSchema: {
+        filename: z.string().min(1),
+        center_x: z.number().int(),
+        center_y: z.number().int(),
+        radius: z.number().int().positive(),
+        color: z.string().regex(HEX_COLOR).default("#000000"),
+        fill: z.boolean().default(false),
+      },
+    }, async ({ filename, center_x, center_y, radius, color, fill }) => this.result(await this.assets.drawCircle(filename, center_x, center_y, radius, color, fill)));
 
     this.server.registerTool("set_tag", {
       description: "Create or update an animation tag.",
