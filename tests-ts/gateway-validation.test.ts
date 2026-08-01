@@ -35,6 +35,11 @@ test("rejects traversal in every input sprite path before starting Aseprite", as
     gateway.exportFrame("../sprite.aseprite", 1, "output.png"),
     gateway.exportLayers("../sprite.aseprite", "output"),
     gateway.exportTag("../sprite.aseprite", "idle", "output.png"),
+    gateway.importImageAsLayer("../sprite.aseprite", "image.png", "Layer"),
+    gateway.createCel("../sprite.aseprite", "Layer", 1),
+    gateway.clearCel("../sprite.aseprite", "Layer", 1),
+    gateway.copyCel("../sprite.aseprite", "Layer", 1, 2),
+    gateway.copyFrame("../sprite.aseprite", 1),
     gateway.setTag("../sprite.aseprite", "idle", 1, 1),
     gateway.createTilemapLayer("../sprite.aseprite", "Tiles", 16, 16),
     gateway.validateScene("../sprite.aseprite", ["Layer"]),
@@ -131,6 +136,20 @@ test("rejects invalid layer and tag export contracts before starting Aseprite", 
   assert.equal(badLayers.message, "Parent directory traversal is not allowed");
   assert.equal(badTag.message, "Tag name cannot be empty");
   assert.equal(badScale.message, "Scale must be between 1 and 64");
+});
+
+test("rejects invalid import and cel contracts before starting Aseprite", async () => {
+  const badImport = await gateway.importImageAsLayer("sprite.aseprite", "../image.png", "Layer");
+  const badCreate = await gateway.createCel("sprite.aseprite", "Layer", 0);
+  const badClear = await gateway.clearCel("sprite.aseprite", "", 1);
+  const badCopyCel = await gateway.copyCel("sprite.aseprite", "Layer", 0, 2);
+  const badCopyFrame = await gateway.copyFrame("sprite.aseprite", 0);
+
+  assert.equal(badImport.message, "Parent directory traversal is not allowed");
+  assert.equal(badCreate.message, "Frame index must be a positive integer");
+  assert.equal(badClear.message, "Layer name cannot be empty");
+  assert.equal(badCopyCel.message, "Source frame must be a positive integer");
+  assert.equal(badCopyFrame.message, "Source frame must be a positive integer");
 });
 
 test("rejects invalid tag frame ranges before starting Aseprite", async () => {

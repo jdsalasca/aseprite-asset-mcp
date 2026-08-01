@@ -846,6 +846,117 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: `Tag '${name}' exported to ${target}` };
   }
 
+  public async importImageAsLayer(filename: string, imagePath: string, layerName: string, frameIndex = 1, x = 0, y = 0): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const image = validatePath(imagePath);
+    if (typeof image !== "string") return image;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    if (![x, y].every((coordinate) => Number.isInteger(coordinate))) return { ok: false, message: "Coordinates must be integers" };
+    try {
+      await fs.access(image);
+    } catch {
+      return { ok: false, message: `Image file not found: ${image}` };
+    }
+    const script = this.openScript(source, `
+      if ${frameIndex} > #spr.frames then print("ERROR:Frame index out of range") return end
+      local imported = Image { fromFile = "${luaEscape(image.replaceAll("\\", "/"))}" }
+      if not imported then print("ERROR:Could not load image") return end
+      local target = find_layer(spr, "${luaEscape(name)}")
+      if not target then target = spr:newLayer() target.name = "${luaEscape(name)}" end
+      local frame = spr.frames[${frameIndex}]
+      local cel = target:cel(frame)
+      if not cel then cel = spr:newCel(target, frame, Image(spr.width, spr.height, spr.colorMode), Point(0, 0)) end
+      cel.image:drawImage(imported, Point(${x}, ${y}))
+    `);
+    return result(await this.runLua(script, source), `Image imported into '${name}' frame ${frameIndex} in ${source}`);
+  }
+
+  public async createCel(filename: string, layerName: string, frameIndex: number, x = 0, y = 0): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    if (![x, y].every((coordinate) => Number.isInteger(coordinate))) return { ok: false, message: "Coordinates must be integers" };
+    const script = this.openScript(source, `
+      if ${frameIndex} > #spr.frames then print("ERROR:Frame index out of range") return end
+      local target = find_layer(spr, "${luaEscape(name)}")
+      if not target or target.isGroup then print("ERROR:Layer not found") return end
+      local frame = spr.frames[${frameIndex}]
+      if not target:cel(frame) then spr:newCel(target, frame, Image(spr.width, spr.height, spr.colorMode), Point(${x}, ${y})) end
+    `);
+    return result(await this.runLua(script, source), `Cel created on '${name}' frame ${frameIndex} in ${source}`);
+  }
+
+  public async clearCel(filename: string, layerName: string, frameIndex: number): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    const script = this.openScript(source, `
+      if ${frameIndex} > #spr.frames then print("ERROR:Frame index out of range") return end
+      local target = find_layer(spr, "${luaEscape(name)}")
+      if not target or target.isGroup then print("ERROR:Layer not found") return end
+      local cel = target:cel(spr.frames[${frameIndex}])
+      if cel then spr:deleteCel(cel) end
+    `);
+    return result(await this.runLua(script, source), `Cel cleared on '${name}' frame ${frameIndex} in ${source}`);
+  }
+
+  public async copyCel(filename: string, layerName: string, sourceFrame: number, targetFrame: number, replace = true): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (!isPositiveInteger(sourceFrame)) return { ok: false, message: "Source frame must be a positive integer" };
+    if (!isPositiveInteger(targetFrame)) return { ok: false, message: "Target frame must be a positive integer" };
+    const script = this.openScript(source, `
+      if ${sourceFrame} > #spr.frames then print("ERROR:Source frame out of range") return end
+      if ${targetFrame} > #spr.frames then print("ERROR:Target frame out of range") return end
+      local target = find_layer(spr, "${luaEscape(name)}")
+      if not target or target.isGroup then print("ERROR:Layer not found") return end
+      local sourceCel = target:cel(spr.frames[${sourceFrame}])
+      if not sourceCel then print("ERROR:Source cel not found") return end
+      local targetCel = target:cel(spr.frames[${targetFrame}])
+      if targetCel and ${replace ? "true" : "false"} then spr:deleteCel(targetCel) targetCel = nil end
+      if not targetCel then spr:newCel(target, spr.frames[${targetFrame}], sourceCel.image:clone(), sourceCel.position) end
+    `);
+    return result(await this.runLua(script, source), `Cel copied on '${name}' from frame ${sourceFrame} to ${targetFrame} in ${source}`);
+  }
+
+  public async copyFrame(filename: string, sourceFrame: number, targetFrame?: number, overwrite = true): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (!isPositiveInteger(sourceFrame)) return { ok: false, message: "Source frame must be a positive integer" };
+    if (targetFrame !== undefined && !isPositiveInteger(targetFrame)) return { ok: false, message: "Target frame must be a positive integer" };
+    const destination = targetFrame === undefined ? "nil" : String(targetFrame);
+    const message = targetFrame === undefined ? `Frame ${sourceFrame} copied to new frame in ${source}` : `Frame ${sourceFrame} copied to frame ${targetFrame} in ${source}`;
+    const script = this.openScript(source, `
+      if ${sourceFrame} > #spr.frames then print("ERROR:Source frame out of range") return end
+      local destinationIndex = ${destination}
+      if destinationIndex ~= nil and destinationIndex > #spr.frames then print("ERROR:Target frame out of range") return end
+      local destinationFrame = destinationIndex == nil and spr:newFrame() or spr.frames[destinationIndex]
+      local function visit(layer)
+        if layer.isGroup then
+          for _, child in ipairs(layer.layers) do visit(child) end
+          return
+        end
+        if ${overwrite ? "true" : "false"} then
+          local old = layer:cel(destinationFrame)
+          if old then spr:deleteCel(old) end
+        end
+        local sourceCel = layer:cel(spr.frames[${sourceFrame}])
+        if sourceCel and not layer:cel(destinationFrame) then spr:newCel(layer, destinationFrame, sourceCel.image:clone(), sourceCel.position) end
+      end
+      for _, layer in ipairs(spr.layers) do visit(layer) end
+    `);
+    return result(await this.runLua(script, source), message);
+  }
+
   private async resolveTagRange(filename: string, tagName: string): Promise<CommandResult> {
     const script = `
       local spr = app.activeSprite

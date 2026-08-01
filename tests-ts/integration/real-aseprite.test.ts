@@ -46,6 +46,11 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
       await gateway.copySprite(source, copiedSprite),
       await gateway.exportFrame(source, 2, exportedFrame, 2),
       await gateway.exportLayers(source, exportedLayers),
+      await gateway.importImageAsLayer(source, exportedFrame, "reference", 1, 0, 0),
+      await gateway.createCel(source, "reference", 3, 1, 1),
+      await gateway.copyCel(source, "body", 2, 3, true),
+      await gateway.copyFrame(source, 2, 4, true),
+      await gateway.clearCel(source, "reference", 3),
       await gateway.setFrame(source, 2),
       await gateway.setFrameDuration(source, 2, 150),
       await gateway.setFrameDurationAll(source, 120),
@@ -63,7 +68,7 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
       }),
     ];
     for (const step of steps) assert.equal(step.ok, true, step.message);
-    const missingCel = await gateway.drawPixelsAt(source, "body", 3, [{ x: 0, y: 0, color: "#ffffff" }], false);
+    const missingCel = await gateway.drawPixelsAt(source, "reference", 3, [{ x: 0, y: 0, color: "#ffffff" }], false);
     assert.equal(missingCel.ok, false);
     assert.equal(missingCel.message, "Cel not found");
     assert.equal(existsSync(source), true);
