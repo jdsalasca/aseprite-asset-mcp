@@ -55,6 +55,8 @@ Las abstracciones no contienen nombres de SDK, Aseprite, Node, HTTP ni filesyste
 - CI para los tres repositorios;
 - releases y documentación cruzada.
 
+La publicación npm queda protegida por autenticación: el workflow no contiene tokens y requiere configurar el secreto de publicación en GitHub o iniciar sesión localmente.
+
 ## Criterios de diseño
 
 - dominio puro y pequeño;
