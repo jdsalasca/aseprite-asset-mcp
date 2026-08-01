@@ -72,6 +72,10 @@ const TOOL_NAMES = [
   "generate_color_ramp",
   "quantize_to_palette",
   "set_color_mode",
+  "get_pixel_color",
+  "get_pixels_rect",
+  "get_composite_pixel",
+  "get_composite_rect",
   "outline_native",
   "adjust_hsl_native",
   "adjust_brightness_contrast",
@@ -475,6 +479,26 @@ export class AsepriteMcpServerAdapter {
       description: "Convert a sprite to RGB, grayscale, or indexed color mode.",
       inputSchema: { filename: z.string().min(1), mode: z.enum(["rgb", "grayscale", "indexed"]) },
     }, async ({ filename, mode }) => this.result(await this.assets.setColorMode(filename, mode)));
+
+    this.server.registerTool("get_pixel_color", {
+      description: "Read one RGBA pixel from a cel.",
+      inputSchema: { filename: z.string().min(1), x: z.number().int(), y: z.number().int(), layer_name: z.string().default(""), frame_index: z.number().int().positive().default(1) },
+    }, async ({ filename, x, y, layer_name, frame_index }) => this.result(await this.assets.getPixelColor(filename, x, y, layer_name, frame_index)));
+
+    this.server.registerTool("get_pixels_rect", {
+      description: "Read a rectangular RGBA region from a cel as JSON.",
+      inputSchema: { filename: z.string().min(1), x: z.number().int(), y: z.number().int(), width: z.number().int().positive(), height: z.number().int().positive(), layer_name: z.string().default(""), frame_index: z.number().int().positive().default(1) },
+    }, async ({ filename, x, y, width, height, layer_name, frame_index }) => this.result(await this.assets.getPixelsRect(filename, x, y, width, height, layer_name, frame_index)));
+
+    this.server.registerTool("get_composite_pixel", {
+      description: "Read one RGBA pixel from the visible flattened composite.",
+      inputSchema: { filename: z.string().min(1), x: z.number().int(), y: z.number().int(), frame_index: z.number().int().positive().default(1) },
+    }, async ({ filename, x, y, frame_index }) => this.result(await this.assets.getCompositePixel(filename, x, y, frame_index)));
+
+    this.server.registerTool("get_composite_rect", {
+      description: "Read a visible flattened composite region as JSON.",
+      inputSchema: { filename: z.string().min(1), x: z.number().int(), y: z.number().int(), width: z.number().int().positive(), height: z.number().int().positive(), frame_index: z.number().int().positive().default(1) },
+    }, async ({ filename, x, y, width, height, frame_index }) => this.result(await this.assets.getCompositeRect(filename, x, y, width, height, frame_index)));
 
     this.server.registerTool("outline_native", {
       description: "Apply Aseprite native outline to a selected layer and frame.",

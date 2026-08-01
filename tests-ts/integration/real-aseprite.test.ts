@@ -102,6 +102,10 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
       await gateway.quantizeToPalette(source, "body", 1, 3),
       await gateway.setColorMode(source, "grayscale"),
       await gateway.setColorMode(source, "rgb"),
+      await gateway.getPixelColor(source, 2, 2, "body", 2),
+      await gateway.getPixelsRect(source, 0, 0, 2, 2, "body", 2),
+      await gateway.getCompositePixel(source, 2, 2, 2),
+      await gateway.getCompositeRect(source, 0, 0, 2, 2, 2),
     ];
     for (const [index, step] of steps.entries()) assert.equal(step.ok, true, `step ${index}: ${step.message}`);
     const matricesResult = await gateway.listConvolutionMatrices();
@@ -114,6 +118,15 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
     const ramp = await gateway.generateColorRamp("#D04648", 5);
     assert.equal(ramp.ok, true, ramp.message);
     assert.equal(JSON.parse(ramp.message).length, 5);
+    const pixel = await gateway.getPixelColor(source, 2, 2, "body", 2);
+    assert.equal(pixel.ok, true, pixel.message);
+    assert.match(pixel.message, /^#[0-9a-f]{6} \(r=\d+, g=\d+, b=\d+, a=\d+\)$/);
+    const pixels = await gateway.getPixelsRect(source, 0, 0, 2, 2, "body", 2);
+    assert.equal(pixels.ok, true, pixels.message);
+    assert.equal(JSON.parse(pixels.message).length, 4);
+    const composite = await gateway.getCompositeRect(source, 0, 0, 2, 2, 2);
+    assert.equal(composite.ok, true, composite.message);
+    assert.equal(JSON.parse(composite.message).length, 4);
     const comparison = await gateway.compareFrames(source, 1, 2);
     assert.equal(comparison.ok, true, comparison.message);
     const metrics = JSON.parse(comparison.message) as { changedPixels?: number; totalPixels?: number; bounds?: unknown };

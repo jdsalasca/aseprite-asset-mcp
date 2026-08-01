@@ -69,6 +69,10 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("apply_dither_gradient"));
     assert.ok(tools.includes("apply_dither_pattern"));
     assert.ok(tools.includes("set_frame"));
+    assert.ok(tools.includes("get_pixel_color"));
+    assert.ok(tools.includes("get_pixels_rect"));
+    assert.ok(tools.includes("get_composite_pixel"));
+    assert.ok(tools.includes("get_composite_rect"));
     assert.ok(tools.includes("draw_rectangle"));
     assert.ok(tools.includes("create_character_plan"));
     assert.ok(tools.includes("create_scene_plan"));
@@ -193,6 +197,10 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
     await call("quantize_to_palette", { filename: source, layer_name: "body", start_frame: 1, end_frame: 1 });
     await call("set_color_mode", { filename: source, mode: "grayscale" });
     await call("set_color_mode", { filename: source, mode: "rgb" });
+    await call("get_pixel_color", { filename: source, x: 2, y: 2, layer_name: "body", frame_index: 1 });
+    await call("get_pixels_rect", { filename: source, x: 0, y: 0, width: 2, height: 2, layer_name: "body", frame_index: 1 });
+    await call("get_composite_pixel", { filename: source, x: 2, y: 2, frame_index: 1 });
+    await call("get_composite_rect", { filename: source, x: 0, y: 0, width: 2, height: 2, frame_index: 1 });
     await call("flatten_sprite", { filename: source });
     await call("export_spritesheet", {
       filename: source,
