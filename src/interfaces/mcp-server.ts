@@ -11,6 +11,9 @@ import { VisualAssetService } from "../application/services/VisualAssetService.j
 import { buildCharacterPlan, buildScenePlan } from "../workflows/plans.js";
 import type { AsepriteResult } from "../domain/aseprite.js";
 import { EnhancementToolController } from "./controllers/EnhancementToolController.js";
+import { AssetJobToolController } from "./controllers/AssetJobToolController.js";
+import { AssetJobService } from "../application/services/AssetJobService.js";
+import { InMemoryAssetJobStore } from "../infrastructure/jobs/InMemoryAssetJobStore.js";
 
 const SERVER_VERSION = "1.0.0";
 const TYPESCRIPT_VERSION = "6.0.3";
@@ -145,6 +148,9 @@ const TOOL_NAMES = [
   "build_texture_atlas",
   "run_asset_recipe",
   "batch_asset_job",
+  "start_asset_job",
+  "get_asset_job_status",
+  "cancel_asset_job",
   "export_asset_pack",
   "create_style_bible",
   "inspect_reference",
@@ -163,10 +169,12 @@ export class AsepriteMcpServerAdapter {
 
   private readonly imageAssets: PixelArtAssetService;
   private readonly visualAssets: VisualAssetService;
+  private readonly assetJobs: AssetJobService;
 
   public constructor(private readonly assets: AsepriteAssetService, imageAssets?: PixelArtAssetService) {
     this.imageAssets = imageAssets ?? new PixelArtAssetService(new SharpRasterCodec(), new JsonAssetManifestWriter());
     this.visualAssets = new VisualAssetService(new SharpRasterCodec(), new JsonAssetManifestWriter());
+    this.assetJobs = new AssetJobService({ run: (input) => this.imageAssets.runBatch(input) }, new InMemoryAssetJobStore());
     this.server = new McpServer({ name: "aseprite-asset-mcp", version: SERVER_VERSION });
     this.registerTools();
   }
@@ -252,6 +260,7 @@ export class AsepriteMcpServerAdapter {
       inputSchema: { filename: z.string().min(1) },
     }, async ({ filename }) => this.result(await this.visualAssets.inspectReference(filename)));
     new EnhancementToolController(this.visualAssets).register(this.server);
+    new AssetJobToolController(this.assetJobs).register(this.server);
 
     this.server.registerTool("run_asset_quality_gate", {
       description: "Run compact pixel-art quality checks before export.",
