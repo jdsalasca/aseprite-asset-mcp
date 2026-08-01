@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",
+    "pureimage": "^0.4.20",
     "zod": "^4.0.0"
   },
   "devDependencies": {

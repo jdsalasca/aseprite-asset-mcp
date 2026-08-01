@@ -8,6 +8,7 @@ import { AsepriteCliGateway } from "../../src/infrastructure/aseprite/AsepriteCl
 
 const defaultAsepritePath = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Aseprite\\Aseprite.exe";
 const asepritePath = process.env.ASEPRITE_PATH ?? defaultAsepritePath;
+const textFontPath = ["C:\\Windows\\Fonts\\arial.ttf", "C:\\Windows\\Fonts\\segoeui.ttf"].find((filename) => existsSync(filename));
 
 test("real Aseprite completes the core asset workflow", { skip: !existsSync(asepritePath) }, async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "aseprite-mcp-integration-"));
@@ -195,4 +196,23 @@ test("real Aseprite applies layer transforms without losing pixel data", { skip:
 
   assert.equal((await gateway.resizeCanvas(source, 6, 4)).ok, true);
   assert.equal((await gateway.cropCanvas(source, 1, 1, 4, 2)).ok, true);
+});
+
+test("real TypeScript text rasterizer measures and draws a system font", { skip: !existsSync(asepritePath) || !textFontPath }, async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "aseprite-mcp-text-"));
+  const source = path.join(directory, "text.aseprite");
+  const gateway = new AsepriteCliGateway({ executable: asepritePath });
+  const fonts = await gateway.listTextFonts();
+  assert.equal(fonts.ok, true, fonts.message);
+  assert.match(fonts.message, /System fonts/);
+  const measured = await gateway.measureText("Aseprite", textFontPath as string, 8, 1, 1, false);
+  assert.equal(measured.ok, true, measured.message);
+  assert.match(measured.message, /width=\d+ height=\d+ advance_width=\d+/);
+  assert.equal((await gateway.createCanvas(48, 24, source)).ok, true);
+  assert.equal((await gateway.drawText({ filename: source, text: "A", x: 4, y: 4, font: textFontPath as string, size: 12, color: "#ff0000", layerName: "labels", anchor: "topleft", outlineColor: "#000000", shadowColor: "#0000ff", createIfMissing: true })).ok, true);
+  const pixels = await gateway.getPixelsRect(source, 0, 0, 32, 24, "labels", 1);
+  assert.equal(pixels.ok, true, pixels.message);
+  const values = JSON.parse(pixels.message) as Array<{ r: number; g: number; b: number; a: number }>;
+  assert.equal(values[0]?.a, 0);
+  assert.ok(values.some((pixel) => pixel.r > 200 && pixel.g < 80 && pixel.b < 80 && pixel.a > 0));
 });

@@ -1,4 +1,4 @@
-import type { AsepriteGateway, AsepriteResult, PixelInput, PointInput } from "../../domain/aseprite.js";
+import type { AsepriteGateway, AsepriteResult, PixelInput, PointInput, TextDrawInput } from "../../domain/aseprite.js";
 
 export class AsepriteAssetService {
   public constructor(private readonly gateway: AsepriteGateway) {}
@@ -321,6 +321,18 @@ export class AsepriteAssetService {
 
   public cropCanvas(filename: string, x: number, y: number, width: number, height: number): Promise<AsepriteResult> {
     return this.gateway.cropCanvas(filename, x, y, width, height);
+  }
+
+  public listTextFonts(): Promise<AsepriteResult> {
+    return this.gateway.listTextFonts();
+  }
+
+  public measureText(text: string, font: string, size = 1, letterSpacing = 0, bold = 0, antialias = false): Promise<AsepriteResult> {
+    return this.gateway.measureText(text, font, size, letterSpacing, bold, antialias);
+  }
+
+  public drawText(input: TextDrawInput): Promise<AsepriteResult> {
+    return this.gateway.drawText(input);
   }
 
   public applyConvolution(filename: string, matrix: string, layerName = "", frameIndex = 1, x = 0, y = 0, width = 0, height = 0): Promise<AsepriteResult> {

@@ -14,6 +14,29 @@ export interface PointInput {
   y: number;
 }
 
+export interface TextDrawInput {
+  filename: string;
+  text: string;
+  x: number;
+  y: number;
+  font: string;
+  size?: number | undefined;
+  color?: string | undefined;
+  layerName?: string | undefined;
+  frameIndex?: number | undefined;
+  anchor?: string | undefined;
+  letterSpacing?: number | undefined;
+  bold?: number | undefined;
+  outlineColor?: string | undefined;
+  outlineWidth?: number | undefined;
+  outlineDiagonal?: boolean | undefined;
+  shadowColor?: string | undefined;
+  shadowDx?: number | undefined;
+  shadowDy?: number | undefined;
+  antialias?: boolean | undefined;
+  createIfMissing?: boolean | undefined;
+}
+
 export interface AsepriteGateway {
   createCanvas(width: number, height: number, filename: string): Promise<AsepriteResult>;
   addGroup(filename: string, groupName: string, parentGroup?: string): Promise<AsepriteResult>;
@@ -95,6 +118,9 @@ export interface AsepriteGateway {
   rotateLayer(filename: string, layerName: string, frameIndex: number, angle?: 90 | 180 | 270): Promise<AsepriteResult>;
   resizeCanvas(filename: string, width: number, height: number): Promise<AsepriteResult>;
   cropCanvas(filename: string, x: number, y: number, width: number, height: number): Promise<AsepriteResult>;
+  listTextFonts(): Promise<AsepriteResult>;
+  measureText(text: string, font: string, size?: number, letterSpacing?: number, bold?: number, antialias?: boolean): Promise<AsepriteResult>;
+  drawText(input: TextDrawInput): Promise<AsepriteResult>;
   applyConvolution(filename: string, matrix: string, layerName?: string, frameIndex?: number, x?: number, y?: number, width?: number, height?: number): Promise<AsepriteResult>;
   listConvolutionMatrices(): Promise<AsepriteResult>;
   applyDitherGradient(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, colorStart: string, colorEnd: string, horizontal?: boolean, createIfMissing?: boolean): Promise<AsepriteResult>;
