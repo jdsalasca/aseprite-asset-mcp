@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
 import type { ExportAnimationPort } from "../../application/ports/AssetCapabilityPorts.js";
-import type { AsepriteResult } from "../../domain/aseprite.js";
+import type { AssetOperationResult } from "../../domain/asset-operations.js";
 
 export class ExportAnimationToolController {
   public constructor(private readonly assets: ExportAnimationPort) {}
@@ -108,5 +108,5 @@ export class ExportAnimationToolController {
     }, async ({ filename, layer_name, frame_index, opacity }) => this.result(await this.assets.setCelOpacity(filename, layer_name, frame_index, opacity)));
   }
 
-  private result(operation: AsepriteResult): { isError?: boolean; content: [{ type: "text"; text: string }] } { return { isError: !operation.ok, content: [{ type: "text", text: operation.message }] }; }
+  private result(operation: AssetOperationResult): { isError?: boolean; content: [{ type: "text"; text: string }] } { return { isError: !operation.ok, content: [{ type: "text", text: operation.message }] }; }
 }

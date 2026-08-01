@@ -3,7 +3,7 @@ import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
-import type { AnimationAuditInput, AnimationEasing, AnimationSanitizeInput, AsepriteGateway, AsepriteResult, CopyLayersInput, PixelInput, PointInput, ScaleAnchor, TextDrawInput, TilePixelInput, TilePlacementInput } from "../../domain/aseprite.js";
+import type { AnimationAuditInput, AnimationEasing, AnimationSanitizeInput, AssetRuntimePort, AssetOperationResult, CopyLayersInput, PixelInput, PointInput, ScaleAnchor, TextDrawInput, TilePixelInput, TilePlacementInput } from "../../domain/asset-operations.js";
 import { availableTextFonts, measureText as rasterMeasureText, rasterizeText } from "../text/TextRasterizer.js";
 
 const execFileAsync = promisify(execFile);
@@ -14,7 +14,7 @@ interface CommandResult {
   output: string;
 }
 
-type PathValidation = string | AsepriteResult;
+type PathValidation = string | AssetOperationResult;
 
 const SHEET_TYPES = new Set(["horizontal", "vertical", "rows", "columns", "packed"]);
 const DATA_FORMATS = new Set(["json-array", "json-hash"]);
@@ -138,18 +138,18 @@ function isHexColor(value: string): boolean {
   return typeof value === "string" && /^#?(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(value.trim());
 }
 
-function validateName(value: string, label: string): string | AsepriteResult {
+function validateName(value: string, label: string): string | AssetOperationResult {
   if (typeof value !== "string" || !value.trim()) return { ok: false, message: `${label} cannot be empty` };
   return value;
 }
 
-function validateNativeRegion(x: number, y: number, width: number, height: number): AsepriteResult | undefined {
+function validateNativeRegion(x: number, y: number, width: number, height: number): AssetOperationResult | undefined {
   if (![x, y, width, height].every((value) => Number.isInteger(value))) return { ok: false, message: "Region values must be integers" };
   if (width < 0 || height < 0 || (width === 0) !== (height === 0)) return { ok: false, message: "Region width and height must both be zero or positive integers" };
   return undefined;
 }
 
-function result(command: CommandResult, successMessage: string): AsepriteResult {
+function result(command: CommandResult, successMessage: string): AssetOperationResult {
   if (command.ok) return { ok: true, message: successMessage };
   return { ok: false, message: command.output || "Aseprite command failed" };
 }
@@ -165,7 +165,7 @@ export interface AsepriteCliGatewayOptions {
   commandRunner?: (args: string[]) => Promise<CommandResult>;
 }
 
-export class AsepriteCliGateway implements AsepriteGateway {
+export class AsepriteCliGateway implements AssetRuntimePort {
   private readonly executable: string;
   private readonly tempDirectory: string;
   private readonly commandRunner: (args: string[]) => Promise<CommandResult>;
@@ -176,7 +176,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     this.commandRunner = options.commandRunner ?? ((args) => this.run(args));
   }
 
-  public async createCanvas(width: number, height: number, filename: string): Promise<AsepriteResult> {
+  public async createCanvas(width: number, height: number, filename: string): Promise<AssetOperationResult> {
     if (!isPositiveInteger(width) || !isPositiveInteger(height)) return { ok: false, message: "Width and height must be positive integers" };
     const target = validatePath(filename);
     if (typeof target !== "string") return target;
@@ -184,7 +184,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script), `Canvas created successfully: ${filename}`);
   }
 
-  public async addGroup(filename: string, groupName: string, parentGroup = ""): Promise<AsepriteResult> {
+  public async addGroup(filename: string, groupName: string, parentGroup = ""): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const script = this.layerScript(filename, `
@@ -199,7 +199,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, filename), `Group '${groupName}' created in ${filename}`);
   }
 
-  public async addLayer(filename: string, layerName: string, group = ""): Promise<AsepriteResult> {
+  public async addLayer(filename: string, layerName: string, group = ""): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const script = this.layerScript(filename, `
@@ -215,7 +215,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, filename), `Layer '${layerName}' added to ${filename}`);
   }
 
-  public async deleteLayer(filename: string, layerName: string): Promise<AsepriteResult> {
+  public async deleteLayer(filename: string, layerName: string): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -229,7 +229,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Layer '${name}' deleted from ${source}`);
   }
 
-  public async renameLayer(filename: string, layerName: string, newName: string): Promise<AsepriteResult> {
+  public async renameLayer(filename: string, layerName: string, newName: string): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -244,7 +244,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Layer '${name}' renamed to '${replacement}' in ${source}`);
   }
 
-  public async duplicateLayer(filename: string, layerName: string, newName = "", group = ""): Promise<AsepriteResult> {
+  public async duplicateLayer(filename: string, layerName: string, newName = "", group = ""): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -278,7 +278,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Layer '${name}' duplicated as '${finalName}'${location} in ${source}`);
   }
 
-  public async reorderLayer(filename: string, layerName: string, position: number): Promise<AsepriteResult> {
+  public async reorderLayer(filename: string, layerName: string, position: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -293,7 +293,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Layer '${name}' moved to position ${position} in ${source}`);
   }
 
-  public async setLayerBlendMode(filename: string, layerName: string, mode: string): Promise<AsepriteResult> {
+  public async setLayerBlendMode(filename: string, layerName: string, mode: string): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -309,7 +309,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Layer '${name}' blend mode set to ${normalizedMode} in ${source}`);
   }
 
-  public async mergeLayerDown(filename: string, layerName: string): Promise<AsepriteResult> {
+  public async mergeLayerDown(filename: string, layerName: string): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -324,21 +324,21 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Layer '${name}' merged down in ${source}`);
   }
 
-  public async flattenSprite(filename: string): Promise<AsepriteResult> {
+  public async flattenSprite(filename: string): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const script = this.openScript(source, "spr:flatten()");
     return result(await this.runLua(script, source), `Sprite flattened in ${source}`);
   }
 
-  public async addFrame(filename: string): Promise<AsepriteResult> {
+  public async addFrame(filename: string): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const script = this.openScript(filename, "spr:newFrame()");
     return result(await this.runLua(script, filename), `New frame added to ${filename}`);
   }
 
-  public async addFrames(filename: string, count: number, durationMs?: number): Promise<AsepriteResult> {
+  public async addFrames(filename: string, count: number, durationMs?: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (!isPositiveInteger(count)) return { ok: false, message: "Count must be a positive integer" };
@@ -353,7 +353,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, filename), `Added ${count} frames to ${filename}`);
   }
 
-  public async setFrame(filename: string, frameIndex: number): Promise<AsepriteResult> {
+  public async setFrame(filename: string, frameIndex: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
@@ -364,7 +364,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, filename), `Active frame set to ${frameIndex} in ${filename}`);
   }
 
-  public async setFrameDuration(filename: string, frameIndex: number, durationMs: number): Promise<AsepriteResult> {
+  public async setFrameDuration(filename: string, frameIndex: number, durationMs: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
@@ -376,7 +376,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, filename), `Frame ${frameIndex} duration set to ${durationMs}ms in ${filename}`);
   }
 
-  public async setFrameDurationAll(filename: string, durationMs: number): Promise<AsepriteResult> {
+  public async setFrameDurationAll(filename: string, durationMs: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (!isPositiveInteger(durationMs)) return { ok: false, message: "Duration must be a positive integer" };
@@ -388,7 +388,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, filename), `All frame durations set to ${durationMs}ms in ${filename}`);
   }
 
-  public async setLayerVisibility(filename: string, layerName: string, visible = true): Promise<AsepriteResult> {
+  public async setLayerVisibility(filename: string, layerName: string, visible = true): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -401,7 +401,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, filename), `Layer '${name}' visibility set to ${visible} in ${filename}`);
   }
 
-  public async setLayerOpacity(filename: string, layerName: string, opacity: number): Promise<AsepriteResult> {
+  public async setLayerOpacity(filename: string, layerName: string, opacity: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -415,7 +415,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, filename), `Layer '${name}' opacity set to ${opacity} in ${filename}`);
   }
 
-  public async setPalette(filename: string, colors: string[]): Promise<AsepriteResult> {
+  public async setPalette(filename: string, colors: string[]): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (!colors.length) return { ok: false, message: "Colors list cannot be empty" };
@@ -430,7 +430,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, filename), `Palette applied to ${filename}`);
   }
 
-  public async drawPixels(filename: string, pixels: PixelInput[]): Promise<AsepriteResult> {
+  public async drawPixels(filename: string, pixels: PixelInput[]): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (!Array.isArray(pixels) || pixels.length === 0) return { ok: false, message: "Pixels list cannot be empty" };
@@ -458,7 +458,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Pixels drawn successfully in ${source}`);
   }
 
-  public async drawLine(filename: string, x1: number, y1: number, x2: number, y2: number, color: string, thickness = 1): Promise<AsepriteResult> {
+  public async drawLine(filename: string, x1: number, y1: number, x2: number, y2: number, color: string, thickness = 1): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (![x1, y1, x2, y2].every((coordinate) => Number.isInteger(coordinate))) return { ok: false, message: "Coordinates must be integers" };
@@ -506,7 +506,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Line drawn successfully in ${source}`);
   }
 
-  public async drawRectangle(filename: string, x: number, y: number, width: number, height: number, color: string, fill = false): Promise<AsepriteResult> {
+  public async drawRectangle(filename: string, x: number, y: number, width: number, height: number, color: string, fill = false): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (!Number.isInteger(x) || !Number.isInteger(y) || !isPositiveInteger(width) || !isPositiveInteger(height)) {
@@ -530,7 +530,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, filename), `Rectangle drawn in ${filename}`);
   }
 
-  public async fillArea(filename: string, x: number, y: number, color: string): Promise<AsepriteResult> {
+  public async fillArea(filename: string, x: number, y: number, color: string): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (!Number.isInteger(x) || !Number.isInteger(y)) return { ok: false, message: "Coordinates must be integers" };
@@ -554,7 +554,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Area filled successfully in ${source}`);
   }
 
-  public async drawCircle(filename: string, centerX: number, centerY: number, radius: number, color: string, fill = false): Promise<AsepriteResult> {
+  public async drawCircle(filename: string, centerX: number, centerY: number, radius: number, color: string, fill = false): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (!Number.isInteger(centerX) || !Number.isInteger(centerY)) return { ok: false, message: "Coordinates must be integers" };
@@ -580,7 +580,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Circle drawn successfully in ${source}`);
   }
 
-  public async drawPixelsAt(filename: string, layerName: string, frameIndex: number, pixels: PixelInput[], createIfMissing = true): Promise<AsepriteResult> {
+  public async drawPixelsAt(filename: string, layerName: string, frameIndex: number, pixels: PixelInput[], createIfMissing = true): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -604,7 +604,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(this.openScript(source, body), source), `Pixels drawn on '${name}' frame ${frameIndex} in ${source}`);
   }
 
-  public async drawLineAt(filename: string, layerName: string, frameIndex: number, x1: number, y1: number, x2: number, y2: number, color: string, thickness = 1, createIfMissing = true): Promise<AsepriteResult> {
+  public async drawLineAt(filename: string, layerName: string, frameIndex: number, x1: number, y1: number, x2: number, y2: number, color: string, thickness = 1, createIfMissing = true): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -646,7 +646,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(this.openScript(source, body), source), `Line drawn on '${name}' frame ${frameIndex} in ${source}`);
   }
 
-  public async drawRectangleAt(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, color: string, fill = false, createIfMissing = true): Promise<AsepriteResult> {
+  public async drawRectangleAt(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, color: string, fill = false, createIfMissing = true): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -668,7 +668,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(this.openScript(source, body), source), `Rectangle drawn on '${name}' frame ${frameIndex} in ${source}`);
   }
 
-  public async drawCircleAt(filename: string, layerName: string, frameIndex: number, centerX: number, centerY: number, radius: number, color: string, fill = false, createIfMissing = true): Promise<AsepriteResult> {
+  public async drawCircleAt(filename: string, layerName: string, frameIndex: number, centerX: number, centerY: number, radius: number, color: string, fill = false, createIfMissing = true): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -690,7 +690,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(this.openScript(source, body), source), `Circle drawn on '${name}' frame ${frameIndex} in ${source}`);
   }
 
-  public async fillAreaAt(filename: string, layerName: string, frameIndex: number, x: number, y: number, color: string, createIfMissing = true): Promise<AsepriteResult> {
+  public async fillAreaAt(filename: string, layerName: string, frameIndex: number, x: number, y: number, color: string, createIfMissing = true): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -710,7 +710,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(this.openScript(source, body), source), `Area filled on '${name}' frame ${frameIndex} in ${source}`);
   }
 
-  public async drawPolygon(filename: string, layerName: string, frameIndex: number, points: PointInput[], color = "#000000", fill = false, createIfMissing = true): Promise<AsepriteResult> {
+  public async drawPolygon(filename: string, layerName: string, frameIndex: number, points: PointInput[], color = "#000000", fill = false, createIfMissing = true): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -779,7 +779,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(this.openScript(source, body), source), `Polygon drawn on '${name}' frame ${frameIndex} in ${source}`);
   }
 
-  public async drawPath(filename: string, layerName: string, frameIndex: number, points: PointInput[], color = "#000000", thickness = 1, createIfMissing = true): Promise<AsepriteResult> {
+  public async drawPath(filename: string, layerName: string, frameIndex: number, points: PointInput[], color = "#000000", thickness = 1, createIfMissing = true): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -824,7 +824,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(this.openScript(source, body), source), `Path drawn on '${name}' frame ${frameIndex} in ${source}`);
   }
 
-  public async applyGradientRect(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, colorStart: string, colorEnd: string, horizontal = true, createIfMissing = true): Promise<AsepriteResult> {
+  public async applyGradientRect(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, colorStart: string, colorEnd: string, horizontal = true, createIfMissing = true): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -856,7 +856,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(this.openScript(source, body), source), `Gradient applied on '${name}' frame ${frameIndex} in ${source}`);
   }
 
-  public async drawEllipseAt(filename: string, layerName: string, frameIndex: number, centerX: number, centerY: number, radiusX: number, radiusY: number, color = "#000000", fill = false, createIfMissing = true): Promise<AsepriteResult> {
+  public async drawEllipseAt(filename: string, layerName: string, frameIndex: number, centerX: number, centerY: number, radiusX: number, radiusY: number, color = "#000000", fill = false, createIfMissing = true): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -878,7 +878,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(this.openScript(source, body), source), `Ellipse drawn on '${name}' frame ${frameIndex} in ${source}`);
   }
 
-  public async setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction = "forward"): Promise<AsepriteResult> {
+  public async setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction = "forward"): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const rangeError = validateFrameRange(fromFrame, toFrame);
@@ -899,7 +899,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, filename), `Tag '${name}' set in ${filename}`);
   }
 
-  public async createTilemapLayer(filename: string, layerName: string, tileWidth: number, tileHeight: number): Promise<AsepriteResult> {
+  public async createTilemapLayer(filename: string, layerName: string, tileWidth: number, tileHeight: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -916,7 +916,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Tilemap layer '${name}' created with ${tileWidth}x${tileHeight} tiles in ${source}`);
   }
 
-  public async drawOnTile(filename: string, layerName: string, tileIndex: number, pixels: TilePixelInput[]): Promise<AsepriteResult> {
+  public async drawOnTile(filename: string, layerName: string, tileIndex: number, pixels: TilePixelInput[]): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -951,7 +951,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Drew ${pixels.length} pixels on tile ${tileIndex} of '${name}' in ${source}`);
   }
 
-  public async setTiles(filename: string, layerName: string, frameIndex: number, tiles: TilePlacementInput[]): Promise<AsepriteResult> {
+  public async setTiles(filename: string, layerName: string, frameIndex: number, tiles: TilePlacementInput[]): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -1005,7 +1005,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Placed ${tiles.length} tiles on '${name}' frame ${frameIndex} in ${source}`);
   }
 
-  public async getTileAt(filename: string, layerName: string, frameIndex: number, col: number, row: number): Promise<AsepriteResult> {
+  public async getTileAt(filename: string, layerName: string, frameIndex: number, col: number, row: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -1035,7 +1035,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: JSON.stringify({ col, row, tile_index: Number(tileLine.slice(5)) }) };
   }
 
-  public async getTilemapInfo(filename: string, layerName: string): Promise<AsepriteResult> {
+  public async getTilemapInfo(filename: string, layerName: string): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -1056,7 +1056,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: JSON.stringify({ tile_width: tileWidth, tile_height: tileHeight, tile_count: tileCount, map_cols: mapCols, map_rows: mapRows }) };
   }
 
-  public async createSlice(filename: string, name: string, x: number, y: number, width: number, height: number): Promise<AsepriteResult> {
+  public async createSlice(filename: string, name: string, x: number, y: number, width: number, height: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const sliceName = validateName(name, "Slice name");
@@ -1072,7 +1072,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Slice '${sliceName}' created at (${x},${y}) ${width}x${height} in ${source}`);
   }
 
-  public async setSliceCenter(filename: string, name: string, x: number, y: number, width: number, height: number): Promise<AsepriteResult> {
+  public async setSliceCenter(filename: string, name: string, x: number, y: number, width: number, height: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const sliceName = validateName(name, "Slice name");
@@ -1087,7 +1087,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Slice '${sliceName}' 9-patch center set to (${x},${y}) ${width}x${height} in ${source}`);
   }
 
-  public async setSlicePivot(filename: string, name: string, x: number, y: number): Promise<AsepriteResult> {
+  public async setSlicePivot(filename: string, name: string, x: number, y: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const sliceName = validateName(name, "Slice name");
@@ -1101,7 +1101,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Slice '${sliceName}' pivot set to (${x},${y}) in ${source}`);
   }
 
-  public async listSlices(filename: string): Promise<AsepriteResult> {
+  public async listSlices(filename: string): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const script = this.readOnlyScript(`
@@ -1125,7 +1125,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: JSON.stringify(slices) };
   }
 
-  public async deleteSlice(filename: string, name: string): Promise<AsepriteResult> {
+  public async deleteSlice(filename: string, name: string): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const sliceName = validateName(name, "Slice name");
@@ -1138,7 +1138,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Slice '${sliceName}' deleted from ${source}`);
   }
 
-  public async ensureLayersPresent(filename: string, layerNames: string[], startFrame = 1, endFrame?: number): Promise<AsepriteResult> {
+  public async ensureLayersPresent(filename: string, layerNames: string[], startFrame = 1, endFrame?: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (!Array.isArray(layerNames) || layerNames.length === 0) return { ok: false, message: "Layer names list cannot be empty" };
@@ -1160,7 +1160,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Ensured cels for layers ${layerNames.join(", ")} on frames ${startFrame}-${endFrame ?? "end"} in ${source}`);
   }
 
-  public async auditAnimation(input: AnimationAuditInput): Promise<AsepriteResult> {
+  public async auditAnimation(input: AnimationAuditInput): Promise<AssetOperationResult> {
     const source = validatePath(input.filename);
     if (typeof source !== "string") return source;
     const startFrame = input.startFrame ?? 1;
@@ -1227,7 +1227,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: JSON.stringify({ summary: { ...summary, outOfRange: outOfRange.length, overlaps: overlaps.length }, overlaps, outOfRange, ...(input.reportCels ? { cels } : {}) }) };
   }
 
-  public async animationSanitize(input: AnimationSanitizeInput): Promise<AsepriteResult> {
+  public async animationSanitize(input: AnimationSanitizeInput): Promise<AssetOperationResult> {
     const source = validatePath(input.filename);
     if (typeof source !== "string") return source;
     const startFrame = input.startFrame ?? 1;
@@ -1304,7 +1304,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: JSON.stringify({ sanitized: { ensured, outOfRange, opacitySet, deleted }, reportOnly: Boolean(input.reportOnly) }) };
   }
 
-  public async getSpriteInfo(filename: string): Promise<AsepriteResult> {
+  public async getSpriteInfo(filename: string): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     try { await fs.access(source); } catch { return { ok: false, message: `File ${filename} not found` }; }
@@ -1344,7 +1344,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return json ? { ok: true, message: json.trim() } : { ok: false, message: "No sprite info returned" };
   }
 
-  public async duplicateFrameRange(filename: string, startFrame: number, endFrame: number, times = 1): Promise<AsepriteResult> {
+  public async duplicateFrameRange(filename: string, startFrame: number, endFrame: number, times = 1): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (validateFrameRange(startFrame, endFrame)) return { ok: false, message: "Frame range must start at 1 and end at or after the start" };
@@ -1367,7 +1367,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Frames ${startFrame}-${endFrame} duplicated ${times} time(s) in ${filename}`);
   }
 
-  public async propagateCels(filename: string, layerNames: string[], sourceFrame: number, startFrame: number, endFrame: number, replace = true): Promise<AsepriteResult> {
+  public async propagateCels(filename: string, layerNames: string[], sourceFrame: number, startFrame: number, endFrame: number, replace = true): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (!Array.isArray(layerNames) || layerNames.length === 0) return { ok: false, message: "Layer names list cannot be empty" };
@@ -1393,7 +1393,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Cels propagated from frame ${sourceFrame} to ${startFrame}-${endFrame} in ${filename}`);
   }
 
-  public async tweenCelPositionsEased(filename: string, layerName: string, startFrame: number, endFrame: number, startX: number, startY: number, endX: number, endY: number, easing: AnimationEasing = "smoothstep", createMissingCels = false, sourceFrameIndex?: number): Promise<AsepriteResult> {
+  public async tweenCelPositionsEased(filename: string, layerName: string, startFrame: number, endFrame: number, startX: number, startY: number, endX: number, endY: number, easing: AnimationEasing = "smoothstep", createMissingCels = false, sourceFrameIndex?: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -1423,7 +1423,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Tweened cel positions (${easing}) on '${name}' frames ${startFrame}-${endFrame} in ${filename}`);
   }
 
-  public async oscillateCelPositions(filename: string, layerName: string, startFrame: number, endFrame: number, amplitudeX = 0, amplitudeY = 0, cycles = 1, phaseDeg = 0, createMissingCels = false, sourceFrameIndex?: number): Promise<AsepriteResult> {
+  public async oscillateCelPositions(filename: string, layerName: string, startFrame: number, endFrame: number, amplitudeX = 0, amplitudeY = 0, cycles = 1, phaseDeg = 0, createMissingCels = false, sourceFrameIndex?: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -1451,7 +1451,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Oscillated cel positions on '${name}' frames ${startFrame}-${endFrame} in ${filename}`);
   }
 
-  public async tweenCelOpacityEased(filename: string, layerName: string, startFrame: number, endFrame: number, startOpacity: number, endOpacity: number, easing: AnimationEasing = "smoothstep", createMissingCels = false, sourceFrameIndex?: number): Promise<AsepriteResult> {
+  public async tweenCelOpacityEased(filename: string, layerName: string, startFrame: number, endFrame: number, startOpacity: number, endOpacity: number, easing: AnimationEasing = "smoothstep", createMissingCels = false, sourceFrameIndex?: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -1481,7 +1481,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Tweened cel opacity (${easing}) on '${name}' frames ${startFrame}-${endFrame} in ${filename}`);
   }
 
-  public async tweenCelScaleEased(filename: string, layerName: string, startFrame: number, endFrame: number, startScale: number, endScale: number, easing: AnimationEasing = "smoothstep", anchor: ScaleAnchor = "center", replace = true, createMissingCels = true, sourceFrameIndex?: number): Promise<AsepriteResult> {
+  public async tweenCelScaleEased(filename: string, layerName: string, startFrame: number, endFrame: number, startScale: number, endScale: number, easing: AnimationEasing = "smoothstep", anchor: ScaleAnchor = "center", replace = true, createMissingCels = true, sourceFrameIndex?: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -1517,7 +1517,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Tweened cel scale (${easing}) on '${name}' frames ${startFrame}-${endFrame} in ${filename}`);
   }
 
-  public async setLayer(filename: string, layerName: string, createIfMissing = false): Promise<AsepriteResult> {
+  public async setLayer(filename: string, layerName: string, createIfMissing = false): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -1531,7 +1531,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Active layer set to '${name}' in ${filename}`);
   }
 
-  public async animationWorkflowGuide(useCase = "character"): Promise<AsepriteResult> {
+  public async animationWorkflowGuide(useCase = "character"): Promise<AssetOperationResult> {
     const normalized = (useCase || "character").trim().toLowerCase();
     const guides: Record<string, string[]> = {
       character: ["Block key poses on frame 1, then use copy_frame or copy_cel for the base.", "Use propagate_cels for static layers across the range.", "Use tween_cel_positions_eased or offset_cel_positions for motion.", "Keep secondary motion on separate layers.", "Use layer visibility/opacity and *_at drawing tools deterministically.", "Finish with set_tag, export_sprite, and audit_animation."],
@@ -1542,7 +1542,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: ["Animation Workflow Guide", `Use case: ${normalized}`, ...bullets.map((bullet) => `- ${bullet}`)].join("\n") };
   }
 
-  public async runLuaScript(script: string, filename = ""): Promise<AsepriteResult> {
+  public async runLuaScript(script: string, filename = ""): Promise<AssetOperationResult> {
     if (typeof script !== "string" || !script.trim()) return { ok: false, message: "Script cannot be empty" };
     if (script.length > 200_000) return { ok: false, message: "Script exceeds the 200000 character limit" };
     if (UNSAFE_LUA_PATTERNS.test(script)) return { ok: false, message: "Script uses blocked host file/process APIs; use the curated tools instead" };
@@ -1558,7 +1558,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: false, message: `Script failed: ${command.output}` };
   }
 
-  public async startPreviewServer(directory: string, port = 8000): Promise<AsepriteResult> {
+  public async startPreviewServer(directory: string, port = 8000): Promise<AssetOperationResult> {
     const target = validatePath(directory);
     if (typeof target !== "string") return target;
     try { if (!(await fs.stat(target)).isDirectory()) return { ok: false, message: `Directory ${directory} not found` }; } catch { return { ok: false, message: `Directory ${directory} not found` }; }
@@ -1588,7 +1588,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: false, message: `Preview server failed to start on port ${port}` };
   }
 
-  public async stopPreviewServer(port = 8000): Promise<AsepriteResult> {
+  public async stopPreviewServer(port = 8000): Promise<AssetOperationResult> {
     if (!Number.isInteger(port) || port < 1024 || port > 65535) return { ok: false, message: "Port must be an integer between 1024 and 65535" };
     const child = previewServers.get(port);
     if (!child || child.killed) return { ok: false, message: `No preview server found for port ${port}` };
@@ -1608,7 +1608,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: `Preview server stopped on port ${port}` };
   }
 
-  public async copyLayersBetweenSprites(input: CopyLayersInput): Promise<AsepriteResult> {
+  public async copyLayersBetweenSprites(input: CopyLayersInput): Promise<AssetOperationResult> {
     const source = validatePath(input.sourceFilename);
     if (typeof source !== "string") return source;
     const target = validatePath(input.targetFilename);
@@ -1649,7 +1649,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: `Layers copied from ${source} to ${target}${missing ? ` (skipped missing layers: ${missing.slice(8)})` : ""}` };
   }
 
-  public async validateScene(filename: string, requiredLayers: string[], startFrame = 1, endFrame?: number): Promise<AsepriteResult> {
+  public async validateScene(filename: string, requiredLayers: string[], startFrame = 1, endFrame?: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (!requiredLayers.length) return { ok: false, message: "Required layers list cannot be empty" };
@@ -1668,7 +1668,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, filename), `Scene validation passed for ${filename}`);
   }
 
-  public async exportSpritesheet(input: Parameters<AsepriteGateway["exportSpritesheet"]>[0]): Promise<AsepriteResult> {
+  public async exportSpritesheet(input: Parameters<AssetRuntimePort["exportSpritesheet"]>[0]): Promise<AssetOperationResult> {
     const source = validatePath(input.filename);
     if (typeof source !== "string") return source;
     const output = validatePath(input.outputFilename);
@@ -1709,7 +1709,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(command, `Sprite sheet exported to ${output}`);
   }
 
-  public async exportSprite(filename: string, outputFilename: string, format = "png"): Promise<AsepriteResult> {
+  public async exportSprite(filename: string, outputFilename: string, format = "png"): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const output = validatePath(outputFilename);
@@ -1725,7 +1725,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: `Sprite exported successfully to ${target}` };
   }
 
-  public async copySprite(filename: string, outputFilename: string, overwrite = false): Promise<AsepriteResult> {
+  public async copySprite(filename: string, outputFilename: string, overwrite = false): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const output = validatePath(outputFilename);
@@ -1742,7 +1742,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: `Sprite copied to ${target}` };
   }
 
-  public async exportFrame(filename: string, frameIndex: number, outputFilename: string, scale = 1): Promise<AsepriteResult> {
+  public async exportFrame(filename: string, frameIndex: number, outputFilename: string, scale = 1): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const output = validatePath(outputFilename);
@@ -1758,7 +1758,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: `Frame ${frameIndex} exported to ${target} at ${scale}x` };
   }
 
-  public async exportLayers(filename: string, outputDirectory: string, includeHidden = false): Promise<AsepriteResult> {
+  public async exportLayers(filename: string, outputDirectory: string, includeHidden = false): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const directory = validatePath(outputDirectory);
@@ -1775,7 +1775,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: `Layers exported to ${directory}: ${produced.join(", ")}` };
   }
 
-  public async exportTag(filename: string, tagName: string, outputFilename: string, scale = 1): Promise<AsepriteResult> {
+  public async exportTag(filename: string, tagName: string, outputFilename: string, scale = 1): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(tagName, "Tag name");
@@ -1797,7 +1797,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: `Tag '${name}' exported to ${target}` };
   }
 
-  public async importImageAsLayer(filename: string, imagePath: string, layerName: string, frameIndex = 1, x = 0, y = 0): Promise<AsepriteResult> {
+  public async importImageAsLayer(filename: string, imagePath: string, layerName: string, frameIndex = 1, x = 0, y = 0): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const image = validatePath(imagePath);
@@ -1825,7 +1825,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Image imported into '${name}' frame ${frameIndex} in ${source}`);
   }
 
-  public async createCel(filename: string, layerName: string, frameIndex: number, x = 0, y = 0): Promise<AsepriteResult> {
+  public async createCel(filename: string, layerName: string, frameIndex: number, x = 0, y = 0): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -1842,7 +1842,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Cel created on '${name}' frame ${frameIndex} in ${source}`);
   }
 
-  public async clearCel(filename: string, layerName: string, frameIndex: number): Promise<AsepriteResult> {
+  public async clearCel(filename: string, layerName: string, frameIndex: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -1858,7 +1858,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Cel cleared on '${name}' frame ${frameIndex} in ${source}`);
   }
 
-  public async copyCel(filename: string, layerName: string, sourceFrame: number, targetFrame: number, replace = true): Promise<AsepriteResult> {
+  public async copyCel(filename: string, layerName: string, sourceFrame: number, targetFrame: number, replace = true): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -1879,7 +1879,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Cel copied on '${name}' from frame ${sourceFrame} to ${targetFrame} in ${source}`);
   }
 
-  public async copyFrame(filename: string, sourceFrame: number, targetFrame?: number, overwrite = true): Promise<AsepriteResult> {
+  public async copyFrame(filename: string, sourceFrame: number, targetFrame?: number, overwrite = true): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (!isPositiveInteger(sourceFrame)) return { ok: false, message: "Source frame must be a positive integer" };
@@ -1908,7 +1908,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), message);
   }
 
-  public async setCelPosition(filename: string, layerName: string, frameIndex: number, x: number, y: number, createIfMissing = false, sourceFrameIndex?: number): Promise<AsepriteResult> {
+  public async setCelPosition(filename: string, layerName: string, frameIndex: number, x: number, y: number, createIfMissing = false, sourceFrameIndex?: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -1936,7 +1936,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Cel position set to (${x}, ${y}) on '${name}' frame ${frameIndex} in ${source}`);
   }
 
-  public async tweenCelPositions(filename: string, layerName: string, startFrame: number, endFrame: number, startX: number, startY: number, endX: number, endY: number, createMissingCels = false, sourceFrameIndex?: number): Promise<AsepriteResult> {
+  public async tweenCelPositions(filename: string, layerName: string, startFrame: number, endFrame: number, startX: number, startY: number, endX: number, endY: number, createMissingCels = false, sourceFrameIndex?: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -1969,7 +1969,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Tweened cel positions on '${name}' frames ${startFrame}-${endFrame} in ${source}`);
   }
 
-  public async offsetCelPositions(filename: string, layerName: string, startFrame: number, endFrame: number, dx: number, dy: number): Promise<AsepriteResult> {
+  public async offsetCelPositions(filename: string, layerName: string, startFrame: number, endFrame: number, dx: number, dy: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -1989,7 +1989,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Offset cel positions by (${dx}, ${dy}) on '${name}' frames ${startFrame}-${endFrame} in ${source}`);
   }
 
-  public async propagateFrameToRange(filename: string, sourceFrame: number, startFrame: number, endFrame: number, overwrite = true): Promise<AsepriteResult> {
+  public async propagateFrameToRange(filename: string, sourceFrame: number, startFrame: number, endFrame: number, overwrite = true): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (!isPositiveInteger(sourceFrame)) return { ok: false, message: "Source frame must be a positive integer" };
@@ -2018,7 +2018,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Frame ${sourceFrame} propagated to frames ${startFrame}-${endFrame} in ${source}`);
   }
 
-  public async deleteFrame(filename: string, frameIndex: number): Promise<AsepriteResult> {
+  public async deleteFrame(filename: string, frameIndex: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
@@ -2030,7 +2030,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Frame ${frameIndex} deleted from ${source}`);
   }
 
-  public async deleteTag(filename: string, name: string): Promise<AsepriteResult> {
+  public async deleteTag(filename: string, name: string): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const tagName = validateName(name, "Tag name");
@@ -2044,7 +2044,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Tag '${tagName}' deleted from ${source}`);
   }
 
-  public async setOnionSkin(filename: string, enabled = true, before = 2, after = 2, opacity = 128): Promise<AsepriteResult> {
+  public async setOnionSkin(filename: string, enabled = true, before = 2, after = 2, opacity = 128): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (!Number.isInteger(before) || !Number.isInteger(after) || before < 0 || after < 0) return { ok: false, message: "Before and after must be non-negative integers" };
@@ -2052,7 +2052,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: `Onion skin settings are UI-only in batch mode; no changes applied (enabled=${enabled}, before=${before}, after=${after}, opacity=${opacity})` };
   }
 
-  public async renderOnionSkin(filename: string, frameIndex: number, outputFilename: string, before = 1, after = 1, scale = 4, ghostOpacity = 100): Promise<AsepriteResult> {
+  public async renderOnionSkin(filename: string, frameIndex: number, outputFilename: string, before = 1, after = 1, scale = 4, ghostOpacity = 100): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const output = validatePath(outputFilename);
@@ -2105,7 +2105,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: `Onion-skin render of frame ${frameIndex} saved to ${target} at ${scale}x` };
   }
 
-  public async compareFrames(filename: string, frameA: number, frameB: number): Promise<AsepriteResult> {
+  public async compareFrames(filename: string, frameA: number, frameB: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (!isPositiveInteger(frameA) || !isPositiveInteger(frameB)) return { ok: false, message: "Frame A and frame B must be positive integers" };
@@ -2152,7 +2152,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return line ? { ok: true, message: line.slice("COMPARE:".length) } : { ok: false, message: "Frame comparison returned no metrics" };
   }
 
-  public async setCelOpacity(filename: string, layerName: string, frameIndex: number, opacity: number): Promise<AsepriteResult> {
+  public async setCelOpacity(filename: string, layerName: string, frameIndex: number, opacity: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -2170,7 +2170,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Cel opacity set to ${opacity} on '${name}' frame ${frameIndex} in ${source}`);
   }
 
-  public async getColorStats(filename: string, frameIndex = 1, top = 16): Promise<AsepriteResult> {
+  public async getColorStats(filename: string, frameIndex = 1, top = 16): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
@@ -2218,7 +2218,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: JSON.stringify({ frame: frameIndex, uniqueColors: unique, opaquePixels: opaque, colors: colors.slice(0, top) }) };
   }
 
-  public async getPalette(filename: string): Promise<AsepriteResult> {
+  public async getPalette(filename: string): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const script = `
@@ -2237,7 +2237,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return colors.length ? { ok: true, message: JSON.stringify(colors) } : { ok: false, message: "Palette read returned no colors" };
   }
 
-  public async extractPalette(filename: string, maxColors = 16, withAlpha = false): Promise<AsepriteResult> {
+  public async extractPalette(filename: string, maxColors = 16, withAlpha = false): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (!Number.isInteger(maxColors) || maxColors < 1 || maxColors > 256) return { ok: false, message: "Max colors must be between 1 and 256" };
@@ -2256,7 +2256,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return colors.length ? { ok: true, message: JSON.stringify({ colors, count: colors.length }) } : { ok: false, message: "Palette extraction returned no colors" };
   }
 
-  public async remapColorsInCelRange(filename: string, layerName: string, startFrame: number, endFrame: number, mappings: Array<{ from: string; to: string }>, createMissingCels = false, sourceFrameIndex?: number): Promise<AsepriteResult> {
+  public async remapColorsInCelRange(filename: string, layerName: string, startFrame: number, endFrame: number, mappings: Array<{ from: string; to: string }>, createMissingCels = false, sourceFrameIndex?: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -2310,18 +2310,18 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Remapped colors on '${name}' frames ${startFrame}-${endFrame} in ${source}`);
   }
 
-  public async listPalettePresets(): Promise<AsepriteResult> {
+  public async listPalettePresets(): Promise<AssetOperationResult> {
     return { ok: true, message: JSON.stringify(PALETTE_PRESETS) };
   }
 
-  public async applyPalettePreset(filename: string, preset: string): Promise<AsepriteResult> {
+  public async applyPalettePreset(filename: string, preset: string): Promise<AssetOperationResult> {
     const colors = PALETTE_PRESETS[preset.trim().toLowerCase()];
     if (!colors) return { ok: false, message: `Unknown palette preset: ${preset}` };
     const applied = await this.setPalette(filename, colors);
     return applied.ok ? { ok: true, message: `Palette preset '${preset}' (${colors.length} colors) applied to ${filename}` } : applied;
   }
 
-  public async generateColorRamp(baseColor: string, steps = 5, hueShiftDegrees = 20, lightnessRange = 0.5): Promise<AsepriteResult> {
+  public async generateColorRamp(baseColor: string, steps = 5, hueShiftDegrees = 20, lightnessRange = 0.5): Promise<AssetOperationResult> {
     const rgb = this.parseHexColor(baseColor);
     if (!rgb) return { ok: false, message: "Colors must use hexadecimal values" };
     if (!Number.isInteger(steps) || steps < 2 || steps > 16) return { ok: false, message: "Steps must be between 2 and 16" };
@@ -2339,7 +2339,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: JSON.stringify(ramp) };
   }
 
-  public async quantizeToPalette(filename: string, layerName = "", startFrame = 1, endFrame = 0): Promise<AsepriteResult> {
+  public async quantizeToPalette(filename: string, layerName = "", startFrame = 1, endFrame = 0): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (!isPositiveInteger(startFrame) || !Number.isInteger(endFrame) || endFrame < 0 || (endFrame > 0 && endFrame < startFrame)) return { ok: false, message: "Frame range must start at 1 and end at or after the start" };
@@ -2403,7 +2403,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: `Quantized ${count} pixels to the palette in ${source}` };
   }
 
-  public async setColorMode(filename: string, mode: string): Promise<AsepriteResult> {
+  public async setColorMode(filename: string, mode: string): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const normalizedMode = mode.trim().toLowerCase();
@@ -2412,7 +2412,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Color mode set to ${normalizedMode} in ${source}`);
   }
 
-  public async getPixelColor(filename: string, x: number, y: number, layerName = "", frameIndex = 1): Promise<AsepriteResult> {
+  public async getPixelColor(filename: string, x: number, y: number, layerName = "", frameIndex = 1): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (![x, y].every(Number.isInteger)) return { ok: false, message: "Coordinates must be integers" };
@@ -2460,7 +2460,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: `${hex} (r=${red}, g=${green}, b=${blue}, a=${alpha})` };
   }
 
-  public async getPixelsRect(filename: string, x: number, y: number, width: number, height: number, layerName = "", frameIndex = 1): Promise<AsepriteResult> {
+  public async getPixelsRect(filename: string, x: number, y: number, width: number, height: number, layerName = "", frameIndex = 1): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (![x, y].every(Number.isInteger)) return { ok: false, message: "Coordinates must be integers" };
@@ -2513,7 +2513,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return pixels.length ? { ok: true, message: JSON.stringify(pixels) } : { ok: false, message: "No pixel data returned" };
   }
 
-  public async getCompositePixel(filename: string, x: number, y: number, frameIndex = 1): Promise<AsepriteResult> {
+  public async getCompositePixel(filename: string, x: number, y: number, frameIndex = 1): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (![x, y].every(Number.isInteger)) return { ok: false, message: "Coordinates must be integers" };
@@ -2545,7 +2545,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: `${hex} (r=${red}, g=${green}, b=${blue}, a=${alpha})` };
   }
 
-  public async getCompositeRect(filename: string, x: number, y: number, width: number, height: number, frameIndex = 1): Promise<AsepriteResult> {
+  public async getCompositeRect(filename: string, x: number, y: number, width: number, height: number, frameIndex = 1): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (![x, y].every(Number.isInteger)) return { ok: false, message: "Coordinates must be integers" };
@@ -2582,7 +2582,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return pixels.length ? { ok: true, message: JSON.stringify(pixels) } : { ok: false, message: "No pixel data returned" };
   }
 
-  public async moveRegion(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, destX: number, destY: number): Promise<AsepriteResult> {
+  public async moveRegion(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, destX: number, destY: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -2614,7 +2614,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(this.openScript(source, body), source), `Moved ${width}x${height} region from (${x},${y}) to (${destX},${destY}) on '${name}' frame ${frameIndex} in ${source}`);
   }
 
-  public async copyRegion(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, destX: number, destY: number, targetLayerName = "", targetFrameIndex = 0): Promise<AsepriteResult> {
+  public async copyRegion(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, destX: number, destY: number, targetLayerName = "", targetFrameIndex = 0): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -2666,7 +2666,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Copied ${width}x${height} region from (${x},${y}) to (${destX},${destY}) in ${source}`);
   }
 
-  public async eraseRegion(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number): Promise<AsepriteResult> {
+  public async eraseRegion(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -2683,7 +2683,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(this.openScript(source, body), source), `Erased ${width}x${height} region at (${x},${y}) on '${name}' frame ${frameIndex} in ${source}`);
   }
 
-  public async eraseColor(filename: string, layerName: string, frameIndex: number, color: string, tolerance = 0): Promise<AsepriteResult> {
+  public async eraseColor(filename: string, layerName: string, frameIndex: number, color: string, tolerance = 0): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -2713,7 +2713,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: `Erased ${count} pixels of ${color} on '${name}' frame ${frameIndex} in ${source}` };
   }
 
-  public async flipLayer(filename: string, layerName: string, frameIndex: number, direction: "horizontal" | "vertical" = "horizontal"): Promise<AsepriteResult> {
+  public async flipLayer(filename: string, layerName: string, frameIndex: number, direction: "horizontal" | "vertical" = "horizontal"): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -2741,7 +2741,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(this.openScript(source, body), source), `Layer '${name}' flipped ${direction}ly in ${source}`);
   }
 
-  public async rotateLayer(filename: string, layerName: string, frameIndex: number, angle: 90 | 180 | 270 = 90): Promise<AsepriteResult> {
+  public async rotateLayer(filename: string, layerName: string, frameIndex: number, angle: 90 | 180 | 270 = 90): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -2779,7 +2779,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(this.openScript(source, body), source), `Layer '${name}' rotated ${angle}° clockwise in ${source}`);
   }
 
-  public async resizeCanvas(filename: string, width: number, height: number): Promise<AsepriteResult> {
+  public async resizeCanvas(filename: string, width: number, height: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (!isPositiveInteger(width) || !isPositiveInteger(height)) return { ok: false, message: "Width and height must be positive integers" };
@@ -2787,7 +2787,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Canvas resized to ${width}x${height} in ${source}`);
   }
 
-  public async cropCanvas(filename: string, x: number, y: number, width: number, height: number): Promise<AsepriteResult> {
+  public async cropCanvas(filename: string, x: number, y: number, width: number, height: number): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (![x, y].every(Number.isInteger)) return { ok: false, message: "Crop coordinates must be integers" };
@@ -2799,7 +2799,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Canvas cropped to (${x},${y}) ${width}x${height} in ${source}`);
   }
 
-  public async listTextFonts(): Promise<AsepriteResult> {
+  public async listTextFonts(): Promise<AssetOperationResult> {
     const fonts = await availableTextFonts();
     if (!fonts.length) return { ok: true, message: "No fonts found. Add a .ttf or .otf file to ~/.aseprite-mcp/fonts/." };
     const user = fonts.filter((font) => font.source === "user");
@@ -2816,7 +2816,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: lines.join("\n") };
   }
 
-  public async measureText(text: string, font: string, size = 1, letterSpacing = 0, bold = 0, antialias = false): Promise<AsepriteResult> {
+  public async measureText(text: string, font: string, size = 1, letterSpacing = 0, bold = 0, antialias = false): Promise<AssetOperationResult> {
     try {
       const metrics = await rasterMeasureText(text, font, size, letterSpacing, bold, antialias);
       return { ok: true, message: `width=${metrics.width} height=${metrics.height} advance_width=${metrics.advanceWidth} above_baseline=${metrics.aboveBaseline} below_baseline=${metrics.belowBaseline} left_bearing=${metrics.leftBearing}` };
@@ -2825,7 +2825,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     }
   }
 
-  public async drawText(input: TextDrawInput): Promise<AsepriteResult> {
+  public async drawText(input: TextDrawInput): Promise<AssetOperationResult> {
     const source = validatePath(input.filename);
     if (typeof source !== "string") return source;
     if (typeof input.text !== "string" || !input.text) return { ok: false, message: "Text cannot be empty" };
@@ -2897,7 +2897,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     }
   }
 
-  public async outlineNative(filename: string, layerName = "", frameIndex = 1, color = "#000000", place = "outside", matrix = "circle"): Promise<AsepriteResult> {
+  public async outlineNative(filename: string, layerName = "", frameIndex = 1, color = "#000000", place = "outside", matrix = "circle"): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
@@ -2910,7 +2910,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Outlined (${place}, ${matrix}) ${layerName || "active layer"} in ${source}`);
   }
 
-  public async adjustHslNative(filename: string, layerName = "", frameIndex = 1, hue = 0, saturation = 0, lightness = 0, x = 0, y = 0, width = 0, height = 0): Promise<AsepriteResult> {
+  public async adjustHslNative(filename: string, layerName = "", frameIndex = 1, hue = 0, saturation = 0, lightness = 0, x = 0, y = 0, width = 0, height = 0): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
@@ -2923,7 +2923,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Adjusted HSL on ${layerName || "active layer"} in ${source}`);
   }
 
-  public async adjustBrightnessContrast(filename: string, layerName = "", frameIndex = 1, brightness = 0, contrast = 0, x = 0, y = 0, width = 0, height = 0): Promise<AsepriteResult> {
+  public async adjustBrightnessContrast(filename: string, layerName = "", frameIndex = 1, brightness = 0, contrast = 0, x = 0, y = 0, width = 0, height = 0): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
@@ -2935,7 +2935,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Adjusted brightness/contrast on ${layerName || "active layer"} in ${source}`);
   }
 
-  public async invertColors(filename: string, layerName = "", frameIndex = 1, x = 0, y = 0, width = 0, height = 0): Promise<AsepriteResult> {
+  public async invertColors(filename: string, layerName = "", frameIndex = 1, x = 0, y = 0, width = 0, height = 0): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
@@ -2946,7 +2946,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Inverted colours on ${layerName || "active layer"} in ${source}`);
   }
 
-  public async outlineCel(filename: string, layerName: string, frameIndex: number, color = "#000000", includeDiagonals = false): Promise<AsepriteResult> {
+  public async outlineCel(filename: string, layerName: string, frameIndex: number, color = "#000000", includeDiagonals = false): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -2978,7 +2978,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(this.openScript(source, body), source), `Outline added to '${name}' frame ${frameIndex} in ${source}`);
   }
 
-  public async replaceColor(filename: string, layerName: string, frameIndex: number, fromColor: string, toColor: string, tolerance = 0): Promise<AsepriteResult> {
+  public async replaceColor(filename: string, layerName: string, frameIndex: number, fromColor: string, toColor: string, tolerance = 0): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -3016,7 +3016,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: `Replaced ${count} pixels ${fromColor} -> ${toColor} on '${name}' frame ${frameIndex} in ${source}` };
   }
 
-  public async adjustHsl(filename: string, layerName: string, frameIndex: number, hueShift = 0, saturationShift = 0, lightnessShift = 0): Promise<AsepriteResult> {
+  public async adjustHsl(filename: string, layerName: string, frameIndex: number, hueShift = 0, saturationShift = 0, lightnessShift = 0): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -3079,7 +3079,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(this.openScript(source, body), source), `Adjusted HSL (h${hueShift >= 0 ? "+" : ""}${hueShift}, s${saturationShift >= 0 ? "+" : ""}${saturationShift}, l${lightnessShift >= 0 ? "+" : ""}${lightnessShift}) on '${name}' frame ${frameIndex} in ${source}`);
   }
 
-  public async applyConvolution(filename: string, matrix: string, layerName = "", frameIndex = 1, x = 0, y = 0, width = 0, height = 0): Promise<AsepriteResult> {
+  public async applyConvolution(filename: string, matrix: string, layerName = "", frameIndex = 1, x = 0, y = 0, width = 0, height = 0): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     if (!CONVOLUTION_MATRICES.has(matrix)) return { ok: false, message: `Unknown convolution matrix: ${matrix}` };
@@ -3091,11 +3091,11 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Applied convolution '${matrix}' on ${layerName || "active layer"} in ${source}`);
   }
 
-  public async listConvolutionMatrices(): Promise<AsepriteResult> {
+  public async listConvolutionMatrices(): Promise<AssetOperationResult> {
     return { ok: true, message: JSON.stringify([...CONVOLUTION_MATRICES].sort()) };
   }
 
-  public async applyDitherGradient(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, colorStart: string, colorEnd: string, horizontal = false, createIfMissing = true): Promise<AsepriteResult> {
+  public async applyDitherGradient(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, colorStart: string, colorEnd: string, horizontal = false, createIfMissing = true): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");
@@ -3131,7 +3131,7 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(this.openScript(source, body), source), `Dithered gradient applied on '${name}' frame ${frameIndex} in ${source}`);
   }
 
-  public async applyDitherPattern(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, colorA: string, colorB: string, density = 0.5, createIfMissing = true): Promise<AsepriteResult> {
+  public async applyDitherPattern(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, colorA: string, colorB: string, density = 0.5, createIfMissing = true): Promise<AssetOperationResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
     const name = validateName(layerName, "Layer name");

@@ -6,7 +6,7 @@ Status: implemented and verified on the migration branch.
 
 This slice migrates the upstream tools `draw_polygon`, `draw_path`, and `apply_gradient_rect`.
 
-The MCP adapter validates the request and calls the application service. The service uses the `AsepriteGateway` port. The CLI adapter validates paths, names, frame indexes, points, dimensions, colors, and thickness before generating Lua.
+The MCP adapter validates the request and calls the application service. The service uses the `AssetGateway` port. The CLI adapter validates paths, names, frame indexes, points, dimensions, colors, and thickness before generating Lua.
 
 ## TDD and bug hunting
 

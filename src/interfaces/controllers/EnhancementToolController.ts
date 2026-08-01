@@ -2,7 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
 import { EnhancementPlanService } from "../../application/services/EnhancementPlanService.js";
 import type { EnhancementGoal } from "../../domain/enhancement.js";
-import type { AsepriteResult } from "../../domain/aseprite.js";
+import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { ReferenceAnalysis } from "../../domain/visual-assets.js";
 import { VisualAssetService } from "../../application/services/VisualAssetService.js";
 import { DeterministicEnhancementService } from "../../application/services/DeterministicEnhancementService.js";
@@ -58,6 +58,6 @@ export class EnhancementToolController {
     });
   }
 
-  private result(operation: AsepriteResult): { isError?: boolean; content: [{ type: "text"; text: string }] } { return { isError: !operation.ok, content: [{ type: "text", text: operation.message }] }; }
+  private result(operation: AssetOperationResult): { isError?: boolean; content: [{ type: "text"; text: string }] } { return { isError: !operation.ok, content: [{ type: "text", text: operation.message }] }; }
   private text(value: unknown): { content: [{ type: "text"; text: string }] } { return { content: [{ type: "text", text: typeof value === "string" ? value : JSON.stringify(value, null, 2) }] }; }
 }

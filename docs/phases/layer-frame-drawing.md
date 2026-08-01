@@ -12,7 +12,7 @@ This slice migrates the upstream tools that draw on an explicit layer and animat
 - `fill_area_at`
 - `draw_circle_at`
 
-The implementation keeps the hexagonal boundary: MCP schemas call the application service, the service calls the `AsepriteGateway` port, and the CLI adapter translates the operation into a validated Aseprite Lua script.
+The implementation keeps the hexagonal boundary: MCP schemas call the application service, the service calls the `AssetGateway` port, and the CLI adapter translates the operation into a validated Aseprite Lua script.
 
 ## TDD and bug hunting
 

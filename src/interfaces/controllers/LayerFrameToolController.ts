@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
 import type { LayerFramePort } from "../../application/ports/AssetCapabilityPorts.js";
-import type { AsepriteResult } from "../../domain/aseprite.js";
+import type { AssetOperationResult } from "../../domain/asset-operations.js";
 
 const HEX_COLOR = /^#?(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
 
@@ -100,5 +100,5 @@ export class LayerFrameToolController {
     }, async ({ filename, colors }) => this.result(await this.assets.setPalette(filename, colors)));
   }
 
-  private result(operation: AsepriteResult): { isError?: boolean; content: [{ type: "text"; text: string }] } { return { isError: !operation.ok, content: [{ type: "text", text: operation.message }] }; }
+  private result(operation: AssetOperationResult): { isError?: boolean; content: [{ type: "text"; text: string }] } { return { isError: !operation.ok, content: [{ type: "text", text: operation.message }] }; }
 }

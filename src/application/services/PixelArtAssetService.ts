@@ -11,11 +11,11 @@ import type {
   RasterCodec,
   TextureAtlasInput,
 } from "../../domain/image-assets.js";
-import type { AsepriteResult } from "../../domain/aseprite.js";
+import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { PixelArtQualityReport, RasterFrame } from "../../domain/pixel-art.js";
 
-function ok(message: unknown): AsepriteResult { return { ok: true, message: JSON.stringify(message) }; }
-function fail(error: unknown): AsepriteResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
+function ok(message: unknown): AssetOperationResult { return { ok: true, message: JSON.stringify(message) }; }
+function fail(error: unknown): AssetOperationResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
 function assertPathPair(inputFilename: string, outputFilename: string): void {
   if (!inputFilename.trim() || !outputFilename.trim()) throw new Error("Input and output filenames are required");
   if (inputFilename.toLowerCase() === outputFilename.toLowerCase()) throw new Error("Input and output filenames must differ");
@@ -45,7 +45,7 @@ function atlasFrame(frames: RasterFrame[], columns: number, padding: number): Ra
 export class PixelArtAssetService {
   public constructor(private readonly codec: RasterCodec, private readonly manifestWriter?: AssetManifestWriter) {}
 
-  public async convertImage(input: ConvertImageInput, animation = false): Promise<AsepriteResult> {
+  public async convertImage(input: ConvertImageInput, animation = false): Promise<AssetOperationResult> {
     try {
       assertPathPair(input.inputFilename, input.outputFilename);
       const source = await this.codec.decode(input.inputFilename);
@@ -56,7 +56,7 @@ export class PixelArtAssetService {
     } catch (error) { return fail(error); }
   }
 
-  public async exportGif(inputFilename: string, outputFilename: string): Promise<AsepriteResult> {
+  public async exportGif(inputFilename: string, outputFilename: string): Promise<AssetOperationResult> {
     try {
       assertPathPair(inputFilename, outputFilename);
       const frames = await this.codec.decode(inputFilename);
@@ -65,7 +65,7 @@ export class PixelArtAssetService {
     } catch (error) { return fail(error); }
   }
 
-  public async inspect(filename: string): Promise<AsepriteResult> {
+  public async inspect(filename: string): Promise<AssetOperationResult> {
     try {
       const frames = await this.codec.decode(filename);
       const reports = frames.map((frame) => inspectRasterFrame(frame));
@@ -88,7 +88,7 @@ export class PixelArtAssetService {
     } catch (error) { return fail(error); }
   }
 
-  public async validate(input: AssetQualityInput): Promise<AsepriteResult> {
+  public async validate(input: AssetQualityInput): Promise<AssetOperationResult> {
     try {
       const frames = await this.codec.decode(input.filename);
       const reports = frames.map((frame) => inspectRasterFrame(frame));
@@ -103,7 +103,7 @@ export class PixelArtAssetService {
     } catch (error) { return fail(error); }
   }
 
-  public async buildAtlas(input: TextureAtlasInput): Promise<AsepriteResult> {
+  public async buildAtlas(input: TextureAtlasInput): Promise<AssetOperationResult> {
     try {
       if (input.inputFilenames.length === 0) throw new Error("At least one input filename is required");
       if (!input.outputFilename.trim()) throw new Error("Output filename is required");
@@ -119,7 +119,7 @@ export class PixelArtAssetService {
     } catch (error) { return fail(error); }
   }
 
-  public async exportPack(input: AssetPackInput): Promise<AsepriteResult> {
+  public async exportPack(input: AssetPackInput): Promise<AssetOperationResult> {
     try {
       if (!this.manifestWriter) throw new Error("An asset manifest writer is required");
       if (input.inputFilenames.length === 0) throw new Error("At least one input filename is required");
@@ -148,7 +148,7 @@ export class PixelArtAssetService {
     } catch (error) { return fail(error); }
   }
 
-  public async runRecipe(input: AssetRecipeInput): Promise<AsepriteResult> {
+  public async runRecipe(input: AssetRecipeInput): Promise<AssetOperationResult> {
     try {
       if (input.inputFilenames.length === 0) throw new Error("At least one input filename is required");
       const plan = { recipe: input.recipe, inputs: input.inputFilenames, output: input.outputFilename ?? null, steps: this.recipeSteps(input.recipe) };
@@ -162,7 +162,7 @@ export class PixelArtAssetService {
     } catch (error) { return fail(error); }
   }
 
-  public async runBatch(input: BatchAssetJobInput): Promise<AsepriteResult> {
+  public async runBatch(input: BatchAssetJobInput): Promise<AssetOperationResult> {
     try {
       if (input.jobs.length === 0) throw new Error("At least one asset job is required");
       if (input.dryRun ?? true) return ok({ dryRun: true, jobs: input.jobs.map((job) => ({ recipe: job.recipe, inputs: job.inputFilenames, output: job.outputFilename ?? null, steps: this.recipeSteps(job.recipe) })) });

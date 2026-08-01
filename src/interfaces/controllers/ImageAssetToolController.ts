@@ -2,7 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
 import type { ExportAnimationPort } from "../../application/ports/AssetCapabilityPorts.js";
 import { PixelArtAssetService } from "../../application/services/PixelArtAssetService.js";
-import type { AsepriteResult } from "../../domain/aseprite.js";
+import type { AssetOperationResult } from "../../domain/asset-operations.js";
 
 export class ImageAssetToolController {
   public constructor(private readonly assets: ExportAnimationPort, private readonly imageAssets: PixelArtAssetService) {}
@@ -65,5 +65,5 @@ export class ImageAssetToolController {
     }, async ({ jobs, dry_run }) => this.result(await this.imageAssets.runBatch({ jobs: jobs.map((job) => ({ recipe: job.recipe, inputFilenames: job.input_filenames, ...(job.output_filename ? { outputFilename: job.output_filename } : {}), ...(job.width === undefined ? {} : { width: job.width }), ...(job.height === undefined ? {} : { height: job.height }), maxColors: job.max_colors })), dryRun: dry_run })));
   }
 
-  private result(operation: AsepriteResult): { isError?: boolean; content: [{ type: "text"; text: string }] } { return { isError: !operation.ok, content: [{ type: "text", text: operation.message }] }; }
+  private result(operation: AssetOperationResult): { isError?: boolean; content: [{ type: "text"; text: string }] } { return { isError: !operation.ok, content: [{ type: "text", text: operation.message }] }; }
 }

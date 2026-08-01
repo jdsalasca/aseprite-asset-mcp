@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
 import type { DrawingPort } from "../../application/ports/AssetCapabilityPorts.js";
-import type { AsepriteResult } from "../../domain/aseprite.js";
+import type { AssetOperationResult } from "../../domain/asset-operations.js";
 
 const HEX_COLOR = /^#?(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
 
@@ -80,5 +80,5 @@ export class DrawingToolController {
     }, async ({ filename, layer_name, frame_index, center_x, center_y, radius_x, radius_y, color, fill, create_if_missing }) => this.result(await this.assets.drawEllipseAt(filename, layer_name, frame_index, center_x, center_y, radius_x, radius_y, color, fill, create_if_missing)));
   }
 
-  private result(operation: AsepriteResult): { isError?: boolean; content: [{ type: "text"; text: string }] } { return { isError: !operation.ok, content: [{ type: "text", text: operation.message }] }; }
+  private result(operation: AssetOperationResult): { isError?: boolean; content: [{ type: "text"; text: string }] } { return { isError: !operation.ok, content: [{ type: "text", text: operation.message }] }; }
 }

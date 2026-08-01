@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
 import { VisualAssetService } from "../../application/services/VisualAssetService.js";
-import type { AsepriteResult } from "../../domain/aseprite.js";
+import type { AssetOperationResult } from "../../domain/asset-operations.js";
 
 const HEX_COLOR = /^#?(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
 
@@ -50,5 +50,5 @@ export class VisualAssetToolController {
     }, async ({ kind, output_prefix, width, height, seed, tile_size, detail_level }) => this.result(await this.visualAssets.generateEnvironmentPack({ kind, outputPrefix: output_prefix, width, height, seed, tileSize: tile_size, detailLevel: detail_level })));
   }
 
-  private result(operation: AsepriteResult): { isError?: boolean; content: [{ type: "text"; text: string }] } { return { isError: !operation.ok, content: [{ type: "text", text: operation.message }] }; }
+  private result(operation: AssetOperationResult): { isError?: boolean; content: [{ type: "text"; text: string }] } { return { isError: !operation.ok, content: [{ type: "text", text: operation.message }] }; }
 }

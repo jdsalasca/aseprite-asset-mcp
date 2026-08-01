@@ -1,6 +1,6 @@
 import { inspectRasterFrame } from "./PixelArtPipeline.js";
 import type { AssetManifestWriter, RasterCodec } from "../../domain/image-assets.js";
-import type { AsepriteResult } from "../../domain/aseprite.js";
+import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { RasterFrame } from "../../domain/pixel-art.js";
 import type {
   BeachSceneInput,
@@ -40,8 +40,8 @@ class SeededRandom {
   }
 }
 
-function ok(value: unknown): AsepriteResult { return { ok: true, message: JSON.stringify(value) }; }
-function fail(error: unknown): AsepriteResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
+function ok(value: unknown): AssetOperationResult { return { ok: true, message: JSON.stringify(value) }; }
+function fail(error: unknown): AssetOperationResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
 function hexToRgba(value: string): [number, number, number, number] {
   const normalized = value.replace(/^#/, "");
   const expanded = normalized.length === 3 ? normalized.split("").map((part) => `${part}${part}`).join("") : normalized;
@@ -101,7 +101,7 @@ function smoothNoise(seed: number, x: number, y: number, gridWidth: number, grid
 export class VisualAssetService implements VisualAssetGateway {
   public constructor(private readonly codec: RasterCodec, private readonly manifestWriter: AssetManifestWriter) {}
 
-  public async createStyleBible(input: StyleBibleInput): Promise<AsepriteResult> {
+  public async createStyleBible(input: StyleBibleInput): Promise<AssetOperationResult> {
     try {
       if (!input.style.id.trim() || input.style.palette.length < 2) throw new Error("Style bible needs an id and at least two colors");
       if (!Number.isInteger(input.style.baseSize) || input.style.baseSize < 4) throw new Error("Style baseSize must be an integer of at least 4");
@@ -111,7 +111,7 @@ export class VisualAssetService implements VisualAssetGateway {
     } catch (error) { return fail(error); }
   }
 
-  public async inspectReference(filename: string): Promise<AsepriteResult> {
+  public async inspectReference(filename: string): Promise<AssetOperationResult> {
     try {
       const frames = await this.codec.decode(filename);
       const first = frames[0];
@@ -147,7 +147,7 @@ export class VisualAssetService implements VisualAssetGateway {
     } catch (error) { return fail(error); }
   }
 
-  public async runQualityGate(input: QualityGateInput): Promise<AsepriteResult> {
+  public async runQualityGate(input: QualityGateInput): Promise<AssetOperationResult> {
     try {
       const frames = await this.codec.decode(input.filename);
       const maxColors = input.maxColors ?? 64;
@@ -169,7 +169,7 @@ export class VisualAssetService implements VisualAssetGateway {
     } catch (error) { return fail(error); }
   }
 
-  public async buildTerrainTileset(input: TerrainTilesetInput): Promise<AsepriteResult> {
+  public async buildTerrainTileset(input: TerrainTilesetInput): Promise<AssetOperationResult> {
     try {
       if (input.terrains.length < 2) throw new Error("At least two terrains are required");
       if (!Number.isInteger(input.tileSize) || input.tileSize < 4 || input.tileSize > 128) throw new Error("tileSize must be an integer from 4 to 128");
@@ -206,7 +206,7 @@ export class VisualAssetService implements VisualAssetGateway {
     } catch (error) { return fail(error); }
   }
 
-  public async generateWorldMap(input: WorldMapInput): Promise<AsepriteResult> {
+  public async generateWorldMap(input: WorldMapInput): Promise<AssetOperationResult> {
     try {
       validateDimensions(input.width, input.height);
       if (input.biomes.length < 2) throw new Error("At least two biomes are required");
@@ -217,7 +217,7 @@ export class VisualAssetService implements VisualAssetGateway {
     } catch (error) { return fail(error); }
   }
 
-  public async generateBeachScene(input: BeachSceneInput): Promise<AsepriteResult> {
+  public async generateBeachScene(input: BeachSceneInput): Promise<AssetOperationResult> {
     try {
       validateDimensions(input.width, input.height);
       const symbols = new Map<TerrainKind, string>([["water", "A"], ["sand", "B"], ["grass", "C"], ["rock", "D"]]);
@@ -232,7 +232,7 @@ export class VisualAssetService implements VisualAssetGateway {
     } catch (error) { return fail(error); }
   }
 
-  public async generateTimeOfDayPack(input: TimeOfDayInput): Promise<AsepriteResult> {
+  public async generateTimeOfDayPack(input: TimeOfDayInput): Promise<AssetOperationResult> {
     try {
       const source = await this.codec.decode(input.inputFilename);
       const base = source[0];
@@ -255,7 +255,7 @@ export class VisualAssetService implements VisualAssetGateway {
     } catch (error) { return fail(error); }
   }
 
-  public async generateEnvironmentPack(input: EnvironmentPackInput): Promise<AsepriteResult> {
+  public async generateEnvironmentPack(input: EnvironmentPackInput): Promise<AssetOperationResult> {
     try {
       validateDimensions(input.width, input.height);
       const prefix = input.outputPrefix.trim();
@@ -269,7 +269,7 @@ export class VisualAssetService implements VisualAssetGateway {
       const timeJson = `${prefix}-time-of-day.json`;
       const terrainResult = await this.buildTerrainTileset({ outputFilename: terrainPng, manifestFilename: terrainJson, tileSize: input.tileSize ?? 16, terrains: biomes, seed: input.seed });
       if (!terrainResult.ok) return terrainResult;
-      let sceneResult: AsepriteResult;
+      let sceneResult: AssetOperationResult;
       let waveGif: string | undefined;
       if (input.kind === "beach") {
         waveGif = `${prefix}-waves.gif`;

@@ -1,4 +1,4 @@
-import type { AsepriteResult } from "./aseprite.js";
+import type { AssetOperationResult } from "./asset-operations.js";
 
 export type DetailLevel = "low" | "medium" | "high";
 export type TerrainKind = "water" | "sand" | "grass" | "rock" | "snow" | "mud";
@@ -86,12 +86,12 @@ export interface EnvironmentPackInput {
 }
 
 export interface VisualAssetGateway {
-  createStyleBible(input: StyleBibleInput): Promise<AsepriteResult>;
-  inspectReference(filename: string): Promise<AsepriteResult>;
-  runQualityGate(input: QualityGateInput): Promise<AsepriteResult>;
-  buildTerrainTileset(input: TerrainTilesetInput): Promise<AsepriteResult>;
-  generateWorldMap(input: WorldMapInput): Promise<AsepriteResult>;
-  generateBeachScene(input: BeachSceneInput): Promise<AsepriteResult>;
-  generateTimeOfDayPack(input: TimeOfDayInput): Promise<AsepriteResult>;
-  generateEnvironmentPack(input: EnvironmentPackInput): Promise<AsepriteResult>;
+  createStyleBible(input: StyleBibleInput): Promise<AssetOperationResult>;
+  inspectReference(filename: string): Promise<AssetOperationResult>;
+  runQualityGate(input: QualityGateInput): Promise<AssetOperationResult>;
+  buildTerrainTileset(input: TerrainTilesetInput): Promise<AssetOperationResult>;
+  generateWorldMap(input: WorldMapInput): Promise<AssetOperationResult>;
+  generateBeachScene(input: BeachSceneInput): Promise<AssetOperationResult>;
+  generateTimeOfDayPack(input: TimeOfDayInput): Promise<AssetOperationResult>;
+  generateEnvironmentPack(input: EnvironmentPackInput): Promise<AssetOperationResult>;
 }
