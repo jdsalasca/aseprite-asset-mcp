@@ -14,6 +14,13 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
   try {
     const tools = await client.listTools();
     assert.ok(tools.includes("create_canvas"));
+    assert.ok(tools.includes("delete_layer"));
+    assert.ok(tools.includes("rename_layer"));
+    assert.ok(tools.includes("duplicate_layer"));
+    assert.ok(tools.includes("reorder_layer"));
+    assert.ok(tools.includes("set_layer_blend_mode"));
+    assert.ok(tools.includes("merge_layer_down"));
+    assert.ok(tools.includes("flatten_sprite"));
     assert.ok(tools.includes("draw_pixels"));
     assert.ok(tools.includes("draw_line"));
     assert.ok(tools.includes("fill_area"));
@@ -165,6 +172,15 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
     await call("delete_tag", { filename: source, name: "idle" });
     await call("delete_frame", { filename: source, frame_index: 2 });
     await call("set_onion_skin", { filename: source, enabled: true, before: 2, after: 2, opacity: 128 });
+    await call("add_layer", { filename: source, layer_name: "scratch" });
+    await call("rename_layer", { filename: source, layer_name: "scratch", new_name: "scratch-renamed" });
+    await call("duplicate_layer", { filename: source, layer_name: "body", new_name: "body-copy" });
+    await call("set_layer_blend_mode", { filename: source, layer_name: "body-copy", mode: "multiply" });
+    await call("merge_layer_down", { filename: source, layer_name: "body-copy" });
+    await call("duplicate_layer", { filename: source, layer_name: "body", new_name: "body-copy-reordered" });
+    await call("reorder_layer", { filename: source, layer_name: "body-copy-reordered", position: 1 });
+    await call("delete_layer", { filename: source, layer_name: "scratch-renamed" });
+    await call("flatten_sprite", { filename: source });
     await call("export_spritesheet", {
       filename: source,
       output_filename: sheet,

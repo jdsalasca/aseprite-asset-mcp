@@ -18,6 +18,13 @@ export interface AsepriteGateway {
   createCanvas(width: number, height: number, filename: string): Promise<AsepriteResult>;
   addGroup(filename: string, groupName: string, parentGroup?: string): Promise<AsepriteResult>;
   addLayer(filename: string, layerName: string, group?: string): Promise<AsepriteResult>;
+  deleteLayer(filename: string, layerName: string): Promise<AsepriteResult>;
+  renameLayer(filename: string, layerName: string, newName: string): Promise<AsepriteResult>;
+  duplicateLayer(filename: string, layerName: string, newName?: string, group?: string): Promise<AsepriteResult>;
+  reorderLayer(filename: string, layerName: string, position: number): Promise<AsepriteResult>;
+  setLayerBlendMode(filename: string, layerName: string, mode: string): Promise<AsepriteResult>;
+  mergeLayerDown(filename: string, layerName: string): Promise<AsepriteResult>;
+  flattenSprite(filename: string): Promise<AsepriteResult>;
   addFrame(filename: string): Promise<AsepriteResult>;
   addFrames(filename: string, count: number, durationMs?: number): Promise<AsepriteResult>;
   setFrame(filename: string, frameIndex: number): Promise<AsepriteResult>;

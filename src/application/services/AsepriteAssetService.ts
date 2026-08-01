@@ -15,6 +15,34 @@ export class AsepriteAssetService {
     return this.gateway.addLayer(filename, layerName, group);
   }
 
+  public deleteLayer(filename: string, layerName: string): Promise<AsepriteResult> {
+    return this.gateway.deleteLayer(filename, layerName);
+  }
+
+  public renameLayer(filename: string, layerName: string, newName: string): Promise<AsepriteResult> {
+    return this.gateway.renameLayer(filename, layerName, newName);
+  }
+
+  public duplicateLayer(filename: string, layerName: string, newName = "", group = ""): Promise<AsepriteResult> {
+    return this.gateway.duplicateLayer(filename, layerName, newName, group);
+  }
+
+  public reorderLayer(filename: string, layerName: string, position: number): Promise<AsepriteResult> {
+    return this.gateway.reorderLayer(filename, layerName, position);
+  }
+
+  public setLayerBlendMode(filename: string, layerName: string, mode: string): Promise<AsepriteResult> {
+    return this.gateway.setLayerBlendMode(filename, layerName, mode);
+  }
+
+  public mergeLayerDown(filename: string, layerName: string): Promise<AsepriteResult> {
+    return this.gateway.mergeLayerDown(filename, layerName);
+  }
+
+  public flattenSprite(filename: string): Promise<AsepriteResult> {
+    return this.gateway.flattenSprite(filename);
+  }
+
   public addFrame(filename: string): Promise<AsepriteResult> {
     return this.gateway.addFrame(filename);
   }
