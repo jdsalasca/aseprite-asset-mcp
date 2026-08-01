@@ -8,6 +8,7 @@ test("rejects traversal in every input sprite path before starting Aseprite", as
   const results = await Promise.all([
     gateway.addGroup("../sprite.aseprite", "Group"),
     gateway.addLayer("../sprite.aseprite", "Layer"),
+    gateway.drawRectangle("../sprite.aseprite", 0, 0, 1, 1, "#112233", true),
     gateway.addFrame("../sprite.aseprite"),
     gateway.addFrames("../sprite.aseprite", 1),
     gateway.setFrame("../sprite.aseprite", 1),
@@ -32,6 +33,14 @@ test("rejects invalid hexadecimal palette colors before starting Aseprite", asyn
 
   assert.equal(result.ok, false);
   assert.equal(result.message, "Colors must use hexadecimal values");
+});
+
+test("rejects invalid drawing dimensions and colors before starting Aseprite", async () => {
+  const invalidDimensions = await gateway.drawRectangle("sprite.aseprite", 0, 0, 1.5, 2, "#112233");
+  const invalidColor = await gateway.drawRectangle("sprite.aseprite", 0, 0, 2, 2, "#12GG34");
+
+  assert.equal(invalidDimensions.message, "Width and height must be positive integers");
+  assert.equal(invalidColor.message, "Colors must use hexadecimal values");
 });
 
 test("rejects invalid tag frame ranges before starting Aseprite", async () => {
