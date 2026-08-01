@@ -61,9 +61,10 @@ jobs:
       if: github.event_name == 'pull_request'
       run: |
         docker run --rm --entrypoint /bin/bash ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:pr-${{ github.event.number }} -c "
-          echo 'Testing Docker image...' &&
-          python3 --version &&
-          uv --version &&
+          echo 'Testing TypeScript MCP image...' &&
+          node --version &&
+          npm --version &&
+          npm run typecheck &&
           ls -la /app &&
           echo 'Docker image test completed successfully!'
         "

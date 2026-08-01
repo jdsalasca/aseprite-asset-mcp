@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   aseprite-mcp:
     build:
@@ -8,22 +6,12 @@ services:
     image: aseprite-mcp:latest
     container_name: aseprite-mcp-server
     restart: unless-stopped
-    # Uncomment the following line if you need to expose ports
-    # ports:
-    #   - "8080:8080"
-    
-    # Mount volumes for development
     volumes:
       - .:/app
-    
-    # Environment variables (copy from sample.env if needed)
-    # env_file:
-    #   - .env
-    
-    # Override entrypoint for development
-    # entrypoint: ["tail", "-f", "/dev/null"]
-    
-    # For production, use the default entrypoint
+      # Mount a host Aseprite installation if the MCP must edit files.
+      # - /path/to/Aseprite:/opt/aseprite:ro
+    environment:
+      ASEPRITE_PATH: /opt/aseprite/Aseprite
     stdin_open: true
     tty: true
 
@@ -36,7 +24,7 @@ services:
     container_name: aseprite-mcp-dev
     volumes:
       - .:/app
-    entrypoint: ["tail", "-f", "/dev/null"]
+    command: ["npm", "run", "test"]
     stdin_open: true
     tty: true
     profiles:

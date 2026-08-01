@@ -2,20 +2,10 @@
 .git
 .gitignore
 
-# Python cache and artifacts
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-*.egg-info/
+# JavaScript dependencies and build output
+node_modules/
 dist/
-build/
-
-# Virtual environments
-venv/
-env/
-.venv/
+artifacts/
 
 # IDE files
 .vscode/
@@ -27,8 +17,7 @@ env/
 .DS_Store
 Thumbs.db
 
-# Test files and coverage
-.pytest_cache/
+# Coverage
 .coverage
 htmlcov/
 

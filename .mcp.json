@@ -2,11 +2,11 @@
   "mcpServers": {
     "aseprite": {
       "type": "stdio",
-      "command": "uv",
+      "command": "npm",
       "args": [
         "run",
-        "-m",
-        "aseprite_mcp"
+        "mcp",
+        "--silent"
       ],
       "env": {}
     }

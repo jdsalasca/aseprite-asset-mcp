@@ -1,27 +1,12 @@
 .env
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-build/
-develop-eggs/
+# Node
+*.tsbuildinfo
+coverage/
 dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
+node_modules/
+__pycache__/
+*.pyc
 
 # Virtual Environment
 venv/
@@ -44,3 +29,7 @@ ENV/
 !examples/swordsman/swordsman.png
 !examples/swordsman/swordsman_slash.gif
 !examples/swordsman/swordsman_slash_sheet.png
+
+# TypeScript workflow outputs
+artifacts/
+node_modules/

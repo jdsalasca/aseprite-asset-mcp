@@ -28,7 +28,7 @@ try {
         Write-Host "  docker run -it --rm --entrypoint /bin/bash $FULL_IMAGE_NAME" -ForegroundColor Cyan
         Write-Host ""
         Write-Host "To test the image:" -ForegroundColor Yellow
-        Write-Host "  docker run --rm --entrypoint /bin/bash $FULL_IMAGE_NAME -c 'python3 --version && uv --version'" -ForegroundColor Cyan
+        Write-Host "  docker run --rm $FULL_IMAGE_NAME node --version" -ForegroundColor Cyan
     } else {
         throw "Docker build failed with exit code $LASTEXITCODE"
     }

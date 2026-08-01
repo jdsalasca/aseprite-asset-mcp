@@ -1,0 +1,29 @@
+{
+  "name": "aseprite-mcp-workflows",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0",
+    "npm": ">=11.0.0"
+  },
+  "description": "Deterministic TypeScript workflows for characters, scenes, and Godot exports through Aseprite MCP.",
+  "scripts": {
+    "mcp": "tsx src/interfaces/mcp-server.ts",
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run typecheck && npm run test:ts",
+    "test:ts": "tsx --test tests-ts/*.test.ts",
+    "asset:character": "tsx scripts/character-workflow.ts",
+    "asset:scene": "tsx scripts/scene-workflow.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "tsx": "^4.23.1",
+    "typescript": "^6.0.3"
+  }
+}
