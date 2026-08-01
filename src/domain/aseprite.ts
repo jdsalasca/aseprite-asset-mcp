@@ -39,6 +39,10 @@ export interface AsepriteGateway {
   drawPolygon(filename: string, layerName: string, frameIndex: number, points: PointInput[], color?: string, fill?: boolean, createIfMissing?: boolean): Promise<AsepriteResult>;
   drawPath(filename: string, layerName: string, frameIndex: number, points: PointInput[], color?: string, thickness?: number, createIfMissing?: boolean): Promise<AsepriteResult>;
   applyGradientRect(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, colorStart: string, colorEnd: string, horizontal?: boolean, createIfMissing?: boolean): Promise<AsepriteResult>;
+  drawEllipseAt(filename: string, layerName: string, frameIndex: number, centerX: number, centerY: number, radiusX: number, radiusY: number, color?: string, fill?: boolean, createIfMissing?: boolean): Promise<AsepriteResult>;
+  exportSprite(filename: string, outputFilename: string, format?: string): Promise<AsepriteResult>;
+  copySprite(filename: string, outputFilename: string, overwrite?: boolean): Promise<AsepriteResult>;
+  exportFrame(filename: string, frameIndex: number, outputFilename: string, scale?: number): Promise<AsepriteResult>;
   setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction?: string): Promise<AsepriteResult>;
   createTilemapLayer(filename: string, layerName: string, tileWidth: number, tileHeight: number): Promise<AsepriteResult>;
   validateScene(filename: string, requiredLayers: string[], startFrame?: number, endFrame?: number): Promise<AsepriteResult>;

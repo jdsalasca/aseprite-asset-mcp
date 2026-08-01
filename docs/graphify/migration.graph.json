@@ -2,18 +2,18 @@
   "schemaVersion": 1,
   "project": "aseprite-mcp",
   "goal": "complete-typescript-migration",
-  "generatedAt": "2026-08-01T13:53:01.968Z",
+  "generatedAt": "2026-08-01T13:58:35.306Z",
   "source": {
     "repository": "https://github.com/diivi/aseprite-mcp",
     "branch": "upstream/main",
     "commit": "90d1696a7e41edff89bbd0823ae6a5f86c114bcc"
   },
   "local": {
-    "branch": "codex/migrate/polygon-path-gradient",
-    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-polygon-gradient",
-    "baseCommit": "723cba828b2035c3b07e8b516c86ca07e8a04ed4",
-    "typescriptToolCount": 31,
-    "testCount": 18
+    "branch": "codex/migrate/ellipse-export",
+    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-ellipse-export",
+    "baseCommit": "6893385b6f2938665592ee102b4ec9666e37a78b",
+    "typescriptToolCount": 35,
+    "testCount": 19
   },
   "tools": [
     {
@@ -633,9 +633,13 @@
       "name": "draw_ellipse_at",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "drawing",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -644,9 +648,13 @@
       "name": "export_sprite",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "export",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -655,9 +663,13 @@
       "name": "copy_sprite",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "core",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -666,9 +678,13 @@
       "name": "export_frame",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "animation",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
