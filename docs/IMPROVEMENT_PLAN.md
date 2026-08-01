@@ -16,7 +16,7 @@ Las abstracciones no contienen nombres de SDK, Aseprite, Node, HTTP ni filesyste
 
 ## Fases
 
-### Fase 1 · Foundation hexagonal — en implementación
+### Fase 1 · Foundation hexagonal — implementada en la rama de integración
 
 - separar puertos genéricos de sesión de herramientas, persistencia y procesos;
 - extraer composición del servidor HTTP a controladores y servicios;
@@ -24,13 +24,15 @@ Las abstracciones no contienen nombres de SDK, Aseprite, Node, HTTP ni filesyste
 - dividir componentes UI en módulos pequeños;
 - añadir pruebas de contratos y validación de errores.
 
-### Fase 2 · Asset enhancement application
+### Fase 2 · Asset enhancement application — primera vertical implementada
 
 - `InspectAsset`, `SuggestEnhancementPlan` y `ApplyEnhancementPlan` como casos de uso;
 - recetas de materiales, iluminación y partículas como estrategias independientes;
 - caché por hash de input, receta, estilo y versión;
 - jobs cancelables para operaciones largas;
 - manifiestos compactos y recursos MCP.
+
+Ya están disponibles el planificador determinista `suggest_enhancement_plan` y los jobs asíncronos `start_asset_job`, `get_asset_job_status` y `cancel_asset_job`. La extracción del registro legacy continuará por slices para evitar una migración riesgosa de una sola vez.
 
 ### Fase 3 · Persistencia y observabilidad
 
