@@ -48,7 +48,7 @@ POST /api/mcp/stop
 POST /api/mcp/call
 ```
 
-El gateway es local y escucha solo en `127.0.0.1`. El navegador no puede ejecutar Aseprite ni acceder directamente al sistema de archivos. La operación de arranque valida el repositorio configurado mediante el proceso hijo `npm run mcp`; las llamadas de herramientas pasan por el protocolo MCP tipado.
+El gateway es local y escucha solo en `127.0.0.1`. El navegador no puede ejecutar Aseprite ni acceder directamente al sistema de archivos. Antes de lanzar el proceso, el gateway valida que la carpeta contenga `package.json` con el script `mcp` y, si se indicó una ruta de Aseprite, que exista. Las llamadas de herramientas pasan por el protocolo MCP tipado.
 
 ## TDD y verificación
 
