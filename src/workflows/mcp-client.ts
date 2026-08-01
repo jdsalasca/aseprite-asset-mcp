@@ -19,7 +19,7 @@ export class AsepriteMcpClient {
   private transport: StdioClientTransport | undefined;
 
   public constructor(private readonly options: AsepriteMcpClientOptions) {
-    this.client = new Client({ name: "aseprite-mcp-typescript-workflows", version: "0.1.0" });
+    this.client = new Client({ name: "aseprite-asset-mcp-workflows", version: "0.1.0" });
   }
 
   public async connect(): Promise<void> {
@@ -62,7 +62,7 @@ export class AsepriteMcpClient {
 
   private assertToolExists(toolCall: ToolCall, names: Set<string>): void {
     if (!names.has(toolCall.name)) {
-      throw new Error(`The Aseprite MCP server does not expose '${toolCall.name}'. Refresh the fork before executing this plan.`);
+      throw new Error(`The Aseprite MCP server does not expose '${toolCall.name}'. Refresh the asset MCP before executing this plan.`);
     }
   }
 }

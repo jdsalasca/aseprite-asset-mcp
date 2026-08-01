@@ -135,7 +135,7 @@ export class AsepriteMcpServerAdapter {
   public readonly server: McpServer;
 
   public constructor(private readonly assets: AsepriteAssetService) {
-    this.server = new McpServer({ name: "aseprite-mcp-typescript", version: SERVER_VERSION });
+    this.server = new McpServer({ name: "aseprite-asset-mcp", version: SERVER_VERSION });
     this.registerTools();
   }
 

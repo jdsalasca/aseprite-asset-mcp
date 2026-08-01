@@ -1,5 +1,5 @@
 {
-  "name": "aseprite-mcp-workflows",
+  "name": "aseprite-asset-mcp",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -7,7 +7,7 @@
     "node": ">=24.0.0",
     "npm": ">=11.0.0"
   },
-  "description": "Deterministic TypeScript workflows for characters, scenes, and Godot exports through Aseprite MCP.",
+  "description": "Token-efficient TypeScript MCP asset factory for Aseprite, pixel art, animation, and Godot exports.",
   "scripts": {
     "mcp": "tsx src/interfaces/mcp-server.ts",
     "build": "tsc --noEmit",

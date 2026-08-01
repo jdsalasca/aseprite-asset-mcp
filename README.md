@@ -1,4 +1,4 @@
-# Aseprite MCP TypeScript
+# Aseprite Asset MCP
 
 MCP server público para crear pixel art, personajes y escenarios de Aseprite con TypeScript 6.0.3, Node.js 24 y arquitectura hexagonal.
 
@@ -18,9 +18,9 @@ tests-ts/          TDD unitario y handshake MCP
 
 ## Estado de la migración
 
-La rama `develop` elimina el servidor anterior y usa solo el runtime TypeScript. El núcleo disponible incluye canvas, grupos, capas, frames, tags, paletas, dibujo pixelado, tilemaps, validación, exportación, planes deterministas para personajes y escenarios, y handshake MCP real por stdio.
+La rama `develop` usa únicamente el runtime TypeScript. El núcleo disponible incluye canvas, grupos, capas, frames, tags, paletas, dibujo pixelado, tilemaps, validación, exportación, planes deterministas para personajes y escenarios, y handshake MCP real por stdio.
 
-La base pública se sincronizó con `diivi/aseprite-mcp:main` antes de reconstruir. La rama experimental del upstream no se usó como base porque no es `main` y elimina herramientas durante su trabajo en progreso.
+Este proyecto mantiene su propio desarrollo, roadmap y contrato de herramientas para convertirlo en una fábrica de assets pixel-art eficiente para agentes.
 
 ## Requisitos
 
@@ -101,6 +101,6 @@ La imagen usa Node.js 24. El binario de Aseprite debe estar disponible dentro de
 docker compose run --rm aseprite-mcp-dev
 ```
 
-## Licencia y fork
+## Licencia y proyecto
 
-Este repositorio es un fork público de [`diivi/aseprite-mcp`](https://github.com/diivi/aseprite-mcp) y conserva su licencia MIT. Fork público: [`jdsalasca/aseprite-mcp`](https://github.com/jdsalasca/aseprite-mcp).
+Proyecto independiente: [`jdsalasca/aseprite-asset-mcp`](https://github.com/jdsalasca/aseprite-asset-mcp). Conserva la licencia MIT.
