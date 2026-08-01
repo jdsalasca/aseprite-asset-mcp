@@ -87,6 +87,10 @@ export interface AsepriteGateway {
   getPixelsRect(filename: string, x: number, y: number, width: number, height: number, layerName?: string, frameIndex?: number): Promise<AsepriteResult>;
   getCompositePixel(filename: string, x: number, y: number, frameIndex?: number): Promise<AsepriteResult>;
   getCompositeRect(filename: string, x: number, y: number, width: number, height: number, frameIndex?: number): Promise<AsepriteResult>;
+  moveRegion(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, destX: number, destY: number): Promise<AsepriteResult>;
+  copyRegion(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, destX: number, destY: number, targetLayerName?: string, targetFrameIndex?: number): Promise<AsepriteResult>;
+  eraseRegion(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number): Promise<AsepriteResult>;
+  eraseColor(filename: string, layerName: string, frameIndex: number, color: string, tolerance?: number): Promise<AsepriteResult>;
   applyConvolution(filename: string, matrix: string, layerName?: string, frameIndex?: number, x?: number, y?: number, width?: number, height?: number): Promise<AsepriteResult>;
   listConvolutionMatrices(): Promise<AsepriteResult>;
   applyDitherGradient(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, colorStart: string, colorEnd: string, horizontal?: boolean, createIfMissing?: boolean): Promise<AsepriteResult>;

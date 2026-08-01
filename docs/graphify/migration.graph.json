@@ -2,18 +2,18 @@
   "schemaVersion": 1,
   "project": "aseprite-mcp",
   "goal": "complete-typescript-migration",
-  "generatedAt": "2026-08-01T15:35:59.237Z",
+  "generatedAt": "2026-08-01T15:42:08.212Z",
   "source": {
     "repository": "https://github.com/diivi/aseprite-mcp",
     "branch": "upstream/main",
     "commit": "90d1696a7e41edff89bbd0823ae6a5f86c114bcc"
   },
   "local": {
-    "branch": "codex/migrate/pixel-read",
-    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-pixel-read",
-    "baseCommit": "60eb7a1550ba8d84b8e499e9ee20d94d9ebf0bdd",
-    "typescriptToolCount": 83,
-    "testCount": 32
+    "branch": "codex/migrate/selection",
+    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-selection",
+    "baseCommit": "ea00e53a72181f83df9390b67ad78dd6c615566a",
+    "typescriptToolCount": 87,
+    "testCount": 33
   },
   "tools": [
     {
@@ -1381,9 +1381,13 @@
       "name": "move_region",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "selection",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -1392,9 +1396,13 @@
       "name": "copy_region",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "selection",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -1403,9 +1411,13 @@
       "name": "erase_region",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "drawing",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -1414,9 +1426,13 @@
       "name": "erase_color",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "drawing",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []

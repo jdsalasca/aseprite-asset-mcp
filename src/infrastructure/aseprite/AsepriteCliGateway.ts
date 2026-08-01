@@ -1839,6 +1839,137 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return pixels.length ? { ok: true, message: JSON.stringify(pixels) } : { ok: false, message: "No pixel data returned" };
   }
 
+  public async moveRegion(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, destX: number, destY: number): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    if (![x, y, destX, destY].every(Number.isInteger)) return { ok: false, message: "Coordinates must be integers" };
+    if (!isPositiveInteger(width) || !isPositiveInteger(height)) return { ok: false, message: "Width and height must be positive integers" };
+    const body = this.layerFrameScript(name, frameIndex, false, `
+      local img = cel.image
+      local function pset(px, py, value)
+        if px >= 0 and py >= 0 and px < img.width and py < img.height then img:putPixel(px, py, value) end
+      end
+      local buffer = {}
+      for row = 0, ${height - 1} do
+        buffer[row] = {}
+        for column = 0, ${width - 1} do
+          local sx, sy = ${x} + column, ${y} + row
+          if sx >= 0 and sy >= 0 and sx < img.width and sy < img.height then buffer[row][column] = img:getPixel(sx, sy) else buffer[row][column] = 0 end
+          if sx >= 0 and sy >= 0 and sx < img.width and sy < img.height then img:putPixel(sx, sy, 0) end
+        end
+      end
+      for row = 0, ${height - 1} do
+        for column = 0, ${width - 1} do
+          local value = buffer[row][column]
+          if app.pixelColor.rgbaA(value) > 0 then pset(${destX} + column, ${destY} + row, value) end
+        end
+      end
+    `);
+    return result(await this.runLua(this.openScript(source, body), source), `Moved ${width}x${height} region from (${x},${y}) to (${destX},${destY}) on '${name}' frame ${frameIndex} in ${source}`);
+  }
+
+  public async copyRegion(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, destX: number, destY: number, targetLayerName = "", targetFrameIndex = 0): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    const targetName = validateName(targetLayerName.trim() || name, "Target layer name");
+    if (typeof targetName !== "string") return targetName;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    if (targetFrameIndex < 0 || !Number.isInteger(targetFrameIndex)) return { ok: false, message: "Target frame index must be a positive integer or zero" };
+    const resolvedTargetFrame = targetFrameIndex > 0 ? targetFrameIndex : frameIndex;
+    if (![x, y, destX, destY].every(Number.isInteger)) return { ok: false, message: "Coordinates must be integers" };
+    if (!isPositiveInteger(width) || !isPositiveInteger(height)) return { ok: false, message: "Width and height must be positive integers" };
+    const script = this.openScript(source, `
+      if ${frameIndex} > #spr.frames then print("ERROR:Source frame index out of range") return end
+      if ${resolvedTargetFrame} > #spr.frames then print("ERROR:Target frame index out of range") return end
+      local function normalize_cel(layer, frame, create)
+        local current = layer:cel(frame)
+        if not current and create then current = spr:newCel(layer, frame, Image(spr.width, spr.height, spr.colorMode), Point(0, 0)) end
+        if not current then return nil end
+        if current.position.x ~= 0 or current.position.y ~= 0 or current.image.width ~= spr.width or current.image.height ~= spr.height then
+          local normalized = Image(spr.width, spr.height, spr.colorMode)
+          normalized:drawImage(current.image, current.position)
+          current.image, current.position = normalized, Point(0, 0)
+        end
+        return current
+      end
+      local sourceLayer = find_layer(spr, "${luaEscape(name)}")
+      local targetLayer = find_layer(spr, "${luaEscape(targetName)}")
+      if not sourceLayer then print("ERROR:Source layer not found") return end
+      if not targetLayer then print("ERROR:Target layer not found") return end
+      local sourceCel = normalize_cel(sourceLayer, spr.frames[${frameIndex}], false)
+      if not sourceCel then print("ERROR:No cel at source layer/frame") return end
+      local targetCel = normalize_cel(targetLayer, spr.frames[${resolvedTargetFrame}], true)
+      local sourceImage, targetImage = sourceCel.image, targetCel.image
+      local buffer = {}
+      for row = 0, ${height - 1} do
+        buffer[row] = {}
+        for column = 0, ${width - 1} do
+          local sx, sy = ${x} + column, ${y} + row
+          if sx >= 0 and sy >= 0 and sx < sourceImage.width and sy < sourceImage.height then buffer[row][column] = sourceImage:getPixel(sx, sy) else buffer[row][column] = 0 end
+        end
+      end
+      for row = 0, ${height - 1} do
+        for column = 0, ${width - 1} do
+          local value = buffer[row][column]
+          if app.pixelColor.rgbaA(value) > 0 and ${destX} + column >= 0 and ${destY} + row >= 0 and ${destX} + column < targetImage.width and ${destY} + row < targetImage.height then targetImage:putPixel(${destX} + column, ${destY} + row, value) end
+        end
+      end
+    `);
+    return result(await this.runLua(script, source), `Copied ${width}x${height} region from (${x},${y}) to (${destX},${destY}) in ${source}`);
+  }
+
+  public async eraseRegion(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    if (![x, y].every(Number.isInteger)) return { ok: false, message: "Coordinates must be integers" };
+    if (!isPositiveInteger(width) || !isPositiveInteger(height)) return { ok: false, message: "Width and height must be positive integers" };
+    const body = this.layerFrameScript(name, frameIndex, false, `
+      local img = cel.image
+      for py = math.max(0, ${y}), math.min(img.height - 1, ${y + height - 1}) do
+        for px = math.max(0, ${x}), math.min(img.width - 1, ${x + width - 1}) do img:putPixel(px, py, 0) end
+      end
+    `);
+    return result(await this.runLua(this.openScript(source, body), source), `Erased ${width}x${height} region at (${x},${y}) on '${name}' frame ${frameIndex} in ${source}`);
+  }
+
+  public async eraseColor(filename: string, layerName: string, frameIndex: number, color: string, tolerance = 0): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const name = validateName(layerName, "Layer name");
+    if (typeof name !== "string") return name;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    if (!Number.isInteger(tolerance) || tolerance < 0 || tolerance > 255) return { ok: false, message: "Tolerance must be between 0 and 255" };
+    const rgba = this.parseHexColor(color);
+    if (!rgba) return { ok: false, message: "Colors must use hexadecimal values" };
+    const [red, green, blue] = rgba;
+    const body = this.layerFrameScript(name, frameIndex, false, `
+      local count = 0
+      local img = cel.image
+      for py = 0, img.height - 1 do
+        for px = 0, img.width - 1 do
+          local value = img:getPixel(px, py)
+          if app.pixelColor.rgbaA(value) > 0 and math.abs(app.pixelColor.rgbaR(value) - ${red}) <= ${tolerance} and math.abs(app.pixelColor.rgbaG(value) - ${green}) <= ${tolerance} and math.abs(app.pixelColor.rgbaB(value) - ${blue}) <= ${tolerance} then
+            img:putPixel(px, py, 0)
+            count = count + 1
+          end
+        end
+      end
+      print("COUNT:" .. count)
+    `);
+    const command = await this.runLua(this.openScript(source, body), source);
+    if (!command.ok) return { ok: false, message: command.output };
+    const count = command.output.split(/\r?\n/).find((line) => line.startsWith("COUNT:"))?.slice(6) ?? "?";
+    return { ok: true, message: `Erased ${count} pixels of ${color} on '${name}' frame ${frameIndex} in ${source}` };
+  }
+
   public async outlineNative(filename: string, layerName = "", frameIndex = 1, color = "#000000", place = "outside", matrix = "circle"): Promise<AsepriteResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;

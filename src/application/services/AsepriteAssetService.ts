@@ -291,6 +291,22 @@ export class AsepriteAssetService {
     return this.gateway.getCompositeRect(filename, x, y, width, height, frameIndex);
   }
 
+  public moveRegion(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, destX: number, destY: number): Promise<AsepriteResult> {
+    return this.gateway.moveRegion(filename, layerName, frameIndex, x, y, width, height, destX, destY);
+  }
+
+  public copyRegion(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, destX: number, destY: number, targetLayerName = "", targetFrameIndex = 0): Promise<AsepriteResult> {
+    return this.gateway.copyRegion(filename, layerName, frameIndex, x, y, width, height, destX, destY, targetLayerName, targetFrameIndex);
+  }
+
+  public eraseRegion(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number): Promise<AsepriteResult> {
+    return this.gateway.eraseRegion(filename, layerName, frameIndex, x, y, width, height);
+  }
+
+  public eraseColor(filename: string, layerName: string, frameIndex: number, color: string, tolerance = 0): Promise<AsepriteResult> {
+    return this.gateway.eraseColor(filename, layerName, frameIndex, color, tolerance);
+  }
+
   public applyConvolution(filename: string, matrix: string, layerName = "", frameIndex = 1, x = 0, y = 0, width = 0, height = 0): Promise<AsepriteResult> {
     return this.gateway.applyConvolution(filename, matrix, layerName, frameIndex, x, y, width, height);
   }
