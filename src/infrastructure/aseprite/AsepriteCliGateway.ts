@@ -3,7 +3,8 @@ import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
-import type { AsepriteGateway, AsepriteResult, PixelInput, PointInput } from "../../domain/aseprite.js";
+import type { AsepriteGateway, AsepriteResult, PixelInput, PointInput, TextDrawInput } from "../../domain/aseprite.js";
+import { availableTextFonts, measureText as rasterMeasureText, rasterizeText } from "../text/TextRasterizer.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -2054,6 +2055,104 @@ export class AsepriteCliGateway implements AsepriteGateway {
       spr:crop(${x}, ${y}, ${width}, ${height})
     `);
     return result(await this.runLua(script, source), `Canvas cropped to (${x},${y}) ${width}x${height} in ${source}`);
+  }
+
+  public async listTextFonts(): Promise<AsepriteResult> {
+    const fonts = await availableTextFonts();
+    if (!fonts.length) return { ok: true, message: "No fonts found. Add a .ttf or .otf file to ~/.aseprite-mcp/fonts/." };
+    const user = fonts.filter((font) => font.source === "user");
+    const system = fonts.filter((font) => font.source === "system");
+    const lines: string[] = [];
+    if (user.length) {
+      lines.push("User fonts (~/.aseprite-mcp/fonts):");
+      lines.push(...user.map((font) => `  ${font.name}  [truetype]`));
+    }
+    if (system.length) {
+      lines.push(`System fonts (${system.length}, all truetype):`);
+      lines.push(...system.map((font) => `  ${font.name}`));
+    }
+    return { ok: true, message: lines.join("\n") };
+  }
+
+  public async measureText(text: string, font: string, size = 1, letterSpacing = 0, bold = 0, antialias = false): Promise<AsepriteResult> {
+    try {
+      const metrics = await rasterMeasureText(text, font, size, letterSpacing, bold, antialias);
+      return { ok: true, message: `width=${metrics.width} height=${metrics.height} advance_width=${metrics.advanceWidth} above_baseline=${metrics.aboveBaseline} below_baseline=${metrics.belowBaseline} left_bearing=${metrics.leftBearing}` };
+    } catch (error) {
+      return { ok: false, message: `ERROR: ${error instanceof Error ? error.message : String(error)}` };
+    }
+  }
+
+  public async drawText(input: TextDrawInput): Promise<AsepriteResult> {
+    const source = validatePath(input.filename);
+    if (typeof source !== "string") return source;
+    if (typeof input.text !== "string" || !input.text) return { ok: false, message: "Text cannot be empty" };
+    if (![input.x, input.y].every(Number.isInteger)) return { ok: false, message: "Text coordinates must be integers" };
+    const frameIndex = input.frameIndex ?? 1;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    const anchors = new Set(["topleft", "top", "topright", "left", "center", "right", "bottomleft", "bottom", "bottomright", "baselineleft", "baseline", "baselineright"]);
+    const anchor = input.anchor ?? "topleft";
+    if (!anchors.has(anchor)) return { ok: false, message: `Invalid anchor '${anchor}'` };
+    if (input.layerName !== undefined && typeof input.layerName !== "string") return { ok: false, message: "Layer name must be a string" };
+    const name = input.layerName?.trim() ?? "";
+    try {
+      const metrics = await rasterMeasureText(input.text, input.font, input.size ?? 1, input.letterSpacing ?? 0, input.bold ?? 0, input.antialias ?? false);
+      let blitX = input.x;
+      if (anchor.endsWith("right")) blitX -= metrics.width;
+      else if (["top", "center", "bottom", "baseline"].includes(anchor)) blitX -= Math.floor(metrics.width / 2);
+      let blitY = input.y;
+      if (anchor.startsWith("baseline")) blitY -= metrics.aboveBaseline;
+      else if (anchor.startsWith("bottom")) blitY -= metrics.height;
+      else if (["left", "center", "right"].includes(anchor)) blitY -= Math.floor(metrics.height / 2);
+      const rendered = await rasterizeText({
+        text: input.text,
+        font: input.font,
+        size: input.size,
+        color: input.color,
+        letterSpacing: input.letterSpacing,
+        bold: input.bold,
+        outlineColor: input.outlineColor,
+        outlineWidth: input.outlineWidth,
+        shadowColor: input.shadowColor,
+        shadowDx: input.shadowDx,
+        shadowDy: input.shadowDy,
+        antialias: input.antialias,
+      }, blitX, blitY, this.tempDirectory);
+      const png = luaEscape(rendered.filename.replaceAll("\\", "/"));
+      const escapedName = luaEscape(name);
+      const script = this.openScript(source, `
+        if ${frameIndex} > #spr.frames then print("ERROR:Frame index out of range") return end
+        local stamp = Image { fromFile = "${png}" }
+        if not stamp then print("ERROR:Could not load rendered text") return end
+        local target
+        if "${escapedName}" ~= "" then
+          target = find_layer(spr, "${escapedName}")
+          if not target and ${input.createIfMissing !== false ? "true" : "false"} then target = spr:newLayer() target.name = "${escapedName}" end
+        else
+          target = app.activeLayer or spr.layers[1]
+        end
+        if not target or target.isGroup then print("ERROR:Layer not found") return end
+        local cel = target:cel(spr.frames[${frameIndex}])
+        if not cel and ${input.createIfMissing !== false ? "true" : "false"} then cel = spr:newCel(target, spr.frames[${frameIndex}], Image(spr.width, spr.height, spr.colorMode), Point(0, 0)) end
+        if not cel then print("ERROR:Cel not found") return end
+        if cel.position.x ~= 0 or cel.position.y ~= 0 or cel.image.width ~= spr.width or cel.image.height ~= spr.height then
+          local normalized = Image(spr.width, spr.height, spr.colorMode)
+          normalized:drawImage(cel.image, cel.position)
+          cel.image, cel.position = normalized, Point(0, 0)
+        end
+        cel.image:drawImage(stamp, Point(${rendered.blitX}, ${rendered.blitY}), 255, BlendMode.NORMAL)
+      `);
+      let command: CommandResult;
+      try {
+        command = await this.runLua(script, source);
+      } finally {
+        await fs.rm(rendered.filename, { force: true });
+      }
+      if (!command.ok) return { ok: false, message: `Error drawing text: ${command.output}` };
+      return { ok: true, message: `Drew '${input.text}' at (${blitX}, ${blitY}), text box ${metrics.width}x${metrics.height}` };
+    } catch (error) {
+      return { ok: false, message: `ERROR: ${error instanceof Error ? error.message : String(error)}` };
+    }
   }
 
   public async outlineNative(filename: string, layerName = "", frameIndex = 1, color = "#000000", place = "outside", matrix = "circle"): Promise<AsepriteResult> {

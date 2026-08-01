@@ -8,6 +8,7 @@ import { AsepriteMcpClient } from "../src/workflows/mcp-client.js";
 
 const defaultAsepritePath = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Aseprite\\Aseprite.exe";
 const asepritePath = process.env.ASEPRITE_PATH ?? defaultAsepritePath;
+const textFontPath = ["C:\\Windows\\Fonts\\arial.ttf", "C:\\Windows\\Fonts\\segoeui.ttf"].find((filename) => existsSync(filename));
 
 test("TypeScript MCP server completes a real stdio handshake", async () => {
   const client = new AsepriteMcpClient({ cwd: process.cwd() });
@@ -81,6 +82,9 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("rotate_layer"));
     assert.ok(tools.includes("resize_canvas"));
     assert.ok(tools.includes("crop_canvas"));
+    assert.ok(tools.includes("list_text_fonts"));
+    assert.ok(tools.includes("measure_text"));
+    assert.ok(tools.includes("draw_text"));
     assert.ok(tools.includes("draw_rectangle"));
     assert.ok(tools.includes("create_character_plan"));
     assert.ok(tools.includes("create_scene_plan"));
@@ -117,7 +121,7 @@ test("server capabilities report the current typed runtime and complete tool cou
   }
 });
 
-test("MCP stdio executes drawing primitives against real Aseprite", { skip: !existsSync(asepritePath) }, async () => {
+test("MCP stdio executes drawing primitives against real Aseprite", { skip: !existsSync(asepritePath) || !textFontPath }, async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "aseprite-mcp-e2e-"));
   const source = path.join(directory, "primitive.aseprite");
   const sheet = path.join(directory, "primitive.png");
@@ -129,6 +133,7 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
   const exportedTag = path.join(directory, "primitive-idle.gif");
   const onionRender = path.join(directory, "primitive-onion.png");
   const transformSource = path.join(directory, "transform.aseprite");
+  const textSource = path.join(directory, "text.aseprite");
   const client = new AsepriteMcpClient({
     cwd: process.cwd(),
     environment: { ASEPRITE_PATH: asepritePath },
@@ -221,6 +226,10 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
     await call("rotate_layer", { filename: transformSource, layer_name: "pixels", frame_index: 1, angle: 90 });
     await call("resize_canvas", { filename: transformSource, width: 10, height: 10 });
     await call("crop_canvas", { filename: transformSource, x: 1, y: 1, width: 8, height: 8 });
+    await call("list_text_fonts", {});
+    await call("measure_text", { text: "Aseprite", font: textFontPath, size: 8, letter_spacing: 1, bold: 1 });
+    await call("create_canvas", { width: 48, height: 24, filename: textSource });
+    await call("draw_text", { filename: textSource, text: "A", x: 4, y: 4, font: textFontPath, size: 12, color: "#ff0000", layer_name: "labels", anchor: "topleft", outline_color: "#000000", shadow_color: "#0000ff", create_if_missing: true });
     await call("flatten_sprite", { filename: source });
     await call("export_spritesheet", {
       filename: source,

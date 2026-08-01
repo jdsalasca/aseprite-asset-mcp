@@ -84,6 +84,9 @@ const TOOL_NAMES = [
   "rotate_layer",
   "resize_canvas",
   "crop_canvas",
+  "list_text_fonts",
+  "measure_text",
+  "draw_text",
   "outline_native",
   "adjust_hsl_native",
   "adjust_brightness_contrast",
@@ -547,6 +550,24 @@ export class AsepriteMcpServerAdapter {
       description: "Crop the sprite canvas to a rectangle.",
       inputSchema: { filename: z.string().min(1), x: z.number().int(), y: z.number().int(), width: z.number().int().positive(), height: z.number().int().positive() },
     }, async ({ filename, x, y, width, height }) => this.result(await this.assets.cropCanvas(filename, x, y, width, height)));
+
+    this.server.registerTool("list_text_fonts", {
+      description: "List discoverable TrueType and OpenType fonts.",
+      inputSchema: {},
+    }, async () => this.result(await this.assets.listTextFonts()));
+
+    this.server.registerTool("measure_text", {
+      description: "Measure a text run without changing a sprite.",
+      inputSchema: { text: z.string(), font: z.string().min(1), size: z.number().int().positive().default(1), letter_spacing: z.number().int().nonnegative().default(0), bold: z.number().int().nonnegative().default(0), antialias: z.boolean().default(false) },
+    }, async ({ text, font, size, letter_spacing, bold, antialias }) => this.result(await this.assets.measureText(text, font, size, letter_spacing, bold, antialias)));
+
+    this.server.registerTool("draw_text", {
+      description: "Rasterize and draw text into a sprite layer and frame.",
+      inputSchema: {
+        filename: z.string().min(1), text: z.string().min(1), x: z.number().int(), y: z.number().int(), font: z.string().min(1), size: z.number().int().positive().default(1), color: z.string().regex(HEX_COLOR).default("#FFFFFF"), layer_name: z.string().default(""), frame_index: z.number().int().positive().default(1),
+        anchor: z.enum(["topleft", "top", "topright", "left", "center", "right", "bottomleft", "bottom", "bottomright", "baselineleft", "baseline", "baselineright"]).default("topleft"), letter_spacing: z.number().int().nonnegative().default(0), bold: z.number().int().nonnegative().default(0), outline_color: z.string().regex(HEX_COLOR).optional(), outline_width: z.number().int().positive().default(1), outline_diagonal: z.boolean().default(true), shadow_color: z.string().regex(HEX_COLOR).optional(), shadow_dx: z.number().int().default(1), shadow_dy: z.number().int().default(1), antialias: z.boolean().default(false), create_if_missing: z.boolean().default(true),
+      },
+    }, async ({ filename, text, x, y, font, size, color, layer_name, frame_index, anchor, letter_spacing, bold, outline_color, outline_width, outline_diagonal, shadow_color, shadow_dx, shadow_dy, antialias, create_if_missing }) => this.result(await this.assets.drawText({ filename, text, x, y, font, size, color, layerName: layer_name, frameIndex: frame_index, anchor, letterSpacing: letter_spacing, bold, outlineColor: outline_color, outlineWidth: outline_width, outlineDiagonal: outline_diagonal, shadowColor: shadow_color, shadowDx: shadow_dx, shadowDy: shadow_dy, antialias, createIfMissing: create_if_missing })));
 
     this.server.registerTool("outline_native", {
       description: "Apply Aseprite native outline to a selected layer and frame.",

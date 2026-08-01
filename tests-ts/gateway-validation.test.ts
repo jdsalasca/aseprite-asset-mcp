@@ -376,6 +376,20 @@ test("rejects invalid transform contracts before starting Aseprite", async () =>
   assert.equal(badCropCoordinates.message, "Crop coordinates must be integers");
 });
 
+test("rejects invalid text contracts before rasterizing or starting Aseprite", async () => {
+  const badMeasureSize = await gateway.measureText("A", "missing-font", 0);
+  const badMeasureSpacing = await gateway.measureText("A", "missing-font", 1, -1);
+  const badDrawText = await gateway.drawText({ filename: "sprite.aseprite", text: "A", x: 0, y: 0, font: "missing-font", anchor: "invalid" });
+  const badDrawCoordinates = await gateway.drawText({ filename: "sprite.aseprite", text: "A", x: 0.5, y: 0, font: "missing-font" });
+  const badDrawEmpty = await gateway.drawText({ filename: "sprite.aseprite", text: "", x: 0, y: 0, font: "missing-font" });
+
+  assert.match(badMeasureSize.message, /Size must be an integer/);
+  assert.match(badMeasureSpacing.message, /Letter spacing must be an integer/);
+  assert.equal(badDrawText.message, "Invalid anchor 'invalid'");
+  assert.equal(badDrawCoordinates.message, "Text coordinates must be integers");
+  assert.equal(badDrawEmpty.message, "Text cannot be empty");
+});
+
 test("rejects invalid tag frame ranges before starting Aseprite", async () => {
   const result = await gateway.setTag("sprite.aseprite", "idle", 0, 2);
 
