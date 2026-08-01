@@ -59,6 +59,10 @@ const TOOL_NAMES = [
   "get_color_stats",
   "get_palette",
   "extract_palette",
+  "outline_native",
+  "adjust_hsl_native",
+  "adjust_brightness_contrast",
+  "invert_colors",
   "set_tag",
   "create_tilemap_layer",
   "validate_scene",
@@ -386,6 +390,26 @@ export class AsepriteMcpServerAdapter {
       description: "Extract and persist an optimized palette with a bounded color count.",
       inputSchema: { filename: z.string().min(1), max_colors: z.number().int().min(1).max(256).default(16), with_alpha: z.boolean().default(false) },
     }, async ({ filename, max_colors, with_alpha }) => this.result(await this.assets.extractPalette(filename, max_colors, with_alpha)));
+
+    this.server.registerTool("outline_native", {
+      description: "Apply Aseprite native outline to a selected layer and frame.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().default(""), frame_index: z.number().int().positive().default(1), color: z.string().regex(HEX_COLOR).default("#000000"), place: z.enum(["outside", "inside"]).default("outside"), matrix: z.enum(["circle", "square"]).default("circle") },
+    }, async ({ filename, layer_name, frame_index, color, place, matrix }) => this.result(await this.assets.outlineNative(filename, layer_name, frame_index, color, place, matrix)));
+
+    this.server.registerTool("adjust_hsl_native", {
+      description: "Apply Aseprite native hue, saturation, and lightness adjustment.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().default(""), frame_index: z.number().int().positive().default(1), hue: z.number().int().min(-180).max(180).default(0), saturation: z.number().int().min(-100).max(100).default(0), lightness: z.number().int().min(-100).max(100).default(0), x: z.number().int().default(0), y: z.number().int().default(0), width: z.number().int().nonnegative().default(0), height: z.number().int().nonnegative().default(0) },
+    }, async ({ filename, layer_name, frame_index, hue, saturation, lightness, x, y, width, height }) => this.result(await this.assets.adjustHslNative(filename, layer_name, frame_index, hue, saturation, lightness, x, y, width, height)));
+
+    this.server.registerTool("adjust_brightness_contrast", {
+      description: "Apply Aseprite native brightness and contrast adjustment.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().default(""), frame_index: z.number().int().positive().default(1), brightness: z.number().int().min(-100).max(100).default(0), contrast: z.number().int().min(-100).max(100).default(0), x: z.number().int().default(0), y: z.number().int().default(0), width: z.number().int().nonnegative().default(0), height: z.number().int().nonnegative().default(0) },
+    }, async ({ filename, layer_name, frame_index, brightness, contrast, x, y, width, height }) => this.result(await this.assets.adjustBrightnessContrast(filename, layer_name, frame_index, brightness, contrast, x, y, width, height)));
+
+    this.server.registerTool("invert_colors", {
+      description: "Apply Aseprite native color inversion.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().default(""), frame_index: z.number().int().positive().default(1), x: z.number().int().default(0), y: z.number().int().default(0), width: z.number().int().nonnegative().default(0), height: z.number().int().nonnegative().default(0) },
+    }, async ({ filename, layer_name, frame_index, x, y, width, height }) => this.result(await this.assets.invertColors(filename, layer_name, frame_index, x, y, width, height)));
 
     this.server.registerTool("set_tag", {
       description: "Create or update an animation tag.",

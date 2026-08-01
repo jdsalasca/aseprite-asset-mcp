@@ -2,18 +2,18 @@
   "schemaVersion": 1,
   "project": "aseprite-mcp",
   "goal": "complete-typescript-migration",
-  "generatedAt": "2026-08-01T14:29:06.474Z",
+  "generatedAt": "2026-08-01T14:35:36.894Z",
   "source": {
     "repository": "https://github.com/diivi/aseprite-mcp",
     "branch": "upstream/main",
     "commit": "90d1696a7e41edff89bbd0823ae6a5f86c114bcc"
   },
   "local": {
-    "branch": "codex/migrate/color-analysis",
-    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-color-analysis",
-    "baseCommit": "824aa00d4f6250b4c8a6ae9cb1e8fdd6891f15fc",
-    "typescriptToolCount": 55,
-    "testCount": 25
+    "branch": "codex/migrate/native-fx",
+    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-native-fx",
+    "baseCommit": "d91a87c4bfc73ebaedbc6dd4ed9f9f8348ab93ee",
+    "typescriptToolCount": 59,
+    "testCount": 26
   },
   "tools": [
     {
@@ -956,9 +956,13 @@
       "name": "outline_native",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "core",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -967,9 +971,13 @@
       "name": "adjust_hsl_native",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "core",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -978,9 +986,13 @@
       "name": "adjust_brightness_contrast",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "core",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -989,9 +1001,13 @@
       "name": "invert_colors",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "palette",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []

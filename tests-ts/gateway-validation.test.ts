@@ -53,6 +53,10 @@ test("rejects traversal in every input sprite path before starting Aseprite", as
     gateway.getColorStats("../sprite.aseprite"),
     gateway.getPalette("../sprite.aseprite"),
     gateway.extractPalette("../sprite.aseprite"),
+    gateway.outlineNative("../sprite.aseprite"),
+    gateway.adjustHslNative("../sprite.aseprite"),
+    gateway.adjustBrightnessContrast("../sprite.aseprite"),
+    gateway.invertColors("../sprite.aseprite"),
     gateway.setTag("../sprite.aseprite", "idle", 1, 1),
     gateway.createTilemapLayer("../sprite.aseprite", "Tiles", 16, 16),
     gateway.validateScene("../sprite.aseprite", ["Layer"]),
@@ -209,6 +213,20 @@ test("rejects invalid opacity and palette analysis contracts before starting Ase
   assert.equal(badOpacity.message, "Opacity must be between 0 and 255");
   assert.equal(badStats.message, "Top must be a positive integer");
   assert.equal(badPalette.message, "Max colors must be between 1 and 256");
+});
+
+test("rejects invalid native effect contracts before starting Aseprite", async () => {
+  const badOutlineColor = await gateway.outlineNative("sprite.aseprite", "Layer", 1, "#GGGGGG");
+  const badOutlinePlace = await gateway.outlineNative("sprite.aseprite", "Layer", 1, "#000000", "invalid");
+  const badHsl = await gateway.adjustHslNative("sprite.aseprite", "Layer", 1, 181, 0, 0);
+  const badContrast = await gateway.adjustBrightnessContrast("sprite.aseprite", "Layer", 1, 0, 101);
+  const badRegion = await gateway.invertColors("sprite.aseprite", "Layer", 1, 0, 0, 0, 2);
+
+  assert.equal(badOutlineColor.message, "Colors must use hexadecimal values");
+  assert.equal(badOutlinePlace.message, "Place must be 'outside' or 'inside'");
+  assert.equal(badHsl.message, "Hue must be between -180 and 180");
+  assert.equal(badContrast.message, "Brightness and contrast must be between -100 and 100");
+  assert.equal(badRegion.message, "Region width and height must both be zero or positive integers");
 });
 
 test("rejects invalid tag frame ranges before starting Aseprite", async () => {
