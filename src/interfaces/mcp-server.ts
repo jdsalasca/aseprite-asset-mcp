@@ -91,6 +91,11 @@ const TOOL_NAMES = [
   "set_tiles",
   "get_tile_at",
   "get_tilemap_info",
+  "create_slice",
+  "set_slice_center",
+  "set_slice_pivot",
+  "list_slices",
+  "delete_slice",
   "outline_native",
   "adjust_hsl_native",
   "adjust_brightness_contrast",
@@ -592,6 +597,31 @@ export class AsepriteMcpServerAdapter {
       description: "Read tile size, tileset count, and map dimensions.",
       inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1) },
     }, async ({ filename, layer_name }) => this.result(await this.assets.getTilemapInfo(filename, layer_name)));
+
+    this.server.registerTool("create_slice", {
+      description: "Create a named rectangular slice.",
+      inputSchema: { filename: z.string().min(1), name: z.string().min(1), x: z.number().int(), y: z.number().int(), width: z.number().int().positive(), height: z.number().int().positive() },
+    }, async ({ filename, name, x, y, width, height }) => this.result(await this.assets.createSlice(filename, name, x, y, width, height)));
+
+    this.server.registerTool("set_slice_center", {
+      description: "Set a slice 9-patch center rectangle.",
+      inputSchema: { filename: z.string().min(1), name: z.string().min(1), x: z.number().int(), y: z.number().int(), width: z.number().int().positive(), height: z.number().int().positive() },
+    }, async ({ filename, name, x, y, width, height }) => this.result(await this.assets.setSliceCenter(filename, name, x, y, width, height)));
+
+    this.server.registerTool("set_slice_pivot", {
+      description: "Set a slice pivot point.",
+      inputSchema: { filename: z.string().min(1), name: z.string().min(1), x: z.number().int(), y: z.number().int() },
+    }, async ({ filename, name, x, y }) => this.result(await this.assets.setSlicePivot(filename, name, x, y)));
+
+    this.server.registerTool("list_slices", {
+      description: "List slice bounds, centers, and pivots as JSON.",
+      inputSchema: { filename: z.string().min(1) },
+    }, async ({ filename }) => this.result(await this.assets.listSlices(filename)));
+
+    this.server.registerTool("delete_slice", {
+      description: "Delete a named slice.",
+      inputSchema: { filename: z.string().min(1), name: z.string().min(1) },
+    }, async ({ filename, name }) => this.result(await this.assets.deleteSlice(filename, name)));
 
     this.server.registerTool("outline_native", {
       description: "Apply Aseprite native outline to a selected layer and frame.",

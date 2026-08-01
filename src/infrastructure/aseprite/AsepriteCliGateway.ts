@@ -1052,6 +1052,88 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return { ok: true, message: JSON.stringify({ tile_width: tileWidth, tile_height: tileHeight, tile_count: tileCount, map_cols: mapCols, map_rows: mapRows }) };
   }
 
+  public async createSlice(filename: string, name: string, x: number, y: number, width: number, height: number): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const sliceName = validateName(name, "Slice name");
+    if (typeof sliceName !== "string") return sliceName;
+    if (![x, y].every(Number.isInteger)) return { ok: false, message: "Slice coordinates must be integers" };
+    if (!isPositiveInteger(width) || !isPositiveInteger(height)) return { ok: false, message: "Width and height must be positive integers" };
+    const script = this.openScript(source, `
+      local slice = find_slice(spr, "${luaEscape(sliceName)}")
+      if slice then print("ERROR:Slice with that name already exists") return end
+      local created = spr:newSlice(Rectangle(${x}, ${y}, ${width}, ${height}))
+      created.name = "${luaEscape(sliceName)}"
+    `);
+    return result(await this.runLua(script, source), `Slice '${sliceName}' created at (${x},${y}) ${width}x${height} in ${source}`);
+  }
+
+  public async setSliceCenter(filename: string, name: string, x: number, y: number, width: number, height: number): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const sliceName = validateName(name, "Slice name");
+    if (typeof sliceName !== "string") return sliceName;
+    if (![x, y].every(Number.isInteger)) return { ok: false, message: "Slice center coordinates must be integers" };
+    if (!isPositiveInteger(width) || !isPositiveInteger(height)) return { ok: false, message: "Width and height must be positive integers" };
+    const script = this.openScript(source, `
+      local slice = find_slice(spr, "${luaEscape(sliceName)}")
+      if not slice then print("ERROR:Slice not found") return end
+      slice.center = Rectangle(${x}, ${y}, ${width}, ${height})
+    `);
+    return result(await this.runLua(script, source), `Slice '${sliceName}' 9-patch center set to (${x},${y}) ${width}x${height} in ${source}`);
+  }
+
+  public async setSlicePivot(filename: string, name: string, x: number, y: number): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const sliceName = validateName(name, "Slice name");
+    if (typeof sliceName !== "string") return sliceName;
+    if (![x, y].every(Number.isInteger)) return { ok: false, message: "Slice pivot coordinates must be integers" };
+    const script = this.openScript(source, `
+      local slice = find_slice(spr, "${luaEscape(sliceName)}")
+      if not slice then print("ERROR:Slice not found") return end
+      slice.pivot = Point(${x}, ${y})
+    `);
+    return result(await this.runLua(script, source), `Slice '${sliceName}' pivot set to (${x},${y}) in ${source}`);
+  }
+
+  public async listSlices(filename: string): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const script = this.readOnlyScript(`
+      for _, slice in ipairs(spr.slices) do
+        local b = slice.bounds
+        local parts = {}
+        parts[#parts + 1] = string.format('"name":%s', string.format("%q", slice.name))
+        parts[#parts + 1] = string.format('"x":%d,"y":%d,"width":%d,"height":%d', b.x, b.y, b.width, b.height)
+        if slice.center then local c = slice.center parts[#parts + 1] = string.format('"center":{"x":%d,"y":%d,"width":%d,"height":%d}', c.x, c.y, c.width, c.height) end
+        if slice.pivot then local p = slice.pivot parts[#parts + 1] = string.format('"pivot":{"x":%d,"y":%d}', p.x, p.y) end
+        print("SLICE:{" .. table.concat(parts, ",") .. "}")
+      end
+      print("DONE")
+    `);
+    const command = await this.runLua(script, source);
+    if (!command.ok) return { ok: false, message: `Failed to list slices: ${command.output}` };
+    const slices: unknown[] = [];
+    for (const line of command.output.split(/\r?\n/).filter((entry) => entry.startsWith("SLICE:"))) {
+      try { slices.push(JSON.parse(line.slice(6))); } catch { return { ok: false, message: "Invalid slice data returned" }; }
+    }
+    return { ok: true, message: JSON.stringify(slices) };
+  }
+
+  public async deleteSlice(filename: string, name: string): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const sliceName = validateName(name, "Slice name");
+    if (typeof sliceName !== "string") return sliceName;
+    const script = this.openScript(source, `
+      local slice = find_slice(spr, "${luaEscape(sliceName)}")
+      if not slice then print("ERROR:Slice not found") return end
+      spr:deleteSlice(slice)
+    `);
+    return result(await this.runLua(script, source), `Slice '${sliceName}' deleted from ${source}`);
+  }
+
   public async validateScene(filename: string, requiredLayers: string[], startFrame = 1, endFrame?: number): Promise<AsepriteResult> {
     const source = validatePath(filename);
     if (typeof source !== "string") return source;
@@ -2674,6 +2756,10 @@ export class AsepriteCliGateway implements AsepriteGateway {
         end
         return nil
       end
+      local function find_slice(sprite, name)
+        for _, slice in ipairs(sprite.slices) do if slice.name == name then return slice end end
+        return nil
+      end
       local spr = app.activeSprite
       if not spr then print("ERROR:No active sprite") return end
       app.transaction(function() ${body} end)
@@ -2689,6 +2775,10 @@ export class AsepriteCliGateway implements AsepriteGateway {
           if layer.name == name then return layer end
           if layer.isGroup then local nested = find_layer(layer, name) if nested then return nested end end
         end
+        return nil
+      end
+      local function find_slice(sprite, name)
+        for _, slice in ipairs(sprite.slices) do if slice.name == name then return slice end end
         return nil
       end
       local spr = app.activeSprite

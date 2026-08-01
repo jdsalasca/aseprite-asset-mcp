@@ -351,6 +351,26 @@ export class AsepriteAssetService {
     return this.gateway.getTilemapInfo(filename, layerName);
   }
 
+  public createSlice(filename: string, name: string, x: number, y: number, width: number, height: number): Promise<AsepriteResult> {
+    return this.gateway.createSlice(filename, name, x, y, width, height);
+  }
+
+  public setSliceCenter(filename: string, name: string, x: number, y: number, width: number, height: number): Promise<AsepriteResult> {
+    return this.gateway.setSliceCenter(filename, name, x, y, width, height);
+  }
+
+  public setSlicePivot(filename: string, name: string, x: number, y: number): Promise<AsepriteResult> {
+    return this.gateway.setSlicePivot(filename, name, x, y);
+  }
+
+  public listSlices(filename: string): Promise<AsepriteResult> {
+    return this.gateway.listSlices(filename);
+  }
+
+  public deleteSlice(filename: string, name: string): Promise<AsepriteResult> {
+    return this.gateway.deleteSlice(filename, name);
+  }
+
   public applyConvolution(filename: string, matrix: string, layerName = "", frameIndex = 1, x = 0, y = 0, width = 0, height = 0): Promise<AsepriteResult> {
     return this.gateway.applyConvolution(filename, matrix, layerName, frameIndex, x, y, width, height);
   }

@@ -412,6 +412,22 @@ test("rejects invalid tilemap contracts before starting Aseprite", async () => {
   assert.equal(badInfoLayer.message, "Layer name cannot be empty");
 });
 
+test("rejects invalid slice contracts before starting Aseprite", async () => {
+  const badName = await gateway.createSlice("sprite.aseprite", "", 0, 0, 4, 4);
+  const badCoordinates = await gateway.createSlice("sprite.aseprite", "hud", 0.5, 0, 4, 4);
+  const badSize = await gateway.createSlice("sprite.aseprite", "hud", 0, 0, 0, 4);
+  const badCenter = await gateway.setSliceCenter("sprite.aseprite", "hud", 0, 0, 0, 4);
+  const badPivot = await gateway.setSlicePivot("sprite.aseprite", "hud", 0.5, 0);
+  const badDelete = await gateway.deleteSlice("sprite.aseprite", "");
+
+  assert.equal(badName.message, "Slice name cannot be empty");
+  assert.equal(badCoordinates.message, "Slice coordinates must be integers");
+  assert.equal(badSize.message, "Width and height must be positive integers");
+  assert.equal(badCenter.message, "Width and height must be positive integers");
+  assert.equal(badPivot.message, "Slice pivot coordinates must be integers");
+  assert.equal(badDelete.message, "Slice name cannot be empty");
+});
+
 test("rejects invalid tag frame ranges before starting Aseprite", async () => {
   const result = await gateway.setTag("sprite.aseprite", "idle", 0, 2);
 
