@@ -1067,6 +1067,40 @@ export class AsepriteCliGateway implements AsepriteGateway {
     return result(await this.runLua(script, source), `Frame ${sourceFrame} propagated to frames ${startFrame}-${endFrame} in ${source}`);
   }
 
+  public async deleteFrame(filename: string, frameIndex: number): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    const script = this.openScript(source, `
+      if ${frameIndex} > #spr.frames then print("ERROR:Frame index out of range") return end
+      if #spr.frames <= 1 then print("ERROR:Cannot delete the only frame") return end
+      spr:deleteFrame(spr.frames[${frameIndex}])
+    `);
+    return result(await this.runLua(script, source), `Frame ${frameIndex} deleted from ${source}`);
+  }
+
+  public async deleteTag(filename: string, name: string): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    const tagName = validateName(name, "Tag name");
+    if (typeof tagName !== "string") return tagName;
+    const script = this.openScript(source, `
+      local target = nil
+      for _, tag in ipairs(spr.tags) do if tag.name == "${luaEscape(tagName)}" then target = tag break end end
+      if not target then print("ERROR:Tag not found") return end
+      spr:deleteTag(target)
+    `);
+    return result(await this.runLua(script, source), `Tag '${tagName}' deleted from ${source}`);
+  }
+
+  public async setOnionSkin(filename: string, enabled = true, before = 2, after = 2, opacity = 128): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (!Number.isInteger(before) || !Number.isInteger(after) || before < 0 || after < 0) return { ok: false, message: "Before and after must be non-negative integers" };
+    if (!Number.isInteger(opacity) || opacity < 0 || opacity > 255) return { ok: false, message: "Opacity must be between 0 and 255" };
+    return { ok: true, message: `Onion skin settings are UI-only in batch mode; no changes applied (enabled=${enabled}, before=${before}, after=${after}, opacity=${opacity})` };
+  }
+
   private async resolveTagRange(filename: string, tagName: string): Promise<CommandResult> {
     const script = `
       local spr = app.activeSprite

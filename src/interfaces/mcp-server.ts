@@ -50,6 +50,9 @@ const TOOL_NAMES = [
   "tween_cel_positions",
   "offset_cel_positions",
   "propagate_frame_to_range",
+  "delete_frame",
+  "delete_tag",
+  "set_onion_skin",
   "set_tag",
   "create_tilemap_layer",
   "validate_scene",
@@ -332,6 +335,21 @@ export class AsepriteMcpServerAdapter {
       description: "Propagate all source-frame cels to a frame range.",
       inputSchema: { filename: z.string().min(1), source_frame: z.number().int().positive(), start_frame: z.number().int().positive(), end_frame: z.number().int().positive(), overwrite: z.boolean().default(true) },
     }, async ({ filename, source_frame, start_frame, end_frame, overwrite }) => this.result(await this.assets.propagateFrameToRange(filename, source_frame, start_frame, end_frame, overwrite)));
+
+    this.server.registerTool("delete_frame", {
+      description: "Delete one animation frame while keeping at least one frame in the sprite.",
+      inputSchema: { filename: z.string().min(1), frame_index: z.number().int().positive() },
+    }, async ({ filename, frame_index }) => this.result(await this.assets.deleteFrame(filename, frame_index)));
+
+    this.server.registerTool("delete_tag", {
+      description: "Delete an existing animation tag.",
+      inputSchema: { filename: z.string().min(1), name: z.string().min(1) },
+    }, async ({ filename, name }) => this.result(await this.assets.deleteTag(filename, name)));
+
+    this.server.registerTool("set_onion_skin", {
+      description: "Validate onion-skin settings for batch workflows; Aseprite UI-only settings are reported explicitly.",
+      inputSchema: { filename: z.string().min(1), enabled: z.boolean().default(true), before: z.number().int().nonnegative().default(2), after: z.number().int().nonnegative().default(2), opacity: z.number().int().min(0).max(255).default(128) },
+    }, async ({ filename, enabled, before, after, opacity }) => this.result(await this.assets.setOnionSkin(filename, enabled, before, after, opacity)));
 
     this.server.registerTool("set_tag", {
       description: "Create or update an animation tag.",

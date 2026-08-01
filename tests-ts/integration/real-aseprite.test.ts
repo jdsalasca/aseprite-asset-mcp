@@ -63,6 +63,9 @@ test("real Aseprite completes the core asset workflow", { skip: !existsSync(asep
       await gateway.setPalette(source, ["112233", "#abcdef"]),
       await gateway.setTag(source, "idle", 1, 3),
       await gateway.exportTag(source, "idle", exportedTag),
+      await gateway.deleteTag(source, "idle"),
+      await gateway.deleteFrame(source, 4),
+      await gateway.setOnionSkin(source, true, 2, 2, 128),
       await gateway.validateScene(source, ["body"], 1, 3),
       await gateway.exportSpritesheet({
         filename: source,
