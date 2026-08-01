@@ -123,6 +123,26 @@ export class AsepriteAssetService {
     return this.gateway.exportTag(filename, tagName, outputFilename, scale);
   }
 
+  public importImageAsLayer(filename: string, imagePath: string, layerName: string, frameIndex = 1, x = 0, y = 0): Promise<AsepriteResult> {
+    return this.gateway.importImageAsLayer(filename, imagePath, layerName, frameIndex, x, y);
+  }
+
+  public createCel(filename: string, layerName: string, frameIndex: number, x = 0, y = 0): Promise<AsepriteResult> {
+    return this.gateway.createCel(filename, layerName, frameIndex, x, y);
+  }
+
+  public clearCel(filename: string, layerName: string, frameIndex: number): Promise<AsepriteResult> {
+    return this.gateway.clearCel(filename, layerName, frameIndex);
+  }
+
+  public copyCel(filename: string, layerName: string, sourceFrame: number, targetFrame: number, replace = true): Promise<AsepriteResult> {
+    return this.gateway.copyCel(filename, layerName, sourceFrame, targetFrame, replace);
+  }
+
+  public copyFrame(filename: string, sourceFrame: number, targetFrame?: number, overwrite = true): Promise<AsepriteResult> {
+    return this.gateway.copyFrame(filename, sourceFrame, targetFrame, overwrite);
+  }
+
   public setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction = "forward"): Promise<AsepriteResult> {
     return this.gateway.setTag(filename, name, fromFrame, toFrame, direction);
   }

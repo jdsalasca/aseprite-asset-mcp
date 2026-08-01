@@ -41,6 +41,11 @@ const TOOL_NAMES = [
   "export_frame",
   "export_layers",
   "export_tag",
+  "import_image_as_layer",
+  "create_cel",
+  "clear_cel",
+  "copy_cel",
+  "copy_frame",
   "set_tag",
   "create_tilemap_layer",
   "validate_scene",
@@ -278,6 +283,31 @@ export class AsepriteMcpServerAdapter {
       description: "Export an animation tag as an image or animation file after validating that the tag exists.",
       inputSchema: { filename: z.string().min(1), tag_name: z.string().min(1), output_filename: z.string().min(1), scale: z.number().int().min(1).max(64).default(1) },
     }, async ({ filename, tag_name, output_filename, scale }) => this.result(await this.assets.exportTag(filename, tag_name, output_filename, scale)));
+
+    this.server.registerTool("import_image_as_layer", {
+      description: "Import an image into a named layer and frame, creating the layer when it does not exist.",
+      inputSchema: { filename: z.string().min(1), image_path: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive().default(1), x: z.number().int().default(0), y: z.number().int().default(0) },
+    }, async ({ filename, image_path, layer_name, frame_index, x, y }) => this.result(await this.assets.importImageAsLayer(filename, image_path, layer_name, frame_index, x, y)));
+
+    this.server.registerTool("create_cel", {
+      description: "Create an empty cel at a layer and frame when one does not already exist.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(), x: z.number().int().default(0), y: z.number().int().default(0) },
+    }, async ({ filename, layer_name, frame_index, x, y }) => this.result(await this.assets.createCel(filename, layer_name, frame_index, x, y)));
+
+    this.server.registerTool("clear_cel", {
+      description: "Delete a cel from a named layer and frame.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive() },
+    }, async ({ filename, layer_name, frame_index }) => this.result(await this.assets.clearCel(filename, layer_name, frame_index)));
+
+    this.server.registerTool("copy_cel", {
+      description: "Copy one layer cel to another frame, replacing the destination by default.",
+      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), source_frame: z.number().int().positive(), target_frame: z.number().int().positive(), replace: z.boolean().default(true) },
+    }, async ({ filename, layer_name, source_frame, target_frame, replace }) => this.result(await this.assets.copyCel(filename, layer_name, source_frame, target_frame, replace)));
+
+    this.server.registerTool("copy_frame", {
+      description: "Copy all cels from one frame to another frame or append a new frame.",
+      inputSchema: { filename: z.string().min(1), source_frame: z.number().int().positive(), target_frame: z.number().int().positive().optional(), overwrite: z.boolean().default(true) },
+    }, async ({ filename, source_frame, target_frame, overwrite }) => this.result(await this.assets.copyFrame(filename, source_frame, target_frame, overwrite)));
 
     this.server.registerTool("set_tag", {
       description: "Create or update an animation tag.",

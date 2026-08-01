@@ -32,6 +32,11 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("export_frame"));
     assert.ok(tools.includes("export_layers"));
     assert.ok(tools.includes("export_tag"));
+    assert.ok(tools.includes("import_image_as_layer"));
+    assert.ok(tools.includes("create_cel"));
+    assert.ok(tools.includes("clear_cel"));
+    assert.ok(tools.includes("copy_cel"));
+    assert.ok(tools.includes("copy_frame"));
     assert.ok(tools.includes("set_frame"));
     assert.ok(tools.includes("draw_rectangle"));
     assert.ok(tools.includes("create_character_plan"));
@@ -112,6 +117,11 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
     await call("set_tag", { filename: source, name: "idle", from_frame: 1, to_frame: 2 });
     await call("export_layers", { filename: source, output_directory: exportedLayers });
     await call("export_tag", { filename: source, tag_name: "idle", output_filename: exportedTag, scale: 1 });
+    await call("import_image_as_layer", { filename: source, image_path: exportedFrame, layer_name: "reference", frame_index: 1, x: 0, y: 0 });
+    await call("create_cel", { filename: source, layer_name: "reference", frame_index: 2, x: 1, y: 1 });
+    await call("copy_cel", { filename: source, layer_name: "body", source_frame: 2, target_frame: 1, replace: true });
+    await call("copy_frame", { filename: source, source_frame: 2, target_frame: 1, overwrite: true });
+    await call("clear_cel", { filename: source, layer_name: "reference", frame_index: 2 });
     await call("export_spritesheet", {
       filename: source,
       output_filename: sheet,

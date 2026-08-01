@@ -45,6 +45,11 @@ export interface AsepriteGateway {
   exportFrame(filename: string, frameIndex: number, outputFilename: string, scale?: number): Promise<AsepriteResult>;
   exportLayers(filename: string, outputDirectory: string, includeHidden?: boolean): Promise<AsepriteResult>;
   exportTag(filename: string, tagName: string, outputFilename: string, scale?: number): Promise<AsepriteResult>;
+  importImageAsLayer(filename: string, imagePath: string, layerName: string, frameIndex?: number, x?: number, y?: number): Promise<AsepriteResult>;
+  createCel(filename: string, layerName: string, frameIndex: number, x?: number, y?: number): Promise<AsepriteResult>;
+  clearCel(filename: string, layerName: string, frameIndex: number): Promise<AsepriteResult>;
+  copyCel(filename: string, layerName: string, sourceFrame: number, targetFrame: number, replace?: boolean): Promise<AsepriteResult>;
+  copyFrame(filename: string, sourceFrame: number, targetFrame?: number, overwrite?: boolean): Promise<AsepriteResult>;
   setTag(filename: string, name: string, fromFrame: number, toFrame: number, direction?: string): Promise<AsepriteResult>;
   createTilemapLayer(filename: string, layerName: string, tileWidth: number, tileHeight: number): Promise<AsepriteResult>;
   validateScene(filename: string, requiredLayers: string[], startFrame?: number, endFrame?: number): Promise<AsepriteResult>;
