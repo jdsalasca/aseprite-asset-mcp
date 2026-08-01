@@ -10,9 +10,7 @@ import { JsonAssetManifestWriter } from "../infrastructure/image/JsonAssetManife
 import { VisualAssetService } from "../application/services/VisualAssetService.js";
 import { buildCharacterPlan, buildScenePlan } from "../workflows/plans.js";
 import type { AsepriteResult } from "../domain/aseprite.js";
-import type { EnhancementGoal } from "../domain/enhancement.js";
-import type { ReferenceAnalysis } from "../domain/visual-assets.js";
-import { EnhancementPlanService } from "../application/services/EnhancementPlanService.js";
+import { EnhancementToolController } from "./controllers/EnhancementToolController.js";
 
 const SERVER_VERSION = "1.0.0";
 const TYPESCRIPT_VERSION = "6.0.3";
@@ -165,7 +163,6 @@ export class AsepriteMcpServerAdapter {
 
   private readonly imageAssets: PixelArtAssetService;
   private readonly visualAssets: VisualAssetService;
-  private readonly enhancementPlans = new EnhancementPlanService();
 
   public constructor(private readonly assets: AsepriteAssetService, imageAssets?: PixelArtAssetService) {
     this.imageAssets = imageAssets ?? new PixelArtAssetService(new SharpRasterCodec(), new JsonAssetManifestWriter());
@@ -254,25 +251,7 @@ export class AsepriteMcpServerAdapter {
       description: "Analyze reference dimensions, dominant colors, contrast, edges, and transparency.",
       inputSchema: { filename: z.string().min(1) },
     }, async ({ filename }) => this.result(await this.visualAssets.inspectReference(filename)));
-
-    this.server.registerTool("suggest_enhancement_plan", {
-      description: "Inspect one image and return a deterministic, non-destructive enhancement plan for an agent or human review.",
-      inputSchema: {
-        filename: z.string().min(1),
-        goals: z.array(z.enum(["cleanup", "terrain_grain", "water_flow", "directional_lighting", "particles", "time_of_day", "animation"])).optional(),
-        max_colors: z.number().int().min(2).max(256).default(64),
-        seed: z.number().int().default(1),
-      },
-    }, async ({ filename, goals, max_colors, seed }) => {
-      const analysisResult = await this.visualAssets.inspectReference(filename);
-      if (!analysisResult.ok) return this.result(analysisResult);
-      try {
-        const analysis = JSON.parse(analysisResult.message) as ReferenceAnalysis;
-        return this.text(this.enhancementPlans.suggest({ filename, analysis, ...(goals ? { goals: goals as EnhancementGoal[] } : {}), maxColors: max_colors, seed }));
-      } catch {
-        return this.result({ ok: false, message: "Reference analysis did not return a valid enhancement contract" });
-      }
-    });
+    new EnhancementToolController(this.visualAssets).register(this.server);
 
     this.server.registerTool("run_asset_quality_gate", {
       description: "Run compact pixel-art quality checks before export.",
