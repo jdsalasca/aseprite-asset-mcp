@@ -20,24 +20,18 @@ export class AssetJobService {
   public async cancel(id: string): Promise<AssetJobRecord | undefined> {
     const record = await this.store.get(id);
     if (!record || ["completed", "failed", "cancelled"].includes(record.status)) return record;
-    const cancelled: AssetJobRecord = { ...record, status: "cancelled", updatedAt: new Date().toISOString() };
-    await this.store.save(cancelled);
-    return cancelled;
+    await this.store.updateIfStatus(id, ["queued", "running"], { status: "cancelled", updatedAt: new Date().toISOString() });
+    return this.store.get(id);
   }
 
   private async execute(record: AssetJobRecord, input: AssetJobInput): Promise<void> {
-    const current = await this.store.get(record.id);
-    if (!current || current.status === "cancelled") return;
-    await this.store.save({ ...current, status: "running", updatedAt: new Date().toISOString() });
+    const started = await this.store.updateIfStatus(record.id, "queued", { status: "running", updatedAt: new Date().toISOString() });
+    if (!started) return;
     try {
       const outcome = await this.runner.run(input);
-      const latest = await this.store.get(record.id);
-      if (!latest || latest.status === "cancelled") return;
-      await this.store.save({ ...latest, status: outcome.ok ? "completed" : "failed", outcome, updatedAt: new Date().toISOString() });
+      await this.store.updateIfStatus(record.id, "running", { status: outcome.ok ? "completed" : "failed", outcome, updatedAt: new Date().toISOString() });
     } catch (error) {
-      const latest = await this.store.get(record.id);
-      if (!latest || latest.status === "cancelled") return;
-      await this.store.save({ ...latest, status: "failed", outcome: { ok: false, message: error instanceof Error ? error.message : String(error) }, updatedAt: new Date().toISOString() });
+      await this.store.updateIfStatus(record.id, "running", { status: "failed", outcome: { ok: false, message: error instanceof Error ? error.message : String(error) }, updatedAt: new Date().toISOString() });
     }
   }
 }
