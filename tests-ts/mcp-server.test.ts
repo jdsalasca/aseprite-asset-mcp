@@ -7,6 +7,7 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
   try {
     const tools = await client.listTools();
     assert.ok(tools.includes("create_canvas"));
+    assert.ok(tools.includes("set_frame"));
     assert.ok(tools.includes("draw_rectangle"));
     assert.ok(tools.includes("create_character_plan"));
     assert.ok(tools.includes("create_scene_plan"));
