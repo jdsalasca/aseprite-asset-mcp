@@ -18,6 +18,7 @@ import { LayerFrameToolController } from "./controllers/LayerFrameToolController
 import { DrawingToolController } from "./controllers/DrawingToolController.js";
 import { ExportAnimationToolController } from "./controllers/ExportAnimationToolController.js";
 import { PaletteTransformToolController } from "./controllers/PaletteTransformToolController.js";
+import { TextTileSliceToolController } from "./controllers/TextTileSliceToolController.js";
 import { AssetJobService } from "../application/services/AssetJobService.js";
 import { InMemoryAssetJobStore } from "../infrastructure/jobs/InMemoryAssetJobStore.js";
 import { DeterministicEnhancementService } from "../application/services/DeterministicEnhancementService.js";
@@ -227,69 +228,7 @@ export class AsepriteMcpServerAdapter {
     new DrawingToolController(this.assets).register(this.server);
     new ExportAnimationToolController(this.assets).register(this.server);
     new PaletteTransformToolController(this.assets).register(this.server);
-    this.server.registerTool("list_text_fonts", {
-      description: "List discoverable TrueType and OpenType fonts.",
-      inputSchema: {},
-    }, async () => this.result(await this.assets.listTextFonts()));
-
-    this.server.registerTool("measure_text", {
-      description: "Measure a text run without changing a sprite.",
-      inputSchema: { text: z.string(), font: z.string().min(1), size: z.number().int().positive().default(1), letter_spacing: z.number().int().nonnegative().default(0), bold: z.number().int().nonnegative().default(0), antialias: z.boolean().default(false) },
-    }, async ({ text, font, size, letter_spacing, bold, antialias }) => this.result(await this.assets.measureText(text, font, size, letter_spacing, bold, antialias)));
-
-    this.server.registerTool("draw_text", {
-      description: "Rasterize and draw text into a sprite layer and frame.",
-      inputSchema: {
-        filename: z.string().min(1), text: z.string().min(1), x: z.number().int(), y: z.number().int(), font: z.string().min(1), size: z.number().int().positive().default(1), color: z.string().regex(HEX_COLOR).default("#FFFFFF"), layer_name: z.string().default(""), frame_index: z.number().int().positive().default(1),
-        anchor: z.enum(["topleft", "top", "topright", "left", "center", "right", "bottomleft", "bottom", "bottomright", "baselineleft", "baseline", "baselineright"]).default("topleft"), letter_spacing: z.number().int().nonnegative().default(0), bold: z.number().int().nonnegative().default(0), outline_color: z.string().regex(HEX_COLOR).optional(), outline_width: z.number().int().positive().default(1), outline_diagonal: z.boolean().default(true), shadow_color: z.string().regex(HEX_COLOR).optional(), shadow_dx: z.number().int().default(1), shadow_dy: z.number().int().default(1), antialias: z.boolean().default(false), create_if_missing: z.boolean().default(true),
-      },
-    }, async ({ filename, text, x, y, font, size, color, layer_name, frame_index, anchor, letter_spacing, bold, outline_color, outline_width, outline_diagonal, shadow_color, shadow_dx, shadow_dy, antialias, create_if_missing }) => this.result(await this.assets.drawText({ filename, text, x, y, font, size, color, layerName: layer_name, frameIndex: frame_index, anchor, letterSpacing: letter_spacing, bold, outlineColor: outline_color, outlineWidth: outline_width, outlineDiagonal: outline_diagonal, shadowColor: shadow_color, shadowDx: shadow_dx, shadowDy: shadow_dy, antialias, createIfMissing: create_if_missing })));
-
-    this.server.registerTool("draw_on_tile", {
-      description: "Draw pixels onto a tilemap tileset tile.",
-      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), tile_index: z.number().int().min(1), pixels: z.array(z.object({ x: z.number().int(), y: z.number().int(), color: z.string().regex(HEX_COLOR) })).min(1) },
-    }, async ({ filename, layer_name, tile_index, pixels }) => this.result(await this.assets.drawOnTile(filename, layer_name, tile_index, pixels)));
-
-    this.server.registerTool("set_tiles", {
-      description: "Place tile indices on a tilemap frame by grid coordinates.",
-      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(), tiles: z.array(z.object({ col: z.number().int().nonnegative(), row: z.number().int().nonnegative(), tile_index: z.number().int().nonnegative() })).min(1) },
-    }, async ({ filename, layer_name, frame_index, tiles }) => this.result(await this.assets.setTiles(filename, layer_name, frame_index, tiles.map(({ col, row, tile_index }) => ({ col, row, tileIndex: tile_index })))));
-
-    this.server.registerTool("get_tile_at", {
-      description: "Read the tile index at a tilemap grid coordinate.",
-      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1), frame_index: z.number().int().positive(), col: z.number().int().nonnegative(), row: z.number().int().nonnegative() },
-    }, async ({ filename, layer_name, frame_index, col, row }) => this.result(await this.assets.getTileAt(filename, layer_name, frame_index, col, row)));
-
-    this.server.registerTool("get_tilemap_info", {
-      description: "Read tile size, tileset count, and map dimensions.",
-      inputSchema: { filename: z.string().min(1), layer_name: z.string().min(1) },
-    }, async ({ filename, layer_name }) => this.result(await this.assets.getTilemapInfo(filename, layer_name)));
-
-    this.server.registerTool("create_slice", {
-      description: "Create a named rectangular slice.",
-      inputSchema: { filename: z.string().min(1), name: z.string().min(1), x: z.number().int(), y: z.number().int(), width: z.number().int().positive(), height: z.number().int().positive() },
-    }, async ({ filename, name, x, y, width, height }) => this.result(await this.assets.createSlice(filename, name, x, y, width, height)));
-
-    this.server.registerTool("set_slice_center", {
-      description: "Set a slice 9-patch center rectangle.",
-      inputSchema: { filename: z.string().min(1), name: z.string().min(1), x: z.number().int(), y: z.number().int(), width: z.number().int().positive(), height: z.number().int().positive() },
-    }, async ({ filename, name, x, y, width, height }) => this.result(await this.assets.setSliceCenter(filename, name, x, y, width, height)));
-
-    this.server.registerTool("set_slice_pivot", {
-      description: "Set a slice pivot point.",
-      inputSchema: { filename: z.string().min(1), name: z.string().min(1), x: z.number().int(), y: z.number().int() },
-    }, async ({ filename, name, x, y }) => this.result(await this.assets.setSlicePivot(filename, name, x, y)));
-
-    this.server.registerTool("list_slices", {
-      description: "List slice bounds, centers, and pivots as JSON.",
-      inputSchema: { filename: z.string().min(1) },
-    }, async ({ filename }) => this.result(await this.assets.listSlices(filename)));
-
-    this.server.registerTool("delete_slice", {
-      description: "Delete a named slice.",
-      inputSchema: { filename: z.string().min(1), name: z.string().min(1) },
-    }, async ({ filename, name }) => this.result(await this.assets.deleteSlice(filename, name)));
-
+    new TextTileSliceToolController(this.assets).register(this.server);
     this.server.registerTool("ensure_layers_present", {
       description: "Ensure cels exist for named layers across a frame range.",
       inputSchema: { filename: z.string().min(1), layer_names: z.array(z.string().min(1)).min(1), start_frame: z.number().int().positive().default(1), end_frame: z.number().int().positive().optional() },
