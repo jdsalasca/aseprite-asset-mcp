@@ -275,6 +275,22 @@ export class AsepriteAssetService {
     return this.gateway.setColorMode(filename, mode);
   }
 
+  public getPixelColor(filename: string, x: number, y: number, layerName = "", frameIndex = 1): Promise<AsepriteResult> {
+    return this.gateway.getPixelColor(filename, x, y, layerName, frameIndex);
+  }
+
+  public getPixelsRect(filename: string, x: number, y: number, width: number, height: number, layerName = "", frameIndex = 1): Promise<AsepriteResult> {
+    return this.gateway.getPixelsRect(filename, x, y, width, height, layerName, frameIndex);
+  }
+
+  public getCompositePixel(filename: string, x: number, y: number, frameIndex = 1): Promise<AsepriteResult> {
+    return this.gateway.getCompositePixel(filename, x, y, frameIndex);
+  }
+
+  public getCompositeRect(filename: string, x: number, y: number, width: number, height: number, frameIndex = 1): Promise<AsepriteResult> {
+    return this.gateway.getCompositeRect(filename, x, y, width, height, frameIndex);
+  }
+
   public applyConvolution(filename: string, matrix: string, layerName = "", frameIndex = 1, x = 0, y = 0, width = 0, height = 0): Promise<AsepriteResult> {
     return this.gateway.applyConvolution(filename, matrix, layerName, frameIndex, x, y, width, height);
   }

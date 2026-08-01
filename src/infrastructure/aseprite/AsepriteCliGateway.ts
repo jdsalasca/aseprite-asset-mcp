@@ -149,6 +149,11 @@ function result(command: CommandResult, successMessage: string): AsepriteResult 
   return { ok: false, message: command.output || "Aseprite command failed" };
 }
 
+function parsePixelFields(value: string, expected: number): number[] | undefined {
+  const fields = value.split(",").map(Number);
+  return fields.length === expected && fields.every(Number.isInteger) ? fields : undefined;
+}
+
 export interface AsepriteCliGatewayOptions {
   executable?: string;
   tempDirectory?: string;
@@ -1662,6 +1667,176 @@ export class AsepriteCliGateway implements AsepriteGateway {
     if (!["rgb", "grayscale", "indexed"].includes(normalizedMode)) return { ok: false, message: "Mode must be 'rgb', 'grayscale', or 'indexed'" };
     const script = this.openScript(source, `app.command.ChangePixelFormat { format = "${normalizedMode}" }`);
     return result(await this.runLua(script, source), `Color mode set to ${normalizedMode} in ${source}`);
+  }
+
+  public async getPixelColor(filename: string, x: number, y: number, layerName = "", frameIndex = 1): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (![x, y].every(Number.isInteger)) return { ok: false, message: "Coordinates must be integers" };
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    const name = layerName.trim();
+    const script = `
+      local function find_layer(parent, wanted)
+        for _, layer in ipairs(parent.layers) do
+          if layer.name == wanted then return layer end
+          if layer.isGroup then local nested = find_layer(layer, wanted) if nested then return nested end end
+        end
+        return nil
+      end
+      local spr = app.activeSprite
+      if not spr then print("ERROR:No active sprite") return end
+      if ${frameIndex} < 1 or ${frameIndex} > #spr.frames then print("ERROR:Frame index out of range") return end
+      local cel = nil
+      if "${luaEscape(name)}" ~= "" then
+        local target = find_layer(spr, "${luaEscape(name)}")
+        if not target or target.isGroup then print("ERROR:Layer not found") return end
+        cel = target:cel(spr.frames[${frameIndex}])
+        if not cel then print("ERROR:No cel at that layer/frame") return end
+      else
+        app.activeFrame = spr.frames[${frameIndex}]
+        cel = app.activeCel
+        if not cel then print("ERROR:No active cel") return end
+      end
+      local img = cel.image
+      local cx, cy = ${x} - cel.position.x, ${y} - cel.position.y
+      local red, green, blue, alpha = 0, 0, 0, 0
+      if cx >= 0 and cy >= 0 and cx < img.width and cy < img.height then
+        local value = img:getPixel(cx, cy)
+        red, green, blue, alpha = app.pixelColor.rgbaR(value), app.pixelColor.rgbaG(value), app.pixelColor.rgbaB(value), app.pixelColor.rgbaA(value)
+      end
+      print(string.format("PIXEL:%d,%d,%d,%d", red, green, blue, alpha))
+    `;
+    const command = await this.runLua(script, source);
+    if (!command.ok) return { ok: false, message: `Failed to read pixel: ${command.output}` };
+    const line = command.output.split(/\r?\n/).find((entry) => entry.startsWith("PIXEL:"));
+    if (!line) return { ok: false, message: "No pixel data returned" };
+    const fields = parsePixelFields(line.slice(6), 4);
+    if (!fields) return { ok: false, message: "Invalid pixel data returned" };
+    const [red, green, blue, alpha] = fields as [number, number, number, number];
+    const hex = `#${red.toString(16).padStart(2, "0")}${green.toString(16).padStart(2, "0")}${blue.toString(16).padStart(2, "0")}`;
+    return { ok: true, message: `${hex} (r=${red}, g=${green}, b=${blue}, a=${alpha})` };
+  }
+
+  public async getPixelsRect(filename: string, x: number, y: number, width: number, height: number, layerName = "", frameIndex = 1): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (![x, y].every(Number.isInteger)) return { ok: false, message: "Coordinates must be integers" };
+    if (!isPositiveInteger(width) || !isPositiveInteger(height)) return { ok: false, message: "Width and height must be positive integers" };
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    const name = layerName.trim();
+    const script = `
+      local function find_layer(parent, wanted)
+        for _, layer in ipairs(parent.layers) do
+          if layer.name == wanted then return layer end
+          if layer.isGroup then local nested = find_layer(layer, wanted) if nested then return nested end end
+        end
+        return nil
+      end
+      local spr = app.activeSprite
+      if not spr then print("ERROR:No active sprite") return end
+      if ${frameIndex} < 1 or ${frameIndex} > #spr.frames then print("ERROR:Frame index out of range") return end
+      local cel = nil
+      if "${luaEscape(name)}" ~= "" then
+        local target = find_layer(spr, "${luaEscape(name)}")
+        if not target or target.isGroup then print("ERROR:Layer not found") return end
+        cel = target:cel(spr.frames[${frameIndex}])
+        if not cel then print("ERROR:No cel at that layer/frame") return end
+      else
+        app.activeFrame = spr.frames[${frameIndex}]
+        cel = app.activeCel
+        if not cel then print("ERROR:No active cel") return end
+      end
+      local img, offsetX, offsetY = cel.image, cel.position.x, cel.position.y
+      for py = ${y}, ${y + height - 1} do
+        for px = ${x}, ${x + width - 1} do
+          local cx, cy = px - offsetX, py - offsetY
+          local red, green, blue, alpha = 0, 0, 0, 0
+          if cx >= 0 and cy >= 0 and cx < img.width and cy < img.height then
+            local value = img:getPixel(cx, cy)
+            red, green, blue, alpha = app.pixelColor.rgbaR(value), app.pixelColor.rgbaG(value), app.pixelColor.rgbaB(value), app.pixelColor.rgbaA(value)
+          end
+          print(string.format("PIXEL:%d,%d,%d,%d,%d,%d", px, py, red, green, blue, alpha))
+        end
+      end
+    `;
+    const command = await this.runLua(script, source);
+    if (!command.ok) return { ok: false, message: `Failed to read pixels: ${command.output}` };
+    const pixels = command.output.split(/\r?\n/).filter((entry) => entry.startsWith("PIXEL:")).map((entry) => {
+      const fields = parsePixelFields(entry.slice(6), 6);
+      if (!fields) return undefined;
+      const [px, py, red, green, blue, alpha] = fields as [number, number, number, number, number, number];
+      return { x: px, y: py, hex: `#${red.toString(16).padStart(2, "0")}${green.toString(16).padStart(2, "0")}${blue.toString(16).padStart(2, "0")}`, r: red, g: green, b: blue, a: alpha };
+    }).filter((pixel): pixel is { x: number; y: number; hex: string; r: number; g: number; b: number; a: number } => pixel !== undefined);
+    return pixels.length ? { ok: true, message: JSON.stringify(pixels) } : { ok: false, message: "No pixel data returned" };
+  }
+
+  public async getCompositePixel(filename: string, x: number, y: number, frameIndex = 1): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (![x, y].every(Number.isInteger)) return { ok: false, message: "Coordinates must be integers" };
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    const script = `
+      local spr = app.activeSprite
+      if not spr then print("ERROR:No active sprite") return end
+      if ${frameIndex} < 1 or ${frameIndex} > #spr.frames then print("ERROR:Frame index out of range") return end
+      local clone = Sprite(spr)
+      clone:flatten()
+      local cel = clone.layers[1]:cel(clone.frames[${frameIndex}])
+      if not cel then print("ERROR:No composite cel") return end
+      local img = cel.image
+      local red, green, blue, alpha = 0, 0, 0, 0
+      if ${x} >= 0 and ${y} >= 0 and ${x} < img.width and ${y} < img.height then
+        local value = img:getPixel(${x}, ${y})
+        red, green, blue, alpha = app.pixelColor.rgbaR(value), app.pixelColor.rgbaG(value), app.pixelColor.rgbaB(value), app.pixelColor.rgbaA(value)
+      end
+      print(string.format("PIXEL:%d,%d,%d,%d", red, green, blue, alpha))
+    `;
+    const command = await this.runLua(script, source);
+    if (!command.ok) return { ok: false, message: `Failed to read composite pixel: ${command.output}` };
+    const line = command.output.split(/\r?\n/).find((entry) => entry.startsWith("PIXEL:"));
+    if (!line) return { ok: false, message: "No pixel data returned" };
+    const fields = parsePixelFields(line.slice(6), 4);
+    if (!fields) return { ok: false, message: "Invalid pixel data returned" };
+    const [red, green, blue, alpha] = fields as [number, number, number, number];
+    const hex = `#${red.toString(16).padStart(2, "0")}${green.toString(16).padStart(2, "0")}${blue.toString(16).padStart(2, "0")}`;
+    return { ok: true, message: `${hex} (r=${red}, g=${green}, b=${blue}, a=${alpha})` };
+  }
+
+  public async getCompositeRect(filename: string, x: number, y: number, width: number, height: number, frameIndex = 1): Promise<AsepriteResult> {
+    const source = validatePath(filename);
+    if (typeof source !== "string") return source;
+    if (![x, y].every(Number.isInteger)) return { ok: false, message: "Coordinates must be integers" };
+    if (!isPositiveInteger(width) || !isPositiveInteger(height)) return { ok: false, message: "Width and height must be positive integers" };
+    if (!isPositiveInteger(frameIndex)) return { ok: false, message: "Frame index must be a positive integer" };
+    const script = `
+      local spr = app.activeSprite
+      if not spr then print("ERROR:No active sprite") return end
+      if ${frameIndex} < 1 or ${frameIndex} > #spr.frames then print("ERROR:Frame index out of range") return end
+      local clone = Sprite(spr)
+      clone:flatten()
+      local cel = clone.layers[1]:cel(clone.frames[${frameIndex}])
+      if not cel then print("ERROR:No composite cel") return end
+      local img = cel.image
+      for py = ${y}, ${y + height - 1} do
+        for px = ${x}, ${x + width - 1} do
+          local red, green, blue, alpha = 0, 0, 0, 0
+          if px >= 0 and py >= 0 and px < img.width and py < img.height then
+            local value = img:getPixel(px, py)
+            red, green, blue, alpha = app.pixelColor.rgbaR(value), app.pixelColor.rgbaG(value), app.pixelColor.rgbaB(value), app.pixelColor.rgbaA(value)
+          end
+          print(string.format("PIXEL:%d,%d,%d,%d,%d,%d", px, py, red, green, blue, alpha))
+        end
+      end
+    `;
+    const command = await this.runLua(script, source);
+    if (!command.ok) return { ok: false, message: `Failed to read composite pixels: ${command.output}` };
+    const pixels = command.output.split(/\r?\n/).filter((entry) => entry.startsWith("PIXEL:")).map((entry) => {
+      const fields = parsePixelFields(entry.slice(6), 6);
+      if (!fields) return undefined;
+      const [px, py, red, green, blue, alpha] = fields as [number, number, number, number, number, number];
+      return { x: px, y: py, hex: `#${red.toString(16).padStart(2, "0")}${green.toString(16).padStart(2, "0")}${blue.toString(16).padStart(2, "0")}`, r: red, g: green, b: blue, a: alpha };
+    }).filter((pixel): pixel is { x: number; y: number; hex: string; r: number; g: number; b: number; a: number } => pixel !== undefined);
+    return pixels.length ? { ok: true, message: JSON.stringify(pixels) } : { ok: false, message: "No pixel data returned" };
   }
 
   public async outlineNative(filename: string, layerName = "", frameIndex = 1, color = "#000000", place = "outside", matrix = "circle"): Promise<AsepriteResult> {

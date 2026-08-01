@@ -74,6 +74,10 @@ test("rejects traversal in every input sprite path before starting Aseprite", as
     gateway.applyPalettePreset("../sprite.aseprite", "gameboy"),
     gateway.quantizeToPalette("../sprite.aseprite"),
     gateway.setColorMode("../sprite.aseprite", "rgb"),
+    gateway.getPixelColor("../sprite.aseprite", 0, 0),
+    gateway.getPixelsRect("../sprite.aseprite", 0, 0, 1, 1),
+    gateway.getCompositePixel("../sprite.aseprite", 0, 0),
+    gateway.getCompositeRect("../sprite.aseprite", 0, 0, 1, 1),
     gateway.setTag("../sprite.aseprite", "idle", 1, 1),
     gateway.createTilemapLayer("../sprite.aseprite", "Tiles", 16, 16),
     gateway.validateScene("../sprite.aseprite", ["Layer"]),
@@ -320,6 +324,20 @@ test("rejects invalid palette expansion contracts before starting Aseprite", asy
   assert.equal(badRampSteps.message, "Steps must be between 2 and 16");
   assert.equal(badQuantizeFrame.message, "Frame range must start at 1 and end at or after the start");
   assert.equal(badMode.message, "Mode must be 'rgb', 'grayscale', or 'indexed'");
+});
+
+test("rejects invalid pixel read contracts before starting Aseprite", async () => {
+  const badPixelCoordinates = await gateway.getPixelColor("sprite.aseprite", 0.5, 0);
+  const badPixelFrame = await gateway.getPixelColor("sprite.aseprite", 0, 0, "Layer", 0);
+  const badRectWidth = await gateway.getPixelsRect("sprite.aseprite", 0, 0, 0, 1);
+  const badRectHeight = await gateway.getCompositeRect("sprite.aseprite", 0, 0, 1, 0);
+  const badCompositeFrame = await gateway.getCompositePixel("sprite.aseprite", 0, 0, 0);
+
+  assert.equal(badPixelCoordinates.message, "Coordinates must be integers");
+  assert.equal(badPixelFrame.message, "Frame index must be a positive integer");
+  assert.equal(badRectWidth.message, "Width and height must be positive integers");
+  assert.equal(badRectHeight.message, "Width and height must be positive integers");
+  assert.equal(badCompositeFrame.message, "Frame index must be a positive integer");
 });
 
 test("rejects invalid tag frame ranges before starting Aseprite", async () => {

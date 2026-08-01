@@ -2,18 +2,18 @@
   "schemaVersion": 1,
   "project": "aseprite-mcp",
   "goal": "complete-typescript-migration",
-  "generatedAt": "2026-08-01T15:25:22.876Z",
+  "generatedAt": "2026-08-01T15:35:59.237Z",
   "source": {
     "repository": "https://github.com/diivi/aseprite-mcp",
     "branch": "upstream/main",
     "commit": "90d1696a7e41edff89bbd0823ae6a5f86c114bcc"
   },
   "local": {
-    "branch": "codex/migrate/palette-expansion",
-    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-palette-expansion",
-    "baseCommit": "6e9d1c0bd2d74dc5e7b0aa4f8cac0a04159fa0ad",
-    "typescriptToolCount": 79,
-    "testCount": 31
+    "branch": "codex/migrate/pixel-read",
+    "worktree": "C:/Users/jdsal/Documents/Programming-personal/aseprite-mcp-pixel-read",
+    "baseCommit": "60eb7a1550ba8d84b8e499e9ee20d94d9ebf0bdd",
+    "typescriptToolCount": 83,
+    "testCount": 32
   },
   "tools": [
     {
@@ -1229,9 +1229,13 @@
       "name": "get_pixel_color",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "palette",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -1240,9 +1244,13 @@
       "name": "get_pixels_rect",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "core",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -1251,9 +1259,13 @@
       "name": "get_composite_pixel",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "core",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []
@@ -1262,9 +1274,13 @@
       "name": "get_composite_rect",
       "source": "upstream",
       "target": "typescript",
-      "status": "pending",
+      "status": "verified",
       "domain": "core",
-      "tests": [],
+      "tests": [
+        "tests-ts/gateway-validation.test.ts",
+        "tests-ts/integration/real-aseprite.test.ts",
+        "tests-ts/mcp-server.test.ts"
+      ],
       "dependencies": [],
       "commit": null,
       "evidence": []

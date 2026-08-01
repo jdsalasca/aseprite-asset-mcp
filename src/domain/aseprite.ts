@@ -83,6 +83,10 @@ export interface AsepriteGateway {
   generateColorRamp(baseColor: string, steps?: number, hueShiftDegrees?: number, lightnessRange?: number): Promise<AsepriteResult>;
   quantizeToPalette(filename: string, layerName?: string, startFrame?: number, endFrame?: number): Promise<AsepriteResult>;
   setColorMode(filename: string, mode: string): Promise<AsepriteResult>;
+  getPixelColor(filename: string, x: number, y: number, layerName?: string, frameIndex?: number): Promise<AsepriteResult>;
+  getPixelsRect(filename: string, x: number, y: number, width: number, height: number, layerName?: string, frameIndex?: number): Promise<AsepriteResult>;
+  getCompositePixel(filename: string, x: number, y: number, frameIndex?: number): Promise<AsepriteResult>;
+  getCompositeRect(filename: string, x: number, y: number, width: number, height: number, frameIndex?: number): Promise<AsepriteResult>;
   applyConvolution(filename: string, matrix: string, layerName?: string, frameIndex?: number, x?: number, y?: number, width?: number, height?: number): Promise<AsepriteResult>;
   listConvolutionMatrices(): Promise<AsepriteResult>;
   applyDitherGradient(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, colorStart: string, colorEnd: string, horizontal?: boolean, createIfMissing?: boolean): Promise<AsepriteResult>;
