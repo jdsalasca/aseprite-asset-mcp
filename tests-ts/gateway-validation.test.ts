@@ -70,6 +70,10 @@ test("rejects traversal in every input sprite path before starting Aseprite", as
     gateway.outlineCel("../sprite.aseprite", "Layer", 1),
     gateway.replaceColor("../sprite.aseprite", "Layer", 1, "#000000", "#ffffff"),
     gateway.adjustHsl("../sprite.aseprite", "Layer", 1),
+    gateway.remapColorsInCelRange("../sprite.aseprite", "Layer", 1, 1, [{ from: "#000000", to: "#ffffff" }]),
+    gateway.applyPalettePreset("../sprite.aseprite", "gameboy"),
+    gateway.quantizeToPalette("../sprite.aseprite"),
+    gateway.setColorMode("../sprite.aseprite", "rgb"),
     gateway.setTag("../sprite.aseprite", "idle", 1, 1),
     gateway.createTilemapLayer("../sprite.aseprite", "Tiles", 16, 16),
     gateway.validateScene("../sprite.aseprite", ["Layer"]),
@@ -295,6 +299,27 @@ test("rejects invalid legacy HSL contracts before starting Aseprite", async () =
   assert.equal(badSaturation.message, "Saturation shift must be between -100 and 100");
   assert.equal(badLightness.message, "Lightness shift must be between -100 and 100");
   assert.equal(badFrame.message, "Frame index must be a positive integer");
+});
+
+test("rejects invalid palette expansion contracts before starting Aseprite", async () => {
+  const badMappings = await gateway.remapColorsInCelRange("sprite.aseprite", "Layer", 1, 1, []);
+  const badMappingColor = await gateway.remapColorsInCelRange("sprite.aseprite", "Layer", 1, 1, [{ from: "invalid", to: "#ffffff" }]);
+  const presets = await gateway.listPalettePresets();
+  const badPreset = await gateway.applyPalettePreset("sprite.aseprite", "not-a-preset");
+  const badRampColor = await gateway.generateColorRamp("invalid");
+  const badRampSteps = await gateway.generateColorRamp("#112233", 1);
+  const badQuantizeFrame = await gateway.quantizeToPalette("sprite.aseprite", "", 0);
+  const badMode = await gateway.setColorMode("sprite.aseprite", "cmyk");
+
+  assert.equal(badMappings.message, "Mappings list cannot be empty");
+  assert.equal(badMappingColor.message, "Mappings must use hexadecimal values");
+  assert.equal(presets.ok, true);
+  assert.match(presets.message, /gameboy/);
+  assert.match(badPreset.message, /Unknown palette preset: not-a-preset/);
+  assert.equal(badRampColor.message, "Colors must use hexadecimal values");
+  assert.equal(badRampSteps.message, "Steps must be between 2 and 16");
+  assert.equal(badQuantizeFrame.message, "Frame range must start at 1 and end at or after the start");
+  assert.equal(badMode.message, "Mode must be 'rgb', 'grayscale', or 'indexed'");
 });
 
 test("rejects invalid tag frame ranges before starting Aseprite", async () => {

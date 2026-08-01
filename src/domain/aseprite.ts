@@ -77,6 +77,12 @@ export interface AsepriteGateway {
   outlineCel(filename: string, layerName: string, frameIndex: number, color?: string, includeDiagonals?: boolean): Promise<AsepriteResult>;
   replaceColor(filename: string, layerName: string, frameIndex: number, fromColor: string, toColor: string, tolerance?: number): Promise<AsepriteResult>;
   adjustHsl(filename: string, layerName: string, frameIndex: number, hueShift?: number, saturationShift?: number, lightnessShift?: number): Promise<AsepriteResult>;
+  remapColorsInCelRange(filename: string, layerName: string, startFrame: number, endFrame: number, mappings: Array<{ from: string; to: string }>, createMissingCels?: boolean, sourceFrameIndex?: number): Promise<AsepriteResult>;
+  listPalettePresets(): Promise<AsepriteResult>;
+  applyPalettePreset(filename: string, preset: string): Promise<AsepriteResult>;
+  generateColorRamp(baseColor: string, steps?: number, hueShiftDegrees?: number, lightnessRange?: number): Promise<AsepriteResult>;
+  quantizeToPalette(filename: string, layerName?: string, startFrame?: number, endFrame?: number): Promise<AsepriteResult>;
+  setColorMode(filename: string, mode: string): Promise<AsepriteResult>;
   applyConvolution(filename: string, matrix: string, layerName?: string, frameIndex?: number, x?: number, y?: number, width?: number, height?: number): Promise<AsepriteResult>;
   listConvolutionMatrices(): Promise<AsepriteResult>;
   applyDitherGradient(filename: string, layerName: string, frameIndex: number, x: number, y: number, width: number, height: number, colorStart: string, colorEnd: string, horizontal?: boolean, createIfMissing?: boolean): Promise<AsepriteResult>;

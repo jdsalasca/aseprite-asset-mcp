@@ -251,6 +251,30 @@ export class AsepriteAssetService {
     return this.gateway.adjustHsl(filename, layerName, frameIndex, hueShift, saturationShift, lightnessShift);
   }
 
+  public remapColorsInCelRange(filename: string, layerName: string, startFrame: number, endFrame: number, mappings: Array<{ from: string; to: string }>, createMissingCels = false, sourceFrameIndex?: number): Promise<AsepriteResult> {
+    return this.gateway.remapColorsInCelRange(filename, layerName, startFrame, endFrame, mappings, createMissingCels, sourceFrameIndex);
+  }
+
+  public listPalettePresets(): Promise<AsepriteResult> {
+    return this.gateway.listPalettePresets();
+  }
+
+  public applyPalettePreset(filename: string, preset: string): Promise<AsepriteResult> {
+    return this.gateway.applyPalettePreset(filename, preset);
+  }
+
+  public generateColorRamp(baseColor: string, steps = 5, hueShiftDegrees = 20, lightnessRange = 0.5): Promise<AsepriteResult> {
+    return this.gateway.generateColorRamp(baseColor, steps, hueShiftDegrees, lightnessRange);
+  }
+
+  public quantizeToPalette(filename: string, layerName = "", startFrame = 1, endFrame = 0): Promise<AsepriteResult> {
+    return this.gateway.quantizeToPalette(filename, layerName, startFrame, endFrame);
+  }
+
+  public setColorMode(filename: string, mode: string): Promise<AsepriteResult> {
+    return this.gateway.setColorMode(filename, mode);
+  }
+
   public applyConvolution(filename: string, matrix: string, layerName = "", frameIndex = 1, x = 0, y = 0, width = 0, height = 0): Promise<AsepriteResult> {
     return this.gateway.applyConvolution(filename, matrix, layerName, frameIndex, x, y, width, height);
   }
