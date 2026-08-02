@@ -43,6 +43,7 @@ El adaptador CLI concreto ahora es un compositor delgado: `AsepriteLayerAdapter`
 - `JsonAssetJobStore` implementa el puerto genérico de jobs y recupera estados tras reinicios;
 - transiciones condicionales evitan que workers o cancelaciones sobrescriban estados más nuevos;
 - `AssetArtifactResolverPort` mantiene la abstracción genérica y `FileAssetArtifactResolver` calcula formato, tamaño y SHA-256 en infraestructura;
+- `MaterialTextureService` encapsula la granularidad determinista y `VisualAssetService` solo compone el caso de uso visual;
 - los jobs completados conservan metadata de artifacts y el store JSON la recupera después de reiniciar;
 - el archivo runtime vive fuera de Git mediante `ASSET_JOB_STORE_PATH` o `.asset-studio/jobs.json`;
 - repositorio de artifacts y jobs;

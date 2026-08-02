@@ -16,6 +16,7 @@ import type {
   VisualAssetGateway,
   WorldMapInput,
 } from "../../domain/visual-assets.js";
+import { MaterialTextureService } from "./MaterialTextureService.js";
 
 const TERRAIN_COLORS: Record<TerrainKind, [number, number, number, number]> = {
   water: [48, 129, 173, 255],
@@ -81,10 +82,6 @@ function validateDimensions(width: number, height: number): void {
   if (!Number.isInteger(width) || width < 1 || width > 2048 || !Number.isInteger(height) || height < 1 || height > 2048) throw new Error("Map dimensions must be integers from 1 to 2048");
 }
 
-function assertDistinctFiles(inputFilename: string, outputFilename: string): void {
-  if (inputFilename.trim().toLowerCase() === outputFilename.trim().toLowerCase()) throw new Error("Input and output filenames must be different");
-}
-
 function hashNoise(seed: number, x: number, y: number): number {
   let value = Math.imul(x + seed * 31, 374761393) ^ Math.imul(y + seed * 17, 668265263);
   value = Math.imul(value ^ (value >>> 13), 1274126177);
@@ -104,7 +101,7 @@ function smoothNoise(seed: number, x: number, y: number, gridWidth: number, grid
 }
 
 export class VisualAssetService implements VisualAssetGateway {
-  public constructor(private readonly codec: RasterCodec, private readonly manifestWriter: AssetManifestWriter) {}
+  public constructor(private readonly codec: RasterCodec, private readonly manifestWriter: AssetManifestWriter, private readonly materialTextures = new MaterialTextureService(codec)) {}
 
   public async createStyleBible(input: StyleBibleInput): Promise<AssetOperationResult> {
     try {
@@ -261,48 +258,7 @@ export class VisualAssetService implements VisualAssetGateway {
   }
 
   public async applyMaterialTexture(input: MaterialTextureInput): Promise<AssetOperationResult> {
-    try {
-      assertDistinctFiles(input.inputFilename, input.outputFilename);
-      const intensity = input.intensity ?? 0.6;
-      if (!Number.isFinite(intensity) || intensity < 0 || intensity > 1) throw new Error("Texture intensity must be between 0 and 1");
-      const source = await this.codec.decode(input.inputFilename);
-      if (source.length === 0) throw new Error("Input has no frames");
-      const frames = source.map((frame, frameIndex) => {
-        const pixels = new Uint8ClampedArray(frame.pixels);
-        const strength = Math.round(intensity * 42);
-        for (let y = 0; y < frame.height; y += 1) {
-          for (let x = 0; x < frame.width; x += 1) {
-            const offset = (y * frame.width + x) * 4;
-            if ((pixels[offset + 3] ?? 0) === 0) continue;
-            const noise = hashNoise(input.seed + frameIndex * 101, x, y);
-            const delta = Math.round((noise - 0.5) * strength);
-            const wave = input.material === "water" && ((x + y + frameIndex * 2) % 7 === 0) ? Math.round(strength * 0.45) : 0;
-            const channelDelta = delta + wave;
-            if (input.material === "water") {
-              pixels[offset] = Math.max(0, Math.min(255, (pixels[offset] ?? 0) + Math.round(channelDelta * 0.45)));
-              pixels[offset + 1] = Math.max(0, Math.min(255, (pixels[offset + 1] ?? 0) + Math.round(channelDelta * 0.8)));
-              pixels[offset + 2] = Math.max(0, Math.min(255, (pixels[offset + 2] ?? 0) + channelDelta));
-            } else if (input.material === "grass") {
-              pixels[offset] = Math.max(0, Math.min(255, (pixels[offset] ?? 0) + Math.round(channelDelta * 0.35)));
-              pixels[offset + 1] = Math.max(0, Math.min(255, (pixels[offset + 1] ?? 0) + channelDelta));
-              pixels[offset + 2] = Math.max(0, Math.min(255, (pixels[offset + 2] ?? 0) + Math.round(channelDelta * 0.3)));
-            } else if (input.material === "earth") {
-              pixels[offset] = Math.max(0, Math.min(255, (pixels[offset] ?? 0) + Math.round(channelDelta * 0.9)));
-              pixels[offset + 1] = Math.max(0, Math.min(255, (pixels[offset + 1] ?? 0) + Math.round(channelDelta * 0.65)));
-              pixels[offset + 2] = Math.max(0, Math.min(255, (pixels[offset + 2] ?? 0) + Math.round(channelDelta * 0.35)));
-            } else {
-              pixels[offset] = Math.max(0, Math.min(255, (pixels[offset] ?? 0) + channelDelta));
-              pixels[offset + 1] = Math.max(0, Math.min(255, (pixels[offset + 1] ?? 0) + channelDelta));
-              pixels[offset + 2] = Math.max(0, Math.min(255, (pixels[offset + 2] ?? 0) + channelDelta));
-            }
-          }
-        }
-        return { ...frame, pixels };
-      });
-      const format = input.format ?? (source.length > 1 ? "gif" : "png");
-      await this.codec.encode(frames, input.outputFilename, format);
-      return ok({ operation: "apply_material_texture", input: input.inputFilename, output: input.outputFilename, material: input.material, seed: input.seed, intensity, frames: frames.length, format, deterministic: true, sourcePreserved: true });
-    } catch (error) { return fail(error); }
+    return this.materialTextures.apply(input);
   }
 
   public async generateEnvironmentPack(input: EnvironmentPackInput): Promise<AssetOperationResult> {
