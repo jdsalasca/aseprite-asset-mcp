@@ -2,7 +2,7 @@
 
 Trees, bushes, crops and plants with weather and wildlife variants.
 
-Esta carpeta contiene 38 assets deterministas. Cada subcarpeta documenta sus previews, sprite sheets, manifest y variantes.
+Esta carpeta contiene 38 assets deterministas. Cada subcarpeta documenta sus previews, sprite sheets PNG/SVG, GIF animado, manifest y variantes.
 
 ## Ejemplos
 

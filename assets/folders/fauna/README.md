@@ -2,7 +2,7 @@
 
 Living animals and ambient wildlife for inhabited scenes.
 
-Esta carpeta contiene 21 assets deterministas. Cada subcarpeta documenta sus previews, sprite sheets, manifest y variantes.
+Esta carpeta contiene 21 assets deterministas. Cada subcarpeta documenta sus previews, sprite sheets PNG/SVG, GIF animado, manifest y variantes.
 
 ## Ejemplos
 

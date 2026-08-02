@@ -4,8 +4,8 @@ harbor interior with modular floor, wall, light and prop layers.
 
 - **ID:** `harbor`
 - **Categoría:** `interiors`
-- **Formatos base:** PNG, SVG y JSON
-- **Archivos:** [preview.png](./preview.png), [sprite-sheet.png](./sprite-sheet.png), [manifest.json](./manifest.json)
+- **Formatos base:** PNG, GIF animado, SVG y JSON
+- **Archivos:** [preview.png](./preview.png), [sprite-sheet.png](./sprite-sheet.png), [sprite-sheet.gif](./sprite-sheet.gif), [manifest.json](./manifest.json)
 - **Reproducible:** sí; el catálogo y los previews se generan con la semilla derivada del ID.
 
 ## Variantes

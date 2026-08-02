@@ -2,7 +2,7 @@
 
 Mounts with travel and movement states.
 
-Esta carpeta contiene 12 assets deterministas. Cada subcarpeta documenta sus previews, sprite sheets, manifest y variantes.
+Esta carpeta contiene 12 assets deterministas. Cada subcarpeta documenta sus previews, sprite sheets PNG/SVG, GIF animado, manifest y variantes.
 
 ## Ejemplos
 

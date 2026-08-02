@@ -4,8 +4,8 @@ rose bush prop for layered scenes.
 
 - **ID:** `rose-bush`
 - **Categoría:** `flora`
-- **Formatos base:** PNG, SVG y JSON
-- **Archivos:** [preview.png](./preview.png), [sprite-sheet.png](./sprite-sheet.png), [manifest.json](./manifest.json)
+- **Formatos base:** PNG, GIF animado, SVG y JSON
+- **Archivos:** [preview.png](./preview.png), [sprite-sheet.png](./sprite-sheet.png), [sprite-sheet.gif](./sprite-sheet.gif), [manifest.json](./manifest.json)
 - **Reproducible:** sí; el catálogo y los previews se generan con la semilla derivada del ID.
 
 ## Variantes

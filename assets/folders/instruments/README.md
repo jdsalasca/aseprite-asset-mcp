@@ -2,7 +2,7 @@
 
 Cultural props and instruments for lively interiors.
 
-Esta carpeta contiene 10 assets deterministas. Cada subcarpeta documenta sus previews, sprite sheets, manifest y variantes.
+Esta carpeta contiene 10 assets deterministas. Cada subcarpeta documenta sus previews, sprite sheets PNG/SVG, GIF animado, manifest y variantes.
 
 ## Ejemplos
 

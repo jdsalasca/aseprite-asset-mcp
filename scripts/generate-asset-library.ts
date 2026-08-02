@@ -64,7 +64,7 @@ function svgFor(seed: Seed, frames = 1): string {
 function readme(seed: Seed, folder: string): string {
   const inline = (value: string) => "`" + value + "`";
   const variants = seed.variants.map((variant) => `- ${inline(variant)}: variante determinista sugerida para el pipeline.`).join("\n");
-  return [`# ${seed.title}`, "", seed.description, "", `- **ID:** ${inline(seed.id)}`, `- **Categoría:** ${inline(seed.category)}`, "- **Formatos base:** PNG, SVG y JSON", "- **Archivos:** [preview.png](./preview.png), [sprite-sheet.png](./sprite-sheet.png), [manifest.json](./manifest.json)", "- **Reproducible:** sí; el catálogo y los previews se generan con la semilla derivada del ID.", "", "## Variantes", "", variants, "", "## Ejemplo MCP", "", `Busca este asset con ${inline("get_asset_library")} y después compón una receta con ${inline("create_asset_recipe")}. Para una salida animada, usa ${inline("run_asset_recipe")} con ${inline("animation_pixel_art")} o aplica el efecto indicado por la variante.`, "", "## Carpeta", "", inline(folder), ""].join("\n");
+  return [`# ${seed.title}`, "", seed.description, "", `- **ID:** ${inline(seed.id)}`, `- **Categoría:** ${inline(seed.category)}`, "- **Formatos base:** PNG, GIF animado, SVG y JSON", "- **Archivos:** [preview.png](./preview.png), [sprite-sheet.png](./sprite-sheet.png), [sprite-sheet.gif](./sprite-sheet.gif), [manifest.json](./manifest.json)", "- **Reproducible:** sí; el catálogo y los previews se generan con la semilla derivada del ID.", "", "## Variantes", "", variants, "", "## Ejemplo MCP", "", `Busca este asset con ${inline("get_asset_library")} y después compón una receta con ${inline("create_asset_recipe")}. Para una salida animada, usa ${inline("run_asset_recipe")} con ${inline("animation_pixel_art")} o aplica el efecto indicado por la variante.`, "", "## Carpeta", "", inline(folder), ""].join("\n");
 }
 
 async function writeItem(seed: Seed): Promise<{ id: string; title: string; category: string; folder: string; kind: Kind; description: string; tags: string[]; variants: string[]; formats: ["png", "gif", "svg", "json"]; readmePath: string; previewPath: string; spritePath: string; deterministic: true }> {
@@ -73,13 +73,17 @@ async function writeItem(seed: Seed): Promise<{ id: string; title: string; categ
   await fs.mkdir(directory, { recursive: true });
   const previewSvg = svgFor(seed);
   const spriteSvg = svgFor(seed, 4);
+  const spritePng = await sharp(Buffer.from(spriteSvg)).png().toBuffer();
+  const rawFrames = await Promise.all(Array.from({ length: 4 }, (_, frame) => sharp(spritePng).extract({ left: frame * 32, top: 0, width: 32, height: 32 }).raw().toBuffer()));
+  const animatedGif = sharp(Buffer.concat(rawFrames), { raw: { width: 32, height: 32 * 4, channels: 4, pageHeight: 32 }, animated: true }).gif({ delay: [180, 180, 180, 180], loop: 0 });
   await Promise.all([
     fs.writeFile(path.join(directory, "preview.svg"), previewSvg, "utf8"),
     fs.writeFile(path.join(directory, "sprite-sheet.svg"), spriteSvg, "utf8"),
     sharp(Buffer.from(previewSvg)).png().toFile(path.join(directory, "preview.png")),
-    sharp(Buffer.from(spriteSvg)).png().toFile(path.join(directory, "sprite-sheet.png")),
+    fs.writeFile(path.join(directory, "sprite-sheet.png"), spritePng),
+    animatedGif.toFile(path.join(directory, "sprite-sheet.gif")),
   ]);
-  const manifest = { schemaVersion: 1, id: seed.id, title: seed.title, category: seed.category, kind: seed.kind, source: "deterministic-library-generator-v1", seed: hash(seed.id), variants: seed.variants, assets: ["preview.png", "sprite-sheet.png", "preview.svg", "sprite-sheet.svg"], tags: seed.tags, sourcePreserved: true, deterministic: true };
+  const manifest = { schemaVersion: 1, id: seed.id, title: seed.title, category: seed.category, kind: seed.kind, source: "deterministic-library-generator-v1", seed: hash(seed.id), variants: seed.variants, assets: ["preview.png", "sprite-sheet.png", "sprite-sheet.gif", "preview.svg", "sprite-sheet.svg"], tags: seed.tags, sourcePreserved: true, deterministic: true };
   await fs.writeFile(path.join(directory, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
   await fs.writeFile(path.join(directory, "README.md"), readme(seed, folder), "utf8");
   return { id: seed.id, title: seed.title, category: seed.category, folder, kind: seed.kind, description: seed.description, tags: seed.tags, variants: seed.variants, formats: ["png", "gif", "svg", "json"], readmePath: `${folder}/README.md`, previewPath: `${folder}/preview.png`, spritePath: `${folder}/sprite-sheet.png`, deterministic: true };
@@ -95,7 +99,7 @@ async function main(): Promise<void> {
   for (const category of categories) {
     const categoryItems = items.filter((item) => item.category === category.id);
     const examples = categoryItems.slice(0, 12).map((item) => `- [${item.title}](./${item.id}/README.md): ${item.description}`).join("\n");
-    await fs.writeFile(path.join(root, category.id, "README.md"), [`# ${category.title}`, "", category.description, "", `Esta carpeta contiene ${category.itemCount} assets deterministas. Cada subcarpeta documenta sus previews, sprite sheets, manifest y variantes.`, "", "## Ejemplos", "", examples, "", "## Uso", "", "Busca por categoría con `get_asset_library`, resuelve un item con `get_asset_library_item` y aplica las variantes con los algoritmos del MCP sobre una copia del asset.", ""].join("\n"), "utf8");
+    await fs.writeFile(path.join(root, category.id, "README.md"), [`# ${category.title}`, "", category.description, "", `Esta carpeta contiene ${category.itemCount} assets deterministas. Cada subcarpeta documenta sus previews, sprite sheets PNG/SVG, GIF animado, manifest y variantes.`, "", "## Ejemplos", "", examples, "", "## Uso", "", "Busca por categoría con `get_asset_library`, resuelve un item con `get_asset_library_item` y aplica las variantes con los algoritmos del MCP sobre una copia del asset.", ""].join("\n"), "utf8");
   }
   const presets = [
     { id: "living-forest", title: "Living forest", description: "Trees, wildlife, rain and fire-ready effects for a layered forest scene.", category: "flora", itemIds: ["oak", "pine", "wolf", "owl", "rain", "fire"], recommendedTools: ["generate_world_map", "generate_environment_pack", "generate_time_of_day_pack"], deterministic: true as const },
@@ -107,7 +111,7 @@ async function main(): Promise<void> {
   await fs.writeFile(path.join(root, "catalog.json"), `${JSON.stringify(catalog, null, 2)}\n`, "utf8");
   const inline = (value: string) => "`" + value + "`";
   const categoryLines = categories.map((category) => `- [${category.title}](./${category.id}/): ${category.itemCount} items`).join("\n");
-  await fs.writeFile(path.join(root, "README.md"), [`# Asset folders`, "", `Esta biblioteca contiene ${items.length} carpetas deterministas. Cada carpeta incluye README, manifest, preview PNG/SVG y sprite sheet PNG/SVG.`, "", "## Navegación rápida", "", `- Consulta ${inline("catalog.json")} o usa el MCP ${inline("get_asset_library")}.`, `- Resuelve un item con ${inline("get_asset_library_item")}.`, `- Usa presets con ${inline("get_asset_preset")}.`, "- Las variantes de lluvia, fuego, terremoto, pájaros, luz y movimiento se aplican con los algoritmos del MCP.", "", "## Categorías", "", categoryLines, ""].join("\n"), "utf8");
+  await fs.writeFile(path.join(root, "README.md"), [`# Asset folders`, "", `Esta biblioteca contiene ${items.length} carpetas deterministas. Cada carpeta incluye README, manifest, preview PNG/SVG y sprite sheet PNG/SVG/GIF animado.`, "", "## Navegación rápida", "", `- Consulta ${inline("catalog.json")} o usa el MCP ${inline("get_asset_library")}.`, `- Resuelve un item con ${inline("get_asset_library_item")}.`, `- Usa presets con ${inline("get_asset_preset")}.`, "- Las variantes de lluvia, fuego, terremoto, pájaros, luz y movimiento se aplican con los algoritmos del MCP.", "", "## Categorías", "", categoryLines, ""].join("\n"), "utf8");
   console.log(JSON.stringify({ root, itemCount: items.length, categoryCount: categories.length, presetCount: presets.length }, null, 2));
 }
 

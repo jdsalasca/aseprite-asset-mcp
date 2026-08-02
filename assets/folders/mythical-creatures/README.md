@@ -2,7 +2,7 @@
 
 Mythological creatures with combat-ready states.
 
-Esta carpeta contiene 20 assets deterministas. Cada subcarpeta documenta sus previews, sprite sheets, manifest y variantes.
+Esta carpeta contiene 20 assets deterministas. Cada subcarpeta documenta sus previews, sprite sheets PNG/SVG, GIF animado, manifest y variantes.
 
 ## Ejemplos
 

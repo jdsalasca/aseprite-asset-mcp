@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
+import sharp from "sharp";
 import { FileAssetLibraryAdapter } from "../src/infrastructure/assets/FileAssetLibraryAdapter.js";
 
 test("generated asset library exposes 100+ navigable folders and valid preset references", async () => {
@@ -34,5 +35,16 @@ test("every generated folder and category has a navigation README", async () => 
   const nested = (await fs.readdir(path.resolve("assets/folders"), { withFileTypes: true })).filter((entry) => entry.isDirectory());
   for (const category of nested) {
     for (const item of await fs.readdir(path.resolve("assets/folders", category.name), { withFileTypes: true })) if (item.isDirectory()) assert.equal((await fs.stat(path.resolve("assets/folders", category.name, item.name, "README.md"))).isFile(), true, `missing item README: ${category.name}/${item.name}`);
+  }
+});
+
+test("animated library assets ship a real multi-frame GIF beside the PNG sheet", async () => {
+  const catalog = await new FileAssetLibraryAdapter().load();
+  for (const item of catalog.items.slice(0, 12)) {
+    const gif = path.resolve("assets/folders", item.folder, "sprite-sheet.gif");
+    assert.equal((await fs.stat(gif)).isFile(), true, `missing animated sheet: ${item.id}`);
+    const metadata = await sharp(gif, { animated: true }).metadata();
+    assert.ok((metadata.pages ?? 0) >= 2, `animated sheet has no frames: ${item.id}`);
+    assert.equal(metadata.format, "gif");
   }
 });

@@ -1,6 +1,6 @@
 # Asset folders
 
-Esta biblioteca contiene 339 carpetas deterministas. Cada carpeta incluye README, manifest, preview PNG/SVG y sprite sheet PNG/SVG.
+Esta biblioteca contiene 339 carpetas deterministas. Cada carpeta incluye README, manifest, preview PNG/SVG y sprite sheet PNG/SVG/GIF animado.
 
 ## Navegación rápida
 

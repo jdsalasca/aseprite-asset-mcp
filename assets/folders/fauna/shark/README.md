@@ -4,8 +4,8 @@ shark with idle, walk, hit and habitat variants.
 
 - **ID:** `shark`
 - **Categoría:** `fauna`
-- **Formatos base:** PNG, SVG y JSON
-- **Archivos:** [preview.png](./preview.png), [sprite-sheet.png](./sprite-sheet.png), [manifest.json](./manifest.json)
+- **Formatos base:** PNG, GIF animado, SVG y JSON
+- **Archivos:** [preview.png](./preview.png), [sprite-sheet.png](./sprite-sheet.png), [sprite-sheet.gif](./sprite-sheet.gif), [manifest.json](./manifest.json)
 - **Reproducible:** sí; el catálogo y los previews se generan con la semilla derivada del ID.
 
 ## Variantes
