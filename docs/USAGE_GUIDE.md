@@ -227,6 +227,28 @@ Estas operaciones retornan metadata compacta y escriben un archivo nuevo. Todas 
 
 También están disponibles `apply_color_grade`, `generate_sprite_shadow` y `generate_normal_map`.
 
+## 10. Crear una receta compuesta
+
+El feature creator genera un contrato revisable y no destructivo para que una UX o un agente decida qué pasos ejecutar:
+
+```json
+{
+  "name":"create_asset_recipe",
+  "arguments":{
+    "asset_id":"hero",
+    "input_filename":"art/hero.png",
+    "output_prefix":"art/hero",
+    "format":"png",
+    "steps":["outline","material_texture","depth_lighting","shadow","quality_gate"],
+    "seed":4217,
+    "material":"stone",
+    "direction":"south_west"
+  }
+}
+```
+
+El resultado incluye `recipeId`, outputs separados, argumentos de cada tool, `sourcePreserved: true` y `deterministic: true`. La ejecución permanece bajo control explícito del consumidor.
+
 ## 9. Descubrimiento, progreso y seguridad
 
 Para agentes, usar primero una búsqueda compacta:

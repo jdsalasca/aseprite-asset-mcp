@@ -83,6 +83,10 @@ La publicación npm queda protegida por autenticación: el workflow no contiene 
 - timeout configurable: evita workers colgados y deja el job en estado `failed` con diagnóstico.
 - roots de artifacts: `ASSET_ARTIFACT_ROOT` limita salidas a rutas permitidas y bloquea null bytes.
 
+### Lote feature creator
+
+`AssetRecipeComposerService` y `create_asset_recipe` componen una receta de múltiples efectos con hash estable, semilla, material, dirección de luz, nombres de output aislados y quality gate. El planner no ejecuta ni sobrescribe archivos: produce un contrato pequeño para que Asset Studio o un agente lo revise y ejecute paso a paso.
+
 ## Criterios de diseño
 
 - dominio puro y pequeño;

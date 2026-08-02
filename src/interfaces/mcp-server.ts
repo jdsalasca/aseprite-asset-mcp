@@ -30,6 +30,8 @@ import type { AssetJobStorePort } from "../application/ports/AssetJobPorts.js";
 import path from "node:path";
 import { DeterministicEnhancementService } from "../application/services/DeterministicEnhancementService.js";
 import { SpriteEffectsService } from "../application/services/SpriteEffectsService.js";
+import { AssetRecipeComposerService } from "../application/services/AssetRecipeComposerService.js";
+import { AssetRecipeToolController } from "./controllers/AssetRecipeToolController.js";
 
 const SERVER_VERSION = "1.0.0";
 const TYPESCRIPT_VERSION = "6.0.3";
@@ -185,6 +187,7 @@ const TOOL_NAMES = [
   "generate_sprite_shadow",
   "generate_particle_burst",
   "generate_normal_map",
+  "create_asset_recipe",
 ];
 
 export class AsepriteMcpServerAdapter {
@@ -196,6 +199,7 @@ export class AsepriteMcpServerAdapter {
   private readonly enhancements: DeterministicEnhancementService;
   private readonly assetJobs: AssetJobService;
   private readonly spriteEffects: SpriteEffectsService;
+  private readonly recipes: AssetRecipeComposerService;
 
   public constructor(private readonly assets: AssetGatewayPort, imageAssets?: PixelArtAssetService, jobStore?: AssetJobStorePort) {
     const rasterCodec = new SharpRasterCodec();
@@ -203,6 +207,7 @@ export class AsepriteMcpServerAdapter {
     this.imageAssets = imageAssets ?? new PixelArtAssetService(rasterCodec, manifestWriter);
     this.visualAssets = new VisualAssetService(rasterCodec, manifestWriter);
     this.spriteEffects = new SpriteEffectsService(rasterCodec);
+    this.recipes = new AssetRecipeComposerService();
     this.enhancements = new DeterministicEnhancementService(rasterCodec);
     this.assetJobs = new AssetJobService({ run: (input) => this.imageAssets.runBatch(input) }, jobStore ?? new InMemoryAssetJobStore(), { artifactResolver: new FileAssetArtifactResolver(() => new Date().toISOString(), process.env.ASSET_ARTIFACT_ROOT ? [process.env.ASSET_ARTIFACT_ROOT] : []), timeoutMs: 5 * 60 * 1000 });
     this.server = new McpServer({ name: "aseprite-asset-mcp", version: SERVER_VERSION });
@@ -244,6 +249,7 @@ export class AsepriteMcpServerAdapter {
     new ImageAssetToolController(this.assets, this.imageAssets).register(this.server);
     new VisualAssetToolController(this.visualAssets).register(this.server);
     new SpriteEffectsToolController(this.spriteEffects).register(this.server);
+    new AssetRecipeToolController(this.recipes).register(this.server);
     new EnhancementToolController(this.visualAssets, this.enhancements).register(this.server);
     new AssetJobToolController(this.assetJobs).register(this.server);
     new LayerFrameToolController(this.assets).register(this.server);

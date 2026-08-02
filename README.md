@@ -125,6 +125,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `generate_beach_scene`: crea costa, arena, tierra, preview y oleaje animado.
 - `generate_time_of_day_pack`: crea transición día, atardecer, noche y amanecer.
 - `generate_environment_pack`: empaqueta playa, bosque, aldea o cueva en una sola llamada.
+- `create_asset_recipe`: compone outline, grading, materiales, luz, sombras, partículas, normal map y quality gate en un plan determinista sin ejecutar cambios.
 
 Las operaciones de imagen no necesitan abrir Aseprite; eso reduce latencia y tokens para conversiones masivas. Las operaciones sobre `.aseprite` siguen pasando por el adaptador CLI hexagonal y mantienen la compatibilidad con Godot.
 
