@@ -39,6 +39,8 @@ Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lightin
 
 `/api/v1/assets/normalize-sprite` recibe `{ "input_filename": "hero.gif", "output_filename": "hero-normalized.gif", "manifest_filename": "hero-normalized.json", "padding": 1, "pivot": "bottom_center", "format": "gif" }`. Recorta usando el union de píxeles opacos de todos los frames, conserva sus delays, evita sobrescribir input/output/manifest y devuelve dimensiones, bounds y pivote en una respuesta compacta.
 
+`/api/v1/assets/animation-sheet` recibe `{ "input_filename": "hero.gif", "output_filename": "hero-sheet.png", "manifest_filename": "hero-sheet.json", "columns": 4, "padding": 1 }`. Ensambla la animación en una rejilla PNG, calcula coordenadas/pivotes por frame y conserva `delaysMs`, `totalDurationMs` y `loopDurationMs` en el manifest.
+
 `/api/v1/assets/animation-quality` recibe `{ "filename": "hero-walk.gif" }` y devuelve transiciones compactas, frames duplicados, delays, deriva de paleta, estado de loop y recomendaciones antes de exportar al motor.
 
 `/api/v1/library/presets/generate` recibe `{ "preset_id": "coastal-sunset", "output_prefix": "art/coast", "width": 64, "height": 40, "seed": 9 }`. Resuelve el preset, conserva sus capas en la respuesta y delega en `generate_environment_pack`; así una persona puede pasar de explorar a generar una escena sin encadenar llamadas manuales.

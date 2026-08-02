@@ -13,6 +13,7 @@ import type { ContactSheetService } from "../services/ContactSheetService.js";
 import type { AssetBatchQualityService } from "../services/AssetBatchQualityService.js";
 import type { AnimationQualityService } from "../services/AnimationQualityService.js";
 import type { SpriteNormalizationService } from "../services/SpriteNormalizationService.js";
+import type { AnimationSheetService } from "../services/AnimationSheetService.js";
 
 export interface AssetRestUseCases {
   createRecipe(input: AssetRecipeCreateInput): AssetRecipePlan;
@@ -28,6 +29,7 @@ export interface AssetRestUseCases {
   batchQuality: Pick<AssetBatchQualityService, "inspect">;
   animationQuality: Pick<AnimationQualityService, "inspect">;
   spriteNormalization: Pick<SpriteNormalizationService, "normalize">;
+  animationSheet: Pick<AnimationSheetService, "build">;
   contactSheet: Pick<ContactSheetService, "build">;
   visualAssets: Pick<VisualAssetGateway, "extendScene" | "generateBiomeTransition">;
 }
