@@ -40,10 +40,11 @@ const DESCRIPTION_OVERRIDES: Record<string, string> = {
   get_asset_library: "Search 339 deterministic prebuilt assets and scene presets.",
   get_asset_library_item: "Resolve one asset folder, manifest, README, preview, and sprite sheet.",
   get_asset_preset: "Resolve a ready-to-compose world preset and recommended tools.",
+  compose_asset_preset: "Compose one preset into ordered assets and layers in a single compact response.",
 };
 
 function folderFor(name: string): string {
-  if (name === "get_asset_library" || name === "get_asset_library_item" || name === "get_asset_preset") return "meta/asset-library";
+  if (name === "get_asset_library" || name === "get_asset_library_item" || name === "get_asset_preset" || name === "compose_asset_preset") return "meta/asset-library";
   if (name === "server_capabilities" || name.startsWith("get_tools_")) return "meta/catalog";
   if (name === "create_style_bible") return "asset/style";
   if (name.includes("material_texture")) return "asset/material";

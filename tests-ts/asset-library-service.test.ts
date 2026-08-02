@@ -37,3 +37,10 @@ test("asset library reads a binary preview only after resolving a known item", a
   assert.deepEqual([...((await service.binary("OAK", "preview"))?.data ?? [])], [1, 2, 3]);
   assert.equal(await service.binary("missing", "preview"), null);
 });
+
+test("asset library composes a preset with stable ordered layer roles", async () => {
+  const result = await new AssetLibraryService(new FakeLibrary()).composePreset("rainy-grove");
+  assert.equal(result?.items.length, 2);
+  assert.deepEqual(result?.layers.map((layer) => layer.role), ["background", "foreground"]);
+  assert.equal(result?.deterministic, true);
+});

@@ -23,3 +23,4 @@ export interface AssetLibraryPreset { id: string; title: string; description: st
 export interface AssetLibraryCatalog { schemaVersion: 1; libraryVersion: string; categories: AssetLibraryCategory[]; items: AssetLibraryItem[]; presets: AssetLibraryPreset[]; }
 export interface AssetLibraryQuery { query?: string; category?: string; limit?: number; }
 export interface AssetLibrarySearchResult { query: AssetLibraryQuery; total: number; categories: AssetLibraryCategory[]; items: AssetLibraryItem[]; presets: AssetLibraryPreset[]; }
+export interface AssetLibraryPresetComposition { preset: AssetLibraryPreset; items: AssetLibraryItem[]; layers: Array<{ id: string; assetId: string; role: "background" | "midground" | "foreground" | "effect"; order: number }>; deterministic: true; }

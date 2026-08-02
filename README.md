@@ -179,8 +179,11 @@ GET /api/v1/library/items/forest-ranger
 GET /api/v1/library/presets/living-forest
 GET /api/v1/library/items/forest-ranger/preview
 GET /api/v1/library/items/forest-ranger/sprite
+GET /api/v1/library/presets/living-forest/compose
 ```
 
 Las dos últimas rutas sirven PNG/GIF de forma binaria desde el adaptador de archivos, validando primero el id del catálogo y bloqueando escapes del directorio `assets/folders`. Asset Studio las consume para mostrar previews reales en `PixelAssetGrid`.
+
+`compose_asset_preset` y `GET /api/v1/library/presets/:id/compose` devuelven en una sola respuesta los assets y las capas ordenadas (`background`, `midground`, `foreground`, `effect`), reduciendo búsquedas repetidas de los agentes.
 
 Las variantes (`rain`, `fire`, `earthquake`, `birds`, `wave-reflection`, `day`, `sunset`, `night`, `walk`, `attack`, etc.) son contratos para los algoritmos existentes: se aplican sobre una copia del asset y conservan la fuente.

@@ -198,6 +198,7 @@ const TOOL_NAMES = [
   "get_asset_library",
   "get_asset_library_item",
   "get_asset_preset",
+  "compose_asset_preset",
 ];
 
 export class AsepriteMcpServerAdapter {

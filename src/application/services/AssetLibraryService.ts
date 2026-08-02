@@ -1,4 +1,4 @@
-import type { AssetLibraryBinary, AssetLibraryBinaryKind, AssetLibraryItem, AssetLibraryPreset, AssetLibraryQuery, AssetLibrarySearchResult } from "../../domain/asset-library.js";
+import type { AssetLibraryBinary, AssetLibraryBinaryKind, AssetLibraryItem, AssetLibraryPreset, AssetLibraryPresetComposition, AssetLibraryQuery, AssetLibrarySearchResult } from "../../domain/asset-library.js";
 import type { AssetLibraryPort } from "../ports/AssetLibraryPort.js";
 
 const DEFAULT_LIMIT = 24;
@@ -41,5 +41,14 @@ export class AssetLibraryService {
     const catalog = await this.port.load();
     const item = catalog.items.find((entry) => entry.id.toLocaleLowerCase() === normalize(id));
     return item ? this.port.read(item, kind) : null;
+  }
+
+  public async composePreset(id: string): Promise<AssetLibraryPresetComposition | null> {
+    const catalog = await this.port.load();
+    const preset = catalog.presets.find((entry) => entry.id.toLocaleLowerCase() === normalize(id));
+    if (!preset) return null;
+    const items = preset.itemIds.map((itemId) => catalog.items.find((entry) => entry.id === itemId)).filter((item): item is AssetLibraryItem => Boolean(item));
+    const layers = items.map((item, index) => ({ id: `${preset.id}-${item.id}`, assetId: item.id, role: item.kind === "effect" ? "effect" as const : index === 0 ? "background" as const : index === items.length - 1 ? "foreground" as const : "midground" as const, order: index }));
+    return { preset, items, layers, deterministic: true };
   }
 }
