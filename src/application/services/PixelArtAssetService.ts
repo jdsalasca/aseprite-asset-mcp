@@ -1,4 +1,5 @@
 import { inspectRasterFrame, convertRasterFrames } from "./PixelArtPipeline.js";
+import path from "node:path";
 import type {
   AssetInspection,
   AssetManifestWriter,
@@ -19,6 +20,11 @@ function fail(error: unknown): AssetOperationResult { return { ok: false, messag
 function assertPathPair(inputFilename: string, outputFilename: string): void {
   if (!inputFilename.trim() || !outputFilename.trim()) throw new Error("Input and output filenames are required");
   if (inputFilename.toLowerCase() === outputFilename.toLowerCase()) throw new Error("Input and output filenames must differ");
+}
+
+function assertOutputDiffersFromInputs(inputFilenames: string[], outputFilename: string): void {
+  const output = path.resolve(outputFilename).toLowerCase();
+  if (inputFilenames.some((filename) => path.resolve(filename).toLowerCase() === output)) throw new Error("Output filename must be different from an input asset");
 }
 
 function atlasFrame(frames: RasterFrame[], columns: number, padding: number): RasterFrame {
@@ -107,6 +113,7 @@ export class PixelArtAssetService {
     try {
       if (input.inputFilenames.length === 0) throw new Error("At least one input filename is required");
       if (!input.outputFilename.trim()) throw new Error("Output filename is required");
+      assertOutputDiffersFromInputs(input.inputFilenames, input.outputFilename);
       const decoded = await Promise.all(input.inputFilenames.map(async (filename) => (await this.codec.decode(filename))[0]!));
       const first = decoded[0];
       if (!first || decoded.some((frame) => frame.width !== first.width || frame.height !== first.height)) throw new Error("Atlas inputs must have equal dimensions");
@@ -124,6 +131,7 @@ export class PixelArtAssetService {
       if (!this.manifestWriter) throw new Error("An asset manifest writer is required");
       if (input.inputFilenames.length === 0) throw new Error("At least one input filename is required");
       if (!input.outputFilename.trim() || !input.manifestFilename.trim()) throw new Error("Atlas and manifest filenames are required");
+      assertOutputDiffersFromInputs(input.inputFilenames, input.outputFilename);
       const decoded = await Promise.all(input.inputFilenames.map(async (filename) => (await this.codec.decode(filename))[0]!));
       const first = decoded[0];
       if (!first || decoded.some((frame) => frame.width !== first.width || frame.height !== first.height)) throw new Error("Asset pack inputs must have equal dimensions");

@@ -63,6 +63,23 @@ test("asset recipe defaults to a compact dry-run plan", async () => {
   assert.match(result.message, /preserve delays/);
 });
 
+test("atlas and pack operations reject overwriting an input asset", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "aseprite-nondestructive-atlas-"));
+  const inputA = path.join(directory, "a.png");
+  const inputB = path.join(directory, "b.png");
+  await makePng(inputA, [255, 0, 0, 255]);
+  await makePng(inputB, [0, 255, 0, 255]);
+  const service = new PixelArtAssetService(new SharpRasterCodec(), new JsonAssetManifestWriter());
+
+  const atlas = await service.buildAtlas({ inputFilenames: [inputA, inputB], outputFilename: inputA });
+  const pack = await service.exportPack({ inputFilenames: [inputA, inputB], outputFilename: inputB, manifestFilename: path.join(directory, "manifest.json") });
+
+  assert.equal(atlas.ok, false);
+  assert.match(atlas.message, /different from an input asset/);
+  assert.equal(pack.ok, false);
+  assert.match(pack.message, /different from an input asset/);
+});
+
 test("batch asset jobs return one compact plan", async () => {
   const service = new PixelArtAssetService(new SharpRasterCodec());
   const result = await service.runBatch({ jobs: [
