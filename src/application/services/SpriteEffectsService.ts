@@ -1,7 +1,7 @@
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { RasterCodec } from "../../domain/image-assets.js";
 import type { RasterFrame } from "../../domain/pixel-art.js";
-import type { CleanupIsolatedPixelsInput, ColorGradeInput, DayNightCycleInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SpriteAmbientOcclusionInput, SpriteColorRampInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteGlowInput, SpriteRimLightInput, SpriteRimLightDirection, SpriteShadowInput, SpriteSpecularHighlightInput, WaterCausticsInput, WaterReflectionInput } from "../../domain/sprite-effects.js";
+import type { CleanupIsolatedPixelsInput, ColorGradeInput, DayNightCycleInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SpriteAmbientOcclusionInput, SpriteColorRampInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteGlowInput, SpriteGrainInput, SpriteRimLightInput, SpriteRimLightDirection, SpriteShadowInput, SpriteSpecularHighlightInput, WaterCausticsInput, WaterReflectionInput } from "../../domain/sprite-effects.js";
 
 function ok(value: unknown): AssetOperationResult { return { ok: true, message: JSON.stringify(value) }; }
 function fail(error: unknown): AssetOperationResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
@@ -253,6 +253,28 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
         return { ...frame, pixels };
       });
       const format = formatFor(frames, input.format); await this.codec.encode(frames, input.outputFilename, format); return outputMessage("apply_sprite_color_ramp", input.inputFilename, input.outputFilename, frames.length, format);
+    } catch (error) { return fail(error); }
+  }
+
+  public async applySpriteGrain(input: SpriteGrainInput): Promise<AssetOperationResult> {
+    try {
+      assertDifferent(input.inputFilename, input.outputFilename);
+      const intensity = input.intensity ?? 0.45; const scale = input.scale ?? 1;
+      if (!Number.isInteger(input.seed)) throw new Error("Grain seed must be an integer");
+      if (!Number.isFinite(intensity) || intensity < 0 || intensity > 1) throw new Error("Grain intensity must be between 0 and 1");
+      if (!Number.isInteger(scale) || scale < 1 || scale > 8) throw new Error("Grain scale must be an integer from 1 to 8");
+      const source = await this.codec.decode(input.inputFilename);
+      const frames = source.map((frame, frameIndex) => {
+        const pixels = new Uint8ClampedArray(frame.pixels);
+        for (let y = 0; y < frame.height; y += 1) for (let x = 0; x < frame.width; x += 1) {
+          const offset = (y * frame.width + x) * 4; const sourceAlpha = frame.pixels[offset + 3] ?? 0; if (sourceAlpha === 0) continue;
+          const cell = Math.floor(x / scale) + Math.floor(y / scale) * Math.ceil(frame.width / scale) * 17;
+          const delta = Math.round((hash(input.seed + frameIndex * 1009, cell) * 2 - 1) * intensity * 48);
+          pixels[offset] = clamp((frame.pixels[offset] ?? 0) + delta, 0, 255); pixels[offset + 1] = clamp((frame.pixels[offset + 1] ?? 0) + delta, 0, 255); pixels[offset + 2] = clamp((frame.pixels[offset + 2] ?? 0) + delta, 0, 255); pixels[offset + 3] = sourceAlpha;
+        }
+        return { ...frame, pixels };
+      });
+      const format = formatFor(frames, input.format); await this.codec.encode(frames, input.outputFilename, format); return outputMessage("apply_sprite_grain", input.inputFilename, input.outputFilename, frames.length, format);
     } catch (error) { return fail(error); }
   }
 

@@ -155,6 +155,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `apply_sprite_ambient_occlusion`: oscurece de forma determinista bordes internos y cavidades según la vecindad alfa, sin alterar transparencia ni la fuente.
 - `apply_sprite_specular_highlight`: añade una banda especular determinista hacia dentro de la silueta para metal, agua, cristal y magia; conserva alfa, frames y la fuente.
 - `apply_sprite_color_ramp`: remapea la luminancia de un sprite a bandas de sombra, medio tono y brillo con una paleta determinista; conserva alfa, frames y la fuente.
+- `apply_sprite_grain`: añade granularidad determinista por semilla, intensidad y escala a superficies opacas; conserva alfa, frames y la fuente.
 - `generate_time_of_day_pack`: crea transición día, atardecer, noche y amanecer.
 - `generate_environment_pack`: empaqueta playa, bosque, aldea o cueva en una sola llamada.
 - `create_asset_recipe`: compone outline, grading, materiales, luz, sombras, partículas, normal map y quality gate en un plan determinista sin ejecutar cambios.
@@ -231,6 +232,7 @@ POST /api/v1/effects/rim-light
 POST /api/v1/effects/ambient-occlusion
 POST /api/v1/effects/specular-highlight
 POST /api/v1/effects/color-ramp
+POST /api/v1/effects/grain
 POST /api/v1/assets/palette-harmonize
 POST /api/v1/assets/contact-sheet
 POST /api/v1/effects/seamless

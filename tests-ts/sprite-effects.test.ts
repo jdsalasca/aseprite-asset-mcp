@@ -210,6 +210,33 @@ test("sprite color ramp rejects invalid threshold ordering and colors", async ()
   assert.equal(invalidColor.ok, false); assert.match(invalidColor.message, /color/i);
 });
 
+test("sprite grain is seeded, scale-aware, alpha-safe, and source-preserving", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-grain-"));
+  const input = path.join(directory, "input.png"); const first = path.join(directory, "first.png"); const second = path.join(directory, "second.png");
+  const pixels = new Uint8ClampedArray(6 * 6 * 4);
+  for (let y = 1; y < 5; y += 1) for (let x = 1; x < 5; x += 1) pixels.set([120, 140, 160, 180], (y * 6 + x) * 4);
+  await sharp(Buffer.from(pixels), { raw: { width: 6, height: 6, channels: 4 } }).png().toFile(input);
+  const sourceBefore = await fs.readFile(input);
+  const operation = { inputFilename: input, outputFilename: first, seed: 17, intensity: 0.8, scale: 2 };
+  const apply = (service() as unknown as { applySpriteGrain(value: typeof operation): Promise<{ ok: boolean; message: string }> }).applySpriteGrain;
+  assert.equal((await apply.call(service(), operation)).ok, true);
+  assert.equal((await apply.call(service(), { ...operation, outputFilename: second })).ok, true);
+  assert.deepEqual(await fs.readFile(first), await fs.readFile(second)); assert.deepEqual(await fs.readFile(input), sourceBefore);
+  const output = await sharp(first).raw().toBuffer({ resolveWithObject: true });
+  assert.equal(output.data[(0 * 6 + 0) * 4 + 3], 0);
+  assert.equal(output.data[(2 * 6 + 2) * 4 + 3], 180);
+  assert.notDeepEqual(Array.from(output.data.slice((2 * 6 + 2) * 4, (2 * 6 + 2) * 4 + 3)), [120, 140, 160]);
+});
+
+test("sprite grain rejects invalid intensity and scale", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-grain-invalid-")); const input = path.join(directory, "input.png"); await makeSprite(input);
+  const apply = (service() as unknown as { applySpriteGrain(value: unknown): Promise<{ ok: boolean; message: string }> }).applySpriteGrain;
+  const invalidIntensity = await apply.call(service(), { inputFilename: input, outputFilename: path.join(directory, "intensity.png"), seed: 1, intensity: 2, scale: 1 });
+  const invalidScale = await apply.call(service(), { inputFilename: input, outputFilename: path.join(directory, "scale.png"), seed: 1, intensity: 0.5, scale: 9 });
+  assert.equal(invalidIntensity.ok, false); assert.match(invalidIntensity.message, /intensity/i);
+  assert.equal(invalidScale.ok, false); assert.match(invalidScale.message, /scale/i);
+});
+
 test("particle burst generation is seeded and exports the requested frame count", async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-particles-")); const first = path.join(directory, "first.gif"); const second = path.join(directory, "second.gif");
   assert.equal((await service().generateParticleBurst({ outputFilename: first, width: 32, height: 32, frames: 6, particleCount: 20, seed: 7, color: "#ffcc55" })).ok, true); assert.equal((await service().generateParticleBurst({ outputFilename: second, width: 32, height: 32, frames: 6, particleCount: 20, seed: 7, color: "#ffcc55" })).ok, true); assert.deepEqual(await fs.readFile(first), await fs.readFile(second)); assert.equal((await sharp(first, { animated: true }).metadata()).pages, 6);
