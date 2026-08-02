@@ -25,6 +25,8 @@ Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lightin
 
 `/api/v1/library/audit` y el tool `audit_asset_library` auditan el catálogo sin generar archivos. Comprueban duplicados de IDs, categorías desconocidas, referencias de presets inexistentes y rutas absolutas o con escapes `..`; devuelven conteos de assets, carpetas, presets, categorías, README, previews y sprites junto con `valid`, `violations`, `deterministic` y `sourcePreserved`.
 
+`POST /api/v1/assets/manifest-audit` y el tool `audit_asset_manifest` reciben `{ "manifest_filename": "output/scene.json" }`. Inspeccionan las rutas de salida referenciadas por el JSON y devuelven tamaño, formato, SHA-256, `missingArtifacts`, `emptyArtifacts` y `valid`, para que la UX pueda bloquear una importación incompleta.
+
 `/api/v1/library/summary` y el tool `summarize_asset_library` devuelven solamente conteos, categorías ordenadas, hasta tres ejemplos por categoría y presets compactos. Es la primera llamada recomendada para que un agente o la UX navegue una biblioteca grande sin consumir el catálogo completo.
 
 `POST /api/v1/library/scene-plan` recibe `{ "item_ids": ["knight", "oak", "rain"] }` y usa el mismo servicio del tool `plan_asset_scene`. Resuelve IDs sin distinguir mayúsculas, conserva el orden solicitado, asigna roles de capa y falla cerrado ante IDs duplicados, traversal o assets inexistentes.

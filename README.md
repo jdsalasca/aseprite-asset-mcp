@@ -122,6 +122,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `inspect_asset` y `validate_asset_quality`: reportan dimensiones, frames, colores, transparencia, delays y pixeles aislados antes de exportar.
 - `inspect_asset_bundle`: combina inspección, quality gate, violaciones y recomendaciones deterministas en una sola respuesta compacta.
 - `inspect_asset_batch`: audita hasta 32 assets en una sola llamada, conserva el orden, aísla fallos de decodificación y devuelve un resumen `valid/invalid/failed` sin transferir buffers de píxeles.
+- `audit_asset_manifest`: revisa los archivos referenciados por un manifest generado, detecta faltantes o archivos vacíos y devuelve formato, tamaño y hash SHA-256 en una respuesta compacta.
 - `inspect_animation_quality`: audita una animación en una sola llamada, detecta frames duplicados, cambios por transición, timing irregular, deriva de paleta y costura de loop.
 - `inspect_sprite_geometry`: calcula bounds alfa, componentes conectados, baseline y pivotes por frame para placement estable.
 - `generate_sprite_hitboxes`: deriva un manifest JSON de colisión desde esa geometría, con modo `components` o `union` y padding acotado, sin duplicar análisis raster.
@@ -247,6 +248,8 @@ Las dos últimas rutas sirven PNG/GIF de forma binaria desde el adaptador de arc
 `compose_asset_scene_animation` y `POST /api/v1/library/scene-animation-compose` añaden `frames` (2–24) y `delay_ms` (1–2000). Cada capa selecciona su frame de forma cíclica, se compone con geometría determinista y se exporta como GIF sin modificar las previews originales.
 
 `generate_library_variant_pack` y `POST /api/v1/library/variants/pack` reciben `item_ids`, `output_prefix`, `variants`, `frames`, `seed` y `delay_ms`. El orquestador resuelve y valida los IDs, materializa previews con un adaptador temporal, delega el algoritmo a `AssetVariantPackService`, libera los temporales incluso ante errores y escribe un manifest compacto del lote.
+
+`audit_asset_manifest` y `POST /api/v1/assets/manifest-audit` reciben `{ "manifest_filename": "output/scene.json" }`. El caso de uso extrae rutas de salida conocidas, comprueba existencia y tamaño, calcula SHA-256 y marca `valid: false` si falta o está vacío algún artefacto. Con `ASSET_ARTIFACT_ROOT` se puede restringir la auditoría a una raíz permitida.
 
 La composición es fail-closed: si el preset contiene una referencia inexistente, no devuelve una escena parcial. Ejecuta `audit_asset_library` para localizar y corregir el catálogo antes de componer.
 

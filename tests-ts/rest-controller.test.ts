@@ -32,6 +32,7 @@ function fakeUseCases(): AssetRestUseCases {
     assetSceneComposer: { compose: async () => result("compose_asset_scene") },
     assetSceneAnimationComposer: { compose: async () => result("compose_asset_scene_animation") },
     assetLibraryVariantPack: { generate: async () => result("generate_library_variant_pack") },
+    assetManifestAudit: { audit: async () => result("audit_asset_manifest") },
     imageAssets: { upscalePixelArt: async () => result("upscale_pixel_art"), qualityBundle: async () => result("inspect_asset_bundle"), harmonizePalette: async () => result("harmonize_asset_palette") },
     batchQuality: { inspect: async () => result("inspect_asset_batch") },
     animationQuality: { inspect: async () => result("inspect_animation_quality") },
@@ -73,6 +74,9 @@ test("REST controller exposes the same recipe and effect application services", 
     const summary = await fetch(`${rest.url}/api/v1/library/summary`);
     assert.equal(summary.status, 200);
     assert.equal((await summary.json()).data.operation, "summarize_asset_library");
+    const manifestAudit = await fetch(`${rest.url}/api/v1/assets/manifest-audit`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ manifest_filename: "scene.json" }) });
+    assert.equal(manifestAudit.status, 200);
+    assert.equal((await manifestAudit.json()).data.operation, "audit_asset_manifest");
     const scenePlan = await fetch(`${rest.url}/api/v1/library/scene-plan`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ item_ids: ["oak"] }) });
     assert.equal(scenePlan.status, 200);
     assert.equal((await scenePlan.json()).data.operation, "plan_asset_scene");
