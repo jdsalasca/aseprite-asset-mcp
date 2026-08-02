@@ -130,3 +130,26 @@ test("water reflection rejects invalid waterline, frame, amplitude, and opacity 
   const result = await service().generateWaterReflection({ inputFilename: input, outputFilename: path.join(directory, "out.gif"), waterline: 0, frames: 1, seed: 1, amplitude: 20, opacity: 2 });
   assert.equal(result.ok, false);
 });
+
+test("water caustics creates deterministic animated highlights, preserves transparency, and keeps the source", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-water-caustics-"));
+  const input = path.join(directory, "input.png"); const first = path.join(directory, "first.gif"); const second = path.join(directory, "second.gif");
+  const pixels = new Uint8ClampedArray(8 * 8 * 4);
+  for (let y = 0; y < 8; y += 1) for (let x = 0; x < 8; x += 1) { const offset = (y * 8 + x) * 4; pixels[offset] = 24; pixels[offset + 1] = 110; pixels[offset + 2] = 180; pixels[offset + 3] = x === 0 || y === 0 ? 0 : 255; }
+  await sharp(Buffer.from(pixels), { raw: { width: 8, height: 8, channels: 4 } }).png().toFile(input);
+  const sourceBefore = await fs.readFile(input);
+  const caustics = { inputFilename: input, outputFilename: first, frames: 5, seed: 12, intensity: 0.85, scale: 3, color: "#DFF6FF", delayMs: 65 };
+  assert.equal((await service().generateWaterCaustics(caustics)).ok, true);
+  assert.equal((await service().generateWaterCaustics({ ...caustics, outputFilename: second })).ok, true);
+  assert.deepEqual(await fs.readFile(first), await fs.readFile(second)); assert.deepEqual(await fs.readFile(input), sourceBefore);
+  const metadata = await sharp(first, { animated: true }).metadata(); assert.equal(metadata.pages, 5); assert.equal(metadata.width, 8); assert.equal(metadata.pageHeight, 8);
+  const output = await sharp(first).raw().toBuffer({ resolveWithObject: true });
+  assert.equal(output.data[3], 0); assert.equal(output.data[7], 0); assert.ok(output.data[1] !== 110 || output.data[2] !== 180);
+  assert.equal(JSON.parse((await service().generateWaterCaustics(caustics)).message).operation, "generate_water_caustics");
+});
+
+test("water caustics rejects invalid color, intensity, scale, and frame values", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-water-caustics-invalid-")); const input = path.join(directory, "input.png"); await makeSprite(input);
+  const result = await service().generateWaterCaustics({ inputFilename: input, outputFilename: path.join(directory, "out.gif"), frames: 1, seed: 1, intensity: 2, scale: 0, color: "nope" });
+  assert.equal(result.ok, false);
+});

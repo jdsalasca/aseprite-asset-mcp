@@ -198,6 +198,7 @@ const TOOL_NAMES = [
   "generate_motion_pack",
   "generate_seamless_texture",
   "generate_water_reflection",
+  "generate_water_caustics",
   "create_asset_recipe",
   "execute_asset_recipe",
   "get_asset_library",

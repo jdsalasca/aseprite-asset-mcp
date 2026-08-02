@@ -1,7 +1,7 @@
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { RasterCodec } from "../../domain/image-assets.js";
 import type { RasterFrame } from "../../domain/pixel-art.js";
-import type { ColorGradeInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, SeamlessTextureInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteShadowInput, WaterReflectionInput } from "../../domain/sprite-effects.js";
+import type { ColorGradeInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, SeamlessTextureInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteShadowInput, WaterCausticsInput, WaterReflectionInput } from "../../domain/sprite-effects.js";
 
 function ok(value: unknown): AssetOperationResult { return { ok: true, message: JSON.stringify(value) }; }
 function fail(error: unknown): AssetOperationResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
@@ -22,6 +22,13 @@ function compositePixel(pixels: Uint8ClampedArray, width: number, height: number
   if (outputAlpha <= 0) return;
   for (let channel = 0; channel < 3; channel += 1) pixels[offset + channel] = Math.round(((color[channel] ?? 0) * sourceAlpha + (pixels[offset + channel] ?? 0) * destinationAlpha * (1 - sourceAlpha)) / outputAlpha);
   pixels[offset + 3] = Math.round(outputAlpha * 255);
+}
+function overlayPixel(pixels: Uint8ClampedArray, width: number, height: number, x: number, y: number, color: [number, number, number, number], mix: number): void {
+  if (x < 0 || y < 0 || x >= width || y >= height) return;
+  const offset = (y * width + x) * 4;
+  if ((pixels[offset + 3] ?? 0) === 0) return;
+  const factor = clamp(mix * (color[3] / 255), 0, 1);
+  for (let channel = 0; channel < 3; channel += 1) pixels[offset + channel] = Math.round((pixels[offset + channel] ?? 0) * (1 - factor) + (color[channel] ?? 0) * factor);
 }
 function outputMessage(operation: string, input: string | null, output: string, frames: number, format: SpriteEffectFormat): AssetOperationResult { return ok({ operation, ...(input ? { input } : {}), output, frames, format, deterministic: true, sourcePreserved: true }); }
 function averagePixel(left: Uint8ClampedArray, right: Uint8ClampedArray, leftOffset: number, rightOffset: number): [number, number, number, number] { return [Math.round(((left[leftOffset] ?? 0) + (right[rightOffset] ?? 0)) / 2), Math.round(((left[leftOffset + 1] ?? 0) + (right[rightOffset + 1] ?? 0)) / 2), Math.round(((left[leftOffset + 2] ?? 0) + (right[rightOffset + 2] ?? 0)) / 2), Math.round(((left[leftOffset + 3] ?? 0) + (right[rightOffset + 3] ?? 0)) / 2)]; }
@@ -215,6 +222,48 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
       const format = formatFor(frames, input.format);
       await this.codec.encode(frames, input.outputFilename, format);
       return outputMessage("generate_water_reflection", input.inputFilename, input.outputFilename, frames.length, format);
+    } catch (error) { return fail(error); }
+  }
+
+  public async generateWaterCaustics(input: WaterCausticsInput): Promise<AssetOperationResult> {
+    try {
+      assertDifferent(input.inputFilename, input.outputFilename);
+      const color = rgba(input.color);
+      const source = await this.codec.decode(input.inputFilename);
+      const firstFrame = source[0];
+      if (!firstFrame) throw new Error("Water caustics requires at least one source frame");
+      if (!Number.isInteger(input.frames) || input.frames < 2 || input.frames > 24) throw new Error("Caustics frames must be an integer from 2 to 24");
+      const intensity = input.intensity ?? 0.7;
+      if (!Number.isFinite(intensity) || intensity < 0 || intensity > 1) throw new Error("Caustics intensity must be between 0 and 1");
+      const scale = input.scale ?? 4;
+      if (!Number.isInteger(scale) || scale < 1 || scale > 32) throw new Error("Caustics scale must be an integer from 1 to 32");
+      if (!Number.isInteger(input.seed)) throw new Error("Caustics seed must be an integer");
+      if (input.delayMs !== undefined && (!Number.isInteger(input.delayMs) || input.delayMs <= 0)) throw new Error("Caustics delay must be a positive integer");
+      const frames = Array.from({ length: input.frames }, (_, frameIndex) => {
+        const sourceFrame = source[frameIndex % source.length] ?? firstFrame;
+        const pixels = new Uint8ClampedArray(sourceFrame.pixels);
+        let firstOpaque: [number, number] | null = null;
+        for (let y = 0; y < sourceFrame.height; y += 1) for (let x = 0; x < sourceFrame.width; x += 1) {
+          const offset = (y * sourceFrame.width + x) * 4;
+          if ((sourceFrame.pixels[offset + 3] ?? 0) === 0) continue;
+          firstOpaque ??= [x, y];
+          const phaseX = (x + frameIndex * 1.7 + input.seed * 0.41) / scale;
+          const phaseY = (y - frameIndex * 1.25 + input.seed * 0.23) / scale;
+          const wave = (Math.sin(phaseX * 2.15 + Math.sin(phaseY)) + Math.sin(phaseY * 1.75 + Math.cos(phaseX * 1.3))) / 2;
+          const ridge = clamp((Math.abs(wave) - 0.48) * 2.7, 0, 1);
+          if (ridge > 0) overlayPixel(pixels, sourceFrame.width, sourceFrame.height, x, y, color, intensity * ridge * 0.82);
+        }
+        if (firstOpaque && intensity > 0) {
+          let markerX = Math.abs((input.seed * 13 + frameIndex * 3) % sourceFrame.width);
+          let markerY = Math.abs((input.seed * 7 + frameIndex * 2) % sourceFrame.height);
+          if ((pixels[(markerY * sourceFrame.width + markerX) * 4 + 3] ?? 0) === 0) [markerX, markerY] = firstOpaque;
+          overlayPixel(pixels, sourceFrame.width, sourceFrame.height, markerX, markerY, color, Math.min(1, 0.35 + intensity * 0.65));
+        }
+        return { width: sourceFrame.width, height: sourceFrame.height, pixels, delayMs: input.delayMs ?? sourceFrame.delayMs ?? 90 };
+      });
+      const format = formatFor(frames, input.format);
+      await this.codec.encode(frames, input.outputFilename, format);
+      return outputMessage("generate_water_caustics", input.inputFilename, input.outputFilename, frames.length, format);
     } catch (error) { return fail(error); }
   }
 }
