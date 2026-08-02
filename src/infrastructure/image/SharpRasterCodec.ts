@@ -35,6 +35,18 @@ export class SharpRasterCodec implements RasterCodec {
     return frames;
   }
 
+  public async decodeBuffer(data: Uint8Array): Promise<RasterFrame[]> {
+    const source = sharp(Buffer.from(data), { animated: true });
+    const metadata = await source.metadata();
+    const width = metadata.width;
+    const pages = Math.max(1, metadata.pages ?? 1);
+    if (!width || !metadata.height) throw new Error("Image has no readable dimensions");
+    const { data: raw, info } = await source.ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+    const pageHeight = metadata.pageHeight ?? Math.floor(info.height / pages);
+    if (!pageHeight || info.height < pageHeight * pages) throw new Error("Animated image has invalid frame dimensions");
+    return Array.from({ length: pages }, (_, index) => { const start = index * width * pageHeight * 4; const end = start + width * pageHeight * 4; const delay = metadata.delay?.[index] ?? metadata.delay?.[0]; return { width, height: pageHeight, pixels: new Uint8ClampedArray(raw.subarray(start, end)), ...(delay === undefined ? {} : { delayMs: delay }) }; });
+  }
+
   public async encode(frames: RasterFrame[], filename: string, format: ImageOutputFormat): Promise<void> {
     assertFrames(frames);
     await fs.mkdir(path.dirname(path.resolve(filename)), { recursive: true });

@@ -151,6 +151,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `audit_asset_library`: valida IDs, referencias de presets, categorías y rutas navegables antes de componer escenas; devuelve métricas compactas y hasta 100 violaciones deterministas.
 - `summarize_asset_library`: devuelve un mapa de categorías, tres ejemplos por categoría y presets sin cargar el detalle completo, reduciendo tokens de navegación.
 - `plan_asset_scene`: recibe IDs arbitrarios de la biblioteca y devuelve capas ordenadas con roles, previews y sprites sin generar archivos.
+- `compose_asset_scene`: recibe IDs y materializa un PNG de escena + manifest navegable con placements deterministas, sin modificar los originales.
 - `get_asset_preset`: devuelve composiciones listas como `living-forest`, `coastal-sunset`, `fantasy-quest` y `rainy-village`.
 - `generate_asset_preset`: ejecuta un preset completo y devuelve terreno, mapa, preview, oleaje cuando aplica y transición temporal en una respuesta compacta.
 - `generate_scene_effect_stack`: agrupa en una sola llamada lluvia, partículas, caústicas/reflejos, día-noche, granularidad de material e iluminación direccional; infiere dimensiones para partículas, devuelve todos los artifacts y preserva la fuente.
@@ -204,6 +205,7 @@ GET /api/v1/library?query=rain&limit=12
 GET /api/v1/library/audit
 GET /api/v1/library/summary
 POST /api/v1/library/scene-plan
+POST /api/v1/library/scene-compose
 POST /api/v1/effects/motion
 POST /api/v1/effects/upscale
 POST /api/v1/assets/palette-harmonize
@@ -235,6 +237,8 @@ POST /api/v1/scenes/biome-transition
 Las dos últimas rutas sirven PNG/GIF de forma binaria desde el adaptador de archivos, validando primero el id del catálogo y bloqueando escapes del directorio `assets/folders`. Asset Studio las consume para mostrar previews reales en `PixelAssetGrid`.
 
 `compose_asset_preset` y `GET /api/v1/library/presets/:id/compose` devuelven en una sola respuesta los assets y las capas ordenadas (`background`, `midground`, `foreground`, `effect`), reduciendo búsquedas repetidas de los agentes.
+
+`compose_asset_scene` y `POST /api/v1/library/scene-compose` reciben `item_ids`, `output_filename`, `manifest_filename`, `width`, `height` y `padding`. El servicio decodifica las previews mediante un puerto raster, compone con alpha source-over y escribe un PNG más un manifest con coordenadas, dimensiones, roles y garantías `deterministic`/`sourcePreserved`.
 
 La composición es fail-closed: si el preset contiene una referencia inexistente, no devuelve una escena parcial. Ejecuta `audit_asset_library` para localizar y corregir el catálogo antes de componer.
 
