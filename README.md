@@ -153,6 +153,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `generate_sprite_glow`: crea un aura de color determinista alrededor de píxeles opacos para magia, fuego, lámparas y efectos de escena, sin alterar la silueta original.
 - `apply_sprite_rim_light`: ilumina únicamente los bordes expuestos de un sprite según una dirección cardinal o diagonal; conserva alfa, frames y la fuente.
 - `apply_sprite_ambient_occlusion`: oscurece de forma determinista bordes internos y cavidades según la vecindad alfa, sin alterar transparencia ni la fuente.
+- `apply_sprite_specular_highlight`: añade una banda especular determinista hacia dentro de la silueta para metal, agua, cristal y magia; conserva alfa, frames y la fuente.
 - `generate_time_of_day_pack`: crea transición día, atardecer, noche y amanecer.
 - `generate_environment_pack`: empaqueta playa, bosque, aldea o cueva en una sola llamada.
 - `create_asset_recipe`: compone outline, grading, materiales, luz, sombras, partículas, normal map y quality gate en un plan determinista sin ejecutar cambios.
@@ -227,6 +228,7 @@ POST /api/v1/effects/cleanup
 POST /api/v1/effects/glow
 POST /api/v1/effects/rim-light
 POST /api/v1/effects/ambient-occlusion
+POST /api/v1/effects/specular-highlight
 POST /api/v1/assets/palette-harmonize
 POST /api/v1/assets/contact-sheet
 POST /api/v1/effects/seamless

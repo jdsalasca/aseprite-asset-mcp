@@ -1,7 +1,7 @@
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { RasterCodec } from "../../domain/image-assets.js";
 import type { RasterFrame } from "../../domain/pixel-art.js";
-import type { CleanupIsolatedPixelsInput, ColorGradeInput, DayNightCycleInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SpriteAmbientOcclusionInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteGlowInput, SpriteRimLightInput, SpriteRimLightDirection, SpriteShadowInput, WaterCausticsInput, WaterReflectionInput } from "../../domain/sprite-effects.js";
+import type { CleanupIsolatedPixelsInput, ColorGradeInput, DayNightCycleInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SpriteAmbientOcclusionInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteGlowInput, SpriteRimLightInput, SpriteRimLightDirection, SpriteShadowInput, SpriteSpecularHighlightInput, WaterCausticsInput, WaterReflectionInput } from "../../domain/sprite-effects.js";
 
 function ok(value: unknown): AssetOperationResult { return { ok: true, message: JSON.stringify(value) }; }
 function fail(error: unknown): AssetOperationResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
@@ -199,6 +199,37 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
         return { ...frame, pixels };
       });
       const format = formatFor(frames, input.format); await this.codec.encode(frames, input.outputFilename, format); return outputMessage("apply_sprite_ambient_occlusion", input.inputFilename, input.outputFilename, frames.length, format);
+    } catch (error) { return fail(error); }
+  }
+
+  public async applySpriteSpecularHighlight(input: SpriteSpecularHighlightInput): Promise<AssetOperationResult> {
+    try {
+      assertDifferent(input.inputFilename, input.outputFilename);
+      const color = rgba(input.color);
+      const vector = RIM_LIGHT_VECTORS[input.direction];
+      if (!vector) throw new Error("Invalid specular direction: " + input.direction);
+      const radius = input.radius ?? 2;
+      const strength = input.strength ?? 0.8;
+      if (!Number.isInteger(radius) || radius < 1 || radius > 8) throw new Error("Specular radius must be an integer from 1 to 8");
+      if (!Number.isFinite(strength) || strength < 0 || strength > 1) throw new Error("Specular strength must be between 0 and 1");
+      const source = await this.codec.decode(input.inputFilename);
+      const frames = source.map((frame) => {
+        const pixels = new Uint8ClampedArray(frame.pixels);
+        for (let y = 0; y < frame.height; y += 1) for (let x = 0; x < frame.width; x += 1) {
+          const offset = (y * frame.width + x) * 4;
+          const sourceAlpha = frame.pixels[offset + 3] ?? 0;
+          if (sourceAlpha === 0) continue;
+          let transparentDistance = 0;
+          for (let distance = 1; distance <= radius; distance += 1) {
+            if (alphaAt(frame, x + vector[0] * distance, y + vector[1] * distance) === 0) { transparentDistance = distance; break; }
+          }
+          if (transparentDistance === 0) continue;
+          const mix = clamp(strength * (1 - (transparentDistance - 1) / radius) * (color[3] / 255) * (sourceAlpha / 255), 0, 1);
+          for (let channel = 0; channel < 3; channel += 1) pixels[offset + channel] = Math.round((frame.pixels[offset + channel] ?? 0) * (1 - mix) + (color[channel] ?? 0) * mix);
+        }
+        return { ...frame, pixels };
+      });
+      const format = formatFor(frames, input.format); await this.codec.encode(frames, input.outputFilename, format); return outputMessage("apply_sprite_specular_highlight", input.inputFilename, input.outputFilename, frames.length, format);
     } catch (error) { return fail(error); }
   }
 

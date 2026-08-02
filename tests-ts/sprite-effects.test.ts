@@ -156,6 +156,33 @@ test("sprite ambient occlusion rejects invalid radius and strength", async () =>
   assert.equal(invalidRadius.ok, false); assert.equal(invalidStrength.ok, false);
 });
 
+test("sprite specular highlight creates a deterministic inward light band and preserves alpha/source", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-specular-"));
+  const input = path.join(directory, "input.png"); const first = path.join(directory, "first.png"); const second = path.join(directory, "second.png");
+  const pixels = new Uint8ClampedArray(5 * 5 * 4);
+  for (let y = 1; y < 4; y += 1) for (let x = 1; x < 4; x += 1) pixels.set([80, 100, 120, 255], (y * 5 + x) * 4);
+  await sharp(Buffer.from(pixels), { raw: { width: 5, height: 5, channels: 4 } }).png().toFile(input);
+  const sourceBefore = await fs.readFile(input);
+  const operation = { inputFilename: input, outputFilename: first, color: "#FFFFFF", direction: "north" as const, radius: 2, strength: 1 };
+  assert.equal((await service().applySpriteSpecularHighlight(operation)).ok, true);
+  assert.equal((await service().applySpriteSpecularHighlight({ ...operation, outputFilename: second })).ok, true);
+  assert.deepEqual(await fs.readFile(first), await fs.readFile(second)); assert.deepEqual(await fs.readFile(input), sourceBefore);
+  const output = await sharp(first).raw().toBuffer({ resolveWithObject: true });
+  const pixel = (x: number, y: number) => Array.from(output.data.slice((y * 5 + x) * 4, (y * 5 + x + 1) * 4));
+  assert.deepEqual(pixel(2, 1), [255, 255, 255, 255]);
+  assert.notDeepEqual(pixel(2, 2), [80, 100, 120, 255]);
+  assert.deepEqual(pixel(2, 3), [80, 100, 120, 255]);
+  assert.deepEqual(pixel(0, 0), [0, 0, 0, 0]);
+});
+
+test("sprite specular highlight rejects invalid direction, radius, and strength", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-specular-invalid-")); const input = path.join(directory, "input.png"); await makeSprite(input);
+  const invalidDirection = await service().applySpriteSpecularHighlight({ inputFilename: input, outputFilename: path.join(directory, "direction.png"), color: "#ffffff", direction: "invalid" as never, radius: 2, strength: 0.5 });
+  const invalidRadius = await service().applySpriteSpecularHighlight({ inputFilename: input, outputFilename: path.join(directory, "radius.png"), color: "#ffffff", direction: "north", radius: 9, strength: 0.5 });
+  const invalidStrength = await service().applySpriteSpecularHighlight({ inputFilename: input, outputFilename: path.join(directory, "strength.png"), color: "#ffffff", direction: "north", radius: 2, strength: 2 });
+  assert.equal(invalidDirection.ok, false); assert.equal(invalidRadius.ok, false); assert.equal(invalidStrength.ok, false);
+});
+
 test("particle burst generation is seeded and exports the requested frame count", async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-particles-")); const first = path.join(directory, "first.gif"); const second = path.join(directory, "second.gif");
   assert.equal((await service().generateParticleBurst({ outputFilename: first, width: 32, height: 32, frames: 6, particleCount: 20, seed: 7, color: "#ffcc55" })).ok, true); assert.equal((await service().generateParticleBurst({ outputFilename: second, width: 32, height: 32, frames: 6, particleCount: 20, seed: 7, color: "#ffcc55" })).ok, true); assert.deepEqual(await fs.readFile(first), await fs.readFile(second)); assert.equal((await sharp(first, { animated: true }).metadata()).pages, 6);
