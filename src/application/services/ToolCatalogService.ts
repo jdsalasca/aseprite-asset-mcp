@@ -20,6 +20,7 @@ const DESCRIPTION_OVERRIDES: Record<string, string> = {
   inspect_asset_bundle: "Inspect one asset and return quality violations and recommendations in one compact response.",
   inspect_asset_batch: "Inspect up to 32 assets in one compact quality report.",
   inspect_animation_quality: "Audit animation frames, timing, palette drift, and loop seams.",
+  normalize_sprite: "Crop raster frames to shared alpha bounds and write deterministic pivot metadata.",
   validate_asset_quality: "Validate palette size and isolated-pixel limits.",
   build_texture_atlas: "Pack equal-size images into one texture atlas.",
   run_asset_recipe: "Run or preview one compact asset recipe.",

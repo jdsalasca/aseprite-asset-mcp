@@ -12,6 +12,7 @@ import type { SceneEffectStackGateway } from "../../domain/scene-effect-stack.js
 import type { ContactSheetService } from "../services/ContactSheetService.js";
 import type { AssetBatchQualityService } from "../services/AssetBatchQualityService.js";
 import type { AnimationQualityService } from "../services/AnimationQualityService.js";
+import type { SpriteNormalizationService } from "../services/SpriteNormalizationService.js";
 
 export interface AssetRestUseCases {
   createRecipe(input: AssetRecipeCreateInput): AssetRecipePlan;
@@ -26,6 +27,7 @@ export interface AssetRestUseCases {
   imageAssets: Pick<PixelArtAssetService, "upscalePixelArt" | "qualityBundle" | "harmonizePalette">;
   batchQuality: Pick<AssetBatchQualityService, "inspect">;
   animationQuality: Pick<AnimationQualityService, "inspect">;
+  spriteNormalization: Pick<SpriteNormalizationService, "normalize">;
   contactSheet: Pick<ContactSheetService, "build">;
   visualAssets: Pick<VisualAssetGateway, "extendScene" | "generateBiomeTransition">;
 }

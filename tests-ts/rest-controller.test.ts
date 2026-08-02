@@ -29,6 +29,7 @@ function fakeUseCases(): AssetRestUseCases {
     imageAssets: { upscalePixelArt: async () => result("upscale_pixel_art"), qualityBundle: async () => result("inspect_asset_bundle"), harmonizePalette: async () => result("harmonize_asset_palette") },
     batchQuality: { inspect: async () => result("inspect_asset_batch") },
     animationQuality: { inspect: async () => result("inspect_animation_quality") },
+    spriteNormalization: { normalize: async () => result("normalize_sprite") },
     contactSheet: { build: async () => result("build_contact_sheet") },
     visualAssets: { extendScene: async () => result("extend_scene"), generateBiomeTransition: async () => result("generate_biome_transition") },
   };
@@ -126,6 +127,9 @@ test("REST controller exposes the same recipe and effect application services", 
     const animationQuality = await fetch(`${rest.url}/api/v1/assets/animation-quality`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ filename: "hero.gif" }) });
     assert.equal(animationQuality.status, 200);
     assert.equal((await animationQuality.json()).data.operation, "inspect_animation_quality");
+    const normalized = await fetch(`${rest.url}/api/v1/assets/normalize-sprite`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_filename: "hero.gif", output_filename: "hero-normalized.gif", manifest_filename: "hero-normalized.json", padding: 1, pivot: "bottom_center", format: "gif" }) });
+    assert.equal(normalized.status, 200);
+    assert.equal((await normalized.json()).data.operation, "normalize_sprite");
     const generatedPreset = await fetch(`${rest.url}/api/v1/library/presets/generate`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ preset_id: "coastal-sunset", output_prefix: "art/coast", width: 32, height: 24, seed: 9 }) });
     assert.equal(generatedPreset.status, 200);
     assert.equal((await generatedPreset.json()).data.operation, "generate_asset_preset");

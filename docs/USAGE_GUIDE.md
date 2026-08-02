@@ -11,7 +11,7 @@ PowerShell:
 
 Health: GET http://127.0.0.1:3766/api/v1/health
 
-Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lighting y /api/v1/effects/outline, /api/v1/effects/color-grade, /api/v1/effects/shadow, /api/v1/effects/particles, /api/v1/effects/normal-map, /api/v1/effects/rain, /api/v1/effects/motion, /api/v1/effects/upscale, /api/v1/assets/palette-harmonize, /api/v1/assets/contact-sheet, /api/v1/assets/quality-batch, /api/v1/effects/seamless, /api/v1/effects/water-reflection, /api/v1/effects/water-caustics, /api/v1/effects/day-night, /api/v1/effects/scene-stack, /api/v1/variants/pack, /api/v1/scenes/extend y /api/v1/scenes/biome-transition.
+Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lighting y /api/v1/effects/outline, /api/v1/effects/color-grade, /api/v1/effects/shadow, /api/v1/effects/particles, /api/v1/effects/normal-map, /api/v1/effects/rain, /api/v1/effects/motion, /api/v1/effects/upscale, /api/v1/assets/palette-harmonize, /api/v1/assets/contact-sheet, /api/v1/assets/quality-batch, /api/v1/assets/animation-quality, /api/v1/assets/normalize-sprite, /api/v1/effects/seamless, /api/v1/effects/water-reflection, /api/v1/effects/water-caustics, /api/v1/effects/day-night, /api/v1/effects/scene-stack, /api/v1/variants/pack, /api/v1/scenes/extend y /api/v1/scenes/biome-transition.
 
 `/api/v1/effects/upscale` recibe `{ "input_filename": "hero.png", "output_filename": "hero-3x.png", "scale": 3 }`. Usa nearest-neighbor determinista, conserva transparencia y delays cuando la entrada es animada, rechaza sobrescribir la fuente y limita cada dimensión resultante a 4096 px.
 
@@ -36,6 +36,8 @@ Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lightin
 `/api/v1/assets/quality-bundle` recibe `{ "filename": "forest-ranger.png", "max_colors": 64, "max_isolated_pixels": 4 }` y devuelve inspección, violaciones, recomendaciones y las garantías `deterministic`/`sourcePreserved` sin generar archivos. Es el camino recomendado para que la UX valide antes de encadenar mejoras.
 
 `/api/v1/assets/quality-batch` recibe `{ "filenames": ["hero.png", "hero-rain.gif"], "max_colors": 64, "max_isolated_pixels": 4 }`. Ejecuta el mismo quality bundle por un puerto compartido, conserva el orden, aísla errores por archivo y devuelve `summary: { total, valid, invalid, failed }`.
+
+`/api/v1/assets/normalize-sprite` recibe `{ "input_filename": "hero.gif", "output_filename": "hero-normalized.gif", "manifest_filename": "hero-normalized.json", "padding": 1, "pivot": "bottom_center", "format": "gif" }`. Recorta usando el union de píxeles opacos de todos los frames, conserva sus delays, evita sobrescribir input/output/manifest y devuelve dimensiones, bounds y pivote en una respuesta compacta.
 
 `/api/v1/assets/animation-quality` recibe `{ "filename": "hero-walk.gif" }` y devuelve transiciones compactas, frames duplicados, delays, deriva de paleta, estado de loop y recomendaciones antes de exportar al motor.
 

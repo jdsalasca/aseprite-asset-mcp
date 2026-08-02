@@ -123,6 +123,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `inspect_asset_bundle`: combina inspección, quality gate, violaciones y recomendaciones deterministas en una sola respuesta compacta.
 - `inspect_asset_batch`: audita hasta 32 assets en una sola llamada, conserva el orden, aísla fallos de decodificación y devuelve un resumen `valid/invalid/failed` sin transferir buffers de píxeles.
 - `inspect_animation_quality`: audita una animación en una sola llamada, detecta frames duplicados, cambios por transición, timing irregular, deriva de paleta y costura de loop.
+- `normalize_sprite`: recorta PNG/GIF a los bounds alfa compartidos, añade padding determinista, conserva los delays y escribe un manifest JSON con pivote para motores 2D.
 - `build_texture_atlas`: empaqueta imágenes del mismo tamaño en un atlas PNG con columnas y padding.
 - `export_asset_pack`: entrega el atlas y un manifiesto JSON con la posición de cada asset.
 - `create_style_bible`: fija paleta, luz, escala, detalle y semilla para mantener consistencia.
@@ -203,6 +204,7 @@ POST /api/v1/variants/pack
 POST /api/v1/assets/quality-bundle
 POST /api/v1/assets/quality-batch
 POST /api/v1/assets/animation-quality
+POST /api/v1/assets/normalize-sprite
 GET /api/v1/library/items/forest-ranger
 GET /api/v1/library/presets/living-forest
 GET /api/v1/library/items/forest-ranger/preview
@@ -218,6 +220,8 @@ Las dos últimas rutas sirven PNG/GIF de forma binaria desde el adaptador de arc
 `compose_asset_preset` y `GET /api/v1/library/presets/:id/compose` devuelven en una sola respuesta los assets y las capas ordenadas (`background`, `midground`, `foreground`, `effect`), reduciendo búsquedas repetidas de los agentes.
 
 Las variantes (`rain`, `fire`, `earthquake`, `birds`, `wave-reflection`, `day`, `sunset`, `night`, `walk`, `attack`, etc.) son contratos para los algoritmos existentes: se aplican sobre una copia del asset y conservan la fuente.
+
+`normalize_sprite` es útil antes de generar atlas o integrar animaciones en Godot: usa el union de alfa de todos los frames para que el canvas no salte, limita el padding a 16 px, rechaza colisiones de input/output/manifest y deja el pivote `bottom_center` sobre la última fila visible.
 
 `generate_variant_pack` evita nueve llamadas del agente cuando se necesita explorar un asset en distintos contextos. Ejemplo MCP/REST equivalente:
 

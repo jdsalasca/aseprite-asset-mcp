@@ -6,9 +6,10 @@ import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { ContactSheetService } from "../../application/services/ContactSheetService.js";
 import type { AssetBatchQualityService } from "../../application/services/AssetBatchQualityService.js";
 import type { AnimationQualityService } from "../../application/services/AnimationQualityService.js";
+import type { SpriteNormalizationService } from "../../application/services/SpriteNormalizationService.js";
 
 export class ImageAssetToolController {
-  public constructor(private readonly assets: ExportAnimationPort, private readonly imageAssets: PixelArtAssetService, private readonly contactSheets: ContactSheetService, private readonly batchQuality: AssetBatchQualityService, private readonly animationQuality: AnimationQualityService) {}
+  public constructor(private readonly assets: ExportAnimationPort, private readonly imageAssets: PixelArtAssetService, private readonly contactSheets: ContactSheetService, private readonly batchQuality: AssetBatchQualityService, private readonly animationQuality: AnimationQualityService, private readonly spriteNormalization: SpriteNormalizationService) {}
 
   public register(server: McpServer): void {
     server.registerTool("convert_image_to_pixel_art", {
@@ -73,6 +74,11 @@ export class ImageAssetToolController {
       description: "Audit an animation for duplicate frames, timing, palette drift, movement bounds, and loop seam issues.",
       inputSchema: { filename: z.string().min(1) },
     }, async ({ filename }) => this.result(await this.animationQuality.inspect({ filename })));
+
+    server.registerTool("normalize_sprite", {
+      description: "Crop one or more raster frames to shared alpha bounds, add deterministic padding and write pivot metadata without overwriting the source.",
+      inputSchema: { input_filename: z.string().min(1), output_filename: z.string().min(1), manifest_filename: z.string().min(1), padding: z.number().int().min(0).max(16).default(0), pivot: z.enum(["center", "bottom_center"]).default("bottom_center"), format: z.enum(["png", "gif"]).optional() },
+    }, async ({ input_filename, output_filename, manifest_filename, padding, pivot, format }) => this.result(await this.spriteNormalization.normalize({ inputFilename: input_filename, outputFilename: output_filename, manifestFilename: manifest_filename, padding, pivot, ...(format ? { format } : {}) })));
 
     server.registerTool("build_texture_atlas", {
       description: "Pack equal-size image frames into one PNG texture atlas.",
