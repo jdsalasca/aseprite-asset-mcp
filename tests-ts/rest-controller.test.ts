@@ -32,6 +32,7 @@ function fakeUseCases(): AssetRestUseCases {
     spriteNormalization: { normalize: async () => result("normalize_sprite") },
     animationSheet: { build: async () => result("build_animation_sheet") },
     spriteGeometry: { inspect: async () => result("inspect_sprite_geometry") },
+    spriteHitbox: { generate: async () => result("generate_sprite_hitboxes") },
     contactSheet: { build: async () => result("build_contact_sheet") },
     visualAssets: { extendScene: async () => result("extend_scene"), generateBiomeTransition: async () => result("generate_biome_transition") },
   };
@@ -138,6 +139,9 @@ test("REST controller exposes the same recipe and effect application services", 
     const geometry = await fetch(`${rest.url}/api/v1/assets/sprite-geometry`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ filename: "hero.gif", min_component_pixels: 2 }) });
     assert.equal(geometry.status, 200);
     assert.equal((await geometry.json()).data.operation, "inspect_sprite_geometry");
+    const hitboxes = await fetch(`${rest.url}/api/v1/assets/sprite-hitboxes`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ filename: "hero.gif", output_filename: "hero-hitboxes.json", mode: "components", padding: 1 }) });
+    assert.equal(hitboxes.status, 200);
+    assert.equal((await hitboxes.json()).data.operation, "generate_sprite_hitboxes");
     const generatedPreset = await fetch(`${rest.url}/api/v1/library/presets/generate`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ preset_id: "coastal-sunset", output_prefix: "art/coast", width: 32, height: 24, seed: 9 }) });
     assert.equal(generatedPreset.status, 200);
     assert.equal((await generatedPreset.json()).data.operation, "generate_asset_preset");
