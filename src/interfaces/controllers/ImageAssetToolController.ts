@@ -4,9 +4,10 @@ import type { ExportAnimationPort } from "../../application/ports/AssetCapabilit
 import { PixelArtAssetService } from "../../application/services/PixelArtAssetService.js";
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { ContactSheetService } from "../../application/services/ContactSheetService.js";
+import type { AssetBatchQualityService } from "../../application/services/AssetBatchQualityService.js";
 
 export class ImageAssetToolController {
-  public constructor(private readonly assets: ExportAnimationPort, private readonly imageAssets: PixelArtAssetService, private readonly contactSheets: ContactSheetService) {}
+  public constructor(private readonly assets: ExportAnimationPort, private readonly imageAssets: PixelArtAssetService, private readonly contactSheets: ContactSheetService, private readonly batchQuality: AssetBatchQualityService) {}
 
   public register(server: McpServer): void {
     server.registerTool("convert_image_to_pixel_art", {
@@ -61,6 +62,11 @@ export class ImageAssetToolController {
       description: "Inspect one asset and return compact quality violations and deterministic recommendations in one call.",
       inputSchema: { filename: z.string().min(1), max_colors: z.number().int().min(1).max(256).default(256), max_isolated_pixels: z.number().int().nonnegative().default(9007199254740991) },
     }, async ({ filename, max_colors, max_isolated_pixels }) => this.result(await this.imageAssets.qualityBundle({ filename, maxColors: max_colors, maxIsolatedPixels: max_isolated_pixels })));
+
+    server.registerTool("inspect_asset_batch", {
+      description: "Inspect up to 32 sprites in one deterministic quality pass and return a compact collection summary.",
+      inputSchema: { filenames: z.array(z.string().min(1)).min(1).max(32), max_colors: z.number().int().min(1).max(256).default(256), max_isolated_pixels: z.number().int().nonnegative().default(9007199254740991) },
+    }, async ({ filenames, max_colors, max_isolated_pixels }) => this.result(await this.batchQuality.inspect({ filenames: [...filenames], maxColors: max_colors, maxIsolatedPixels: max_isolated_pixels })));
 
     server.registerTool("build_texture_atlas", {
       description: "Pack equal-size image frames into one PNG texture atlas.",

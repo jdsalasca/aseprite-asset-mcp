@@ -18,6 +18,7 @@ const DESCRIPTION_OVERRIDES: Record<string, string> = {
   export_animation_gif: "Export a raster animation or Aseprite sprite as GIF.",
   inspect_asset: "Inspect dimensions, frames, colors, transparency, and delays.",
   inspect_asset_bundle: "Inspect one asset and return quality violations and recommendations in one compact response.",
+  inspect_asset_batch: "Inspect up to 32 assets in one compact quality report.",
   validate_asset_quality: "Validate palette size and isolated-pixel limits.",
   build_texture_atlas: "Pack equal-size images into one texture atlas.",
   run_asset_recipe: "Run or preview one compact asset recipe.",

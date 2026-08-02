@@ -27,6 +27,7 @@ function fakeUseCases(): AssetRestUseCases {
     applyDepthLighting: async () => result("apply_depth_lighting"),
     assetLibrary: new AssetLibraryService(new FakeLibrary()),
     imageAssets: { upscalePixelArt: async () => result("upscale_pixel_art"), qualityBundle: async () => result("inspect_asset_bundle"), harmonizePalette: async () => result("harmonize_asset_palette") },
+    batchQuality: { inspect: async () => result("inspect_asset_batch") },
     contactSheet: { build: async () => result("build_contact_sheet") },
     visualAssets: { extendScene: async () => result("extend_scene"), generateBiomeTransition: async () => result("generate_biome_transition") },
   };
@@ -118,6 +119,9 @@ test("REST controller exposes the same recipe and effect application services", 
     const qualityBundle = await fetch(`${rest.url}/api/v1/assets/quality-bundle`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ filename: "hero.png", max_colors: 32, max_isolated_pixels: 4 }) });
     assert.equal(qualityBundle.status, 200);
     assert.equal((await qualityBundle.json()).data.operation, "inspect_asset_bundle");
+    const qualityBatch = await fetch(`${rest.url}/api/v1/assets/quality-batch`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ filenames: ["hero.png", "oak.png"], max_colors: 32, max_isolated_pixels: 4 }) });
+    assert.equal(qualityBatch.status, 200);
+    assert.equal((await qualityBatch.json()).data.operation, "inspect_asset_batch");
     const generatedPreset = await fetch(`${rest.url}/api/v1/library/presets/generate`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ preset_id: "coastal-sunset", output_prefix: "art/coast", width: 32, height: 24, seed: 9 }) });
     assert.equal(generatedPreset.status, 200);
     assert.equal((await generatedPreset.json()).data.operation, "generate_asset_preset");
