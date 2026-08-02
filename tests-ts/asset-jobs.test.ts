@@ -97,3 +97,23 @@ test("persists resolved artifact metadata after a successful job", async () => {
 
   assert.deepEqual((await service.get("job_artifacts"))?.artifacts, [artifact]);
 });
+
+test("validates non-empty job batches and input filenames before queuing", async () => {
+  const service = new AssetJobService({ run: async () => ({ ok: true, message: "unused" }) }, new InMemoryAssetJobStore());
+
+  await assert.rejects(() => service.start({ jobs: [], dryRun: false }), /At least one asset job/);
+  await assert.rejects(() => service.start({ jobs: [{ recipe: "gif", inputFilenames: [] }], dryRun: false }), /Every asset job needs/);
+});
+
+test("exposes progress and marks timed out workers as failed", async () => {
+  const store = new InMemoryAssetJobStore();
+  const service = new AssetJobService({ run: async () => new Promise(() => undefined) }, store, { ids: { next: () => "job_timeout" }, timeoutMs: 5 });
+  const queued = await service.start({ jobs: [{ recipe: "gif", inputFilenames: ["one.png"] }, { recipe: "gif", inputFilenames: ["two.png"] }], dryRun: false });
+
+  assert.deepEqual(queued.progress, { completed: 0, total: 2 });
+  await new Promise((resolve) => setTimeout(resolve, 15));
+  const failed = await service.get("job_timeout");
+  assert.equal(failed?.status, "failed");
+  assert.deepEqual(failed?.progress, { completed: 0, total: 2 });
+  assert.match(failed?.outcome?.message ?? "", /exceeded timeout/);
+});

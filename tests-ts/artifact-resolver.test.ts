@@ -36,3 +36,14 @@ test("file artifact resolver gives equal-content outputs distinct ids", async ()
   assert.equal(artifacts.length, 2);
   assert.notEqual(artifacts[0]?.id, artifacts[1]?.id);
 });
+
+test("file artifact resolver enforces configured roots and rejects null bytes", async () => {
+  const directory = await mkdtemp(path.join(process.cwd(), ".artifact-allowed-"));
+  const output = path.join(directory, "safe.png");
+  await writeFile(output, Buffer.from("safe"));
+  const resolver = new FileAssetArtifactResolver(undefined, [directory]);
+
+  await assert.doesNotReject(() => resolver.resolve("job_allowed", { jobs: [{ recipe: "atlas", inputFilenames: ["source.png"], outputFilename: output }], dryRun: false }));
+  await assert.rejects(() => resolver.resolve("job_escape", { jobs: [{ recipe: "atlas", inputFilenames: ["source.png"], outputFilename: path.join(directory, "..", "outside.png") }], dryRun: false }), /outside allowed roots/);
+  await assert.rejects(() => resolver.resolve("job_null", { jobs: [{ recipe: "atlas", inputFilenames: ["source.png"], outputFilename: `${output}\0bad` }], dryRun: false }), /invalid null byte/);
+});

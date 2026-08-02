@@ -70,6 +70,19 @@ El adaptador CLI concreto ahora es un compositor delgado: `AsepriteLayerAdapter`
 
 La publicación npm queda protegida por autenticación: el workflow no contiene tokens y requiere configurar el secreto de publicación en GitHub o iniciar sesión localmente.
 
+### Lote actual · 10 mejoras de alto impacto
+
+- `apply_pixel_outline`: siluetas limpias para sprites sin tocar la fuente.
+- `apply_color_grade`: brillo, contraste y saturación reproducibles para variantes de estilo.
+- `generate_sprite_shadow`: sombra recortada derivada del alpha.
+- `generate_particle_burst`: ráfaga GIF sembrada con cadencia visible y número de frames estable.
+- `generate_normal_map`: normal map RGBA derivado de la profundidad del alpha.
+- `ToolCatalogService.search` y `get_tools_search`: descubrimiento compacto para que agentes no carguen todo el catálogo.
+- validación de lotes: rechaza entradas vacías y limita batches antes de iniciar workers.
+- progreso de job: expone `completed`/`total` para UIs y agentes.
+- timeout configurable: evita workers colgados y deja el job en estado `failed` con diagnóstico.
+- roots de artifacts: `ASSET_ARTIFACT_ROOT` limita salidas a rutas permitidas y bloquea null bytes.
+
 ## Criterios de diseño
 
 - dominio puro y pequeño;

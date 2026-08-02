@@ -27,3 +27,15 @@ test("tool catalog normalizes slash variants and rejects unknown folders with no
   assert.equal(catalog.byFolder("\\asset\\drawing\\").length, 1);
   assert.deepEqual(catalog.byFolder("missing"), []);
 });
+
+test("tool catalog searches compact descriptors with a bounded result set", () => {
+  const catalog = new ToolCatalogService(["apply_pixel_outline", "apply_color_grade", "generate_sprite_shadow", "generate_particle_burst", "get_tools_by_folder"]);
+
+  assert.deepEqual(catalog.search("shadow"), [{
+    name: "generate_sprite_shadow",
+    folder: "asset/effects",
+    description: "Generate a deterministic clipped shadow from sprite alpha.",
+  }]);
+  assert.equal(catalog.search("asset", 2).length, 2);
+  assert.deepEqual(catalog.search("   "), []);
+});

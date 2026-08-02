@@ -29,6 +29,11 @@ const DESCRIPTION_OVERRIDES: Record<string, string> = {
   generate_environment_pack: "Generate a complete themed environment pack.",
   apply_material_texture: "Add deterministic material grain and highlights while preserving transparency.",
   apply_depth_lighting: "Add deterministic depth-aware directional lighting while preserving transparency.",
+  apply_pixel_outline: "Add a deterministic pixel outline around opaque sprite edges.",
+  apply_color_grade: "Apply deterministic brightness, contrast, and saturation grading.",
+  generate_sprite_shadow: "Generate a deterministic clipped shadow from sprite alpha.",
+  generate_particle_burst: "Generate a deterministic animated particle burst GIF.",
+  generate_normal_map: "Generate a deterministic normal map from sprite alpha depth.",
 };
 
 function folderFor(name: string): string {
@@ -36,6 +41,8 @@ function folderFor(name: string): string {
   if (name === "create_style_bible") return "asset/style";
   if (name.includes("material_texture")) return "asset/material";
   if (name.includes("depth_lighting")) return "asset/lighting";
+  if (name.includes("color_grade") || name.includes("outline") || name.includes("shadow") || name.includes("normal_map")) return "asset/effects";
+  if (name.includes("particle")) return "asset/particles";
   if (name === "inspect_reference" || name === "run_asset_quality_gate") return "asset/quality";
   if (name.includes("terrain") || name.includes("tilemap")) return "asset/tilemap";
   if (name.includes("world") || name.includes("beach") || name.includes("environment") || name.includes("map")) return "asset/world";
@@ -88,5 +95,12 @@ export class ToolCatalogService {
   public byFolder(folder: string): ToolDescriptor[] {
     const normalized = folder.trim().toLowerCase().replaceAll("\\", "/").replace(/^\/+|\/+$/g, "");
     return this.descriptors.filter((descriptor) => descriptor.folder === normalized || descriptor.folder.startsWith(`${normalized}/`));
+  }
+
+  public search(query: string, limit = 20): ToolDescriptor[] {
+    const normalized = query.trim().toLowerCase();
+    if (!normalized) return [];
+    const boundedLimit = Number.isInteger(limit) ? Math.max(1, Math.min(100, limit)) : 20;
+    return this.descriptors.filter((descriptor) => `${descriptor.name} ${descriptor.description} ${descriptor.folder}`.toLowerCase().includes(normalized)).slice(0, boundedLimit);
   }
 }

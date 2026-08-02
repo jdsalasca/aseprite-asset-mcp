@@ -194,3 +194,48 @@ npm run typecheck
 npm test
 npm run showcase
 ```
+
+## 8. Mejorar sprites de forma determinista
+
+Estas operaciones retornan metadata compacta y escriben un archivo nuevo. Todas preservan el input.
+
+```json
+{
+  "name":"apply_pixel_outline",
+  "arguments":{
+    "input_filename":"art/hero.png",
+    "output_filename":"art/hero-outline.png",
+    "color":"#172033",
+    "thickness":1
+  }
+}
+```
+
+```json
+{
+  "name":"generate_particle_burst",
+  "arguments":{
+    "output_filename":"art/hit.gif",
+    "width":32,
+    "height":32,
+    "frames":8,
+    "seed":4217,
+    "color":"#ffd166"
+  }
+}
+```
+
+También están disponibles `apply_color_grade`, `generate_sprite_shadow` y `generate_normal_map`.
+
+## 9. Descubrimiento, progreso y seguridad
+
+Para agentes, usar primero una búsqueda compacta:
+
+```json
+{
+  "name":"get_tools_search",
+  "arguments":{"query":"lighting","limit":5}
+}
+```
+
+`start_asset_job` devuelve `progress: { completed, total }`; `get_asset_job_status` permite refrescarlo sin cargar artifacts completos. Se puede configurar `ASSET_ARTIFACT_ROOT` para restringir outputs y `ASSET_JOB_STORE_PATH` para persistir el estado fuera del repositorio.

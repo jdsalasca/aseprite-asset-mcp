@@ -21,6 +21,7 @@ import { AnimationQualityToolController } from "./controllers/AnimationQualityTo
 import { EffectsToolController } from "./controllers/EffectsToolController.js";
 import { SceneExportToolController } from "./controllers/SceneExportToolController.js";
 import { WorkflowPlanToolController } from "./controllers/WorkflowPlanToolController.js";
+import { SpriteEffectsToolController } from "./controllers/SpriteEffectsToolController.js";
 import { AssetJobService } from "../application/services/AssetJobService.js";
 import { InMemoryAssetJobStore } from "../infrastructure/jobs/InMemoryAssetJobStore.js";
 import { JsonAssetJobStore } from "../infrastructure/jobs/JsonAssetJobStore.js";
@@ -28,6 +29,7 @@ import { FileAssetArtifactResolver } from "../infrastructure/jobs/FileAssetArtif
 import type { AssetJobStorePort } from "../application/ports/AssetJobPorts.js";
 import path from "node:path";
 import { DeterministicEnhancementService } from "../application/services/DeterministicEnhancementService.js";
+import { SpriteEffectsService } from "../application/services/SpriteEffectsService.js";
 
 const SERVER_VERSION = "1.0.0";
 const TYPESCRIPT_VERSION = "6.0.3";
@@ -153,6 +155,7 @@ const TOOL_NAMES = [
   "create_scene_plan",
   "get_tools_list",
   "get_tools_by_folder",
+  "get_tools_search",
   "suggest_enhancement_plan",
   "apply_enhancement_plan",
   "convert_image_to_pixel_art",
@@ -177,6 +180,11 @@ const TOOL_NAMES = [
   "generate_environment_pack",
   "apply_material_texture",
   "apply_depth_lighting",
+  "apply_pixel_outline",
+  "apply_color_grade",
+  "generate_sprite_shadow",
+  "generate_particle_burst",
+  "generate_normal_map",
 ];
 
 export class AsepriteMcpServerAdapter {
@@ -187,14 +195,16 @@ export class AsepriteMcpServerAdapter {
   private readonly visualAssets: VisualAssetService;
   private readonly enhancements: DeterministicEnhancementService;
   private readonly assetJobs: AssetJobService;
+  private readonly spriteEffects: SpriteEffectsService;
 
   public constructor(private readonly assets: AssetGatewayPort, imageAssets?: PixelArtAssetService, jobStore?: AssetJobStorePort) {
     const rasterCodec = new SharpRasterCodec();
     const manifestWriter = new JsonAssetManifestWriter();
     this.imageAssets = imageAssets ?? new PixelArtAssetService(rasterCodec, manifestWriter);
     this.visualAssets = new VisualAssetService(rasterCodec, manifestWriter);
+    this.spriteEffects = new SpriteEffectsService(rasterCodec);
     this.enhancements = new DeterministicEnhancementService(rasterCodec);
-    this.assetJobs = new AssetJobService({ run: (input) => this.imageAssets.runBatch(input) }, jobStore ?? new InMemoryAssetJobStore(), { artifactResolver: new FileAssetArtifactResolver() });
+    this.assetJobs = new AssetJobService({ run: (input) => this.imageAssets.runBatch(input) }, jobStore ?? new InMemoryAssetJobStore(), { artifactResolver: new FileAssetArtifactResolver(() => new Date().toISOString(), process.env.ASSET_ARTIFACT_ROOT ? [process.env.ASSET_ARTIFACT_ROOT] : []), timeoutMs: 5 * 60 * 1000 });
     this.server = new McpServer({ name: "aseprite-asset-mcp", version: SERVER_VERSION });
     this.registerTools();
   }
@@ -226,8 +236,14 @@ export class AsepriteMcpServerAdapter {
       inputSchema: { folder: z.string().min(1) },
     }, async ({ folder }) => this.text({ folder, tools: this.catalog.byFolder(folder) }));
 
+    this.server.registerTool("get_tools_search", {
+      description: "Search a compact subset of tools by name, description, or folder to reduce context usage.",
+      inputSchema: { query: z.string().min(1), limit: z.number().int().min(1).max(100).default(20) },
+    }, async ({ query, limit }) => this.text({ query, tools: this.catalog.search(query, limit) }));
+
     new ImageAssetToolController(this.assets, this.imageAssets).register(this.server);
     new VisualAssetToolController(this.visualAssets).register(this.server);
+    new SpriteEffectsToolController(this.spriteEffects).register(this.server);
     new EnhancementToolController(this.visualAssets, this.enhancements).register(this.server);
     new AssetJobToolController(this.assetJobs).register(this.server);
     new LayerFrameToolController(this.assets).register(this.server);

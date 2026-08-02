@@ -3,6 +3,7 @@ import type { AssetRecipeInput, BatchAssetJobInput } from "./image-assets.js";
 export type AssetJobStatus = "queued" | "running" | "completed" | "failed" | "cancelled";
 
 export interface AssetJobOutcome { ok: boolean; message: string; }
+export interface AssetJobProgress { completed: number; total: number; }
 
 export interface AssetArtifact {
   id: string;
@@ -21,6 +22,7 @@ export interface AssetJobRecord {
   createdAt: string;
   updatedAt: string;
   outcome?: AssetJobOutcome | undefined;
+  progress?: AssetJobProgress | undefined;
   artifacts?: AssetArtifact[] | undefined;
 }
 
