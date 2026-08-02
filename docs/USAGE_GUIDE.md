@@ -41,6 +41,8 @@ Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lightin
 
 `/api/v1/assets/animation-sheet` recibe `{ "input_filename": "hero.gif", "output_filename": "hero-sheet.png", "manifest_filename": "hero-sheet.json", "columns": 4, "padding": 1 }`. Ensambla la animación en una rejilla PNG, calcula coordenadas/pivotes por frame y conserva `delaysMs`, `totalDurationMs` y `loopDurationMs` en el manifest.
 
+`/api/v1/assets/sprite-geometry` recibe `{ "filename": "hero.gif", "min_component_pixels": 1 }`. Es una inspección de solo lectura para scene placement: reporta componentes alfa 4-conectados, bounds, baseline, pivote y drift entre frames sin generar ni sobrescribir assets.
+
 `/api/v1/assets/animation-quality` recibe `{ "filename": "hero-walk.gif" }` y devuelve transiciones compactas, frames duplicados, delays, deriva de paleta, estado de loop y recomendaciones antes de exportar al motor.
 
 `/api/v1/library/presets/generate` recibe `{ "preset_id": "coastal-sunset", "output_prefix": "art/coast", "width": 64, "height": 40, "seed": 9 }`. Resuelve el preset, conserva sus capas en la respuesta y delega en `generate_environment_pack`; así una persona puede pasar de explorar a generar una escena sin encadenar llamadas manuales.

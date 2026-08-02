@@ -125,6 +125,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `inspect_animation_quality`: audita una animación en una sola llamada, detecta frames duplicados, cambios por transición, timing irregular, deriva de paleta y costura de loop.
 - `normalize_sprite`: recorta PNG/GIF a los bounds alfa compartidos, añade padding determinista, conserva los delays y escribe un manifest JSON con pivote para motores 2D.
 - `build_animation_sheet`: convierte todos los frames de una animación en un PNG spritesheet con coordenadas, pivotes `bottom_center`, delays y duración de loop en un manifest navegable.
+- `inspect_sprite_geometry`: calcula bounds alfa, componentes conectados, baseline y pivotes por frame para detectar jitter antes de colisiones o composición de escenas.
 - `build_texture_atlas`: empaqueta imágenes del mismo tamaño en un atlas PNG con columnas y padding.
 - `export_asset_pack`: entrega el atlas y un manifiesto JSON con la posición de cada asset.
 - `create_style_bible`: fija paleta, luz, escala, detalle y semilla para mantener consistencia.
@@ -207,6 +208,7 @@ POST /api/v1/assets/quality-batch
 POST /api/v1/assets/animation-quality
 POST /api/v1/assets/normalize-sprite
 POST /api/v1/assets/animation-sheet
+POST /api/v1/assets/sprite-geometry
 GET /api/v1/library/items/forest-ranger
 GET /api/v1/library/presets/living-forest
 GET /api/v1/library/items/forest-ranger/preview
@@ -226,6 +228,8 @@ Las variantes (`rain`, `fire`, `earthquake`, `birds`, `wave-reflection`, `day`, 
 `normalize_sprite` es útil antes de generar atlas o integrar animaciones en Godot: usa el union de alfa de todos los frames para que el canvas no salte, limita el padding a 16 px, rechaza colisiones de input/output/manifest y deja el pivote `bottom_center` sobre la última fila visible.
 
 `build_animation_sheet` recibe `{ "input_filename": "hero.gif", "output_filename": "hero-sheet.png", "manifest_filename": "hero-sheet.json", "columns": 4, "padding": 1 }`. El PNG solo contiene la rejilla visual; el manifest conserva los delays originales y los pivotes globales de cada celda, evitando que la animación dependa de un formato GIF en el motor.
+
+`inspect_sprite_geometry` recibe `{ "filename": "hero.gif", "min_component_pixels": 1 }` y devuelve por frame los componentes alfa 4-conectados, bounds, baseline y pivote. Un bounds inestable genera recomendación de normalización, pero no se marca como error: el movimiento intencional también puede cambiar la silueta.
 
 `generate_variant_pack` evita nueve llamadas del agente cuando se necesita explorar un asset en distintos contextos. Ejemplo MCP/REST equivalente:
 
