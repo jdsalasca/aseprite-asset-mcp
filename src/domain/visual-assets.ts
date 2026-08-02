@@ -84,6 +84,17 @@ export interface MaterialTextureInput {
   format?: "png" | "gif" | undefined;
 }
 
+export type LightDirection = "north" | "south" | "east" | "west" | "north_east" | "north_west" | "south_east" | "south_west";
+
+export interface DepthLightingInput {
+  inputFilename: string;
+  outputFilename: string;
+  direction: LightDirection;
+  strength?: number | undefined;
+  ambient?: number | undefined;
+  format?: "png" | "gif" | undefined;
+}
+
 export type EnvironmentKind = "beach" | "forest" | "village" | "cave";
 
 export interface EnvironmentPackInput {
@@ -105,5 +116,6 @@ export interface VisualAssetGateway {
   generateBeachScene(input: BeachSceneInput): Promise<AssetOperationResult>;
   generateTimeOfDayPack(input: TimeOfDayInput): Promise<AssetOperationResult>;
   applyMaterialTexture(input: MaterialTextureInput): Promise<AssetOperationResult>;
+  applyDepthLighting(input: DepthLightingInput): Promise<AssetOperationResult>;
   generateEnvironmentPack(input: EnvironmentPackInput): Promise<AssetOperationResult>;
 }

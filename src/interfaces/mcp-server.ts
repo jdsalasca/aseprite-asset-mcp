@@ -176,6 +176,7 @@ const TOOL_NAMES = [
   "generate_time_of_day_pack",
   "generate_environment_pack",
   "apply_material_texture",
+  "apply_depth_lighting",
 ];
 
 export class AsepriteMcpServerAdapter {

@@ -49,6 +49,11 @@ export class VisualAssetToolController {
       inputSchema: { input_filename: z.string().min(1), output_filename: z.string().min(1), material: z.enum(["water", "earth", "grass", "stone", "snow"]), seed: z.number().int(), intensity: z.number().min(0).max(1).default(0.6), format: z.enum(["png", "gif"]).optional() },
     }, async ({ input_filename, output_filename, material, seed, intensity, format }) => this.result(await this.visualAssets.applyMaterialTexture({ inputFilename: input_filename, outputFilename: output_filename, material, seed, intensity, ...(format ? { format } : {}) })));
 
+    server.registerTool("apply_depth_lighting", {
+      description: "Apply deterministic depth-aware directional lighting to a sprite while preserving transparency and source data.",
+      inputSchema: { input_filename: z.string().min(1), output_filename: z.string().min(1), direction: z.enum(["north", "south", "east", "west", "north_east", "north_west", "south_east", "south_west"]), strength: z.number().min(0).max(1).default(0.7), ambient: z.number().min(0).max(1).default(0.35), format: z.enum(["png", "gif"]).optional() },
+    }, async ({ input_filename, output_filename, direction, strength, ambient, format }) => this.result(await this.visualAssets.applyDepthLighting({ inputFilename: input_filename, outputFilename: output_filename, direction, strength, ambient, ...(format ? { format } : {}) })));
+
     server.registerTool("generate_environment_pack", {
       description: "Generate a complete beach, forest, village, or cave asset pack.",
       inputSchema: { kind: z.enum(["beach", "forest", "village", "cave"]), output_prefix: z.string().min(1), width: z.number().int().positive().max(2048), height: z.number().int().positive().max(2048), seed: z.number().int(), tile_size: z.number().int().min(4).max(128).default(16), detail_level: z.enum(["low", "medium", "high"]).default("high") },

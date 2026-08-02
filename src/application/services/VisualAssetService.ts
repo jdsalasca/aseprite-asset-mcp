@@ -7,6 +7,7 @@ import type {
   EnvironmentKind,
   EnvironmentPackInput,
   MaterialTextureInput,
+  DepthLightingInput,
   QualityGateInput,
   ReferenceAnalysis,
   StyleBibleInput,
@@ -17,6 +18,7 @@ import type {
   WorldMapInput,
 } from "../../domain/visual-assets.js";
 import { MaterialTextureService } from "./MaterialTextureService.js";
+import { DepthLightingService } from "./DepthLightingService.js";
 
 const TERRAIN_COLORS: Record<TerrainKind, [number, number, number, number]> = {
   water: [48, 129, 173, 255],
@@ -101,7 +103,7 @@ function smoothNoise(seed: number, x: number, y: number, gridWidth: number, grid
 }
 
 export class VisualAssetService implements VisualAssetGateway {
-  public constructor(private readonly codec: RasterCodec, private readonly manifestWriter: AssetManifestWriter, private readonly materialTextures = new MaterialTextureService(codec)) {}
+  public constructor(private readonly codec: RasterCodec, private readonly manifestWriter: AssetManifestWriter, private readonly materialTextures = new MaterialTextureService(codec), private readonly depthLighting = new DepthLightingService(codec)) {}
 
   public async createStyleBible(input: StyleBibleInput): Promise<AssetOperationResult> {
     try {
@@ -259,6 +261,10 @@ export class VisualAssetService implements VisualAssetGateway {
 
   public async applyMaterialTexture(input: MaterialTextureInput): Promise<AssetOperationResult> {
     return this.materialTextures.apply(input);
+  }
+
+  public async applyDepthLighting(input: DepthLightingInput): Promise<AssetOperationResult> {
+    return this.depthLighting.apply(input);
   }
 
   public async generateEnvironmentPack(input: EnvironmentPackInput): Promise<AssetOperationResult> {

@@ -60,6 +60,26 @@ test("material texture is deterministic, preserves transparency, and cannot over
   assert.match(overwrite.message, /different/);
 });
 
+test("depth lighting is deterministic, directional, and preserves transparent pixels", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "visual-assets-lighting-"));
+  const reference = path.join(directory, "reference.png");
+  const firstOutput = path.join(directory, "light-a.png");
+  const secondOutput = path.join(directory, "light-b.png");
+  await makeReference(reference);
+  const assetService = service();
+  const input = { inputFilename: reference, outputFilename: firstOutput, direction: "south_east" as const, strength: 0.8, ambient: 0.25 };
+  const first = await assetService.applyDepthLighting(input);
+  const second = await assetService.applyDepthLighting({ ...input, outputFilename: secondOutput });
+  assert.equal(first.ok, true);
+  assert.equal(second.ok, true);
+  assert.deepEqual(await fs.readFile(firstOutput), await fs.readFile(secondOutput));
+  const result = await sharp(firstOutput).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  assert.equal(result.data[15], 0);
+  const overwrite = await assetService.applyDepthLighting({ ...input, outputFilename: reference });
+  assert.equal(overwrite.ok, false);
+  assert.match(overwrite.message, /different/);
+});
+
 test("terrain tileset, world map, beach waves, and time-of-day pack are reproducible", async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "visual-assets-world-"));
   const tileset = path.join(directory, "terrain.png");

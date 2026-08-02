@@ -60,6 +60,24 @@ Use `apply_material_texture` when an existing PNG/GIF needs procedural grain wit
 
 Supported materials are `water`, `earth`, `grass`, `stone`, and `snow`. Keep `input_filename` and `output_filename` different; this is enforced before decoding.
 
+## Depth lighting for sprites
+
+Use `apply_depth_lighting` after material texture when a sprite needs more volume. It calculates deterministic edge exposure from the selected light direction and keeps alpha untouched:
+
+```json
+{
+  "name": "apply_depth_lighting",
+  "arguments": {
+    "input_filename": "art/hero/hero-textured.png",
+    "output_filename": "art/hero/hero-lit.png",
+    "direction": "south_east",
+    "strength": 0.7,
+    "ambient": 0.35,
+    "format": "png"
+  }
+}
+```
+
 ## 3. Generate terrain assets
 
 ```json
