@@ -50,13 +50,13 @@ El adaptador CLI concreto ahora es un compositor delgado: `AsepriteLayerAdapter`
 - límites de rutas y tamaño;
 - health checks y métricas de duración, caché y errores.
 
-### Fase 4 · UX de producción
+### Fase 4 · UX de producción — comparación y navegación base implementadas
 
 - editor de recetas;
-- preview antes/después y frames;
+- preview antes/después y frames; `PixelCompare` y `PixelFrameStrip` ya están publicados en la rama de integración y `AssetPreviewPanel` usa la comparación accesible;
 - informes de calidad accionables;
 - accesibilidad, teclado, alto contraste y reduced motion;
-- pruebas visuales y E2E contra el gateway real.
+- pruebas visuales y E2E contra el gateway real; la integración HTTP y el preview SSR ya tienen pruebas TDD.
 
 ### Fase 5 · Releases
 
