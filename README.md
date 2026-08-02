@@ -127,6 +127,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `generate_world_map`: crea mapas multi-bioma deterministas con landmarks y preview.
 - `generate_beach_scene`: crea costa, arena, tierra, preview y oleaje animado.
 - `extend_scene`: amplía un mapa JSON existente por sus bordes, conserva capas y desplaza landmarks de forma determinista.
+- `generate_biome_transition`: detecta fronteras entre biomas, calcula una banda determinista de transición y escribe metadatos/preview para espuma, hierba, roca o bordes de terreno sin mutar el mapa fuente.
 - `generate_seamless_texture`: iguala bordes opuestos para texturas repetibles de agua, tierra, piedra o hierba sin alterar la fuente.
 - `generate_water_reflection`: genera un GIF determinista con reflejo bajo una línea de agua, oleaje y destellos temporales para océanos, playas y mapas.
 - `generate_water_caustics`: genera una pasada GIF de luz refractada sobre píxeles opacos de agua, piscinas, playas o interiores inundados.
@@ -201,6 +202,7 @@ GET /api/v1/library/items/forest-ranger/sprite
 GET /api/v1/library/presets/living-forest/compose
 POST /api/v1/library/presets/generate
 POST /api/v1/effects/scene-stack
+POST /api/v1/scenes/biome-transition
 ```
 
 Las dos últimas rutas sirven PNG/GIF de forma binaria desde el adaptador de archivos, validando primero el id del catálogo y bloqueando escapes del directorio `assets/folders`. Asset Studio las consume para mostrar previews reales en `PixelAssetGrid`.
@@ -240,3 +242,5 @@ La respuesta contiene `artifacts[]` con ruta, operación, cantidad de frames, fo
 ```
 
 El equivalente REST es `POST /api/v1/effects/scene-stack`; devuelve un manifest compacto con un artifact por efecto y mantiene `deterministic: true` y `sourcePreserved: true`.
+
+`generate_biome_transition` recibe `input_map_filename`, `output_map_filename`, `preview_filename` opcional, `transition_width` de 1 a 8 y `seed`. Conserva las capas y landmarks, añade `biomeTransitions[]` con distancia, bioma origen/destino y variante (`edge`, `blend`, `accent`) y genera un preview de un píxel por celda; esto permite que una herramienta posterior pinte espuma, bordes de hierba o roca sin regenerar el mundo.

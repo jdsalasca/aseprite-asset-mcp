@@ -28,6 +28,7 @@ const DESCRIPTION_OVERRIDES: Record<string, string> = {
   generate_world_map: "Generate a seeded multi-biome map manifest.",
   generate_beach_scene: "Generate a beach map with animated waves.",
   extend_scene: "Extend a scene deterministically while preserving layers and landmarks.",
+  generate_biome_transition: "Generate deterministic transition metadata and a preview overlay between adjacent map biomes.",
   generate_time_of_day_pack: "Generate day, sunset, night, and sunrise frames.",
   generate_environment_pack: "Generate a complete themed environment pack.",
   apply_material_texture: "Add deterministic material grain and highlights while preserving transparency.",
@@ -66,7 +67,7 @@ function folderFor(name: string): string {
   if (name === "create_asset_recipe" || name === "execute_asset_recipe") return "asset/recipes";
   if (name === "inspect_reference" || name === "run_asset_quality_gate") return "asset/quality";
   if (name.includes("terrain") || name.includes("tilemap")) return "asset/tilemap";
-  if (name === "extend_scene" || name.includes("world") || name.includes("beach") || name.includes("environment") || name.includes("map")) return "asset/world";
+  if (name === "extend_scene" || name === "generate_biome_transition" || name.includes("world") || name.includes("beach") || name.includes("environment") || name.includes("map")) return "asset/world";
   if (name.includes("time_of_day") || name.includes("weather") || name.includes("wave")) return "asset/environment";
   if (name.endsWith("_plan") || name.includes("recipe") || name.includes("asset_pack")) return "asset/recipes";
   if (name.includes("preview")) return "asset/preview";

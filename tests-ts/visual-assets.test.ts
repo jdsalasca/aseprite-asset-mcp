@@ -141,3 +141,42 @@ test("extends a generated scene deterministically while preserving layers and sh
   assert.equal((await sharp(outputPreview).metadata()).width, 15);
   assert.equal((await sharp(outputPreview).metadata()).height, 9);
 });
+
+test("generates deterministic biome transition metadata and preview without mutating the source map", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "visual-assets-transition-"));
+  const sourceMap = path.join(directory, "source-map.json");
+  const outputMap = path.join(directory, "transition-map.json");
+  const secondMap = path.join(directory, "transition-map-again.json");
+  const preview = path.join(directory, "transition-preview.png");
+  const source = { schemaVersion: 1, kind: "world_map", width: 8, height: 5, seed: 4, biomes: ["water", "sand", "grass"], symbols: { water: "A", sand: "B", grass: "C" }, layers: [{ name: "terrain", rows: ["AAAABBBB", "AAAABBBB", "AAAABBBB", "CCCCBBBB", "CCCCBBBB"] }], landmarks: [{ id: "dock", x: 2, y: 1 }] };
+  await fs.writeFile(sourceMap, `${JSON.stringify(source, null, 2)}\n`, "utf8");
+  const before = await fs.readFile(sourceMap);
+  const assetService = service();
+  const input = { inputMapFilename: sourceMap, outputMapFilename: outputMap, previewFilename: preview, transitionWidth: 2, seed: 73 };
+  const first = await assetService.generateBiomeTransition(input);
+  const second = await assetService.generateBiomeTransition({ ...input, outputMapFilename: secondMap });
+  assert.equal(first.ok, true);
+  assert.equal(second.ok, true);
+  assert.deepEqual(await fs.readFile(outputMap), await fs.readFile(secondMap));
+  assert.deepEqual(await fs.readFile(sourceMap), before);
+  const generated = JSON.parse(await fs.readFile(outputMap, "utf8")) as { width: number; height: number; layers: unknown[]; landmarks: unknown[]; biomeTransitions: Array<{ x: number; y: number; from: string; to: string; distance: number; variant: string }>; transition: { width: number; seed: number; sourceMap: string } };
+  assert.equal(generated.width, 8);
+  assert.equal(generated.height, 5);
+  assert.equal(generated.layers.length, 1);
+  assert.equal(generated.landmarks.length, 1);
+  assert.ok(generated.biomeTransitions.length > 0);
+  assert.ok(generated.biomeTransitions.every((item) => item.distance >= 0 && item.distance <= 2 && item.from !== item.to));
+  assert.deepEqual(generated.transition, { width: 2, seed: 73, sourceMap });
+  assert.deepEqual(await sharp(preview).metadata().then(({ width, height }) => ({ width, height })), { width: 8, height: 5 });
+});
+
+test("biome transition generation rejects malformed maps, unsafe overwrites, and invalid widths", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "visual-assets-transition-invalid-"));
+  const sourceMap = path.join(directory, "source-map.json");
+  await fs.writeFile(sourceMap, JSON.stringify({ width: 2, height: 2, layers: [{ name: "terrain", rows: ["AA", "AA"] }] }), "utf8");
+  const assetService = service();
+  assert.equal((await assetService.generateBiomeTransition({ inputMapFilename: sourceMap, outputMapFilename: sourceMap, transitionWidth: 1, seed: 1 })).ok, false);
+  assert.equal((await assetService.generateBiomeTransition({ inputMapFilename: sourceMap, outputMapFilename: path.join(directory, "out.json"), transitionWidth: 0, seed: 1 })).ok, false);
+  assert.equal((await assetService.generateBiomeTransition({ inputMapFilename: sourceMap, outputMapFilename: path.join(directory, "out-2.json"), transitionWidth: 9, seed: 1 })).ok, false);
+  assert.equal((await assetService.generateBiomeTransition({ inputMapFilename: sourceMap, outputMapFilename: path.join(directory, "out-3.json"), transitionWidth: 1.5, seed: 1 })).ok, false);
+});

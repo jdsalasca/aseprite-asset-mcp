@@ -27,7 +27,7 @@ function fakeUseCases(): AssetRestUseCases {
     applyDepthLighting: async () => result("apply_depth_lighting"),
     assetLibrary: new AssetLibraryService(new FakeLibrary()),
     imageAssets: { upscalePixelArt: async () => result("upscale_pixel_art"), qualityBundle: async () => result("inspect_asset_bundle") },
-    visualAssets: { extendScene: async () => result("extend_scene") },
+    visualAssets: { extendScene: async () => result("extend_scene"), generateBiomeTransition: async () => result("generate_biome_transition") },
   };
 }
 
@@ -90,6 +90,9 @@ test("REST controller exposes the same recipe and effect application services", 
     const extension = await fetch(`${rest.url}/api/v1/scenes/extend`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_map_filename: "map.json", output_map_filename: "map-expanded.json", top: 2, right: 3, bottom: 1, left: 4, seed: 9 }) });
     assert.equal(extension.status, 200);
     assert.equal((await extension.json()).data.operation, "extend_scene");
+    const transition = await fetch(`${rest.url}/api/v1/scenes/biome-transition`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_map_filename: "map.json", output_map_filename: "map-transition.json", preview_filename: "map-transition.png", transition_width: 2, seed: 9 }) });
+    assert.equal(transition.status, 200);
+    assert.equal((await transition.json()).data.operation, "generate_biome_transition");
     const seamless = await fetch(`${rest.url}/api/v1/effects/seamless`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_filename: "hero.png", output_filename: "hero-seamless.png", seam_width: 2 }) });
     assert.equal(seamless.status, 200);
     assert.equal((await seamless.json()).data.operation, "generate_seamless_texture");

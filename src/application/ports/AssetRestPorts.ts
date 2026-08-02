@@ -21,7 +21,7 @@ export interface AssetRestUseCases {
   applyDepthLighting(input: DepthLightingInput): Promise<AssetOperationResult>;
   assetLibrary: AssetLibraryService;
   imageAssets: Pick<PixelArtAssetService, "upscalePixelArt" | "qualityBundle">;
-  visualAssets: Pick<VisualAssetGateway, "extendScene">;
+  visualAssets: Pick<VisualAssetGateway, "extendScene" | "generateBiomeTransition">;
 }
 
 export type AssetRestEffectInput = PixelOutlineInput | ColorGradeInput | SpriteShadowInput | ParticleBurstInput | NormalMapInput;

@@ -12,6 +12,7 @@ import type {
   ReferenceAnalysis,
   StyleBibleInput,
   SceneExtensionInput,
+  BiomeTransitionInput,
   TerrainKind,
   TerrainTilesetInput,
   TimeOfDayInput,
@@ -93,6 +94,53 @@ function validatePathPair(inputFilename: string, outputFilename: string): void {
 function validatePadding(padding: SceneExtensionInput["padding"]): void {
   const values = [padding.top, padding.right, padding.bottom, padding.left];
   if (values.some((value) => !Number.isInteger(value) || value < 0 || value > 512) || values.every((value) => value === 0)) throw new Error("Scene padding must use integers from 0 to 512 and extend at least one side");
+}
+
+interface BiomeTransitionRecord { x: number; y: number; from: string; to: string; distance: number; variant: "edge" | "blend" | "accent"; }
+
+function validateTransitionWidth(width: number): void {
+  if (!Number.isInteger(width) || width < 1 || width > 8) throw new Error("Biome transition width must be an integer from 1 to 8");
+}
+
+function buildBiomeTransitions(rows: string[], width: number, height: number, transitionWidth: number, seed: number): BiomeTransitionRecord[] {
+  const cellCount = width * height;
+  const distance = new Int16Array(cellCount);
+  distance.fill(-1);
+  const from = new Array<string>(cellCount).fill("");
+  const to = new Array<string>(cellCount).fill("");
+  const queue: number[] = [];
+  const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]] as const;
+  for (let y = 0; y < height; y += 1) for (let x = 0; x < width; x += 1) {
+    const current = rows[y]?.[x] ?? "A";
+    const index = y * width + x;
+    for (const [dx, dy] of directions) {
+      const neighborX = x + dx; const neighborY = y + dy;
+      if (neighborX < 0 || neighborY < 0 || neighborX >= width || neighborY >= height) continue;
+      const neighbor = rows[neighborY]?.[neighborX] ?? current;
+      if (neighbor === current) continue;
+      distance[index] = 0; from[index] = current; to[index] = neighbor; queue.push(index); break;
+    }
+  }
+  for (let cursor = 0; cursor < queue.length; cursor += 1) {
+    const index = queue[cursor]!; const x = index % width; const y = Math.floor(index / width); const nextDistance = (distance[index] ?? -1) + 1;
+    if (nextDistance > transitionWidth) continue;
+    for (const [dx, dy] of directions) {
+      const neighborX = x + dx; const neighborY = y + dy;
+      if (neighborX < 0 || neighborY < 0 || neighborX >= width || neighborY >= height) continue;
+      const neighborIndex = neighborY * width + neighborX;
+      if (distance[neighborIndex] !== -1) continue;
+      distance[neighborIndex] = nextDistance; from[neighborIndex] = from[index]!; to[neighborIndex] = to[index]!; queue.push(neighborIndex);
+    }
+  }
+  const maximum = Math.min(cellCount, 200_000);
+  const transitions: BiomeTransitionRecord[] = [];
+  for (let index = 0; index < cellCount && transitions.length < maximum; index += 1) {
+    const cellDistance = distance[index] ?? -1;
+    if (cellDistance < 0 || cellDistance > transitionWidth || from[index] === to[index]) continue;
+    const x = index % width; const y = Math.floor(index / width); const roll = hashNoise(seed + 31, x, y);
+    transitions.push({ x, y, from: rows[y]?.[x] ?? from[index]!, to: to[index]!, distance: cellDistance, variant: roll < 0.34 ? "edge" : roll < 0.67 ? "blend" : "accent" });
+  }
+  return transitions;
 }
 
 function clamp(value: number, minimum: number, maximum: number): number { return Math.max(minimum, Math.min(maximum, value)); }
@@ -305,6 +353,40 @@ export class VisualAssetService implements VisualAssetGateway {
     } catch (error) { return fail(error); }
   }
 
+  public async generateBiomeTransition(input: BiomeTransitionInput): Promise<AssetOperationResult> {
+    try {
+      validatePathPair(input.inputMapFilename, input.outputMapFilename);
+      validateTransitionWidth(input.transitionWidth);
+      if (!Number.isInteger(input.seed)) throw new Error("Biome transition seed must be an integer");
+      if (!this.manifestReader) throw new Error("An asset manifest reader is required to generate biome transitions");
+      const source = await this.manifestReader.read<{
+        width: number;
+        height: number;
+        biomes?: unknown;
+        symbols?: Record<string, string>;
+        layers?: Array<{ name?: string; rows?: unknown }>;
+        landmarks?: unknown[];
+        [key: string]: unknown;
+      }>(input.inputMapFilename);
+      validateDimensions(source.width, source.height);
+      const layers = source.layers ?? [];
+      if (layers.length === 0) throw new Error("Scene map must contain at least one layer");
+      const terrainLayer = layers.find((layer) => layer.name === "terrain") ?? layers[0];
+      if (!terrainLayer || !Array.isArray(terrainLayer.rows) || terrainLayer.rows.length !== source.height || terrainLayer.rows.some((row) => typeof row !== "string" || row.length !== source.width)) throw new Error("Terrain layer rows must match the map dimensions");
+      const rows = terrainLayer.rows as string[];
+      const transitions = buildBiomeTransitions(rows, source.width, source.height, input.transitionWidth, input.seed);
+      const output = { ...source, schemaVersion: 1, biomeTransitions: transitions, transition: { sourceMap: input.inputMapFilename, width: input.transitionWidth, seed: input.seed } };
+      await this.manifestWriter.write(input.outputMapFilename, output);
+      if (input.previewFilename) {
+        const rawBiomes = Array.isArray(source.biomes) ? source.biomes.filter((biome): biome is TerrainKind => typeof biome === "string" && biome in TERRAIN_COLORS) : [];
+        const biomes: TerrainKind[] = rawBiomes.length ? rawBiomes : ["water"];
+        const symbols = new Map<TerrainKind, string>(biomes.map((biome, index) => [biome, source.symbols?.[biome] ?? String.fromCharCode(65 + index)]));
+        await this.codec.encode([this.mapPreview(rows, biomes, symbols, 0, transitions)], input.previewFilename, "png");
+      }
+      return ok({ operation: "generate_biome_transition", input: input.inputMapFilename, output: input.outputMapFilename, preview: input.previewFilename ?? null, width: source.width, height: source.height, transitionWidth: input.transitionWidth, transitions: transitions.length, seed: input.seed, sourcePreserved: true, deterministic: true });
+    } catch (error) { return fail(error); }
+  }
+
   public async generateTimeOfDayPack(input: TimeOfDayInput): Promise<AssetOperationResult> {
     try {
       const source = await this.codec.decode(input.inputFilename);
@@ -396,7 +478,7 @@ export class VisualAssetService implements VisualAssetGateway {
     return { rows, symbols, map: { schemaVersion: 1, kind: "world_map", width: input.width, height: input.height, seed: input.seed, biomes: input.biomes, symbols: Object.fromEntries(symbols), layers: [{ name: "terrain", rows }], landmarks, detailLevel: input.detailLevel ?? "medium" } };
   }
 
-  private mapPreview(rows: string[], biomes: TerrainKind[], symbols: Map<TerrainKind, string>, phase = 0): RasterFrame {
+  private mapPreview(rows: string[], biomes: TerrainKind[], symbols: Map<TerrainKind, string>, phase = 0, transitions: BiomeTransitionRecord[] = []): RasterFrame {
     const height = rows.length;
     const width = rows[0]?.length ?? 1;
     const pixels = new Uint8ClampedArray(width * height * 4);
@@ -413,6 +495,16 @@ export class VisualAssetService implements VisualAssetGateway {
             : base;
         pixels.set(wave, (y * width + x) * 4);
       }
+    }
+    for (const transition of transitions) {
+      if (transition.x < 0 || transition.y < 0 || transition.x >= width || transition.y >= height) continue;
+      const target = TERRAIN_COLORS[reverse.get(transition.to) ?? biomes[0] ?? "water"];
+      const offset = (transition.y * width + transition.x) * 4;
+      const mix = transition.variant === "edge" ? 0.75 : transition.variant === "blend" ? 0.5 : 0.3;
+      pixels[offset] = Math.round((pixels[offset] ?? 0) * (1 - mix) + target[0] * mix);
+      pixels[offset + 1] = Math.round((pixels[offset + 1] ?? 0) * (1 - mix) + target[1] * mix);
+      pixels[offset + 2] = Math.round((pixels[offset + 2] ?? 0) * (1 - mix) + target[2] * mix);
+      pixels[offset + 3] = 255;
     }
     return { width, height, pixels };
   }

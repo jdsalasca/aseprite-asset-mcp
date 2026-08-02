@@ -73,6 +73,14 @@ export interface SceneExtensionInput {
   seed: number;
 }
 
+export interface BiomeTransitionInput {
+  inputMapFilename: string;
+  outputMapFilename: string;
+  previewFilename?: string | undefined;
+  transitionWidth: number;
+  seed: number;
+}
+
 export interface TimeOfDayInput {
   inputFilename: string;
   outputFilename: string;
@@ -123,6 +131,7 @@ export interface VisualAssetGateway {
   generateWorldMap(input: WorldMapInput): Promise<AssetOperationResult>;
   generateBeachScene(input: BeachSceneInput): Promise<AssetOperationResult>;
   extendScene(input: SceneExtensionInput): Promise<AssetOperationResult>;
+  generateBiomeTransition(input: BiomeTransitionInput): Promise<AssetOperationResult>;
   generateTimeOfDayPack(input: TimeOfDayInput): Promise<AssetOperationResult>;
   applyMaterialTexture(input: MaterialTextureInput): Promise<AssetOperationResult>;
   applyDepthLighting(input: DepthLightingInput): Promise<AssetOperationResult>;

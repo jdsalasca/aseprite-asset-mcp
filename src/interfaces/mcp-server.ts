@@ -192,6 +192,7 @@ const TOOL_NAMES = [
   "generate_world_map",
   "generate_beach_scene",
   "extend_scene",
+  "generate_biome_transition",
   "generate_time_of_day_pack",
   "generate_environment_pack",
   "apply_material_texture",
@@ -256,7 +257,7 @@ export class AsepriteMcpServerAdapter {
       generateNormalMap: (input) => this.spriteEffects.generateNormalMap(input),
       runQualityGate: (input) => this.visualAssets.runQualityGate(input),
     });
-    this.restController = new AssetRestController({ createRecipe: (input) => this.recipes.compose(input), executeRecipe: (input) => this.recipeExecutor.execute(this.recipes.compose(input)), spriteEffects: this.spriteEffects, variantPack: this.variantPack, presetGeneration: this.presetGeneration, sceneEffectStack: this.sceneEffectStack, applyMaterialTexture: (input) => this.visualAssets.applyMaterialTexture(input), applyDepthLighting: (input) => this.visualAssets.applyDepthLighting(input), assetLibrary: this.assetLibrary, imageAssets: this.imageAssets, visualAssets: this.visualAssets }, SERVER_VERSION);
+    this.restController = new AssetRestController({ createRecipe: (input) => this.recipes.compose(input), executeRecipe: (input) => this.recipeExecutor.execute(this.recipes.compose(input)), spriteEffects: this.spriteEffects, variantPack: this.variantPack, presetGeneration: this.presetGeneration, sceneEffectStack: this.sceneEffectStack, applyMaterialTexture: (input) => this.visualAssets.applyMaterialTexture(input), applyDepthLighting: (input) => this.visualAssets.applyDepthLighting(input), assetLibrary: this.assetLibrary, imageAssets: this.imageAssets, visualAssets: { extendScene: (input) => this.visualAssets.extendScene(input), generateBiomeTransition: (input) => this.visualAssets.generateBiomeTransition(input) } }, SERVER_VERSION);
     this.enhancements = new DeterministicEnhancementService(rasterCodec);
     this.assetJobs = new AssetJobService({ run: (input) => this.imageAssets.runBatch(input) }, jobStore ?? new InMemoryAssetJobStore(), { artifactResolver: new FileAssetArtifactResolver(() => new Date().toISOString(), process.env.ASSET_ARTIFACT_ROOT ? [process.env.ASSET_ARTIFACT_ROOT] : []), timeoutMs: 5 * 60 * 1000 });
     this.server = new McpServer({ name: "aseprite-asset-mcp", version: SERVER_VERSION });

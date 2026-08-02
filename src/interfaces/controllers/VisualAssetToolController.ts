@@ -44,6 +44,11 @@ export class VisualAssetToolController {
       inputSchema: { input_map_filename: z.string().min(1), output_map_filename: z.string().min(1), preview_filename: z.string().min(1).optional(), top: z.number().int().min(0).max(512).default(0), right: z.number().int().min(0).max(512).default(0), bottom: z.number().int().min(0).max(512).default(0), left: z.number().int().min(0).max(512).default(0), seed: z.number().int().default(1) },
     }, async ({ input_map_filename, output_map_filename, preview_filename, top, right, bottom, left, seed }) => this.result(await this.visualAssets.extendScene({ inputMapFilename: input_map_filename, outputMapFilename: output_map_filename, ...(preview_filename ? { previewFilename: preview_filename } : {}), padding: { top, right, bottom, left }, seed })));
 
+    server.registerTool("generate_biome_transition", {
+      description: "Generate deterministic transition metadata and a preview overlay between adjacent map biomes without mutating the source map.",
+      inputSchema: { input_map_filename: z.string().min(1), output_map_filename: z.string().min(1), preview_filename: z.string().min(1).optional(), transition_width: z.number().int().min(1).max(8).default(2), seed: z.number().int().default(1) },
+    }, async ({ input_map_filename, output_map_filename, preview_filename, transition_width, seed }) => this.result(await this.visualAssets.generateBiomeTransition({ inputMapFilename: input_map_filename, outputMapFilename: output_map_filename, ...(preview_filename ? { previewFilename: preview_filename } : {}), transitionWidth: transition_width, seed })));
+
     server.registerTool("generate_time_of_day_pack", {
       description: "Generate a deterministic day, sunset, night, and sunrise GIF pack.",
       inputSchema: { input_filename: z.string().min(1), output_filename: z.string().min(1), manifest_filename: z.string().min(1).optional(), steps: z.number().int().min(2).max(24).default(8), delay_ms: z.number().int().positive().default(180) },
