@@ -24,6 +24,7 @@ function fakeUseCases(): AssetRestUseCases {
     applyDepthLighting: async () => result("apply_depth_lighting"),
     assetLibrary: new AssetLibraryService(new FakeLibrary()),
     imageAssets: { upscalePixelArt: async () => result("upscale_pixel_art") },
+    visualAssets: { extendScene: async () => result("extend_scene") },
   };
 }
 
@@ -83,6 +84,9 @@ test("REST controller exposes the same recipe and effect application services", 
     const upscale = await fetch(`${rest.url}/api/v1/effects/upscale`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_filename: "hero.png", output_filename: "hero-3x.png", scale: 3 }) });
     assert.equal(upscale.status, 200);
     assert.equal((await upscale.json()).data.operation, "upscale_pixel_art");
+    const extension = await fetch(`${rest.url}/api/v1/scenes/extend`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_map_filename: "map.json", output_map_filename: "map-expanded.json", top: 2, right: 3, bottom: 1, left: 4, seed: 9 }) });
+    assert.equal(extension.status, 200);
+    assert.equal((await extension.json()).data.operation, "extend_scene");
 
     const invalid = await fetch(`${rest.url}/api/v1/effects/outline`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_filename: "hero.png", output_filename: "hero-outline.png", color: "nope" }) });
     assert.equal(invalid.status, 400);

@@ -1,5 +1,5 @@
 import { inspectRasterFrame } from "./PixelArtPipeline.js";
-import type { AssetManifestWriter, RasterCodec } from "../../domain/image-assets.js";
+import type { AssetManifestReader, AssetManifestWriter, RasterCodec } from "../../domain/image-assets.js";
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { RasterFrame } from "../../domain/pixel-art.js";
 import type {
@@ -11,6 +11,7 @@ import type {
   QualityGateInput,
   ReferenceAnalysis,
   StyleBibleInput,
+  SceneExtensionInput,
   TerrainKind,
   TerrainTilesetInput,
   TimeOfDayInput,
@@ -84,6 +85,35 @@ function validateDimensions(width: number, height: number): void {
   if (!Number.isInteger(width) || width < 1 || width > 2048 || !Number.isInteger(height) || height < 1 || height > 2048) throw new Error("Map dimensions must be integers from 1 to 2048");
 }
 
+function validatePathPair(inputFilename: string, outputFilename: string): void {
+  if (!inputFilename.trim() || !outputFilename.trim()) throw new Error("Input and output map filenames are required");
+  if (inputFilename.toLowerCase() === outputFilename.toLowerCase()) throw new Error("Input and output map filenames must differ");
+}
+
+function validatePadding(padding: SceneExtensionInput["padding"]): void {
+  const values = [padding.top, padding.right, padding.bottom, padding.left];
+  if (values.some((value) => !Number.isInteger(value) || value < 0 || value > 512) || values.every((value) => value === 0)) throw new Error("Scene padding must use integers from 0 to 512 and extend at least one side");
+}
+
+function clamp(value: number, minimum: number, maximum: number): number { return Math.max(minimum, Math.min(maximum, value)); }
+
+function extendRows(rows: string[], width: number, height: number, padding: SceneExtensionInput["padding"], seed: number): string[] {
+  const outputWidth = width + padding.left + padding.right;
+  const outputHeight = height + padding.top + padding.bottom;
+  return Array.from({ length: outputHeight }, (_, targetY) => Array.from({ length: outputWidth }, (_, targetX) => {
+    const sourceX = targetX - padding.left;
+    const sourceY = targetY - padding.top;
+    if (sourceX >= 0 && sourceX < width && sourceY >= 0 && sourceY < height) return rows[sourceY]![sourceX]!;
+    const edgeX = clamp(sourceX, 0, width - 1);
+    const edgeY = clamp(sourceY, 0, height - 1);
+    const jitterX = Math.floor(hashNoise(seed, targetX, targetY) * 3) - 1;
+    const jitterY = Math.floor(hashNoise(seed + 17, targetX, targetY) * 3) - 1;
+    const sampleX = clamp(edgeX + jitterX, 0, width - 1);
+    const sampleY = clamp(edgeY + jitterY, 0, height - 1);
+    return rows[sampleY]![sampleX]!;
+  }).join(""));
+}
+
 function hashNoise(seed: number, x: number, y: number): number {
   let value = Math.imul(x + seed * 31, 374761393) ^ Math.imul(y + seed * 17, 668265263);
   value = Math.imul(value ^ (value >>> 13), 1274126177);
@@ -103,7 +133,7 @@ function smoothNoise(seed: number, x: number, y: number, gridWidth: number, grid
 }
 
 export class VisualAssetService implements VisualAssetGateway {
-  public constructor(private readonly codec: RasterCodec, private readonly manifestWriter: AssetManifestWriter, private readonly materialTextures = new MaterialTextureService(codec), private readonly depthLighting = new DepthLightingService(codec)) {}
+  public constructor(private readonly codec: RasterCodec, private readonly manifestWriter: AssetManifestWriter, private readonly materialTextures = new MaterialTextureService(codec), private readonly depthLighting = new DepthLightingService(codec), private readonly manifestReader?: AssetManifestReader) {}
 
   public async createStyleBible(input: StyleBibleInput): Promise<AssetOperationResult> {
     try {
@@ -233,6 +263,45 @@ export class VisualAssetService implements VisualAssetGateway {
       frames.forEach((frame) => { frame.delayMs = input.waveDelayMs ?? 140; });
       await this.codec.encode(frames, input.waveFilename, "gif");
       return ok({ operation: "generate_beach_scene", map: input.mapFilename, preview: input.previewFilename ?? null, waveGif: input.waveFilename, frames: frames.length, seed: input.seed });
+    } catch (error) { return fail(error); }
+  }
+
+  public async extendScene(input: SceneExtensionInput): Promise<AssetOperationResult> {
+    try {
+      validatePathPair(input.inputMapFilename, input.outputMapFilename);
+      validatePadding(input.padding);
+      if (!this.manifestReader) throw new Error("An asset manifest reader is required to extend a scene");
+      if (!Number.isInteger(input.seed)) throw new Error("Scene extension seed must be an integer");
+      const source = await this.manifestReader.read<{
+        width: number;
+        height: number;
+        biomes?: unknown;
+        symbols?: Record<string, string>;
+        layers?: Array<{ name?: string; rows?: unknown }>;
+        landmarks?: Array<Record<string, unknown>>;
+        [key: string]: unknown;
+      }>(input.inputMapFilename);
+      validateDimensions(source.width, source.height);
+      const layers = source.layers ?? [];
+      if (layers.length === 0) throw new Error("Scene map must contain at least one layer");
+      const normalizedLayers = layers.map((layer) => {
+        if (!Array.isArray(layer.rows) || layer.rows.length !== source.height || layer.rows.some((row) => typeof row !== "string" || row.length !== source.width)) throw new Error("Scene layers must contain rows matching the map dimensions");
+        return { ...layer, rows: extendRows(layer.rows as string[], source.width, source.height, input.padding, input.seed) };
+      });
+      const outputWidth = source.width + input.padding.left + input.padding.right;
+      const outputHeight = source.height + input.padding.top + input.padding.bottom;
+      if (outputWidth > 4096 || outputHeight > 4096) throw new Error("Extended scene dimensions must not exceed 4096");
+      const landmarks = Array.isArray(source.landmarks) ? source.landmarks.map((landmark) => ({ ...landmark, ...(typeof landmark.x === "number" ? { x: landmark.x + input.padding.left } : {}), ...(typeof landmark.y === "number" ? { y: landmark.y + input.padding.top } : {}) })) : [];
+      const output = { ...source, schemaVersion: 1, kind: source.kind ?? "world_map", width: outputWidth, height: outputHeight, layers: normalizedLayers, landmarks, extension: { sourceMap: input.inputMapFilename, padding: input.padding, seed: input.seed } };
+      await this.manifestWriter.write(input.outputMapFilename, output);
+      if (input.previewFilename) {
+        const rawBiomes = Array.isArray(source.biomes) ? source.biomes.filter((biome): biome is TerrainKind => typeof biome === "string" && biome in TERRAIN_COLORS) : [];
+        const biomes: TerrainKind[] = rawBiomes.length >= 1 ? rawBiomes : ["water"];
+        const symbols = new Map<TerrainKind, string>(biomes.map((biome, index) => [biome, source.symbols?.[biome] ?? String.fromCharCode(65 + index)]));
+        const terrainRows = normalizedLayers.find((layer) => layer.name === "terrain")?.rows ?? normalizedLayers[0]!.rows;
+        await this.codec.encode([this.mapPreview(terrainRows, biomes, symbols)], input.previewFilename, "png");
+      }
+      return ok({ operation: "extend_scene", input: input.inputMapFilename, output: input.outputMapFilename, preview: input.previewFilename ?? null, width: outputWidth, height: outputHeight, padding: input.padding, seed: input.seed, layers: normalizedLayers.length, sourcePreserved: true, deterministic: true });
     } catch (error) { return fail(error); }
   }
 

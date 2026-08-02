@@ -51,6 +51,10 @@ export interface AssetManifestWriter {
   write(filename: string, value: unknown): Promise<void>;
 }
 
+export interface AssetManifestReader {
+  read<T>(filename: string): Promise<T>;
+}
+
 export type AssetRecipe = "pixel_art" | "animation_pixel_art" | "gif" | "atlas";
 
 export interface AssetRecipeInput {

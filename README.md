@@ -125,6 +125,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `build_terrain_tileset`: genera 16 máscaras cardinales por terreno para transiciones reutilizables.
 - `generate_world_map`: crea mapas multi-bioma deterministas con landmarks y preview.
 - `generate_beach_scene`: crea costa, arena, tierra, preview y oleaje animado.
+- `extend_scene`: amplía un mapa JSON existente por sus bordes, conserva capas y desplaza landmarks de forma determinista.
 - `generate_time_of_day_pack`: crea transición día, atardecer, noche y amanecer.
 - `generate_environment_pack`: empaqueta playa, bosque, aldea o cueva en una sola llamada.
 - `create_asset_recipe`: compone outline, grading, materiales, luz, sombras, partículas, normal map y quality gate en un plan determinista sin ejecutar cambios.

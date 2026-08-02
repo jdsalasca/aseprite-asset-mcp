@@ -65,6 +65,14 @@ export interface BeachSceneInput extends WorldMapInput {
   waveDelayMs?: number | undefined;
 }
 
+export interface SceneExtensionInput {
+  inputMapFilename: string;
+  outputMapFilename: string;
+  previewFilename?: string | undefined;
+  padding: { top: number; right: number; bottom: number; left: number };
+  seed: number;
+}
+
 export interface TimeOfDayInput {
   inputFilename: string;
   outputFilename: string;
@@ -114,6 +122,7 @@ export interface VisualAssetGateway {
   buildTerrainTileset(input: TerrainTilesetInput): Promise<AssetOperationResult>;
   generateWorldMap(input: WorldMapInput): Promise<AssetOperationResult>;
   generateBeachScene(input: BeachSceneInput): Promise<AssetOperationResult>;
+  extendScene(input: SceneExtensionInput): Promise<AssetOperationResult>;
   generateTimeOfDayPack(input: TimeOfDayInput): Promise<AssetOperationResult>;
   applyMaterialTexture(input: MaterialTextureInput): Promise<AssetOperationResult>;
   applyDepthLighting(input: DepthLightingInput): Promise<AssetOperationResult>;

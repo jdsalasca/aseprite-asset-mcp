@@ -16,7 +16,7 @@ async function makeReference(filename: string): Promise<void> {
   await sharp(Buffer.from(pixels), { raw: { width: 2, height: 2, channels: 4 } }).png().toFile(filename);
 }
 
-function service(): VisualAssetService { return new VisualAssetService(new SharpRasterCodec(), new JsonAssetManifestWriter()); }
+function service(): VisualAssetService { const manifest = new JsonAssetManifestWriter(); return new VisualAssetService(new SharpRasterCodec(), manifest, undefined, undefined, manifest); }
 
 test("style bible and reference analysis produce compact contracts", async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "visual-assets-style-"));
@@ -112,4 +112,32 @@ test("environment pack creates one themed artifact manifest", async () => {
   assert.equal((await fs.stat(path.join(directory, "forest-tileset.png"))).isFile(), true);
   assert.equal((await fs.stat(path.join(directory, "forest-map.json"))).isFile(), true);
   assert.equal((await fs.stat(path.join(directory, "forest-time-of-day.gif"))).isFile(), true);
+});
+
+test("extends a generated scene deterministically while preserving layers and shifting landmarks", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "visual-assets-extension-"));
+  const sourceMap = path.join(directory, "source-map.json");
+  const sourcePreview = path.join(directory, "source-preview.png");
+  const outputMap = path.join(directory, "extended-map.json");
+  const outputPreview = path.join(directory, "extended-preview.png");
+  const assetService = service();
+  assert.equal((await assetService.generateWorldMap({ mapFilename: sourceMap, previewFilename: sourcePreview, width: 8, height: 6, seed: 12, biomes: ["water", "sand", "grass"], landmarkCount: 2 })).ok, true);
+
+  const first = await assetService.extendScene({ inputMapFilename: sourceMap, outputMapFilename: outputMap, previewFilename: outputPreview, padding: { top: 2, right: 3, bottom: 1, left: 4 }, seed: 99 });
+  assert.equal(first.ok, true);
+  const secondMap = path.join(directory, "extended-map-again.json");
+  const second = await assetService.extendScene({ inputMapFilename: sourceMap, outputMapFilename: secondMap, padding: { top: 2, right: 3, bottom: 1, left: 4 }, seed: 99 });
+  assert.equal(second.ok, true);
+  assert.deepEqual(await fs.readFile(outputMap), await fs.readFile(secondMap));
+  const extended = JSON.parse(await fs.readFile(outputMap, "utf8")) as { width: number; height: number; layers: Array<{ rows: string[] }>; landmarks: Array<{ x: number; y: number }>; extension: { padding: { left: number; top: number } } };
+  const source = JSON.parse(await fs.readFile(sourceMap, "utf8")) as { layers: Array<{ rows: string[] }>; landmarks: Array<{ x: number; y: number }> };
+  assert.equal(extended.width, 15);
+  assert.equal(extended.height, 9);
+  assert.equal(extended.layers[0]!.rows[2]!.slice(4, 12), source.layers[0]!.rows[0]);
+  assert.equal(extended.layers[0]!.rows[3]!.slice(4, 12), source.layers[0]!.rows[1]);
+  assert.equal(extended.landmarks[0]!.x, source.landmarks[0]!.x + 4);
+  assert.equal(extended.landmarks[0]!.y, source.landmarks[0]!.y + 2);
+  assert.deepEqual(extended.extension.padding, { top: 2, right: 3, bottom: 1, left: 4 });
+  assert.equal((await sharp(outputPreview).metadata()).width, 15);
+  assert.equal((await sharp(outputPreview).metadata()).height, 9);
 });

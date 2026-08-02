@@ -11,9 +11,11 @@ PowerShell:
 
 Health: GET http://127.0.0.1:3766/api/v1/health
 
-Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lighting y /api/v1/effects/outline, /api/v1/effects/color-grade, /api/v1/effects/shadow, /api/v1/effects/particles, /api/v1/effects/normal-map, /api/v1/effects/rain, /api/v1/effects/motion y /api/v1/effects/upscale.
+Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lighting y /api/v1/effects/outline, /api/v1/effects/color-grade, /api/v1/effects/shadow, /api/v1/effects/particles, /api/v1/effects/normal-map, /api/v1/effects/rain, /api/v1/effects/motion, /api/v1/effects/upscale y /api/v1/scenes/extend.
 
 `/api/v1/effects/upscale` recibe `{ "input_filename": "hero.png", "output_filename": "hero-3x.png", "scale": 3 }`. Usa nearest-neighbor determinista, conserva transparencia y delays cuando la entrada es animada, rechaza sobrescribir la fuente y limita cada dimensión resultante a 4096 px.
+
+`/api/v1/scenes/extend` recibe `{ "input_map_filename": "world-map.json", "output_map_filename": "world-map-expanded.json", "top": 2, "right": 8, "bottom": 1, "left": 4, "seed": 9 }`. Lee el mapa mediante el puerto de manifiestos, preserva el centro y las capas, desplaza landmarks y puede escribir un preview PNG.
 
 El sidecar solo escucha en 127.0.0.1, acepta CORS de localhost y 127.0.0.1, y rechaza orígenes externos. La UX asset-studio usa normalmente su gateway en 127.0.0.1:3765, que controla el proceso MCP por stdio y centraliza logs, diagnóstico y fallos.
 
