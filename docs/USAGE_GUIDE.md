@@ -11,7 +11,7 @@ PowerShell:
 
 Health: GET http://127.0.0.1:3766/api/v1/health
 
-Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lighting y /api/v1/effects/outline, /api/v1/effects/color-grade, /api/v1/effects/shadow, /api/v1/effects/particles, /api/v1/effects/normal-map, /api/v1/effects/rain, /api/v1/effects/motion, /api/v1/effects/upscale, /api/v1/assets/palette-harmonize, /api/v1/assets/contact-sheet, /api/v1/assets/quality-batch, /api/v1/assets/animation-quality, /api/v1/assets/normalize-sprite, /api/v1/assets/sprite-geometry, /api/v1/assets/sprite-hitboxes, /api/v1/effects/seamless, /api/v1/effects/water-reflection, /api/v1/effects/water-caustics, /api/v1/effects/day-night, /api/v1/effects/scene-stack, /api/v1/variants/pack, /api/v1/scenes/extend y /api/v1/scenes/biome-transition. La auditoría de biblioteca está disponible como GET /api/v1/library/audit.
+Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lighting y /api/v1/effects/outline, /api/v1/effects/color-grade, /api/v1/effects/shadow, /api/v1/effects/particles, /api/v1/effects/normal-map, /api/v1/effects/rain, /api/v1/effects/motion, /api/v1/effects/upscale, /api/v1/assets/palette-harmonize, /api/v1/assets/contact-sheet, /api/v1/assets/quality-batch, /api/v1/assets/animation-quality, /api/v1/assets/normalize-sprite, /api/v1/assets/sprite-geometry, /api/v1/assets/sprite-hitboxes, /api/v1/effects/seamless, /api/v1/effects/water-reflection, /api/v1/effects/water-caustics, /api/v1/effects/day-night, /api/v1/effects/scene-stack, /api/v1/variants/pack, /api/v1/scenes/extend y /api/v1/scenes/biome-transition. La auditoría está disponible como GET /api/v1/library/audit y el resumen de navegación como GET /api/v1/library/summary.
 
 `/api/v1/effects/upscale` recibe `{ "input_filename": "hero.png", "output_filename": "hero-3x.png", "scale": 3 }`. Usa nearest-neighbor determinista, conserva transparencia y delays cuando la entrada es animada, rechaza sobrescribir la fuente y limita cada dimensión resultante a 4096 px.
 
@@ -24,6 +24,8 @@ Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lightin
 `/api/v1/scenes/biome-transition` recibe `{ "input_map_filename": "world-map.json", "output_map_filename": "world-map-transitions.json", "preview_filename": "world-map-transitions.png", "transition_width": 2, "seed": 73 }`. Calcula la banda alrededor de fronteras de biomas y entrega metadatos deterministas para que el motor aplique espuma, hierba, roca u otros tiles de transición sin tocar el mapa original.
 
 `/api/v1/library/audit` y el tool `audit_asset_library` auditan el catálogo sin generar archivos. Comprueban duplicados de IDs, categorías desconocidas, referencias de presets inexistentes y rutas absolutas o con escapes `..`; devuelven conteos de assets, carpetas, presets, categorías, README, previews y sprites junto con `valid`, `violations`, `deterministic` y `sourcePreserved`.
+
+`/api/v1/library/summary` y el tool `summarize_asset_library` devuelven solamente conteos, categorías ordenadas, hasta tres ejemplos por categoría y presets compactos. Es la primera llamada recomendada para que un agente o la UX navegue una biblioteca grande sin consumir el catálogo completo.
 
 `/api/v1/effects/seamless` recibe `{ "input_filename": "water.png", "output_filename": "water-seamless.png", "seam_width": 2 }` y hace coincidir bordes opuestos para repetir el asset en mapas y fondos.
 
