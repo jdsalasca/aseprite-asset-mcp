@@ -33,6 +33,8 @@ Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lightin
 
 `POST /api/v1/library/scene-animation-compose` recibe los mismos campos más `{ "frames": 8, "delay_ms": 90 }` y usa `compose_asset_scene_animation`. Las previews PNG/GIF se decodifican desde memoria, cada capa rota sus frames de forma cíclica y el resultado se exporta como GIF con `frameLayers` en el manifest para inspección humana o consumo directo del juego.
 
+`POST /api/v1/library/variants/pack` recibe `{ "item_ids": ["oak", "pine"], "output_prefix": "output/library-variants", "variants": ["rain", "walk", "birds"], "frames": 8, "seed": 9, "delay_ms": 90 }`. Genera los outputs agrupados por asset y `output/library-variants.json`; los algoritmos permanecen centralizados en `AssetVariantPackService` y los temporales de previews se eliminan al terminar.
+
 `/api/v1/effects/seamless` recibe `{ "input_filename": "water.png", "output_filename": "water-seamless.png", "seam_width": 2 }` y hace coincidir bordes opuestos para repetir el asset en mapas y fondos.
 
 `/api/v1/effects/water-reflection` recibe `{ "input_filename": "ocean.png", "output_filename": "ocean-reflection.gif", "waterline": 32, "frames": 8, "seed": 7, "amplitude": 2, "opacity": 0.6 }`. Conserva el original, refleja los píxeles sobre la línea de agua, aplica desplazamiento de oleaje y añade un destello determinista por frame.

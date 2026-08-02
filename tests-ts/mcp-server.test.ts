@@ -160,6 +160,7 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("plan_asset_scene"));
     assert.ok(tools.includes("compose_asset_scene"));
     assert.ok(tools.includes("compose_asset_scene_animation"));
+    assert.ok(tools.includes("generate_library_variant_pack"));
     assert.ok(tools.includes("generate_asset_preset"));
     assert.ok(tools.includes("generate_scene_effect_stack"));
     assert.ok(!tools.includes("legacy_server"));

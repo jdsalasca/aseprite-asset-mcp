@@ -31,6 +31,7 @@ const DESCRIPTION_OVERRIDES: Record<string, string> = {
   plan_asset_scene: "Plan ordered scene layers from selected library assets.",
   compose_asset_scene: "Compose selected library previews into a deterministic scene PNG and manifest.",
   compose_asset_scene_animation: "Compose selected animated library previews into a deterministic scene GIF and frame manifest.",
+  generate_library_variant_pack: "Generate deterministic variants for multiple library assets in one request.",
   validate_asset_quality: "Validate palette size and isolated-pixel limits.",
   build_texture_atlas: "Pack equal-size images into one texture atlas.",
   run_asset_recipe: "Run or preview one compact asset recipe.",
@@ -77,6 +78,7 @@ function folderFor(name: string): string {
   if (name === "plan_asset_scene") return "scene/composition";
   if (name === "compose_asset_scene") return "scene/composition";
   if (name === "compose_asset_scene_animation") return "scene/composition";
+  if (name === "generate_library_variant_pack") return "library/variants";
   if (name === "build_contact_sheet") return "asset/preview";
   if (name === "build_sprite_runtime_bundle") return "asset/runtime";
   if (name === "generate_sprite_anchors") return "asset/runtime";
