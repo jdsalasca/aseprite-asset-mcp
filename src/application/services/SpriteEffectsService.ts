@@ -1,7 +1,7 @@
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { RasterCodec } from "../../domain/image-assets.js";
 import type { RasterFrame } from "../../domain/pixel-art.js";
-import type { CleanupIsolatedPixelsInput, ColorGradeInput, DayNightCycleInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteShadowInput, WaterCausticsInput, WaterReflectionInput } from "../../domain/sprite-effects.js";
+import type { CleanupIsolatedPixelsInput, ColorGradeInput, DayNightCycleInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteGlowInput, SpriteShadowInput, WaterCausticsInput, WaterReflectionInput } from "../../domain/sprite-effects.js";
 
 function ok(value: unknown): AssetOperationResult { return { ok: true, message: JSON.stringify(value) }; }
 function fail(error: unknown): AssetOperationResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
@@ -114,6 +114,35 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
         return { ...frame, pixels };
       });
       const format = formatFor(frames, input.format); await this.codec.encode(frames, input.outputFilename, format); return outputMessage("cleanup_isolated_pixels", input.inputFilename, input.outputFilename, frames.length, format);
+    } catch (error) { return fail(error); }
+  }
+
+  public async generateSpriteGlow(input: SpriteGlowInput): Promise<AssetOperationResult> {
+    try {
+      assertDifferent(input.inputFilename, input.outputFilename);
+      const color = rgba(input.color);
+      const radius = input.radius ?? 2;
+      const opacity = input.opacity ?? 0.8;
+      if (!Number.isInteger(radius) || radius < 1 || radius > 8) throw new Error("Glow radius must be an integer from 1 to 8");
+      if (!Number.isFinite(opacity) || opacity < 0 || opacity > 1) throw new Error("Glow opacity must be between 0 and 1");
+      const source = await this.codec.decode(input.inputFilename);
+      const frames = source.map((frame) => {
+        const pixels = new Uint8ClampedArray(frame.pixels);
+        for (let y = 0; y < frame.height; y += 1) for (let x = 0; x < frame.width; x += 1) {
+          const offset = (y * frame.width + x) * 4;
+          if ((frame.pixels[offset + 3] ?? 0) > 0) continue;
+          let glowAlpha = 0;
+          for (let dy = -radius; dy <= radius; dy += 1) for (let dx = -radius; dx <= radius; dx += 1) {
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance > radius || alphaAt(frame, x + dx, y + dy) === 0) continue;
+            const contribution = Math.round((alphaAt(frame, x + dx, y + dy) * color[3] * opacity * (1 - distance / (radius + 1))) / 255);
+            glowAlpha = Math.max(glowAlpha, contribution);
+          }
+          if (glowAlpha > 0) pixels.set([color[0], color[1], color[2], glowAlpha], offset);
+        }
+        return { ...frame, pixels };
+      });
+      const format = formatFor(frames, input.format); await this.codec.encode(frames, input.outputFilename, format); return outputMessage("generate_sprite_glow", input.inputFilename, input.outputFilename, frames.length, format);
     } catch (error) { return fail(error); }
   }
 

@@ -239,6 +239,7 @@ const TOOL_NAMES = [
   "apply_pixel_outline",
   "remove_background",
   "cleanup_isolated_pixels",
+  "generate_sprite_glow",
   "apply_color_grade",
   "generate_sprite_shadow",
   "generate_particle_burst",
