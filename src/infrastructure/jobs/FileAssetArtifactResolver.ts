@@ -14,9 +14,10 @@ export class FileAssetArtifactResolver implements AssetArtifactResolverPort {
     for (const filename of filenames) {
       const data = await readFile(filename);
       const sha256 = createHash("sha256").update(data).digest("hex");
+      const filenameHash = createHash("sha256").update(filename).digest("hex").slice(0, 8);
       const extension = path.extname(filename).replace(/^\./, "").toLowerCase() || "bin";
       artifacts.push({
-        id: `artifact_${jobId}_${sha256.slice(0, 16)}`,
+        id: `artifact_${jobId}_${sha256.slice(0, 16)}_${filenameHash}`,
         jobId,
         filename,
         format: extension,

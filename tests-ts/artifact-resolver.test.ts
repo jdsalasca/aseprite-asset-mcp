@@ -23,3 +23,16 @@ test("file artifact resolver fails when a successful job output is missing", asy
   const resolver = new FileAssetArtifactResolver();
   await assert.rejects(() => resolver.resolve("job_missing", { jobs: [{ recipe: "gif", inputFilenames: ["source.png"], outputFilename: path.join(process.cwd(), ".missing-output.gif") }], dryRun: false }));
 });
+
+test("file artifact resolver gives equal-content outputs distinct ids", async () => {
+  const directory = await mkdtemp(path.join(process.cwd(), ".artifact-distinct-"));
+  const first = path.join(directory, "first.png");
+  const second = path.join(directory, "second.png");
+  await writeFile(first, Buffer.from("same"));
+  await writeFile(second, Buffer.from("same"));
+  const resolver = new FileAssetArtifactResolver();
+  const artifacts = await resolver.resolve("job_same", { jobs: [{ recipe: "atlas", inputFilenames: ["a.png"], outputFilename: first }, { recipe: "atlas", inputFilenames: ["b.png"], outputFilename: second }], dryRun: false });
+
+  assert.equal(artifacts.length, 2);
+  assert.notEqual(artifacts[0]?.id, artifacts[1]?.id);
+});
