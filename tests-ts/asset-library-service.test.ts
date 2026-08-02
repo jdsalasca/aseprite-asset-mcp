@@ -11,7 +11,7 @@ const catalog: AssetLibraryCatalog = {
   items: [
     { id: "oak", title: "Oak tree", category: "flora", folder: "flora/oak", kind: "sprite", description: "Oak with rain and birds variants", tags: ["tree", "rain", "birds"], variants: ["rain", "birds"], formats: ["png", "svg", "json"], readmePath: "flora/oak/README.md", previewPath: "flora/oak/preview.png", spritePath: "flora/oak/sprite-sheet.png", deterministic: true },
     { id: "pine", title: "Pine tree", category: "flora", folder: "flora/pine", kind: "sprite", description: "Pine", tags: ["tree"], variants: ["fire"], formats: ["png", "svg", "json"], readmePath: "flora/pine/README.md", previewPath: "flora/pine/preview.png", spritePath: "flora/pine/sprite-sheet.png", deterministic: true },
-    { id: "knight", title: "Knight", category: "characters", folder: "characters/knight", kind: "character", description: "Knight walk cycle", tags: ["walk", "combat"], variants: ["idle", "walk", "attack"], formats: ["png", "gif", "json"], readmePath: "characters/knight/README.md", previewPath: "characters/knight/preview.png", spritePath: "characters/knight/sprite-sheet.png", deterministic: true },
+    { id: "knight", title: "Knight", category: "characters", folder: "characters/knight", kind: "character", description: "Knight walk cycle", tags: ["walk", "combat"], variants: ["idle", "walk", "attack"], formats: ["png", "gif", "json"], readmePath: "characters/knight/README.md", previewPath: "characters/knight/preview.png", spritePath: "characters/knight/sprite-sheet.png", animationPath: "characters/knight/sprite-sheet.gif", deterministic: true },
   ],
   presets: [{ id: "rainy-grove", title: "Rainy grove", description: "Oak, pine, rain and water", category: "flora", itemIds: ["oak", "pine"], recommendedTools: ["generate_environment_pack", "generate_time_of_day_pack"], deterministic: true }],
 };
@@ -32,9 +32,11 @@ test("asset library resolves items and presets case-insensitively", async () => 
   assert.equal(await service.get("missing"), null);
 });
 
-test("asset library reads a binary preview only after resolving a known item", async () => {
+test("asset library reads binary previews and animations only after resolving known items", async () => {
   const service = new AssetLibraryService(new FakeLibrary());
   assert.deepEqual([...((await service.binary("OAK", "preview"))?.data ?? [])], [1, 2, 3]);
+  assert.deepEqual([...((await service.binary("KNIGHT", "animation"))?.data ?? [])], [1, 2, 3]);
+  assert.equal(await service.binary("OAK", "animation"), null);
   assert.equal(await service.binary("missing", "preview"), null);
 });
 

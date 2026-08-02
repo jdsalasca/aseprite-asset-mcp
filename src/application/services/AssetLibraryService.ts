@@ -40,6 +40,7 @@ export class AssetLibraryService {
   public async binary(id: string, kind: AssetLibraryBinaryKind): Promise<AssetLibraryBinary | null> {
     const catalog = await this.port.load();
     const item = catalog.items.find((entry) => entry.id.toLocaleLowerCase() === normalize(id));
+    if (kind === "animation" && !item?.animationPath) return null;
     return item ? this.port.read(item, kind) : null;
   }
 

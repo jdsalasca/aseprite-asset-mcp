@@ -14,7 +14,8 @@ export class FileAssetLibraryAdapter implements AssetLibraryPort {
   }
 
   public async read(item: AssetLibraryItem, kind: AssetLibraryBinaryKind): Promise<AssetLibraryBinary> {
-    const relative = kind === "preview" ? item.previewPath : item.spritePath;
+    const relative = kind === "preview" ? item.previewPath : kind === "animation" ? item.animationPath : item.spritePath;
+    if (!relative) throw new Error("Asset library animation is not available");
     const filename = path.resolve(this.root, relative);
     const rootPrefix = this.root.endsWith(path.sep) ? this.root : `${this.root}${path.sep}`;
     if (!filename.startsWith(rootPrefix)) throw new Error("Asset library path escapes the asset root");
