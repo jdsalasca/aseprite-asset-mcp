@@ -1,7 +1,7 @@
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { RasterCodec } from "../../domain/image-assets.js";
 import type { RasterFrame } from "../../domain/pixel-art.js";
-import type { CleanupIsolatedPixelsInput, ColorGradeInput, DayNightCycleInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SpriteAmbientOcclusionInput, SpriteColorRampInput, SpriteDitherInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteGlowInput, SpriteGrainInput, SpriteRimLightInput, SpriteRimLightDirection, SpriteShadowInput, SpriteSpecularHighlightInput, WaterCausticsInput, WaterReflectionInput } from "../../domain/sprite-effects.js";
+import type { CleanupIsolatedPixelsInput, ColorGradeInput, DayNightCycleInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SpriteAmbientOcclusionInput, SpriteColorRampInput, SpriteColorTemperatureInput, SpriteDitherInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteGlowInput, SpriteGrainInput, SpriteRimLightInput, SpriteRimLightDirection, SpriteShadowInput, SpriteSpecularHighlightInput, WaterCausticsInput, WaterReflectionInput } from "../../domain/sprite-effects.js";
 
 function ok(value: unknown): AssetOperationResult { return { ok: true, message: JSON.stringify(value) }; }
 function fail(error: unknown): AssetOperationResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
@@ -301,6 +301,28 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
         return { ...frame, pixels };
       });
       const format = formatFor(frames, input.format); await this.codec.encode(frames, input.outputFilename, format); return outputMessage("apply_sprite_dither", input.inputFilename, input.outputFilename, frames.length, format);
+    } catch (error) { return fail(error); }
+  }
+
+  public async applySpriteColorTemperature(input: SpriteColorTemperatureInput): Promise<AssetOperationResult> {
+    try {
+      assertDifferent(input.inputFilename, input.outputFilename);
+      const intensity = input.intensity ?? 0.7;
+      if (!Number.isFinite(input.temperature) || input.temperature < -1 || input.temperature > 1) throw new Error("Color temperature must be between -1 and 1");
+      if (!Number.isFinite(intensity) || intensity < 0 || intensity > 1) throw new Error("Temperature intensity must be between 0 and 1");
+      const target: [number, number, number] = input.temperature >= 0 ? [255, 176, 96] : [104, 160, 255];
+      const mix = Math.abs(input.temperature) * intensity;
+      const source = await this.codec.decode(input.inputFilename);
+      const frames = source.map((frame) => {
+        const pixels = new Uint8ClampedArray(frame.pixels);
+        for (let offset = 0; offset < frame.pixels.length; offset += 4) {
+          const sourceAlpha = frame.pixels[offset + 3] ?? 0; if (sourceAlpha === 0) continue;
+          for (let channel = 0; channel < 3; channel += 1) pixels[offset + channel] = Math.round((frame.pixels[offset + channel] ?? 0) * (1 - mix) + (target[channel] ?? 0) * mix);
+          pixels[offset + 3] = sourceAlpha;
+        }
+        return { ...frame, pixels };
+      });
+      const format = formatFor(frames, input.format); await this.codec.encode(frames, input.outputFilename, format); return outputMessage("apply_sprite_color_temperature", input.inputFilename, input.outputFilename, frames.length, format);
     } catch (error) { return fail(error); }
   }
 

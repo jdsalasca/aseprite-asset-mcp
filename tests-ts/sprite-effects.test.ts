@@ -269,6 +269,32 @@ test("sprite dithering rejects invalid strength, scale, and colors", async () =>
   assert.equal(invalidColor.ok, false); assert.match(invalidColor.message, /color/i);
 });
 
+test("sprite color temperature is deterministic, alpha-safe, and source-preserving", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-temperature-"));
+  const input = path.join(directory, "input.png"); const first = path.join(directory, "first.png"); const second = path.join(directory, "second.png");
+  const pixels = new Uint8ClampedArray(4 * 4 * 4);
+  for (let y = 1; y < 3; y += 1) for (let x = 1; x < 3; x += 1) pixels.set([120, 140, 160, 180], (y * 4 + x) * 4);
+  await sharp(Buffer.from(pixels), { raw: { width: 4, height: 4, channels: 4 } }).png().toFile(input);
+  const sourceBefore = await fs.readFile(input);
+  const operation = { inputFilename: input, outputFilename: first, temperature: 1, intensity: 1 };
+  const apply = (service() as unknown as { applySpriteColorTemperature(value: typeof operation): Promise<{ ok: boolean; message: string }> }).applySpriteColorTemperature;
+  assert.equal((await apply.call(service(), operation)).ok, true);
+  assert.equal((await apply.call(service(), { ...operation, outputFilename: second })).ok, true);
+  assert.deepEqual(await fs.readFile(first), await fs.readFile(second)); assert.deepEqual(await fs.readFile(input), sourceBefore);
+  const output = await sharp(first).raw().toBuffer({ resolveWithObject: true });
+  assert.equal(output.data[3], 0); assert.equal(output.data[(1 * 4 + 1) * 4 + 3], 180);
+  assert.notDeepEqual(Array.from(output.data.slice((1 * 4 + 1) * 4, (1 * 4 + 1) * 4 + 3)), [120, 140, 160]);
+});
+
+test("sprite color temperature rejects invalid ranges", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-temperature-invalid-")); const input = path.join(directory, "input.png"); await makeSprite(input);
+  const apply = (service() as unknown as { applySpriteColorTemperature(value: unknown): Promise<{ ok: boolean; message: string }> }).applySpriteColorTemperature;
+  const invalidTemperature = await apply.call(service(), { inputFilename: input, outputFilename: path.join(directory, "temperature.png"), temperature: 2, intensity: 0.5 });
+  const invalidIntensity = await apply.call(service(), { inputFilename: input, outputFilename: path.join(directory, "intensity.png"), temperature: 0, intensity: 2 });
+  assert.equal(invalidTemperature.ok, false); assert.match(invalidTemperature.message, /temperature/i);
+  assert.equal(invalidIntensity.ok, false); assert.match(invalidIntensity.message, /intensity/i);
+});
+
 test("particle burst generation is seeded and exports the requested frame count", async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-particles-")); const first = path.join(directory, "first.gif"); const second = path.join(directory, "second.gif");
   assert.equal((await service().generateParticleBurst({ outputFilename: first, width: 32, height: 32, frames: 6, particleCount: 20, seed: 7, color: "#ffcc55" })).ok, true); assert.equal((await service().generateParticleBurst({ outputFilename: second, width: 32, height: 32, frames: 6, particleCount: 20, seed: 7, color: "#ffcc55" })).ok, true); assert.deepEqual(await fs.readFile(first), await fs.readFile(second)); assert.equal((await sharp(first, { animated: true }).metadata()).pages, 6);

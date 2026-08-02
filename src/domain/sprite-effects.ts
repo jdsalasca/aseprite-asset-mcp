@@ -13,6 +13,7 @@ export interface SpriteSpecularHighlightInput extends SpriteEffectBaseInput { co
 export interface SpriteColorRampInput extends SpriteEffectBaseInput { shadowColor: string; midColor: string; highlightColor: string; shadowThreshold?: number | undefined; highlightThreshold?: number | undefined; }
 export interface SpriteGrainInput extends SpriteEffectBaseInput { seed: number; intensity?: number | undefined; scale?: number | undefined; }
 export interface SpriteDitherInput extends SpriteEffectBaseInput { darkColor: string; lightColor: string; strength?: number | undefined; scale?: number | undefined; }
+export interface SpriteColorTemperatureInput extends SpriteEffectBaseInput { temperature: number; intensity?: number | undefined; }
 export interface ColorGradeInput extends SpriteEffectBaseInput { brightness?: number | undefined; contrast?: number | undefined; saturation?: number | undefined; }
 export interface SpriteShadowInput extends SpriteEffectBaseInput { offsetX: number; offsetY: number; color: string; opacity?: number | undefined; }
 export interface ParticleBurstInput { outputFilename: string; width: number; height: number; frames: number; particleCount: number; seed: number; color: string; delayMs?: number | undefined; }
@@ -36,6 +37,7 @@ export interface SpriteEffectsGateway {
   applySpriteColorRamp(input: SpriteColorRampInput): Promise<AssetOperationResult>;
   applySpriteGrain(input: SpriteGrainInput): Promise<AssetOperationResult>;
   applySpriteDither(input: SpriteDitherInput): Promise<AssetOperationResult>;
+  applySpriteColorTemperature(input: SpriteColorTemperatureInput): Promise<AssetOperationResult>;
   applyColorGrade(input: ColorGradeInput): Promise<AssetOperationResult>;
   generateSpriteShadow(input: SpriteShadowInput): Promise<AssetOperationResult>;
   generateParticleBurst(input: ParticleBurstInput): Promise<AssetOperationResult>;
