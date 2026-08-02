@@ -26,6 +26,7 @@
     "asset:odiseum-style": "tsx scripts/boost-odiseum-style.ts",
     "asset:odiseum-world": "tsx scripts/paint-odiseum-world.ts",
     "asset:library": "tsx scripts/paint-reusable-asset-library.ts",
+    "asset:library:catalog": "tsx scripts/generate-asset-library.ts",
     "asset:cozy-nature": "tsx scripts/paint-cozy-nature-assets.ts",
     "showcase": "tsx scripts/generate-showcase.ts",
     "showcase:effects": "tsx scripts/generate-effects-showcase.ts"

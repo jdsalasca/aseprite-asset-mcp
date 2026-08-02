@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "royal-queen",
+  "title": "royal queen",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 168744339,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "queen"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

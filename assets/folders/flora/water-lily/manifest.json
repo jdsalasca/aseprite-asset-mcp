@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "water-lily",
+  "title": "water lily",
+  "category": "flora",
+  "kind": "prop",
+  "source": "deterministic-library-generator-v1",
+  "seed": 3600072399,
+  "variants": [
+    "rain",
+    "wind",
+    "snow",
+    "fire"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "plant",
+    "nature",
+    "decor"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

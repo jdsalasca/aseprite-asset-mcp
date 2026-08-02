@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "castle",
+  "title": "castle",
+  "category": "biomes-and-maps",
+  "kind": "scene",
+  "source": "deterministic-library-generator-v1",
+  "seed": 2596447321,
+  "variants": [
+    "day",
+    "sunset",
+    "night",
+    "rain",
+    "storm"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "map",
+    "scene",
+    "tileset"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

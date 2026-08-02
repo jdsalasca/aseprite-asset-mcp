@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "thunderbird",
+  "title": "thunderbird",
+  "category": "mythical-creatures",
+  "kind": "sprite",
+  "source": "deterministic-library-generator-v1",
+  "seed": 2305410294,
+  "variants": [
+    "idle",
+    "walk",
+    "attack",
+    "roar",
+    "hurt"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "creature",
+    "mythology",
+    "combat"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

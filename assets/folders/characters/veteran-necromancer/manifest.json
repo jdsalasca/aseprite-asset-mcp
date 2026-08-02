@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "veteran-necromancer",
+  "title": "veteran necromancer",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 1015015670,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "necromancer"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

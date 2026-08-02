@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "dragon-mount",
+  "title": "dragon mount",
+  "category": "mounts",
+  "kind": "sprite",
+  "source": "deterministic-library-generator-v1",
+  "seed": 61991678,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "jump"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "mount",
+    "travel",
+    "animation"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

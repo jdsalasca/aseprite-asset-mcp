@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "royal-sailor",
+  "title": "royal sailor",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 3735622991,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "sailor"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

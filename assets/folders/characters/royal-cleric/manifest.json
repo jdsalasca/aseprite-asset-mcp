@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "royal-cleric",
+  "title": "royal cleric",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 3816053147,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "cleric"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

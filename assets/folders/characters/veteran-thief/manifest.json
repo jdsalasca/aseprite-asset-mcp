@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "veteran-thief",
+  "title": "veteran thief",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 889391401,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "thief"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

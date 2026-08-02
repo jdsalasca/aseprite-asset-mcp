@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "dead-tree",
+  "title": "dead tree",
+  "category": "flora",
+  "kind": "prop",
+  "source": "deterministic-library-generator-v1",
+  "seed": 2899702082,
+  "variants": [
+    "rain",
+    "fire",
+    "earthquake",
+    "birds",
+    "wind",
+    "autumn"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "tree",
+    "nature",
+    "world"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

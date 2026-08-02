@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "apprentice-mage",
+  "title": "apprentice mage",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 49619123,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "mage"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

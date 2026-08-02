@@ -130,6 +130,9 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("generate_beach_scene"));
     assert.ok(tools.includes("generate_time_of_day_pack"));
     assert.ok(tools.includes("generate_environment_pack"));
+    assert.ok(tools.includes("get_asset_library"));
+    assert.ok(tools.includes("get_asset_library_item"));
+    assert.ok(tools.includes("get_asset_preset"));
     assert.ok(!tools.includes("legacy_server"));
 
     const folderIndex = await client.callTool("get_tools_list", {}) as { content: Array<{ type: string; text?: string }> };

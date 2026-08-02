@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "royal-witch",
+  "title": "royal witch",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 1544275574,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "witch"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

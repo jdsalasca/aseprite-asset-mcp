@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "palm",
+  "title": "palm",
+  "category": "flora",
+  "kind": "prop",
+  "source": "deterministic-library-generator-v1",
+  "seed": 2303507949,
+  "variants": [
+    "rain",
+    "fire",
+    "earthquake",
+    "birds",
+    "wind",
+    "autumn"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "tree",
+    "nature",
+    "world"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

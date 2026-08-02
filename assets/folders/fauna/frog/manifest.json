@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "frog",
+  "title": "frog",
+  "category": "fauna",
+  "kind": "sprite",
+  "source": "deterministic-library-generator-v1",
+  "seed": 2613938663,
+  "variants": [
+    "idle",
+    "walk",
+    "hit",
+    "sleep",
+    "rain"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "fauna",
+    "wildlife",
+    "animation"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

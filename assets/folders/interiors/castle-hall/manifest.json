@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "castle-hall",
+  "title": "castle hall",
+  "category": "interiors",
+  "kind": "scene",
+  "source": "deterministic-library-generator-v1",
+  "seed": 1172696935,
+  "variants": [
+    "day",
+    "night",
+    "firelight",
+    "rain"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "interior",
+    "architecture",
+    "scene"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

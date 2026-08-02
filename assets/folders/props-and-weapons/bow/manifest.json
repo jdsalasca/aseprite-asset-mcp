@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "bow",
+  "title": "bow",
+  "category": "props-and-weapons",
+  "kind": "prop",
+  "source": "deterministic-library-generator-v1",
+  "seed": 1942389483,
+  "variants": [
+    "clean",
+    "glow",
+    "rain",
+    "fire"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "prop",
+    "equipment",
+    "world"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

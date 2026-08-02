@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "ancient-tree",
+  "title": "ancient tree",
+  "category": "flora",
+  "kind": "prop",
+  "source": "deterministic-library-generator-v1",
+  "seed": 3736618618,
+  "variants": [
+    "rain",
+    "fire",
+    "earthquake",
+    "birds",
+    "wind",
+    "autumn"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "tree",
+    "nature",
+    "world"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

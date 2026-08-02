@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "apprentice-rogue",
+  "title": "apprentice rogue",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 4229813373,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "rogue"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

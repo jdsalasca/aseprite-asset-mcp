@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "forest-knight",
+  "title": "forest knight",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 3187592858,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "knight"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

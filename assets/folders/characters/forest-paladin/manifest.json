@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "forest-paladin",
+  "title": "forest paladin",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 513598926,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "paladin"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "forest-druid",
+  "title": "forest druid",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 2437102673,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "druid"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

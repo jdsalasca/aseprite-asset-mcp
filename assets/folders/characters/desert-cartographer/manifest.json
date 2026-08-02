@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "desert-cartographer",
+  "title": "desert cartographer",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 3314109937,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "cartographer"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

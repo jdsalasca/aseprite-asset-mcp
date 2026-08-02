@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "apprentice-engineer",
+  "title": "apprentice engineer",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 2420978024,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "engineer"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "blue-flower",
+  "title": "blue flower",
+  "category": "flora",
+  "kind": "prop",
+  "source": "deterministic-library-generator-v1",
+  "seed": 3969001567,
+  "variants": [
+    "rain",
+    "wind",
+    "snow",
+    "fire"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "plant",
+    "nature",
+    "decor"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

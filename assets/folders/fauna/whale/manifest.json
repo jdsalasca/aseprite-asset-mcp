@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "whale",
+  "title": "whale",
+  "category": "fauna",
+  "kind": "sprite",
+  "source": "deterministic-library-generator-v1",
+  "seed": 1728053750,
+  "variants": [
+    "idle",
+    "walk",
+    "hit",
+    "sleep",
+    "rain"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "fauna",
+    "wildlife",
+    "animation"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

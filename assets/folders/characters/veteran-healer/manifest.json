@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "veteran-healer",
+  "title": "veteran healer",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 693867202,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "healer"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

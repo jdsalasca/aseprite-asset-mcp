@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "maraca",
+  "title": "maraca",
+  "category": "instruments",
+  "kind": "prop",
+  "source": "deterministic-library-generator-v1",
+  "seed": 3645756562,
+  "variants": [
+    "clean",
+    "played",
+    "golden"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "instrument",
+    "culture",
+    "prop"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

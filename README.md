@@ -127,6 +127,9 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `generate_time_of_day_pack`: crea transición día, atardecer, noche y amanecer.
 - `generate_environment_pack`: empaqueta playa, bosque, aldea o cueva en una sola llamada.
 - `create_asset_recipe`: compone outline, grading, materiales, luz, sombras, partículas, normal map y quality gate en un plan determinista sin ejecutar cambios.
+- `get_asset_library`: busca una biblioteca de 339 items preconstruidos en 10 categorías, con resultados compactos para reducir tokens.
+- `get_asset_library_item`: resuelve README, manifest, preview y sprite sheet de un asset concreto.
+- `get_asset_preset`: devuelve composiciones listas como `living-forest`, `coastal-sunset`, `fantasy-quest` y `rainy-village`.
 
 Las operaciones de imagen no necesitan abrir Aseprite; eso reduce latencia y tokens para conversiones masivas. Las operaciones sobre `.aseprite` siguen pasando por el adaptador CLI hexagonal y mantienen la compatibilidad con Godot.
 
@@ -157,3 +160,23 @@ Proyecto independiente: [`jdsalasca/aseprite-asset-mcp`](https://github.com/jdsa
 create_asset_recipe genera un plan revisable y execute_asset_recipe lo ejecuta paso a paso usando los mismos servicios de efectos, materiales, iluminación y calidad. El pipeline conserva la fuente, detiene la primera operación fallida y devuelve el artifact final.
 
 La UX puede invocar POST /api/v1/recipes/execute cuando MCP_REST_PORT está habilitado.
+
+## Biblioteca de assets y presets
+
+`assets/folders/` contiene una biblioteca determinista y navegable: personajes, flora, fauna, criaturas mitológicas, monturas, armas y accesorios, biomas/mapas, interiores, instrumentos y efectos de escena. Cada carpeta tiene su propio `README.md`, `manifest.json`, `preview.png`, `preview.svg`, `sprite-sheet.png` y `sprite-sheet.svg`.
+
+Para regenerar la biblioteca después de cambiar sus semillas:
+
+```text
+npm run asset:library:catalog
+```
+
+Ejemplos REST:
+
+```text
+GET /api/v1/library?query=rain&limit=12
+GET /api/v1/library/items/forest-ranger
+GET /api/v1/library/presets/living-forest
+```
+
+Las variantes (`rain`, `fire`, `earthquake`, `birds`, `wave-reflection`, `day`, `sunset`, `night`, `walk`, `attack`, etc.) son contratos para los algoritmos existentes: se aplican sobre una copia del asset y conservan la fuente.

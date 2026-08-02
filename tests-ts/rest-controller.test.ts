@@ -7,8 +7,13 @@ import type { AssetRestUseCases } from "../src/application/ports/AssetRestPorts.
 import { AssetRestController } from "../src/interfaces/rest/AssetRestController.js";
 import type { AssetOperationResult } from "../src/domain/asset-operations.js";
 import type { SpriteEffectsGateway } from "../src/domain/sprite-effects.js";
+import { AssetLibraryService } from "../src/application/services/AssetLibraryService.js";
+import type { AssetLibraryCatalog } from "../src/domain/asset-library.js";
+import type { AssetLibraryPort } from "../src/application/ports/AssetLibraryPort.js";
 
 function result(operation: string): AssetOperationResult { return { ok: true, message: JSON.stringify({ operation, deterministic: true, sourcePreserved: true }) }; }
+const libraryCatalog: AssetLibraryCatalog = { schemaVersion: 1, libraryVersion: "test", categories: [{ id: "flora", title: "Flora", description: "Plants", itemCount: 1 }], items: [{ id: "oak", title: "Oak", category: "flora", folder: "flora/oak", kind: "sprite", description: "Tree", tags: ["tree"], variants: ["rain"], formats: ["png", "svg", "json"], readmePath: "flora/oak/README.md", previewPath: "flora/oak/preview.png", spritePath: "flora/oak/sprite-sheet.png", deterministic: true }], presets: [] };
+class FakeLibrary implements AssetLibraryPort { public async load(): Promise<AssetLibraryCatalog> { return libraryCatalog; } }
 function fakeUseCases(): AssetRestUseCases {
   const effects: SpriteEffectsGateway = { applyPixelOutline: async () => result("apply_pixel_outline"), applyColorGrade: async () => result("apply_color_grade"), generateSpriteShadow: async () => result("generate_sprite_shadow"), generateParticleBurst: async () => result("generate_particle_burst"), generateNormalMap: async () => result("generate_normal_map") };
   return {
@@ -17,6 +22,7 @@ function fakeUseCases(): AssetRestUseCases {
     spriteEffects: effects,
     applyMaterialTexture: async () => result("apply_material_texture"),
     applyDepthLighting: async () => result("apply_depth_lighting"),
+    assetLibrary: new AssetLibraryService(new FakeLibrary()),
   };
 }
 
@@ -38,6 +44,13 @@ test("REST controller exposes the same recipe and effect application services", 
     const health = await fetch(`${rest.url}/api/v1/health`);
     assert.equal(health.status, 200);
     assert.equal((await health.json()).data.architecture, "hexagonal");
+    const library = await fetch(`${rest.url}/api/v1/library?query=tree`);
+    assert.equal(library.status, 200);
+    assert.equal((await library.json()).data.items[0].id, "oak");
+    const item = await fetch(`${rest.url}/api/v1/library/items/oak`);
+    assert.equal((await item.json()).data.title, "Oak");
+    const missingItem = await fetch(`${rest.url}/api/v1/library/items/missing`);
+    assert.equal(missingItem.status, 404);
 
     const recipe = await fetch(`${rest.url}/api/v1/recipes`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ asset_id: "hero", input_filename: "hero.png", output_prefix: "out/hero", steps: ["outline", "quality_gate"], seed: 4 }) });
     const recipeBody = await recipe.json();

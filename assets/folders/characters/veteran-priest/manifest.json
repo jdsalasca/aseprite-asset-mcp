@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "veteran-priest",
+  "title": "veteran priest",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 2506282336,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "priest"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}
