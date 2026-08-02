@@ -6,11 +6,16 @@ import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { ReferenceAnalysis } from "../../domain/visual-assets.js";
 import { VisualAssetService } from "../../application/services/VisualAssetService.js";
 import { DeterministicEnhancementService } from "../../application/services/DeterministicEnhancementService.js";
+import { EnhancementBundleService } from "../../application/services/EnhancementBundleService.js";
 
 const ENHANCEMENT_GOALS = ["cleanup", "terrain_grain", "water_flow", "directional_lighting", "particles", "time_of_day", "animation"] as const;
 
 export class EnhancementToolController {
-  public constructor(private readonly visualAssets: VisualAssetService, private readonly enhancements: DeterministicEnhancementService, private readonly plans = new EnhancementPlanService()) {}
+  private readonly bundle: EnhancementBundleService;
+
+  public constructor(private readonly visualAssets: VisualAssetService, private readonly enhancements: DeterministicEnhancementService, private readonly plans = new EnhancementPlanService(), bundle?: EnhancementBundleService) {
+    this.bundle = bundle ?? new EnhancementBundleService(visualAssets, enhancements, plans);
+  }
 
   public register(server: McpServer): void {
     server.registerTool("suggest_enhancement_plan", {
@@ -56,6 +61,17 @@ export class EnhancementToolController {
         return this.result({ ok: false, message: error instanceof Error ? error.message : String(error) });
       }
     });
+    server.registerTool("apply_enhancement_bundle", {
+      description: "Inspect, plan, enhance, and quality-gate one asset in a single deterministic non-destructive call.",
+      inputSchema: {
+        filename: z.string().min(1),
+        output_filename: z.string().min(1),
+        format: z.enum(["png", "gif"]).default("png"),
+        goals: z.array(z.enum(ENHANCEMENT_GOALS)).optional(),
+        max_colors: z.number().int().min(2).max(256).default(64),
+        seed: z.number().int().default(1),
+      },
+    }, async ({ filename, output_filename, format, goals, max_colors, seed }) => this.result(await this.bundle.apply({ filename, outputFilename: output_filename, format, ...(goals ? { goals: goals as EnhancementGoal[] } : {}), maxColors: max_colors, seed })));
   }
 
   private result(operation: AssetOperationResult): { isError?: boolean; content: [{ type: "text"; text: string }] } { return { isError: !operation.ok, content: [{ type: "text", text: operation.message }] }; }

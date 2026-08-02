@@ -1,5 +1,6 @@
 import type { ReferenceAnalysis } from "./visual-assets.js";
 import type { ImageOutputFormat } from "./image-assets.js";
+import type { AssetOperationResult } from "./asset-operations.js";
 
 export type EnhancementGoal = "cleanup" | "terrain_grain" | "water_flow" | "directional_lighting" | "particles" | "time_of_day" | "animation";
 
@@ -40,4 +41,26 @@ export interface EnhancementApplyReport {
   frames: number;
   passesApplied: string[];
   sourcePreserved: true;
+}
+
+export interface EnhancementBundleInput {
+  filename: string;
+  outputFilename: string;
+  format: ImageOutputFormat;
+  goals?: readonly EnhancementGoal[] | undefined;
+  maxColors?: number | undefined;
+  seed?: number | undefined;
+}
+
+export interface EnhancementBundleResult {
+  operation: "apply_enhancement_bundle";
+  plan: EnhancementPlan;
+  applied: EnhancementApplyReport;
+  quality: { valid: boolean; violations: string[] };
+  deterministic: true;
+  sourcePreserved: true;
+}
+
+export interface EnhancementBundleGateway {
+  apply(input: EnhancementBundleInput): Promise<AssetOperationResult>;
 }

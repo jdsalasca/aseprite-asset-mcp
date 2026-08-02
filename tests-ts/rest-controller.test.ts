@@ -35,6 +35,7 @@ function fakeUseCases(): AssetRestUseCases {
     assetManifestAudit: { audit: async () => result("audit_asset_manifest") },
     assetSceneRecommendation: { recommend: async () => result("recommend_asset_scene") },
     assetSceneBundle: { build: async () => result("build_scene_bundle") },
+    enhancementBundle: { apply: async () => result("apply_enhancement_bundle") },
     imageAssets: { upscalePixelArt: async () => result("upscale_pixel_art"), qualityBundle: async () => result("inspect_asset_bundle"), harmonizePalette: async () => result("harmonize_asset_palette") },
     batchQuality: { inspect: async () => result("inspect_asset_batch") },
     animationQuality: { inspect: async () => result("inspect_animation_quality") },
@@ -162,6 +163,9 @@ test("REST controller exposes the same recipe and effect application services", 
     const qualityBundle = await fetch(`${rest.url}/api/v1/assets/quality-bundle`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ filename: "hero.png", max_colors: 32, max_isolated_pixels: 4 }) });
     assert.equal(qualityBundle.status, 200);
     assert.equal((await qualityBundle.json()).data.operation, "inspect_asset_bundle");
+    const enhancementBundle = await fetch(`${rest.url}/api/v1/assets/enhancement-bundle`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ filename: "hero.png", output_filename: "hero-enhanced.png", goals: ["cleanup", "particles"], max_colors: 32, seed: 7 }) });
+    assert.equal(enhancementBundle.status, 200);
+    assert.equal((await enhancementBundle.json()).data.operation, "apply_enhancement_bundle");
     const qualityBatch = await fetch(`${rest.url}/api/v1/assets/quality-batch`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ filenames: ["hero.png", "oak.png"], max_colors: 32, max_isolated_pixels: 4 }) });
     assert.equal(qualityBatch.status, 200);
     assert.equal((await qualityBatch.json()).data.operation, "inspect_asset_batch");
