@@ -30,6 +30,7 @@ function fakeUseCases(): AssetRestUseCases {
     assetLibrarySummary: { summarize: async () => result("summarize_asset_library") },
     assetScenePlanner: { plan: async () => result("plan_asset_scene") },
     assetSceneComposer: { compose: async () => result("compose_asset_scene") },
+    assetSceneAnimationComposer: { compose: async () => result("compose_asset_scene_animation") },
     imageAssets: { upscalePixelArt: async () => result("upscale_pixel_art"), qualityBundle: async () => result("inspect_asset_bundle"), harmonizePalette: async () => result("harmonize_asset_palette") },
     batchQuality: { inspect: async () => result("inspect_asset_batch") },
     animationQuality: { inspect: async () => result("inspect_animation_quality") },
@@ -77,6 +78,9 @@ test("REST controller exposes the same recipe and effect application services", 
     const composedScene = await fetch(`${rest.url}/api/v1/library/scene-compose`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ item_ids: ["oak"], output_filename: "scene.png", manifest_filename: "scene.json", width: 32, height: 32, padding: 2 }) });
     assert.equal(composedScene.status, 200);
     assert.equal((await composedScene.json()).data.operation, "compose_asset_scene");
+    const animatedScene = await fetch(`${rest.url}/api/v1/library/scene-animation-compose`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ item_ids: ["rain"], output_filename: "scene.gif", manifest_filename: "scene-animation.json", width: 32, height: 32, padding: 2, frames: 4, delay_ms: 120 }) });
+    assert.equal(animatedScene.status, 200);
+    assert.equal((await animatedScene.json()).data.operation, "compose_asset_scene_animation");
     const item = await fetch(`${rest.url}/api/v1/library/items/oak`);
     assert.equal((await item.json()).data.title, "Oak");
     const preview = await fetch(`${rest.url}/api/v1/library/items/oak/preview`);

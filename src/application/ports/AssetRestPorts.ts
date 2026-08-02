@@ -22,6 +22,7 @@ import type { AssetLibraryAuditService } from "../services/AssetLibraryAuditServ
 import type { AssetLibrarySummaryService } from "../services/AssetLibrarySummaryService.js";
 import type { AssetScenePlannerService } from "../services/AssetScenePlannerService.js";
 import type { AssetSceneComposerService } from "../services/AssetSceneComposerService.js";
+import type { AssetSceneAnimationComposerService } from "../services/AssetSceneAnimationComposerService.js";
 
 export interface AssetRestUseCases {
   createRecipe(input: AssetRecipeCreateInput): AssetRecipePlan;
@@ -37,6 +38,7 @@ export interface AssetRestUseCases {
   assetLibrarySummary: Pick<AssetLibrarySummaryService, "summarize">;
   assetScenePlanner: Pick<AssetScenePlannerService, "plan">;
   assetSceneComposer: Pick<AssetSceneComposerService, "compose">;
+  assetSceneAnimationComposer: Pick<AssetSceneAnimationComposerService, "compose">;
   imageAssets: Pick<PixelArtAssetService, "upscalePixelArt" | "qualityBundle" | "harmonizePalette">;
   batchQuality: Pick<AssetBatchQualityService, "inspect">;
   animationQuality: Pick<AnimationQualityService, "inspect">;

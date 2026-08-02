@@ -28,7 +28,9 @@ test("composer rejects output collisions and missing references without encoding
   const codec: RasterCodec = { decode: async () => [], encode: async () => { encoded = true; } };
   const library = { load: async () => catalog, read: async () => ({ data: new Uint8Array(), contentType: "image/png" }) };
   const service = new AssetSceneComposerService(library, { decodeBuffer: async () => [frame([255, 0, 0, 255])] }, codec, { write: async () => undefined });
-  assert.match((await service.compose({ itemIds: ["oak"], outputFilename: "scene.png", manifestFilename: "scene.png", width: 16, height: 16 })).message, /must differ/);
+  assert.match((await service.compose({ itemIds: ["oak"], outputFilename: "scene.png", manifestFilename: "scene.png", width: 16, height: 16 })).message, /\.json/);
+  assert.match((await service.compose({ itemIds: ["oak"], outputFilename: "scene.gif", manifestFilename: "scene.json", width: 16, height: 16 })).message, /\.png/);
+  assert.match((await service.compose({ itemIds: ["oak"], outputFilename: "scene.png", manifestFilename: "scene.txt", width: 16, height: 16 })).message, /\.json/);
   assert.match((await service.compose({ itemIds: ["missing"], outputFilename: "scene.png", manifestFilename: "scene.json", width: 16, height: 16 })).message, /missing asset/);
   assert.equal(encoded, false);
 });

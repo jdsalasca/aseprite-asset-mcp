@@ -152,6 +152,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `summarize_asset_library`: devuelve un mapa de categorías, tres ejemplos por categoría y presets sin cargar el detalle completo, reduciendo tokens de navegación.
 - `plan_asset_scene`: recibe IDs arbitrarios de la biblioteca y devuelve capas ordenadas con roles, previews y sprites sin generar archivos.
 - `compose_asset_scene`: recibe IDs y materializa un PNG de escena + manifest navegable con placements deterministas, sin modificar los originales.
+- `compose_asset_scene_animation`: recibe IDs de la biblioteca y materializa un GIF de escena con selección cíclica de frames, delays y manifest por frame.
 - `get_asset_preset`: devuelve composiciones listas como `living-forest`, `coastal-sunset`, `fantasy-quest` y `rainy-village`.
 - `generate_asset_preset`: ejecuta un preset completo y devuelve terreno, mapa, preview, oleaje cuando aplica y transición temporal en una respuesta compacta.
 - `generate_scene_effect_stack`: agrupa en una sola llamada lluvia, partículas, caústicas/reflejos, día-noche, granularidad de material e iluminación direccional; infiere dimensiones para partículas, devuelve todos los artifacts y preserva la fuente.
@@ -206,6 +207,7 @@ GET /api/v1/library/audit
 GET /api/v1/library/summary
 POST /api/v1/library/scene-plan
 POST /api/v1/library/scene-compose
+POST /api/v1/library/scene-animation-compose
 POST /api/v1/effects/motion
 POST /api/v1/effects/upscale
 POST /api/v1/assets/palette-harmonize
@@ -239,6 +241,8 @@ Las dos últimas rutas sirven PNG/GIF de forma binaria desde el adaptador de arc
 `compose_asset_preset` y `GET /api/v1/library/presets/:id/compose` devuelven en una sola respuesta los assets y las capas ordenadas (`background`, `midground`, `foreground`, `effect`), reduciendo búsquedas repetidas de los agentes.
 
 `compose_asset_scene` y `POST /api/v1/library/scene-compose` reciben `item_ids`, `output_filename`, `manifest_filename`, `width`, `height` y `padding`. El servicio decodifica las previews mediante un puerto raster, compone con alpha source-over y escribe un PNG más un manifest con coordenadas, dimensiones, roles y garantías `deterministic`/`sourcePreserved`.
+
+`compose_asset_scene_animation` y `POST /api/v1/library/scene-animation-compose` añaden `frames` (2–24) y `delay_ms` (1–2000). Cada capa selecciona su frame de forma cíclica, se compone con geometría determinista y se exporta como GIF sin modificar las previews originales.
 
 La composición es fail-closed: si el preset contiene una referencia inexistente, no devuelve una escena parcial. Ejecuta `audit_asset_library` para localizar y corregir el catálogo antes de componer.
 

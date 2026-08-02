@@ -31,6 +31,8 @@ Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lightin
 
 `POST /api/v1/library/scene-compose` recibe `{ "item_ids": ["oak", "rain"], "output_filename": "output/scene.png", "manifest_filename": "output/scene.json", "width": 64, "height": 64, "padding": 2 }` y usa el mismo servicio del tool `compose_asset_scene`. Lee las previews del catálogo, compone un PNG determinista y escribe un manifest con las coordenadas de cada capa; los assets fuente permanecen intactos. Rechaza colisiones de nombres, dimensiones fuera de rango, IDs duplicados, traversal y referencias inexistentes.
 
+`POST /api/v1/library/scene-animation-compose` recibe los mismos campos más `{ "frames": 8, "delay_ms": 90 }` y usa `compose_asset_scene_animation`. Las previews PNG/GIF se decodifican desde memoria, cada capa rota sus frames de forma cíclica y el resultado se exporta como GIF con `frameLayers` en el manifest para inspección humana o consumo directo del juego.
+
 `/api/v1/effects/seamless` recibe `{ "input_filename": "water.png", "output_filename": "water-seamless.png", "seam_width": 2 }` y hace coincidir bordes opuestos para repetir el asset en mapas y fondos.
 
 `/api/v1/effects/water-reflection` recibe `{ "input_filename": "ocean.png", "output_filename": "ocean-reflection.gif", "waterline": 32, "frames": 8, "seed": 7, "amplitude": 2, "opacity": 0.6 }`. Conserva el original, refleja los píxeles sobre la línea de agua, aplica desplazamiento de oleaje y añade un destello determinista por frame.
