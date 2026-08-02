@@ -18,6 +18,7 @@ import type { SpriteGeometryService } from "../services/SpriteGeometryService.js
 import type { SpriteHitboxService } from "../services/SpriteHitboxService.js";
 import type { SpriteRuntimeBundleService } from "../services/SpriteRuntimeBundleService.js";
 import type { SpriteAnchorsService } from "../services/SpriteAnchorsService.js";
+import type { AssetLibraryAuditService } from "../services/AssetLibraryAuditService.js";
 
 export interface AssetRestUseCases {
   createRecipe(input: AssetRecipeCreateInput): AssetRecipePlan;
@@ -29,6 +30,7 @@ export interface AssetRestUseCases {
   applyMaterialTexture(input: MaterialTextureInput): Promise<AssetOperationResult>;
   applyDepthLighting(input: DepthLightingInput): Promise<AssetOperationResult>;
   assetLibrary: AssetLibraryService;
+  assetLibraryAudit: Pick<AssetLibraryAuditService, "audit">;
   imageAssets: Pick<PixelArtAssetService, "upscalePixelArt" | "qualityBundle" | "harmonizePalette">;
   batchQuality: Pick<AssetBatchQualityService, "inspect">;
   animationQuality: Pick<AnimationQualityService, "inspect">;
