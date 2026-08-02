@@ -44,3 +44,9 @@ test("asset library composes a preset with stable ordered layer roles", async ()
   assert.deepEqual(result?.layers.map((layer) => layer.role), ["background", "foreground"]);
   assert.equal(result?.deterministic, true);
 });
+
+test("asset library refuses to compose a preset with missing item references", async () => {
+  const broken: AssetLibraryCatalog = { ...catalog, presets: [{ ...catalog.presets[0]!, itemIds: ["oak", "missing-tree"] }] };
+  const result = await new AssetLibraryService({ load: async () => broken, read: async () => ({ data: new Uint8Array(), contentType: "image/png" }) }).composePreset("rainy-grove");
+  assert.equal(result, null);
+});

@@ -47,8 +47,10 @@ export class AssetLibraryService {
     const catalog = await this.port.load();
     const preset = catalog.presets.find((entry) => entry.id.toLocaleLowerCase() === normalize(id));
     if (!preset) return null;
-    const items = preset.itemIds.map((itemId) => catalog.items.find((entry) => entry.id === itemId)).filter((item): item is AssetLibraryItem => Boolean(item));
-    const layers = items.map((item, index) => ({ id: `${preset.id}-${item.id}`, assetId: item.id, role: item.kind === "effect" ? "effect" as const : index === 0 ? "background" as const : index === items.length - 1 ? "foreground" as const : "midground" as const, order: index }));
-    return { preset, items, layers, deterministic: true };
+    const items = preset.itemIds.map((itemId) => catalog.items.find((entry) => entry.id === itemId));
+    if (items.some((item) => !item)) return null;
+    const resolvedItems = items as AssetLibraryItem[];
+    const layers = resolvedItems.map((item, index) => ({ id: `${preset.id}-${item.id}`, assetId: item.id, role: item.kind === "effect" ? "effect" as const : index === 0 ? "background" as const : index === resolvedItems.length - 1 ? "foreground" as const : "midground" as const, order: index }));
+    return { preset, items: resolvedItems, layers, deterministic: true };
   }
 }
