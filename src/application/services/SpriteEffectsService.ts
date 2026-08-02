@@ -1,7 +1,7 @@
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { RasterCodec } from "../../domain/image-assets.js";
 import type { RasterFrame } from "../../domain/pixel-art.js";
-import type { CleanupIsolatedPixelsInput, ColorGradeInput, DayNightCycleInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteGlowInput, SpriteShadowInput, WaterCausticsInput, WaterReflectionInput } from "../../domain/sprite-effects.js";
+import type { CleanupIsolatedPixelsInput, ColorGradeInput, DayNightCycleInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteGlowInput, SpriteRimLightInput, SpriteRimLightDirection, SpriteShadowInput, WaterCausticsInput, WaterReflectionInput } from "../../domain/sprite-effects.js";
 
 function ok(value: unknown): AssetOperationResult { return { ok: true, message: JSON.stringify(value) }; }
 function fail(error: unknown): AssetOperationResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
@@ -34,6 +34,7 @@ function outputMessage(operation: string, input: string | null, output: string, 
 function averagePixel(left: Uint8ClampedArray, right: Uint8ClampedArray, leftOffset: number, rightOffset: number): [number, number, number, number] { return [Math.round(((left[leftOffset] ?? 0) + (right[rightOffset] ?? 0)) / 2), Math.round(((left[leftOffset + 1] ?? 0) + (right[rightOffset + 1] ?? 0)) / 2), Math.round(((left[leftOffset + 2] ?? 0) + (right[rightOffset + 2] ?? 0)) / 2), Math.round(((left[leftOffset + 3] ?? 0) + (right[rightOffset + 3] ?? 0)) / 2)]; }
 function interpolateChannel(left: number, right: number, progress: number): number { return Math.round(left + (right - left) * progress); }
 function interpolateRgb(left: [number, number, number], right: [number, number, number], progress: number): [number, number, number] { return [interpolateChannel(left[0], right[0], progress), interpolateChannel(left[1], right[1], progress), interpolateChannel(left[2], right[2], progress)]; }
+const RIM_LIGHT_VECTORS: Record<SpriteRimLightDirection, readonly [number, number]> = { north: [0, -1], north_east: [1, -1], east: [1, 0], south_east: [1, 1], south: [0, 1], south_west: [-1, 1], west: [-1, 0], north_west: [-1, -1] };
 
 export class SpriteEffectsService implements SpriteEffectsGateway {
   public constructor(private readonly codec: RasterCodec) {}
@@ -143,6 +144,30 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
         return { ...frame, pixels };
       });
       const format = formatFor(frames, input.format); await this.codec.encode(frames, input.outputFilename, format); return outputMessage("generate_sprite_glow", input.inputFilename, input.outputFilename, frames.length, format);
+    } catch (error) { return fail(error); }
+  }
+
+  public async applySpriteRimLight(input: SpriteRimLightInput): Promise<AssetOperationResult> {
+    try {
+      assertDifferent(input.inputFilename, input.outputFilename);
+      const color = rgba(input.color);
+      const vector = RIM_LIGHT_VECTORS[input.direction];
+      if (!vector) throw new Error("Invalid rim-light direction: " + input.direction);
+      const strength = input.strength ?? 0.75;
+      if (!Number.isFinite(strength) || strength < 0 || strength > 1) throw new Error("Rim-light strength must be between 0 and 1");
+      const source = await this.codec.decode(input.inputFilename);
+      const frames = source.map((frame) => {
+        const pixels = new Uint8ClampedArray(frame.pixels);
+        for (let y = 0; y < frame.height; y += 1) for (let x = 0; x < frame.width; x += 1) {
+          const offset = (y * frame.width + x) * 4;
+          const sourceAlpha = frame.pixels[offset + 3] ?? 0;
+          if (sourceAlpha === 0 || alphaAt(frame, x + vector[0], y + vector[1]) > 0) continue;
+          const mix = clamp(strength * (color[3] / 255) * (sourceAlpha / 255), 0, 1);
+          for (let channel = 0; channel < 3; channel += 1) pixels[offset + channel] = Math.round((frame.pixels[offset + channel] ?? 0) * (1 - mix) + (color[channel] ?? 0) * mix);
+        }
+        return { ...frame, pixels };
+      });
+      const format = formatFor(frames, input.format); await this.codec.encode(frames, input.outputFilename, format); return outputMessage("apply_sprite_rim_light", input.inputFilename, input.outputFilename, frames.length, format);
     } catch (error) { return fail(error); }
   }
 
