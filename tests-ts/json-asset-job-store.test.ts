@@ -7,7 +7,14 @@ import { JsonAssetJobStore } from "../src/infrastructure/jobs/JsonAssetJobStore.
 import type { AssetJobRecord } from "../src/domain/asset-jobs.js";
 
 function record(status: AssetJobRecord["status"] = "queued"): AssetJobRecord {
-  return { id: "job_persisted", status, jobs: [{ recipe: "gif", inputFilenames: ["source.png"] }], createdAt: "now", updatedAt: "now" };
+  return {
+    id: "job_persisted",
+    status,
+    jobs: [{ recipe: "gif", inputFilenames: ["source.png"] }],
+    createdAt: "now",
+    updatedAt: "now",
+    artifacts: [{ id: "artifact_1", jobId: "job_persisted", filename: "output.gif", format: "gif", sizeBytes: 42, sha256: "a".repeat(64), createdAt: "now" }],
+  };
 }
 
 test("json job store recovers records after a new adapter instance", async () => {

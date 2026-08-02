@@ -24,6 +24,7 @@ import { WorkflowPlanToolController } from "./controllers/WorkflowPlanToolContro
 import { AssetJobService } from "../application/services/AssetJobService.js";
 import { InMemoryAssetJobStore } from "../infrastructure/jobs/InMemoryAssetJobStore.js";
 import { JsonAssetJobStore } from "../infrastructure/jobs/JsonAssetJobStore.js";
+import { FileAssetArtifactResolver } from "../infrastructure/jobs/FileAssetArtifactResolver.js";
 import type { AssetJobStorePort } from "../application/ports/AssetJobPorts.js";
 import path from "node:path";
 import { DeterministicEnhancementService } from "../application/services/DeterministicEnhancementService.js";
@@ -191,7 +192,7 @@ export class AsepriteMcpServerAdapter {
     this.imageAssets = imageAssets ?? new PixelArtAssetService(rasterCodec, manifestWriter);
     this.visualAssets = new VisualAssetService(rasterCodec, manifestWriter);
     this.enhancements = new DeterministicEnhancementService(rasterCodec);
-    this.assetJobs = new AssetJobService({ run: (input) => this.imageAssets.runBatch(input) }, jobStore ?? new InMemoryAssetJobStore());
+    this.assetJobs = new AssetJobService({ run: (input) => this.imageAssets.runBatch(input) }, jobStore ?? new InMemoryAssetJobStore(), { artifactResolver: new FileAssetArtifactResolver() });
     this.server = new McpServer({ name: "aseprite-asset-mcp", version: SERVER_VERSION });
     this.registerTools();
   }

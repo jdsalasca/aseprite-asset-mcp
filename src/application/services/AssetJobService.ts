@@ -1,11 +1,24 @@
 import { randomUUID } from "node:crypto";
 import type { AssetJobInput, AssetJobRecord } from "../../domain/asset-jobs.js";
-import type { AssetJobRunnerPort, AssetJobStorePort, JobIdPort } from "../ports/AssetJobPorts.js";
+import type { AssetArtifactResolverPort, AssetJobRunnerPort, AssetJobStorePort, JobIdPort } from "../ports/AssetJobPorts.js";
+
+export interface AssetJobServiceDependencies {
+  ids?: JobIdPort;
+  artifactResolver?: AssetArtifactResolverPort;
+}
 
 class RandomJobId implements JobIdPort { public next(): string { return `job_${randomUUID().replaceAll("-", "").slice(0, 16)}`; } }
 
 export class AssetJobService {
-  public constructor(private readonly runner: AssetJobRunnerPort, private readonly store: AssetJobStorePort, private readonly ids: JobIdPort = new RandomJobId()) {}
+  private readonly ids: JobIdPort;
+
+  public constructor(
+    private readonly runner: AssetJobRunnerPort,
+    private readonly store: AssetJobStorePort,
+    private readonly dependencies: AssetJobServiceDependencies = {},
+  ) {
+    this.ids = dependencies.ids ?? new RandomJobId();
+  }
 
   public async start(input: AssetJobInput): Promise<AssetJobRecord> {
     const isolatedInput = structuredClone(input);
@@ -30,7 +43,8 @@ export class AssetJobService {
     if (!started) return;
     try {
       const outcome = await this.runner.run(input);
-      await this.store.updateIfStatus(record.id, "running", { status: outcome.ok ? "completed" : "failed", outcome, updatedAt: new Date().toISOString() });
+      const artifacts = outcome.ok && this.dependencies.artifactResolver ? await this.dependencies.artifactResolver.resolve(record.id, input) : undefined;
+      await this.store.updateIfStatus(record.id, "running", { status: outcome.ok ? "completed" : "failed", outcome, ...(artifacts ? { artifacts } : {}), updatedAt: new Date().toISOString() });
     } catch (error) {
       await this.store.updateIfStatus(record.id, "running", { status: "failed", outcome: { ok: false, message: error instanceof Error ? error.message : String(error) }, updatedAt: new Date().toISOString() });
     }

@@ -1,4 +1,4 @@
-import type { AssetJobInput, AssetJobOutcome, AssetJobRecord, AssetJobStatus } from "../../domain/asset-jobs.js";
+import type { AssetArtifact, AssetJobInput, AssetJobOutcome, AssetJobRecord, AssetJobStatus } from "../../domain/asset-jobs.js";
 
 export interface AssetJobRunnerPort {
   run(input: AssetJobInput): Promise<AssetJobOutcome>;
@@ -11,3 +11,7 @@ export interface AssetJobStorePort {
 }
 
 export interface JobIdPort { next(): string; }
+
+export interface AssetArtifactResolverPort {
+  resolve(jobId: string, input: AssetJobInput): Promise<AssetArtifact[]>;
+}

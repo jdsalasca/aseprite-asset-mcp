@@ -38,10 +38,12 @@ Ya están disponibles el planificador determinista `suggest_enhancement_plan`, l
 
 El adaptador CLI concreto ahora es un compositor delgado: `AsepriteLayerAdapter`, `AsepriteDrawingAdapter`, `AsepriteExportAdapter`, `AsepritePaletteAdapter`, `AsepriteTextAdapter`, `AsepriteAnimationAdapter`, `AsepriteEffectsAdapter` y `AsepriteSceneAdapter` implementan las capacidades aisladas sobre `AsepriteCommandAdapter`.
 
-### Fase 3 · Persistencia y observabilidad — persistencia de jobs implementada
+### Fase 3 · Persistencia y observabilidad — jobs y artifacts implementados
 
 - `JsonAssetJobStore` implementa el puerto genérico de jobs y recupera estados tras reinicios;
 - transiciones condicionales evitan que workers o cancelaciones sobrescriban estados más nuevos;
+- `AssetArtifactResolverPort` mantiene la abstracción genérica y `FileAssetArtifactResolver` calcula formato, tamaño y SHA-256 en infraestructura;
+- los jobs completados conservan metadata de artifacts y el store JSON la recupera después de reiniciar;
 - el archivo runtime vive fuera de Git mediante `ASSET_JOB_STORE_PATH` o `.asset-studio/jobs.json`;
 - repositorio de artifacts y jobs;
 - logs estructurados con correlación;
