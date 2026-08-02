@@ -1,9 +1,10 @@
-import { inspectRasterFrame, convertRasterFrames } from "./PixelArtPipeline.js";
+import { inspectRasterFrame, convertRasterFrames, harmonizeRasterFrames } from "./PixelArtPipeline.js";
 import path from "node:path";
 import type {
   AssetInspection,
   AssetManifestWriter,
   AssetPackInput,
+  PaletteHarmonizeInput,
   AssetQualityBundleInput,
   AssetQualityInput,
   AssetRecipeInput,
@@ -21,7 +22,8 @@ function ok(message: unknown): AssetOperationResult { return { ok: true, message
 function fail(error: unknown): AssetOperationResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
 function assertPathPair(inputFilename: string, outputFilename: string): void {
   if (!inputFilename.trim() || !outputFilename.trim()) throw new Error("Input and output filenames are required");
-  if (inputFilename.toLowerCase() === outputFilename.toLowerCase()) throw new Error("Input and output filenames must differ");
+  if (inputFilename.includes("\0") || outputFilename.includes("\0")) throw new Error("Input and output filenames cannot contain null bytes");
+  if (path.resolve(inputFilename).toLowerCase() === path.resolve(outputFilename).toLowerCase()) throw new Error("Input and output filenames must differ");
 }
 
 function assertOutputDiffersFromInputs(inputFilenames: string[], outputFilename: string): void {
@@ -104,6 +106,20 @@ export class PixelArtAssetService {
       const format = input.format ?? (frames.length > 1 ? "gif" : "png");
       await this.codec.encode(frames, input.outputFilename, format);
       return ok({ operation: "upscale_pixel_art", input: input.inputFilename, output: input.outputFilename, scale: input.scale, frames: frames.length, width: first.width * input.scale, height: first.height * input.scale, format, deterministic: true, sourcePreserved: true });
+    } catch (error) { return fail(error); }
+  }
+
+  public async harmonizePalette(input: PaletteHarmonizeInput): Promise<AssetOperationResult> {
+    try {
+      assertPathPair(input.inputFilename, input.outputFilename);
+      if (!/^#?(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(input.accentColor.trim())) throw new Error("Accent color must be a 6 or 8 digit hexadecimal color");
+      if (!Number.isFinite(input.strength) || input.strength < 0 || input.strength > 1) throw new Error("Strength must be between 0 and 1");
+      if (!Number.isInteger(input.maxColors) || input.maxColors < 2 || input.maxColors > 64) throw new Error("Maximum colors must be an integer from 2 to 64");
+      const source = await this.codec.decode(input.inputFilename);
+      const harmonized = harmonizeRasterFrames(source, input.accentColor, input.strength, input.maxColors);
+      const format = input.format ?? (harmonized.frames.length > 1 ? "gif" : "png");
+      await this.codec.encode(harmonized.frames, input.outputFilename, format);
+      return ok({ operation: "harmonize_asset_palette", input: input.inputFilename, output: input.outputFilename, frames: harmonized.frames.length, format, accentColor: input.accentColor.toUpperCase(), strength: input.strength, maxColors: input.maxColors, palette: harmonized.palette, deterministic: true, sourcePreserved: true });
     } catch (error) { return fail(error); }
   }
 

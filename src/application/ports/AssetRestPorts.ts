@@ -20,7 +20,7 @@ export interface AssetRestUseCases {
   applyMaterialTexture(input: MaterialTextureInput): Promise<AssetOperationResult>;
   applyDepthLighting(input: DepthLightingInput): Promise<AssetOperationResult>;
   assetLibrary: AssetLibraryService;
-  imageAssets: Pick<PixelArtAssetService, "upscalePixelArt" | "qualityBundle">;
+  imageAssets: Pick<PixelArtAssetService, "upscalePixelArt" | "qualityBundle" | "harmonizePalette">;
   visualAssets: Pick<VisualAssetGateway, "extendScene" | "generateBiomeTransition">;
 }
 

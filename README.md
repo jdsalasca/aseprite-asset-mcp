@@ -116,6 +116,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `convert_image_to_pixel_art`: convierte PNG, JPG, WebP y otros formatos soportados por Sharp con resize box/nearest, paleta limitada, transparencia y dithering Bayer opcional.
 - `convert_animation_to_pixel_art`: procesa todos los frames con una paleta global y conserva sus delays en GIF.
 - `upscale_pixel_art`: aumenta sprites estáticos o animados con nearest-neighbor determinista, conserva transparencia/delays y limita la salida a 4096 px.
+- `harmonize_asset_palette`: mueve un PNG/GIF hacia una familia cromática de acento, limita la paleta y conserva transparencia/delays en una salida separada.
 - `export_animation_gif`: exporta una imagen animada o un `.aseprite` a GIF.
 - `inspect_asset` y `validate_asset_quality`: reportan dimensiones, frames, colores, transparencia, delays y pixeles aislados antes de exportar.
 - `inspect_asset_bundle`: combina inspección, quality gate, violaciones y recomendaciones deterministas en una sola respuesta compacta.
@@ -189,6 +190,7 @@ Ejemplos REST:
 GET /api/v1/library?query=rain&limit=12
 POST /api/v1/effects/motion
 POST /api/v1/effects/upscale
+POST /api/v1/assets/palette-harmonize
 POST /api/v1/effects/seamless
 POST /api/v1/effects/water-reflection
 POST /api/v1/effects/water-caustics

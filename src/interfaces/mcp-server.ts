@@ -174,6 +174,7 @@ const TOOL_NAMES = [
   "convert_image_to_pixel_art",
   "convert_animation_to_pixel_art",
   "upscale_pixel_art",
+  "harmonize_asset_palette",
   "export_animation_gif",
   "inspect_asset",
   "inspect_asset_bundle",

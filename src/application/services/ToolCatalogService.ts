@@ -13,6 +13,7 @@ const DESCRIPTION_OVERRIDES: Record<string, string> = {
   convert_image_to_pixel_art: "Convert one image to pixel art with a bounded palette.",
   convert_animation_to_pixel_art: "Convert all frames to pixel art and preserve delays.",
   upscale_pixel_art: "Upscale sprites with deterministic nearest-neighbor pixels and preserved transparency.",
+  harmonize_asset_palette: "Harmonize a sprite palette toward an accent color with bounded deterministic output.",
   export_animation_gif: "Export a raster animation or Aseprite sprite as GIF.",
   inspect_asset: "Inspect dimensions, frames, colors, transparency, and delays.",
   inspect_asset_bundle: "Inspect one asset and return quality violations and recommendations in one compact response.",

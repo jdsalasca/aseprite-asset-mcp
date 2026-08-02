@@ -20,6 +20,15 @@ export interface UpscalePixelArtInput {
   format?: ImageOutputFormat | undefined;
 }
 
+export interface PaletteHarmonizeInput {
+  inputFilename: string;
+  outputFilename: string;
+  accentColor: string;
+  strength: number;
+  maxColors: number;
+  format?: ImageOutputFormat | undefined;
+}
+
 export interface AssetInspection {
   filename: string;
   frameCount: number;

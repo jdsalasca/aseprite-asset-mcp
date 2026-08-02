@@ -26,7 +26,7 @@ function fakeUseCases(): AssetRestUseCases {
     applyMaterialTexture: async () => result("apply_material_texture"),
     applyDepthLighting: async () => result("apply_depth_lighting"),
     assetLibrary: new AssetLibraryService(new FakeLibrary()),
-    imageAssets: { upscalePixelArt: async () => result("upscale_pixel_art"), qualityBundle: async () => result("inspect_asset_bundle") },
+    imageAssets: { upscalePixelArt: async () => result("upscale_pixel_art"), qualityBundle: async () => result("inspect_asset_bundle"), harmonizePalette: async () => result("harmonize_asset_palette") },
     visualAssets: { extendScene: async () => result("extend_scene"), generateBiomeTransition: async () => result("generate_biome_transition") },
   };
 }
@@ -87,6 +87,9 @@ test("REST controller exposes the same recipe and effect application services", 
     const upscale = await fetch(`${rest.url}/api/v1/effects/upscale`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_filename: "hero.png", output_filename: "hero-3x.png", scale: 3 }) });
     assert.equal(upscale.status, 200);
     assert.equal((await upscale.json()).data.operation, "upscale_pixel_art");
+    const harmonize = await fetch(`${rest.url}/api/v1/assets/palette-harmonize`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_filename: "hero.png", output_filename: "hero-harmonized.png", accent_color: "#3155d8", strength: 0.8, max_colors: 8 }) });
+    assert.equal(harmonize.status, 200);
+    assert.equal((await harmonize.json()).data.operation, "harmonize_asset_palette");
     const extension = await fetch(`${rest.url}/api/v1/scenes/extend`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_map_filename: "map.json", output_map_filename: "map-expanded.json", top: 2, right: 3, bottom: 1, left: 4, seed: 9 }) });
     assert.equal(extension.status, 200);
     assert.equal((await extension.json()).data.operation, "extend_scene");

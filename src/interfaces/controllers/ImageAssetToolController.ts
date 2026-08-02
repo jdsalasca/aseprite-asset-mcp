@@ -29,6 +29,11 @@ export class ImageAssetToolController {
       inputSchema: { input_filename: z.string().min(1), output_filename: z.string().min(1), scale: z.number().int().min(2).max(16), format: z.enum(["png", "gif"]).optional() },
     }, async ({ input_filename, output_filename, scale, format }) => this.result(await this.imageAssets.upscalePixelArt({ inputFilename: input_filename, outputFilename: output_filename, scale, ...(format ? { format } : {}) })));
 
+    server.registerTool("harmonize_asset_palette", {
+      description: "Apply a deterministic accent palette to a PNG or GIF, preserve transparency and timing, and cap output colors without overwriting the source.",
+      inputSchema: { input_filename: z.string().min(1), output_filename: z.string().min(1), accent_color: z.string().regex(/^#?(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/), strength: z.number().min(0).max(1).default(0.65), max_colors: z.number().int().min(2).max(64).default(16), format: z.enum(["png", "gif"]).optional() },
+    }, async ({ input_filename, output_filename, accent_color, strength, max_colors, format }) => this.result(await this.imageAssets.harmonizePalette({ inputFilename: input_filename, outputFilename: output_filename, accentColor: accent_color, strength, maxColors: max_colors, ...(format ? { format } : {}) })));
+
     server.registerTool("export_animation_gif", {
       description: "Convert a PNG, GIF, or animated image into a GIF while preserving frames.",
       inputSchema: { input_filename: z.string().min(1), output_filename: z.string().min(1) },

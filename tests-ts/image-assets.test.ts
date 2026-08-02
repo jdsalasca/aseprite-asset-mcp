@@ -128,6 +128,47 @@ test("pixel upscale uses nearest-neighbor, preserves transparency and animation 
   assert.equal((await service.upscalePixelArt({ inputFilename: input, outputFilename: input, scale: 2 })).ok, false);
 });
 
+test("palette harmonization is deterministic, bounded, animated-safe, and source-preserving", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "aseprite-palette-harmony-test-"));
+  const input = path.join(directory, "source.png");
+  const output = path.join(directory, "source-harmonized.png");
+  await sharp(Buffer.from([
+    255, 32, 32, 255, 32, 255, 64, 255,
+    32, 32, 32, 0, 64, 128, 255, 255,
+  ]), { raw: { width: 2, height: 2, channels: 4 } }).png().toFile(input);
+  const original = await fs.readFile(input);
+  const service = new PixelArtAssetService(new SharpRasterCodec());
+
+  const result = await service.harmonizePalette({ inputFilename: input, outputFilename: output, accentColor: "#3155d8", strength: 0.8, maxColors: 2 });
+  assert.equal(result.ok, true);
+  const payload = JSON.parse(result.message) as { operation: string; palette: string[]; frames: number; deterministic: boolean; sourcePreserved: boolean; strength: number };
+  assert.equal(payload.operation, "harmonize_asset_palette");
+  assert.equal(payload.frames, 1);
+  assert.equal(payload.palette.length <= 2, true);
+  assert.equal(payload.deterministic, true);
+  assert.equal(payload.sourcePreserved, true);
+  assert.equal(payload.strength, 0.8);
+  assert.deepEqual(await fs.readFile(input), original);
+  const pixels = await sharp(output).raw().toBuffer();
+  assert.deepEqual([...pixels.subarray(8, 12)], [0, 0, 0, 0]);
+
+  const second = path.join(directory, "source-harmonized-2.png");
+  const repeat = await service.harmonizePalette({ inputFilename: input, outputFilename: second, accentColor: "#3155d8", strength: 0.8, maxColors: 2 });
+  assert.equal(repeat.ok, true);
+  assert.deepEqual(await fs.readFile(output), await fs.readFile(second));
+});
+
+test("palette harmonization rejects unsafe aliases, invalid colors, strength, and palette limits", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "aseprite-palette-harmony-invalid-"));
+  const input = path.join(directory, "source.png");
+  await makePng(input, [255, 0, 0, 255]);
+  const service = new PixelArtAssetService(new SharpRasterCodec());
+  assert.equal((await service.harmonizePalette({ inputFilename: input, outputFilename: `${directory}${path.sep}nested${path.sep}..${path.sep}source.png`, accentColor: "#3155d8", strength: 0.5, maxColors: 4 })).ok, false);
+  assert.equal((await service.harmonizePalette({ inputFilename: input, outputFilename: path.join(directory, "bad-color.png"), accentColor: "blue", strength: 0.5, maxColors: 4 })).ok, false);
+  assert.equal((await service.harmonizePalette({ inputFilename: input, outputFilename: path.join(directory, "bad-strength.png"), accentColor: "#3155d8", strength: 1.1, maxColors: 4 })).ok, false);
+  assert.equal((await service.harmonizePalette({ inputFilename: input, outputFilename: path.join(directory, "bad-palette.png"), accentColor: "#3155d8", strength: 0.5, maxColors: 1 })).ok, false);
+});
+
 test("batch asset jobs return one compact plan", async () => {
   const service = new PixelArtAssetService(new SharpRasterCodec());
   const result = await service.runBatch({ jobs: [
