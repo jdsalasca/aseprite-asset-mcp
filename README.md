@@ -148,6 +148,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `generate_water_reflection`: genera un GIF determinista con reflejo bajo una línea de agua, oleaje y destellos temporales para océanos, playas y mapas.
 - `generate_water_caustics`: genera una pasada GIF de luz refractada sobre píxeles opacos de agua, piscinas, playas o interiores inundados.
 - `generate_day_night_cycle`: genera un GIF determinista con las etapas `day`, `sunset`, `night` y `sunrise`, preservando transparencia y dimensiones.
+- `remove_background`: elimina un color de fondo por RGB con tolerancia opcional; en modo conectado solo remueve coincidencias alcanzables desde el borde y conserva colores encerrados.
 - `generate_time_of_day_pack`: crea transición día, atardecer, noche y amanecer.
 - `generate_environment_pack`: empaqueta playa, bosque, aldea o cueva en una sola llamada.
 - `create_asset_recipe`: compone outline, grading, materiales, luz, sombras, partículas, normal map y quality gate en un plan determinista sin ejecutar cambios.
@@ -217,6 +218,7 @@ POST /api/v1/library/scene-animation-compose
 POST /api/v1/library/variants/pack
 POST /api/v1/effects/motion
 POST /api/v1/effects/upscale
+POST /api/v1/effects/remove-background
 POST /api/v1/assets/palette-harmonize
 POST /api/v1/assets/contact-sheet
 POST /api/v1/effects/seamless

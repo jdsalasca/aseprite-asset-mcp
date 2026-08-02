@@ -21,6 +21,35 @@ test("pixel outline adds opaque edge pixels without overwriting source", async (
   assert.equal(result.ok, true); const data = await sharp(output).raw().toBuffer({ resolveWithObject: true }); assert.ok([...data.data].some((value, index) => index % 4 === 3 && value > 0)); assert.notDeepEqual(await fs.readFile(input), await fs.readFile(output));
 });
 
+test("background removal clears connected pixels deterministically and preserves enclosed colors", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-background-"));
+  const input = path.join(directory, "input.png"); const first = path.join(directory, "first.png"); const second = path.join(directory, "second.png");
+  const pixels = new Uint8ClampedArray(5 * 5 * 4);
+  const set = (x: number, y: number, color: [number, number, number, number]) => pixels.set(color, (y * 5 + x) * 4);
+  for (let y = 0; y < 5; y += 1) for (let x = 0; x < 5; x += 1) set(x, y, [20, 40, 80, 255]);
+  for (let y = 1; y < 4; y += 1) for (let x = 1; x < 4; x += 1) set(x, y, [220, 90, 40, 255]);
+  set(2, 2, [20, 40, 80, 255]);
+  await sharp(Buffer.from(pixels), { raw: { width: 5, height: 5, channels: 4 } }).png().toFile(input);
+  const operation = { inputFilename: input, outputFilename: first, backgroundColor: "#142850", tolerance: 0, connectedOnly: true };
+  assert.equal((await service().removeBackground(operation)).ok, true);
+  assert.equal((await service().removeBackground({ ...operation, outputFilename: second })).ok, true);
+  assert.deepEqual(await fs.readFile(first), await fs.readFile(second));
+  assert.deepEqual(await fs.readFile(input), await sharp(Buffer.from(pixels), { raw: { width: 5, height: 5, channels: 4 } }).png().toBuffer());
+  const output = await sharp(first).raw().toBuffer({ resolveWithObject: true });
+  assert.equal(output.data[3], 0);
+  assert.equal(output.data[(2 * 5 + 2) * 4 + 3], 255);
+  assert.equal(output.data[(2 * 5 + 1) * 4 + 3], 255);
+});
+
+test("background removal supports global mode and rejects invalid contracts", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-background-invalid-")); const input = path.join(directory, "input.png"); await makeSprite(input);
+  const global = await service().removeBackground({ inputFilename: input, outputFilename: path.join(directory, "global.png"), backgroundColor: "#000000", tolerance: 0, connectedOnly: false });
+  assert.equal(global.ok, true);
+  const invalidTolerance = await service().removeBackground({ inputFilename: input, outputFilename: path.join(directory, "invalid.png"), backgroundColor: "#000000", tolerance: 256 });
+  assert.equal(invalidTolerance.ok, false);
+  assert.match(invalidTolerance.message, /tolerance/i);
+});
+
 test("color grade is deterministic and rejects invalid ranges", async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-grade-")); const input = path.join(directory, "input.png"); const first = path.join(directory, "first.png"); const second = path.join(directory, "second.png"); await makeSprite(input);
   assert.equal((await service().applyColorGrade({ inputFilename: input, outputFilename: first, brightness: 0.1, contrast: 1.2, saturation: 0.8 })).ok, true); assert.equal((await service().applyColorGrade({ inputFilename: input, outputFilename: second, brightness: 0.1, contrast: 1.2, saturation: 0.8 })).ok, true); assert.deepEqual(await fs.readFile(first), await fs.readFile(second));

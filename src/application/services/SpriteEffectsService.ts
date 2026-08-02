@@ -1,7 +1,7 @@
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { RasterCodec } from "../../domain/image-assets.js";
 import type { RasterFrame } from "../../domain/pixel-art.js";
-import type { ColorGradeInput, DayNightCycleInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, SeamlessTextureInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteShadowInput, WaterCausticsInput, WaterReflectionInput } from "../../domain/sprite-effects.js";
+import type { ColorGradeInput, DayNightCycleInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteShadowInput, WaterCausticsInput, WaterReflectionInput } from "../../domain/sprite-effects.js";
 
 function ok(value: unknown): AssetOperationResult { return { ok: true, message: JSON.stringify(value) }; }
 function fail(error: unknown): AssetOperationResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
@@ -47,6 +47,45 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
       const source = await this.codec.decode(input.inputFilename);
       const frames = source.map((frame) => { const pixels = new Uint8ClampedArray(frame.pixels); for (let y = 0; y < frame.height; y += 1) for (let x = 0; x < frame.width; x += 1) if (alphaAt(frame, x, y) > 0) for (let dy = -thickness; dy <= thickness; dy += 1) for (let dx = -thickness; dx <= thickness; dx += 1) if (Math.abs(dx) + Math.abs(dy) <= thickness && alphaAt(frame, x + dx, y + dy) === 0) setPixel(pixels, frame.width, frame.height, x + dx, y + dy, [color[0], color[1], color[2], Math.round((alphaAt(frame, x, y) * color[3]) / 255)]); return { ...frame, pixels }; });
       const format = formatFor(frames, input.format); await this.codec.encode(frames, input.outputFilename, format); return outputMessage("apply_pixel_outline", input.inputFilename, input.outputFilename, frames.length, format);
+    } catch (error) { return fail(error); }
+  }
+
+  public async removeBackground(input: RemoveBackgroundInput): Promise<AssetOperationResult> {
+    try {
+      assertDifferent(input.inputFilename, input.outputFilename);
+      const target = rgba(input.backgroundColor);
+      const tolerance = input.tolerance ?? 0;
+      if (!Number.isInteger(tolerance) || tolerance < 0 || tolerance > 255) throw new Error("Background tolerance must be an integer from 0 to 255");
+      const connectedOnly = input.connectedOnly ?? true;
+      const source = await this.codec.decode(input.inputFilename);
+      const matches = (frame: RasterFrame, x: number, y: number): boolean => {
+        const offset = (y * frame.width + x) * 4;
+        if ((frame.pixels[offset + 3] ?? 0) === 0) return false;
+        const red = (frame.pixels[offset] ?? 0) - target[0];
+        const green = (frame.pixels[offset + 1] ?? 0) - target[1];
+        const blue = (frame.pixels[offset + 2] ?? 0) - target[2];
+        return red * red + green * green + blue * blue <= tolerance * tolerance * 3;
+      };
+      const frames = source.map((frame) => {
+        const pixels = new Uint8ClampedArray(frame.pixels);
+        const remove = new Set<number>();
+        if (connectedOnly) {
+          const queue: Array<[number, number]> = [];
+          for (let x = 0; x < frame.width; x += 1) { queue.push([x, 0]); if (frame.height > 1) queue.push([x, frame.height - 1]); }
+          for (let y = 1; y < frame.height - 1; y += 1) { queue.push([0, y]); if (frame.width > 1) queue.push([frame.width - 1, y]); }
+          while (queue.length) {
+            const [x, y] = queue.pop()!; const index = y * frame.width + x;
+            if (remove.has(index) || !matches(frame, x, y)) continue;
+            remove.add(index);
+            if (x > 0) queue.push([x - 1, y]); if (x + 1 < frame.width) queue.push([x + 1, y]); if (y > 0) queue.push([x, y - 1]); if (y + 1 < frame.height) queue.push([x, y + 1]);
+          }
+        } else {
+          for (let y = 0; y < frame.height; y += 1) for (let x = 0; x < frame.width; x += 1) if (matches(frame, x, y)) remove.add(y * frame.width + x);
+        }
+        for (const index of remove) pixels[index * 4 + 3] = 0;
+        return { ...frame, pixels };
+      });
+      const format = formatFor(frames, input.format); await this.codec.encode(frames, input.outputFilename, format); return outputMessage("remove_background", input.inputFilename, input.outputFilename, frames.length, format);
     } catch (error) { return fail(error); }
   }
 

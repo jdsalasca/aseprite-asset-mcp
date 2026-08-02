@@ -237,6 +237,7 @@ const TOOL_NAMES = [
   "apply_material_texture",
   "apply_depth_lighting",
   "apply_pixel_outline",
+  "remove_background",
   "apply_color_grade",
   "generate_sprite_shadow",
   "generate_particle_burst",

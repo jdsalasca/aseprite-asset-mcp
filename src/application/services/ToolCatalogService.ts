@@ -53,6 +53,7 @@ const DESCRIPTION_OVERRIDES: Record<string, string> = {
   apply_material_texture: "Add deterministic material grain and highlights while preserving transparency.",
   apply_depth_lighting: "Add deterministic depth-aware directional lighting while preserving transparency.",
   apply_pixel_outline: "Add a deterministic pixel outline around opaque sprite edges.",
+  remove_background: "Remove a selected background color deterministically, optionally limited to pixels connected to the image edge.",
   apply_color_grade: "Apply deterministic brightness, contrast, and saturation grading.",
   generate_sprite_shadow: "Generate a deterministic clipped shadow from sprite alpha.",
   generate_particle_burst: "Generate a deterministic animated particle burst GIF.",
@@ -93,7 +94,7 @@ function folderFor(name: string): string {
   if (name === "generate_scene_effect_stack") return "asset/effects";
   if (name.includes("material_texture")) return "asset/material";
   if (name.includes("depth_lighting")) return "asset/lighting";
-  if (name.includes("color_grade") || name.includes("outline") || name.includes("shadow") || name.includes("normal_map") || name.includes("rain") || name.includes("motion") || name.includes("seamless") || name.includes("reflection") || name.includes("caustics") || name.includes("day_night") || name.includes("variant_pack")) return "asset/effects";
+  if (name.includes("color_grade") || name.includes("outline") || name.includes("background") || name.includes("shadow") || name.includes("normal_map") || name.includes("rain") || name.includes("motion") || name.includes("seamless") || name.includes("reflection") || name.includes("caustics") || name.includes("day_night") || name.includes("variant_pack")) return "asset/effects";
   if (name.includes("particle")) return "asset/particles";
   if (name === "create_asset_recipe" || name === "execute_asset_recipe") return "asset/recipes";
   if (name === "inspect_reference" || name === "run_asset_quality_gate") return "asset/quality";
