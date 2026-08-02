@@ -10,6 +10,8 @@ import { JsonAssetManifestWriter } from "../infrastructure/image/JsonAssetManife
 import { VisualAssetService } from "../application/services/VisualAssetService.js";
 import { EnhancementToolController } from "./controllers/EnhancementToolController.js";
 import { EnhancementBundleService } from "../application/services/EnhancementBundleService.js";
+import { EnhancementBatchService } from "../application/services/EnhancementBatchService.js";
+import { EnhancementBatchToolController } from "./controllers/EnhancementBatchToolController.js";
 import { AssetJobToolController } from "./controllers/AssetJobToolController.js";
 import { ImageAssetToolController } from "./controllers/ImageAssetToolController.js";
 import { AssetBatchQualityService } from "../application/services/AssetBatchQualityService.js";
@@ -197,6 +199,7 @@ const TOOL_NAMES = [
   "suggest_enhancement_plan",
   "apply_enhancement_plan",
   "apply_enhancement_bundle",
+  "apply_enhancement_batch",
   "convert_image_to_pixel_art",
   "convert_animation_to_pixel_art",
   "upscale_pixel_art",
@@ -281,6 +284,7 @@ export class AsepriteMcpServerAdapter {
   private readonly visualAssets: VisualAssetService;
   private readonly enhancements: DeterministicEnhancementService;
   private readonly enhancementBundle: EnhancementBundleService;
+  private readonly enhancementBatch: EnhancementBatchService;
   private readonly assetJobs: AssetJobService;
   private readonly spriteEffects: SpriteEffectsService;
   private readonly variantPack: AssetVariantPackService;
@@ -342,7 +346,8 @@ export class AsepriteMcpServerAdapter {
     });
     this.enhancements = new DeterministicEnhancementService(rasterCodec);
     this.enhancementBundle = new EnhancementBundleService(this.visualAssets, this.enhancements);
-    this.restController = new AssetRestController({ createRecipe: (input) => this.recipes.compose(input), executeRecipe: (input) => this.recipeExecutor.execute(this.recipes.compose(input)), spriteEffects: this.spriteEffects, variantPack: this.variantPack, presetGeneration: this.presetGeneration, sceneEffectStack: this.sceneEffectStack, applyMaterialTexture: (input) => this.visualAssets.applyMaterialTexture(input), applyDepthLighting: (input) => this.visualAssets.applyDepthLighting(input), assetLibrary: this.assetLibrary, assetLibraryAudit: this.assetLibraryAudit, assetLibrarySummary: this.assetLibrarySummary, assetScenePlanner: this.assetScenePlanner, assetSceneComposer: this.assetSceneComposer, assetSceneAnimationComposer: this.assetSceneAnimationComposer, assetLibraryVariantPack: this.assetLibraryVariantPack, assetManifestAudit: this.assetManifestAudit, assetSceneRecommendation: this.assetSceneRecommendation, assetSceneBundle: this.assetSceneBundle, enhancementBundle: this.enhancementBundle, imageAssets: this.imageAssets, batchQuality: this.batchQuality, animationQuality: this.animationQuality, spriteNormalization: this.spriteNormalization, animationSheet: this.animationSheet, spriteGeometry: this.spriteGeometry, spriteHitbox: this.spriteHitbox, spriteRuntimeBundle: this.spriteRuntimeBundle, spriteAnchors: this.spriteAnchors, contactSheet: this.contactSheets, visualAssets: { extendScene: (input) => this.visualAssets.extendScene(input), generateBiomeTransition: (input) => this.visualAssets.generateBiomeTransition(input) } }, SERVER_VERSION);
+    this.enhancementBatch = new EnhancementBatchService(this.enhancementBundle);
+    this.restController = new AssetRestController({ createRecipe: (input) => this.recipes.compose(input), executeRecipe: (input) => this.recipeExecutor.execute(this.recipes.compose(input)), spriteEffects: this.spriteEffects, variantPack: this.variantPack, presetGeneration: this.presetGeneration, sceneEffectStack: this.sceneEffectStack, applyMaterialTexture: (input) => this.visualAssets.applyMaterialTexture(input), applyDepthLighting: (input) => this.visualAssets.applyDepthLighting(input), assetLibrary: this.assetLibrary, assetLibraryAudit: this.assetLibraryAudit, assetLibrarySummary: this.assetLibrarySummary, assetScenePlanner: this.assetScenePlanner, assetSceneComposer: this.assetSceneComposer, assetSceneAnimationComposer: this.assetSceneAnimationComposer, assetLibraryVariantPack: this.assetLibraryVariantPack, assetManifestAudit: this.assetManifestAudit, assetSceneRecommendation: this.assetSceneRecommendation, assetSceneBundle: this.assetSceneBundle, enhancementBundle: this.enhancementBundle, enhancementBatch: this.enhancementBatch, imageAssets: this.imageAssets, batchQuality: this.batchQuality, animationQuality: this.animationQuality, spriteNormalization: this.spriteNormalization, animationSheet: this.animationSheet, spriteGeometry: this.spriteGeometry, spriteHitbox: this.spriteHitbox, spriteRuntimeBundle: this.spriteRuntimeBundle, spriteAnchors: this.spriteAnchors, contactSheet: this.contactSheets, visualAssets: { extendScene: (input) => this.visualAssets.extendScene(input), generateBiomeTransition: (input) => this.visualAssets.generateBiomeTransition(input) } }, SERVER_VERSION);
     this.assetJobs = new AssetJobService({ run: (input) => this.imageAssets.runBatch(input) }, jobStore ?? new InMemoryAssetJobStore(), { artifactResolver: new FileAssetArtifactResolver(() => new Date().toISOString(), process.env.ASSET_ARTIFACT_ROOT ? [process.env.ASSET_ARTIFACT_ROOT] : []), timeoutMs: 5 * 60 * 1000 });
     this.server = new McpServer({ name: "aseprite-asset-mcp", version: SERVER_VERSION });
     this.registerTools();
@@ -393,6 +398,7 @@ export class AsepriteMcpServerAdapter {
     new AssetSceneRecommendationToolController(this.assetSceneRecommendation).register(this.server);
     new AssetSceneBundleToolController(this.assetSceneBundle).register(this.server);
     new EnhancementToolController(this.visualAssets, this.enhancements, undefined, this.enhancementBundle).register(this.server);
+    new EnhancementBatchToolController(this.enhancementBatch).register(this.server);
     new AssetJobToolController(this.assetJobs).register(this.server);
     new LayerFrameToolController(this.assets).register(this.server);
 

@@ -11,7 +11,7 @@ PowerShell:
 
 Health: GET http://127.0.0.1:3766/api/v1/health
 
-Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lighting, /api/v1/assets/enhancement-bundle y /api/v1/effects/outline, /api/v1/effects/color-grade, /api/v1/effects/shadow, /api/v1/effects/particles, /api/v1/effects/normal-map, /api/v1/effects/rain, /api/v1/effects/motion, /api/v1/effects/upscale, /api/v1/assets/palette-harmonize, /api/v1/assets/contact-sheet, /api/v1/assets/quality-batch, /api/v1/assets/animation-quality, /api/v1/assets/normalize-sprite, /api/v1/assets/sprite-geometry, /api/v1/assets/sprite-hitboxes, /api/v1/effects/seamless, /api/v1/effects/water-reflection, /api/v1/effects/water-caustics, /api/v1/effects/day-night, /api/v1/effects/scene-stack, /api/v1/variants/pack, /api/v1/scenes/extend y /api/v1/scenes/biome-transition. La auditoría está disponible como GET /api/v1/library/audit y el resumen de navegación como GET /api/v1/library/summary.
+Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lighting, /api/v1/assets/enhancement-bundle, /api/v1/assets/enhancement-batch y /api/v1/effects/outline, /api/v1/effects/color-grade, /api/v1/effects/shadow, /api/v1/effects/particles, /api/v1/effects/normal-map, /api/v1/effects/rain, /api/v1/effects/motion, /api/v1/effects/upscale, /api/v1/assets/palette-harmonize, /api/v1/assets/contact-sheet, /api/v1/assets/quality-batch, /api/v1/assets/animation-quality, /api/v1/assets/normalize-sprite, /api/v1/assets/sprite-geometry, /api/v1/assets/sprite-hitboxes, /api/v1/effects/seamless, /api/v1/effects/water-reflection, /api/v1/effects/water-caustics, /api/v1/effects/day-night, /api/v1/effects/scene-stack, /api/v1/variants/pack, /api/v1/scenes/extend y /api/v1/scenes/biome-transition. La auditoría está disponible como GET /api/v1/library/audit y el resumen de navegación como GET /api/v1/library/summary.
 
 `/api/v1/effects/upscale` recibe `{ "input_filename": "hero.png", "output_filename": "hero-3x.png", "scale": 3 }`. Usa nearest-neighbor determinista, conserva transparencia y delays cuando la entrada es animada, rechaza sobrescribir la fuente y limita cada dimensión resultante a 4096 px.
 
@@ -54,6 +54,8 @@ Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lightin
 `/api/v1/assets/quality-bundle` recibe `{ "filename": "forest-ranger.png", "max_colors": 64, "max_isolated_pixels": 4 }` y devuelve inspección, violaciones, recomendaciones y las garantías `deterministic`/`sourcePreserved` sin generar archivos. Es el camino recomendado para que la UX valide antes de encadenar mejoras.
 
 `/api/v1/assets/enhancement-bundle` recibe `{ "filename": "hero.png", "output_filename": "hero-enhanced.png", "format": "png", "goals": ["cleanup", "terrain_grain", "directional_lighting"], "max_colors": 64, "seed": 7 }`. Ejecuta el mismo caso de uso que `apply_enhancement_bundle`: inspección, plan, aplicación no destructiva y quality gate en una sola llamada.
+
+`/api/v1/assets/enhancement-batch` recibe una lista `items` con `filename`, `output_filename` y `format`. El servicio bloquea colisiones entre fuentes y salidas antes de materializar, conserva el orden, continúa después de un error individual y devuelve un resumen compacto para la UX.
 
 `/api/v1/assets/quality-batch` recibe `{ "filenames": ["hero.png", "hero-rain.gif"], "max_colors": 64, "max_isolated_pixels": 4 }`. Ejecuta el mismo quality bundle por un puerto compartido, conserva el orden, aísla errores por archivo y devuelve `summary: { total, valid, invalid, failed }`.
 

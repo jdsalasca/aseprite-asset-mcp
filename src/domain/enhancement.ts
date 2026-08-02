@@ -64,3 +64,39 @@ export interface EnhancementBundleResult {
 export interface EnhancementBundleGateway {
   apply(input: EnhancementBundleInput): Promise<AssetOperationResult>;
 }
+
+export interface EnhancementBatchItemInput {
+  filename: string;
+  outputFilename: string;
+  format: ImageOutputFormat;
+}
+
+export interface EnhancementBatchInput {
+  items: readonly EnhancementBatchItemInput[];
+  goals?: readonly EnhancementGoal[] | undefined;
+  maxColors?: number | undefined;
+  seed?: number | undefined;
+}
+
+export interface EnhancementBatchItemResult {
+  filename: string;
+  outputFilename: string;
+  ok: boolean;
+  planId?: string;
+  frames?: number;
+  passesApplied?: string[];
+  quality?: { valid: boolean; violations: string[] };
+  error?: string;
+}
+
+export interface EnhancementBatchResult {
+  operation: "apply_enhancement_batch";
+  items: EnhancementBatchItemResult[];
+  summary: { total: number; succeeded: number; failed: number };
+  deterministic: true;
+  sourcePreserved: true;
+}
+
+export interface EnhancementBatchGateway {
+  apply(input: EnhancementBatchInput): Promise<AssetOperationResult>;
+}
