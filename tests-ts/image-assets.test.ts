@@ -139,15 +139,17 @@ test("palette harmonization is deterministic, bounded, animated-safe, and source
   const original = await fs.readFile(input);
   const service = new PixelArtAssetService(new SharpRasterCodec());
 
-  const result = await service.harmonizePalette({ inputFilename: input, outputFilename: output, accentColor: "#3155d8", strength: 0.8, maxColors: 2 });
+  const result = await service.harmonizePalette({ inputFilename: input, outputFilename: output, accentColor: "3155d8", strength: 0.8, maxColors: 2 });
   assert.equal(result.ok, true);
-  const payload = JSON.parse(result.message) as { operation: string; palette: string[]; frames: number; deterministic: boolean; sourcePreserved: boolean; strength: number };
+  const payload = JSON.parse(result.message) as { operation: string; palette: string[]; frames: number; deterministic: boolean; sourcePreserved: boolean; strength: number; accentColor: string };
   assert.equal(payload.operation, "harmonize_asset_palette");
   assert.equal(payload.frames, 1);
   assert.equal(payload.palette.length <= 2, true);
   assert.equal(payload.deterministic, true);
   assert.equal(payload.sourcePreserved, true);
   assert.equal(payload.strength, 0.8);
+  assert.equal(payload.accentColor, "#3155D8");
+  assert.equal(payload.palette.every((color) => color.startsWith("#")), true);
   assert.deepEqual(await fs.readFile(input), original);
   const pixels = await sharp(output).raw().toBuffer();
   assert.deepEqual([...pixels.subarray(8, 12)], [0, 0, 0, 0]);

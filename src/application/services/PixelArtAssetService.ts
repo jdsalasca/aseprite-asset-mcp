@@ -119,7 +119,8 @@ export class PixelArtAssetService {
       const harmonized = harmonizeRasterFrames(source, input.accentColor, input.strength, input.maxColors);
       const format = input.format ?? (harmonized.frames.length > 1 ? "gif" : "png");
       await this.codec.encode(harmonized.frames, input.outputFilename, format);
-      return ok({ operation: "harmonize_asset_palette", input: input.inputFilename, output: input.outputFilename, frames: harmonized.frames.length, format, accentColor: input.accentColor.toUpperCase(), strength: input.strength, maxColors: input.maxColors, palette: harmonized.palette, deterministic: true, sourcePreserved: true });
+      const accentColor = input.accentColor.startsWith("#") ? input.accentColor.toUpperCase() : `#${input.accentColor.toUpperCase()}`;
+      return ok({ operation: "harmonize_asset_palette", input: input.inputFilename, output: input.outputFilename, frames: harmonized.frames.length, format, accentColor, strength: input.strength, maxColors: input.maxColors, palette: harmonized.palette, deterministic: true, sourcePreserved: true });
     } catch (error) { return fail(error); }
   }
 
