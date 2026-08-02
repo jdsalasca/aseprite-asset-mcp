@@ -4,6 +4,7 @@ import type {
   AssetInspection,
   AssetManifestWriter,
   AssetPackInput,
+  AssetQualityBundleInput,
   AssetQualityInput,
   AssetRecipeInput,
   BatchAssetJobInput,
@@ -140,6 +141,39 @@ export class PixelArtAssetService {
         ...(report.isolatedPixels > maxIsolatedPixels ? [`frame ${index + 1}: ${report.isolatedPixels} isolated pixels > ${maxIsolatedPixels}`] : []),
       ]);
       const result = { filename: input.filename, valid: violations.length === 0, frameCount: frames.length, reports, violations };
+      return { ok: violations.length === 0, message: JSON.stringify(result) };
+    } catch (error) { return fail(error); }
+  }
+
+  public async qualityBundle(input: AssetQualityBundleInput): Promise<AssetOperationResult> {
+    try {
+      if (!input.filename.trim()) throw new Error("Asset filename is required");
+      const maxColors = input.maxColors ?? 256;
+      const maxIsolatedPixels = input.maxIsolatedPixels ?? Number.MAX_SAFE_INTEGER;
+      if (!Number.isInteger(maxColors) || maxColors < 1 || maxColors > 256) throw new Error("Maximum colors must be an integer from 1 to 256");
+      if (!Number.isInteger(maxIsolatedPixels) || maxIsolatedPixels < 0) throw new Error("Maximum isolated pixels must be a non-negative integer");
+      const frames = await this.codec.decode(input.filename);
+      const reports = frames.map((frame) => inspectRasterFrame(frame));
+      const uniqueColors = new Set<string>();
+      for (const frame of frames) for (let offset = 0; offset < frame.pixels.length; offset += 4) if ((frame.pixels[offset + 3] ?? 0) > 0) uniqueColors.add(`${frame.pixels[offset]},${frame.pixels[offset + 1]},${frame.pixels[offset + 2]},${frame.pixels[offset + 3]}`);
+      const violations = reports.flatMap((report, index) => [
+        ...(report.colors > maxColors ? [`frame ${index + 1}: ${report.colors} colors > ${maxColors}`] : []),
+        ...(report.isolatedPixels > maxIsolatedPixels ? [`frame ${index + 1}: ${report.isolatedPixels} isolated pixels > ${maxIsolatedPixels}`] : []),
+      ]);
+      const recommendations = new Set<string>();
+      if (reports.some((report) => report.isolatedPixels > maxIsolatedPixels)) recommendations.add("Apply a 1px outline or connect isolated pixels before export.");
+      if (uniqueColors.size > maxColors) recommendations.add("Reduce the palette or run convert_image_to_pixel_art with a bounded max_colors value.");
+      if (frames.length > 1 && new Set(frames.map((frame) => frame.delayMs ?? 0)).size > 1) recommendations.add("Review frame timing before exporting to the target engine.");
+      if (recommendations.size === 0) recommendations.add("Asset passes the requested compact quality checks.");
+      const result = {
+        operation: "inspect_asset_bundle",
+        filename: input.filename,
+        inspection: { filename: input.filename, frameCount: frames.length, width: frames[0]?.width ?? 0, height: frames[0]?.height ?? 0, totalColors: uniqueColors.size, reports, delaysMs: frames.map((frame) => frame.delayMs ?? 0) },
+        quality: { valid: violations.length === 0, maxColors, maxIsolatedPixels, violations },
+        recommendations: [...recommendations],
+        deterministic: true,
+        sourcePreserved: true,
+      };
       return { ok: violations.length === 0, message: JSON.stringify(result) };
     } catch (error) { return fail(error); }
   }

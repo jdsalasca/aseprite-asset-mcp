@@ -118,6 +118,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `upscale_pixel_art`: aumenta sprites estáticos o animados con nearest-neighbor determinista, conserva transparencia/delays y limita la salida a 4096 px.
 - `export_animation_gif`: exporta una imagen animada o un `.aseprite` a GIF.
 - `inspect_asset` y `validate_asset_quality`: reportan dimensiones, frames, colores, transparencia, delays y pixeles aislados antes de exportar.
+- `inspect_asset_bundle`: combina inspección, quality gate, violaciones y recomendaciones deterministas en una sola respuesta compacta.
 - `build_texture_atlas`: empaqueta imágenes del mismo tamaño en un atlas PNG con columnas y padding.
 - `export_asset_pack`: entrega el atlas y un manifiesto JSON con la posición de cada asset.
 - `create_style_bible`: fija paleta, luz, escala, detalle y semilla para mantener consistencia.
@@ -190,6 +191,7 @@ POST /api/v1/effects/water-reflection
 POST /api/v1/effects/water-caustics
 POST /api/v1/effects/day-night
 POST /api/v1/variants/pack
+POST /api/v1/assets/quality-bundle
 GET /api/v1/library/items/forest-ranger
 GET /api/v1/library/presets/living-forest
 GET /api/v1/library/items/forest-ranger/preview

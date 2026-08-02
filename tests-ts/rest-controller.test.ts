@@ -24,7 +24,7 @@ function fakeUseCases(): AssetRestUseCases {
     applyMaterialTexture: async () => result("apply_material_texture"),
     applyDepthLighting: async () => result("apply_depth_lighting"),
     assetLibrary: new AssetLibraryService(new FakeLibrary()),
-    imageAssets: { upscalePixelArt: async () => result("upscale_pixel_art") },
+    imageAssets: { upscalePixelArt: async () => result("upscale_pixel_art"), qualityBundle: async () => result("inspect_asset_bundle") },
     visualAssets: { extendScene: async () => result("extend_scene") },
   };
 }
@@ -103,6 +103,9 @@ test("REST controller exposes the same recipe and effect application services", 
     const variantPack = await fetch(`${rest.url}/api/v1/variants/pack`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_filename: "oak.png", output_prefix: "oak-variants", variants: ["rain", "fire", "birds"], frames: 6, seed: 4 }) });
     assert.equal(variantPack.status, 200);
     assert.equal((await variantPack.json()).data.operation, "generate_variant_pack");
+    const qualityBundle = await fetch(`${rest.url}/api/v1/assets/quality-bundle`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ filename: "hero.png", max_colors: 32, max_isolated_pixels: 4 }) });
+    assert.equal(qualityBundle.status, 200);
+    assert.equal((await qualityBundle.json()).data.operation, "inspect_asset_bundle");
 
     const invalid = await fetch(`${rest.url}/api/v1/effects/outline`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_filename: "hero.png", output_filename: "hero-outline.png", color: "nope" }) });
     assert.equal(invalid.status, 400);

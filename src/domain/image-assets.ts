@@ -36,6 +36,8 @@ export interface AssetQualityInput {
   maxIsolatedPixels?: number | undefined;
 }
 
+export interface AssetQualityBundleInput extends AssetQualityInput {}
+
 export interface TextureAtlasInput {
   inputFilenames: string[];
   outputFilename: string;

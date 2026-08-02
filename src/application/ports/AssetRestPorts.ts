@@ -16,7 +16,7 @@ export interface AssetRestUseCases {
   applyMaterialTexture(input: MaterialTextureInput): Promise<AssetOperationResult>;
   applyDepthLighting(input: DepthLightingInput): Promise<AssetOperationResult>;
   assetLibrary: AssetLibraryService;
-  imageAssets: Pick<PixelArtAssetService, "upscalePixelArt">;
+  imageAssets: Pick<PixelArtAssetService, "upscalePixelArt" | "qualityBundle">;
   visualAssets: Pick<VisualAssetGateway, "extendScene">;
 }
 

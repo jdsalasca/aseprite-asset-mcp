@@ -172,6 +172,7 @@ const TOOL_NAMES = [
   "upscale_pixel_art",
   "export_animation_gif",
   "inspect_asset",
+  "inspect_asset_bundle",
   "validate_asset_quality",
   "build_texture_atlas",
   "run_asset_recipe",

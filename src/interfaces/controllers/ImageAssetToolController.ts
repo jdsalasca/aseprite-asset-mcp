@@ -46,6 +46,11 @@ export class ImageAssetToolController {
       inputSchema: { filename: z.string().min(1), max_colors: z.number().int().min(1).max(256).default(256), max_isolated_pixels: z.number().int().nonnegative().default(9007199254740991) },
     }, async ({ filename, max_colors, max_isolated_pixels }) => this.result(await this.imageAssets.validate({ filename, maxColors: max_colors, maxIsolatedPixels: max_isolated_pixels })));
 
+    server.registerTool("inspect_asset_bundle", {
+      description: "Inspect one asset and return compact quality violations and deterministic recommendations in one call.",
+      inputSchema: { filename: z.string().min(1), max_colors: z.number().int().min(1).max(256).default(256), max_isolated_pixels: z.number().int().nonnegative().default(9007199254740991) },
+    }, async ({ filename, max_colors, max_isolated_pixels }) => this.result(await this.imageAssets.qualityBundle({ filename, maxColors: max_colors, maxIsolatedPixels: max_isolated_pixels })));
+
     server.registerTool("build_texture_atlas", {
       description: "Pack equal-size image frames into one PNG texture atlas.",
       inputSchema: { input_filenames: z.array(z.string().min(1)).min(1), output_filename: z.string().min(1), columns: z.number().int().positive().optional(), padding: z.number().int().nonnegative().default(0) },

@@ -55,6 +55,21 @@ test("asset service converts, inspects, validates, and packs without shelling ou
   assert.match(await fs.readFile(manifest, "utf8"), /"schemaVersion": 1/);
 });
 
+test("asset quality bundle inspects once and returns compact violations with recommendations", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "aseprite-quality-bundle-test-"));
+  const input = path.join(directory, "isolated.png");
+  await makePng(input, [255, 0, 0, 255]);
+  const service = new PixelArtAssetService(new SharpRasterCodec());
+  const result = await service.qualityBundle({ filename: input, maxColors: 2, maxIsolatedPixels: 0 });
+  assert.equal(result.ok, false);
+  const payload = JSON.parse(result.message) as { operation: string; inspection: { frameCount: number }; quality: { valid: boolean; violations: string[] }; recommendations: string[] };
+  assert.equal(payload.operation, "inspect_asset_bundle");
+  assert.equal(payload.inspection.frameCount, 1);
+  assert.equal(payload.quality.valid, false);
+  assert.match(payload.quality.violations[0] ?? "", /isolated pixels/);
+  assert.ok(payload.recommendations.some((recommendation) => /outline|aislad|isolated/i.test(recommendation)));
+});
+
 test("asset recipe defaults to a compact dry-run plan", async () => {
   const service = new PixelArtAssetService(new SharpRasterCodec());
   const result = await service.runRecipe({ recipe: "animation_pixel_art", inputFilenames: ["input.gif"] });
