@@ -178,4 +178,6 @@ test("day night cycle rejects invalid frame, intensity, and seed values", async 
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-day-night-invalid-")); const input = path.join(directory, "input.png"); await makeSprite(input);
   const result = await service().generateDayNightCycle({ inputFilename: input, outputFilename: path.join(directory, "out.gif"), frames: 3, seed: 1.5, intensity: 2 });
   assert.equal(result.ok, false);
+  const zeroIntensity = await service().generateDayNightCycle({ inputFilename: input, outputFilename: path.join(directory, "zero.gif"), frames: 8, seed: 1, intensity: 0 });
+  assert.equal(zeroIntensity.ok, false);
 });

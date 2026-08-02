@@ -277,7 +277,7 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
       if (!firstFrame) throw new Error("Day-night cycle requires at least one source frame");
       if (!Number.isInteger(input.frames) || input.frames < 4 || input.frames > 24) throw new Error("Day-night frames must be an integer from 4 to 24");
       const intensity = input.intensity ?? 0.8;
-      if (!Number.isFinite(intensity) || intensity < 0 || intensity > 1) throw new Error("Day-night intensity must be between 0 and 1");
+      if (!Number.isFinite(intensity) || intensity < 0.05 || intensity > 1) throw new Error("Day-night intensity must be between 0.05 and 1");
       if (!Number.isInteger(input.seed)) throw new Error("Day-night seed must be an integer");
       if (input.delayMs !== undefined && (!Number.isInteger(input.delayMs) || input.delayMs <= 0)) throw new Error("Day-night delay must be a positive integer");
       const anchors: Array<{ color: [number, number, number]; strength: number }> = [
