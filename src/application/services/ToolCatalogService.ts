@@ -28,6 +28,7 @@ const DESCRIPTION_OVERRIDES: Record<string, string> = {
   generate_sprite_anchors: "Generate deterministic placement anchors from sprite geometry.",
   audit_asset_library: "Audit library ids, references, categories, and asset paths.",
   summarize_asset_library: "Return compact library categories and preset navigation metadata.",
+  plan_asset_scene: "Plan ordered scene layers from selected library assets.",
   validate_asset_quality: "Validate palette size and isolated-pixel limits.",
   build_texture_atlas: "Pack equal-size images into one texture atlas.",
   run_asset_recipe: "Run or preview one compact asset recipe.",
@@ -71,6 +72,7 @@ function folderFor(name: string): string {
   if (name === "get_asset_library" || name === "get_asset_library_item" || name === "get_asset_preset" || name === "compose_asset_preset" || name === "generate_asset_preset") return "meta/asset-library";
   if (name === "audit_asset_library") return "meta/asset-library";
   if (name === "summarize_asset_library") return "meta/asset-library";
+  if (name === "plan_asset_scene") return "scene/composition";
   if (name === "build_contact_sheet") return "asset/preview";
   if (name === "build_sprite_runtime_bundle") return "asset/runtime";
   if (name === "generate_sprite_anchors") return "asset/runtime";

@@ -28,6 +28,7 @@ function fakeUseCases(): AssetRestUseCases {
     assetLibrary: new AssetLibraryService(new FakeLibrary()),
     assetLibraryAudit: { audit: async () => result("audit_asset_library") },
     assetLibrarySummary: { summarize: async () => result("summarize_asset_library") },
+    assetScenePlanner: { plan: async () => result("plan_asset_scene") },
     imageAssets: { upscalePixelArt: async () => result("upscale_pixel_art"), qualityBundle: async () => result("inspect_asset_bundle"), harmonizePalette: async () => result("harmonize_asset_palette") },
     batchQuality: { inspect: async () => result("inspect_asset_batch") },
     animationQuality: { inspect: async () => result("inspect_animation_quality") },
@@ -69,6 +70,9 @@ test("REST controller exposes the same recipe and effect application services", 
     const summary = await fetch(`${rest.url}/api/v1/library/summary`);
     assert.equal(summary.status, 200);
     assert.equal((await summary.json()).data.operation, "summarize_asset_library");
+    const scenePlan = await fetch(`${rest.url}/api/v1/library/scene-plan`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ item_ids: ["oak"] }) });
+    assert.equal(scenePlan.status, 200);
+    assert.equal((await scenePlan.json()).data.operation, "plan_asset_scene");
     const item = await fetch(`${rest.url}/api/v1/library/items/oak`);
     assert.equal((await item.json()).data.title, "Oak");
     const preview = await fetch(`${rest.url}/api/v1/library/items/oak/preview`);

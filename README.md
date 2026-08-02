@@ -150,6 +150,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `get_asset_library_item`: resuelve README, manifest, preview y sprite sheet de un asset concreto.
 - `audit_asset_library`: valida IDs, referencias de presets, categorías y rutas navegables antes de componer escenas; devuelve métricas compactas y hasta 100 violaciones deterministas.
 - `summarize_asset_library`: devuelve un mapa de categorías, tres ejemplos por categoría y presets sin cargar el detalle completo, reduciendo tokens de navegación.
+- `plan_asset_scene`: recibe IDs arbitrarios de la biblioteca y devuelve capas ordenadas con roles, previews y sprites sin generar archivos.
 - `get_asset_preset`: devuelve composiciones listas como `living-forest`, `coastal-sunset`, `fantasy-quest` y `rainy-village`.
 - `generate_asset_preset`: ejecuta un preset completo y devuelve terreno, mapa, preview, oleaje cuando aplica y transición temporal en una respuesta compacta.
 - `generate_scene_effect_stack`: agrupa en una sola llamada lluvia, partículas, caústicas/reflejos, día-noche, granularidad de material e iluminación direccional; infiere dimensiones para partículas, devuelve todos los artifacts y preserva la fuente.
@@ -202,6 +203,7 @@ Ejemplos REST:
 GET /api/v1/library?query=rain&limit=12
 GET /api/v1/library/audit
 GET /api/v1/library/summary
+POST /api/v1/library/scene-plan
 POST /api/v1/effects/motion
 POST /api/v1/effects/upscale
 POST /api/v1/assets/palette-harmonize

@@ -20,6 +20,7 @@ import type { SpriteRuntimeBundleService } from "../services/SpriteRuntimeBundle
 import type { SpriteAnchorsService } from "../services/SpriteAnchorsService.js";
 import type { AssetLibraryAuditService } from "../services/AssetLibraryAuditService.js";
 import type { AssetLibrarySummaryService } from "../services/AssetLibrarySummaryService.js";
+import type { AssetScenePlannerService } from "../services/AssetScenePlannerService.js";
 
 export interface AssetRestUseCases {
   createRecipe(input: AssetRecipeCreateInput): AssetRecipePlan;
@@ -33,6 +34,7 @@ export interface AssetRestUseCases {
   assetLibrary: AssetLibraryService;
   assetLibraryAudit: Pick<AssetLibraryAuditService, "audit">;
   assetLibrarySummary: Pick<AssetLibrarySummaryService, "summarize">;
+  assetScenePlanner: Pick<AssetScenePlannerService, "plan">;
   imageAssets: Pick<PixelArtAssetService, "upscalePixelArt" | "qualityBundle" | "harmonizePalette">;
   batchQuality: Pick<AssetBatchQualityService, "inspect">;
   animationQuality: Pick<AnimationQualityService, "inspect">;

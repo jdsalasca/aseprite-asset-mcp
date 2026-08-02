@@ -3,9 +3,10 @@ import * as z from "zod/v4";
 import type { AssetLibraryService } from "../../application/services/AssetLibraryService.js";
 import type { AssetLibraryAuditService } from "../../application/services/AssetLibraryAuditService.js";
 import type { AssetLibrarySummaryService } from "../../application/services/AssetLibrarySummaryService.js";
+import type { AssetScenePlannerService } from "../../application/services/AssetScenePlannerService.js";
 
 export class AssetLibraryToolController {
-  public constructor(private readonly library: AssetLibraryService, private readonly auditService: AssetLibraryAuditService, private readonly summaryService: AssetLibrarySummaryService) {}
+  public constructor(private readonly library: AssetLibraryService, private readonly auditService: AssetLibraryAuditService, private readonly summaryService: AssetLibrarySummaryService, private readonly scenePlanner: AssetScenePlannerService) {}
 
   public register(server: McpServer): void {
     server.registerTool("get_asset_library", { description: "Search the deterministic asset/preset library with compact results for humans and agents.", inputSchema: { query: z.string().optional(), category: z.string().optional(), limit: z.number().int().min(1).max(100).default(24) } }, async ({ query, category, limit }) => this.text(await this.library.search({ ...(query === undefined ? {} : { query }), ...(category === undefined ? {} : { category }), limit })));
@@ -14,6 +15,7 @@ export class AssetLibraryToolController {
     server.registerTool("compose_asset_preset", { description: "Compose one scene preset into compact assets and ordered layers for a single low-token request.", inputSchema: { id: z.string().min(1) } }, async ({ id }) => this.text(await this.library.composePreset(id)));
     server.registerTool("audit_asset_library", { description: "Audit library ids, preset references, categories, folders, and navigable asset paths before composing a scene.", inputSchema: {} }, async () => this.result(await this.auditService.audit()));
     server.registerTool("summarize_asset_library", { description: "Return compact category and preset navigation metadata for the asset library with minimal tokens.", inputSchema: {} }, async () => this.result(await this.summaryService.summarize()));
+    server.registerTool("plan_asset_scene", { description: "Plan ordered scene layers from selected asset library ids without generating files or loading full asset details.", inputSchema: { item_ids: z.array(z.string().min(1)).min(1).max(24) } }, async ({ item_ids }) => { try { return this.result(await this.scenePlanner.plan(item_ids)); } catch (error) { return { isError: true, content: [{ type: "text" as const, text: error instanceof Error ? error.message : String(error) }] }; } });
   }
 
   private text(value: unknown): { content: [{ type: "text"; text: string }] } { return { content: [{ type: "text", text: JSON.stringify(value, null, 2) }] }; }

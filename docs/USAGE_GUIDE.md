@@ -27,6 +27,8 @@ Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lightin
 
 `/api/v1/library/summary` y el tool `summarize_asset_library` devuelven solamente conteos, categorías ordenadas, hasta tres ejemplos por categoría y presets compactos. Es la primera llamada recomendada para que un agente o la UX navegue una biblioteca grande sin consumir el catálogo completo.
 
+`POST /api/v1/library/scene-plan` recibe `{ "item_ids": ["knight", "oak", "rain"] }` y usa el mismo servicio del tool `plan_asset_scene`. Resuelve IDs sin distinguir mayúsculas, conserva el orden solicitado, asigna roles de capa y falla cerrado ante IDs duplicados, traversal o assets inexistentes.
+
 `/api/v1/effects/seamless` recibe `{ "input_filename": "water.png", "output_filename": "water-seamless.png", "seam_width": 2 }` y hace coincidir bordes opuestos para repetir el asset en mapas y fondos.
 
 `/api/v1/effects/water-reflection` recibe `{ "input_filename": "ocean.png", "output_filename": "ocean-reflection.gif", "waterline": 32, "frames": 8, "seed": 7, "amplitude": 2, "opacity": 0.6 }`. Conserva el original, refleja los píxeles sobre la línea de agua, aplica desplazamiento de oleaje y añade un destello determinista por frame.

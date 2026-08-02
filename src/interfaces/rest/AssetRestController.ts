@@ -31,6 +31,7 @@ const paletteHarmonizeSchema = z.object({ input_filename: z.string().min(1), out
 const contactSheetSchema = z.object({ input_filenames: z.array(z.string().min(1)).min(1).max(64), output_filename: z.string().min(1), manifest_filename: z.string().min(1), cell_width: z.number().int().min(8).max(512), cell_height: z.number().int().min(8).max(512), columns: z.number().int().min(1).max(16).optional(), padding: z.number().int().min(0).max(64).default(0) });
 const sceneExtensionSchema = z.object({ input_map_filename: z.string().min(1), output_map_filename: z.string().min(1), preview_filename: z.string().min(1).optional(), top: z.number().int().min(0).max(512).default(0), right: z.number().int().min(0).max(512).default(0), bottom: z.number().int().min(0).max(512).default(0), left: z.number().int().min(0).max(512).default(0), seed: z.number().int().default(1) });
 const biomeTransitionSchema = z.object({ input_map_filename: z.string().min(1), output_map_filename: z.string().min(1), preview_filename: z.string().min(1).optional(), transition_width: z.number().int().min(1).max(8).default(2), seed: z.number().int().default(1) });
+const scenePlanSchema = z.object({ item_ids: z.array(z.string().min(1)).min(1).max(24) });
 
 export class AssetRestController {
   public constructor(private readonly useCases: AssetRestUseCases, private readonly version = "1.0.0") {}
@@ -51,6 +52,7 @@ export class AssetRestController {
       if (request.method !== "POST") return this.send(response, 404, { error: "Ruta no encontrada" }, origin);
       const body = await this.readBody(request);
       if (url.pathname === "/api/v1/recipes/execute") { const execution = await this.useCases.executeRecipe(this.toRecipeInput(recipeSchema.parse(body))); return this.send(response, execution.ok ? 200 : 422, { data: execution, ...(execution.ok ? {} : { error: execution.error ?? "Recipe execution failed" }) }, origin); }
+      if (url.pathname === "/api/v1/library/scene-plan") { const value = scenePlanSchema.parse(body); try { return this.operation(response, await this.useCases.assetScenePlanner.plan([...value.item_ids]), origin); } catch (error) { throw error; } }
       if (url.pathname === "/api/v1/recipes") return this.send(response, 200, { data: this.useCases.createRecipe(this.toRecipeInput(recipeSchema.parse(body))) }, origin);
       if (url.pathname === "/api/v1/material-texture") { const value = materialSchema.parse(body); return this.operation(response, await this.useCases.applyMaterialTexture({ inputFilename: value.input_filename, outputFilename: value.output_filename, material: value.material, seed: value.seed, intensity: value.intensity, ...(value.format ? { format: value.format } : {}) }), origin); }
       if (url.pathname === "/api/v1/depth-lighting") { const value = lightingSchema.parse(body); return this.operation(response, await this.useCases.applyDepthLighting({ inputFilename: value.input_filename, outputFilename: value.output_filename, direction: value.direction, strength: value.strength, ambient: value.ambient, ...(value.format ? { format: value.format } : {}) }), origin); }
