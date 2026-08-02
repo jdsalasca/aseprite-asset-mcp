@@ -176,6 +176,8 @@ test("biome transition generation rejects malformed maps, unsafe overwrites, and
   await fs.writeFile(sourceMap, JSON.stringify({ width: 2, height: 2, layers: [{ name: "terrain", rows: ["AA", "AA"] }] }), "utf8");
   const assetService = service();
   assert.equal((await assetService.generateBiomeTransition({ inputMapFilename: sourceMap, outputMapFilename: sourceMap, transitionWidth: 1, seed: 1 })).ok, false);
+  const aliasedSourceMap = `${directory}${path.sep}nested${path.sep}..${path.sep}source-map.json`;
+  assert.equal((await assetService.generateBiomeTransition({ inputMapFilename: sourceMap, outputMapFilename: aliasedSourceMap, transitionWidth: 1, seed: 1 })).ok, false);
   assert.equal((await assetService.generateBiomeTransition({ inputMapFilename: sourceMap, outputMapFilename: path.join(directory, "out.json"), transitionWidth: 0, seed: 1 })).ok, false);
   assert.equal((await assetService.generateBiomeTransition({ inputMapFilename: sourceMap, outputMapFilename: path.join(directory, "out-2.json"), transitionWidth: 9, seed: 1 })).ok, false);
   assert.equal((await assetService.generateBiomeTransition({ inputMapFilename: sourceMap, outputMapFilename: path.join(directory, "out-3.json"), transitionWidth: 1.5, seed: 1 })).ok, false);

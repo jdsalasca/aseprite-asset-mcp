@@ -1,3 +1,4 @@
+import path from "node:path";
 import { inspectRasterFrame } from "./PixelArtPipeline.js";
 import type { AssetManifestReader, AssetManifestWriter, RasterCodec } from "../../domain/image-assets.js";
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
@@ -88,7 +89,8 @@ function validateDimensions(width: number, height: number): void {
 
 function validatePathPair(inputFilename: string, outputFilename: string): void {
   if (!inputFilename.trim() || !outputFilename.trim()) throw new Error("Input and output map filenames are required");
-  if (inputFilename.toLowerCase() === outputFilename.toLowerCase()) throw new Error("Input and output map filenames must differ");
+  if (inputFilename.includes("\0") || outputFilename.includes("\0")) throw new Error("Input and output map filenames cannot contain null bytes");
+  if (path.resolve(inputFilename).toLowerCase() === path.resolve(outputFilename).toLowerCase()) throw new Error("Input and output map filenames must differ");
 }
 
 function validatePadding(padding: SceneExtensionInput["padding"]): void {
