@@ -1,4 +1,6 @@
 export type AssetLibraryFormat = "png" | "gif" | "svg" | "json";
+export type AssetLibraryBinaryKind = "preview" | "sprite";
+export interface AssetLibraryBinary { data: Uint8Array; contentType: string; }
 
 export interface AssetLibraryItem {
   id: string;

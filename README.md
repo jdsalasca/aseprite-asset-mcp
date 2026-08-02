@@ -177,6 +177,10 @@ Ejemplos REST:
 GET /api/v1/library?query=rain&limit=12
 GET /api/v1/library/items/forest-ranger
 GET /api/v1/library/presets/living-forest
+GET /api/v1/library/items/forest-ranger/preview
+GET /api/v1/library/items/forest-ranger/sprite
 ```
+
+Las dos últimas rutas sirven PNG/GIF de forma binaria desde el adaptador de archivos, validando primero el id del catálogo y bloqueando escapes del directorio `assets/folders`. Asset Studio las consume para mostrar previews reales en `PixelAssetGrid`.
 
 Las variantes (`rain`, `fire`, `earthquake`, `birds`, `wave-reflection`, `day`, `sunset`, `night`, `walk`, `attack`, etc.) son contratos para los algoritmos existentes: se aplican sobre una copia del asset y conservan la fuente.

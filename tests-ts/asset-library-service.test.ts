@@ -15,7 +15,7 @@ const catalog: AssetLibraryCatalog = {
   ],
   presets: [{ id: "rainy-grove", title: "Rainy grove", description: "Oak, pine, rain and water", category: "flora", itemIds: ["oak", "pine"], recommendedTools: ["generate_environment_pack", "generate_time_of_day_pack"], deterministic: true }],
 };
-class FakeLibrary implements AssetLibraryPort { public async load(): Promise<AssetLibraryCatalog> { return catalog; } }
+class FakeLibrary implements AssetLibraryPort { public async load(): Promise<AssetLibraryCatalog> { return catalog; } public async read() { return { data: new Uint8Array([1, 2, 3]), contentType: "image/png" }; } }
 
 test("asset library searches tags, clamps limits, and returns matching categories", async () => {
   const result = await new AssetLibraryService(new FakeLibrary()).search({ query: "rain", limit: 999 });
@@ -30,4 +30,10 @@ test("asset library resolves items and presets case-insensitively", async () => 
   assert.equal((await service.get("KNIGHT"))?.variants.includes("walk"), true);
   assert.equal((await service.preset("RAINY-GROVE"))?.itemIds.length, 2);
   assert.equal(await service.get("missing"), null);
+});
+
+test("asset library reads a binary preview only after resolving a known item", async () => {
+  const service = new AssetLibraryService(new FakeLibrary());
+  assert.deepEqual([...((await service.binary("OAK", "preview"))?.data ?? [])], [1, 2, 3]);
+  assert.equal(await service.binary("missing", "preview"), null);
 });

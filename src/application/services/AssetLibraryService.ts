@@ -1,4 +1,4 @@
-import type { AssetLibraryItem, AssetLibraryPreset, AssetLibraryQuery, AssetLibrarySearchResult } from "../../domain/asset-library.js";
+import type { AssetLibraryBinary, AssetLibraryBinaryKind, AssetLibraryItem, AssetLibraryPreset, AssetLibraryQuery, AssetLibrarySearchResult } from "../../domain/asset-library.js";
 import type { AssetLibraryPort } from "../ports/AssetLibraryPort.js";
 
 const DEFAULT_LIMIT = 24;
@@ -35,5 +35,11 @@ export class AssetLibraryService {
     const catalog = await this.port.load();
     const wanted = normalize(id);
     return catalog.presets.find((item) => item.id.toLocaleLowerCase() === wanted) ?? null;
+  }
+
+  public async binary(id: string, kind: AssetLibraryBinaryKind): Promise<AssetLibraryBinary | null> {
+    const catalog = await this.port.load();
+    const item = catalog.items.find((entry) => entry.id.toLocaleLowerCase() === normalize(id));
+    return item ? this.port.read(item, kind) : null;
   }
 }

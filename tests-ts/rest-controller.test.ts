@@ -13,7 +13,7 @@ import type { AssetLibraryPort } from "../src/application/ports/AssetLibraryPort
 
 function result(operation: string): AssetOperationResult { return { ok: true, message: JSON.stringify({ operation, deterministic: true, sourcePreserved: true }) }; }
 const libraryCatalog: AssetLibraryCatalog = { schemaVersion: 1, libraryVersion: "test", categories: [{ id: "flora", title: "Flora", description: "Plants", itemCount: 1 }], items: [{ id: "oak", title: "Oak", category: "flora", folder: "flora/oak", kind: "sprite", description: "Tree", tags: ["tree"], variants: ["rain"], formats: ["png", "svg", "json"], readmePath: "flora/oak/README.md", previewPath: "flora/oak/preview.png", spritePath: "flora/oak/sprite-sheet.png", deterministic: true }], presets: [] };
-class FakeLibrary implements AssetLibraryPort { public async load(): Promise<AssetLibraryCatalog> { return libraryCatalog; } }
+class FakeLibrary implements AssetLibraryPort { public async load(): Promise<AssetLibraryCatalog> { return libraryCatalog; } public async read() { return { data: new Uint8Array([137, 80, 78, 71]), contentType: "image/png" }; } }
 function fakeUseCases(): AssetRestUseCases {
   const effects: SpriteEffectsGateway = { applyPixelOutline: async () => result("apply_pixel_outline"), applyColorGrade: async () => result("apply_color_grade"), generateSpriteShadow: async () => result("generate_sprite_shadow"), generateParticleBurst: async () => result("generate_particle_burst"), generateNormalMap: async () => result("generate_normal_map"), generateRainOverlay: async () => result("generate_rain_overlay") };
   return {
@@ -49,6 +49,10 @@ test("REST controller exposes the same recipe and effect application services", 
     assert.equal((await library.json()).data.items[0].id, "oak");
     const item = await fetch(`${rest.url}/api/v1/library/items/oak`);
     assert.equal((await item.json()).data.title, "Oak");
+    const preview = await fetch(`${rest.url}/api/v1/library/items/oak/preview`);
+    assert.equal(preview.status, 200);
+    assert.equal(preview.headers.get("content-type"), "image/png");
+    assert.deepEqual([...new Uint8Array(await preview.arrayBuffer())], [137, 80, 78, 71]);
     const missingItem = await fetch(`${rest.url}/api/v1/library/items/missing`);
     assert.equal(missingItem.status, 404);
 

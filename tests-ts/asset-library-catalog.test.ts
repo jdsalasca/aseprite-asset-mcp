@@ -16,3 +16,12 @@ test("generated asset library exposes 100+ navigable folders and valid preset re
     assert.equal((await fs.stat(path.resolve("assets/folders", item.spritePath))).isFile(), true);
   }
 });
+
+test("file adapter serves a generated preview as binary data", async () => {
+  const adapter = new FileAssetLibraryAdapter();
+  const item = (await adapter.load()).items.find((entry) => entry.id === "oak");
+  assert.ok(item);
+  const binary = await adapter.read(item!, "preview");
+  assert.equal(binary.contentType, "image/png");
+  assert.ok(binary.data.byteLength > 20);
+});
