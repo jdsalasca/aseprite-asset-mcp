@@ -9,7 +9,18 @@ const validCatalog: AssetLibraryCatalog = { schemaVersion: 1, libraryVersion: "t
 test("audits a valid catalog and returns compact navigation counts", async () => {
   const result = await new AssetLibraryAuditService({ load: async () => validCatalog, read: async () => ({ data: new Uint8Array(), contentType: "image/png" }) }).audit();
   assert.equal(result.ok, true);
-  assert.deepEqual(JSON.parse(result.message), { operation: "audit_asset_library", libraryVersion: "test-v1", totalItems: 1, totalCategories: 1, totalPresets: 1, totalFolders: 1, readmePaths: 1, previewPaths: 1, spritePaths: 1, valid: true, violations: [], deterministic: true, sourcePreserved: true });
+  assert.deepEqual(JSON.parse(result.message), { operation: "audit_asset_library", libraryVersion: "test-v1", totalItems: 1, totalCategories: 1, totalPresets: 1, totalFolders: 1, readmePaths: 1, previewPaths: 1, spritePaths: 1, animationPaths: 0, valid: true, violations: [], deterministic: true, sourcePreserved: true });
+});
+
+test("reports animated coverage and fails closed when a GIF has no animation path", async () => {
+  const animated = { ...item("rain"), formats: ["png", "gif"] as ["png", "gif"], animationPath: "flora/rain/sprite-sheet.gif" };
+  const { animationPath: _animationPath, ...missingAnimated } = animated;
+  const valid = await new AssetLibraryAuditService({ load: async () => ({ ...validCatalog, items: [animated], presets: [{ ...validCatalog.presets[0]!, itemIds: ["rain"] }] }), read: async () => ({ data: new Uint8Array(), contentType: "image/png" }) }).audit();
+  assert.deepEqual(JSON.parse(valid.message), { operation: "audit_asset_library", libraryVersion: "test-v1", totalItems: 1, totalCategories: 1, totalPresets: 1, totalFolders: 1, readmePaths: 1, previewPaths: 1, spritePaths: 1, animationPaths: 1, valid: true, violations: [], deterministic: true, sourcePreserved: true });
+  const missing = await new AssetLibraryAuditService({ load: async () => ({ ...validCatalog, items: [missingAnimated], presets: [{ ...validCatalog.presets[0]!, itemIds: ["rain"] }] }), read: async () => ({ data: new Uint8Array(), contentType: "image/png" }) }).audit();
+  const payload = JSON.parse(missing.message) as { valid: boolean; violations: string[] };
+  assert.equal(payload.valid, false);
+  assert.ok(payload.violations.includes("missing animation path: rain"));
 });
 
 test("finds duplicate ids, missing preset references, missing categories, and unsafe paths", async () => {

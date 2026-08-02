@@ -94,6 +94,7 @@
       "readmePath": "characters/apprentice-knight/README.md",
       "previewPath": "characters/apprentice-knight/preview.png",
       "spritePath": "characters/apprentice-knight/sprite-sheet.png",
+      "animationPath": "characters/apprentice-knight/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -126,6 +127,7 @@
       "readmePath": "characters/veteran-knight/README.md",
       "previewPath": "characters/veteran-knight/preview.png",
       "spritePath": "characters/veteran-knight/sprite-sheet.png",
+      "animationPath": "characters/veteran-knight/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -158,6 +160,7 @@
       "readmePath": "characters/forest-knight/README.md",
       "previewPath": "characters/forest-knight/preview.png",
       "spritePath": "characters/forest-knight/sprite-sheet.png",
+      "animationPath": "characters/forest-knight/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -190,6 +193,7 @@
       "readmePath": "characters/desert-knight/README.md",
       "previewPath": "characters/desert-knight/preview.png",
       "spritePath": "characters/desert-knight/sprite-sheet.png",
+      "animationPath": "characters/desert-knight/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -222,6 +226,7 @@
       "readmePath": "characters/royal-knight/README.md",
       "previewPath": "characters/royal-knight/preview.png",
       "spritePath": "characters/royal-knight/sprite-sheet.png",
+      "animationPath": "characters/royal-knight/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -254,6 +259,7 @@
       "readmePath": "characters/apprentice-ranger/README.md",
       "previewPath": "characters/apprentice-ranger/preview.png",
       "spritePath": "characters/apprentice-ranger/sprite-sheet.png",
+      "animationPath": "characters/apprentice-ranger/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -286,6 +292,7 @@
       "readmePath": "characters/veteran-ranger/README.md",
       "previewPath": "characters/veteran-ranger/preview.png",
       "spritePath": "characters/veteran-ranger/sprite-sheet.png",
+      "animationPath": "characters/veteran-ranger/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -318,6 +325,7 @@
       "readmePath": "characters/forest-ranger/README.md",
       "previewPath": "characters/forest-ranger/preview.png",
       "spritePath": "characters/forest-ranger/sprite-sheet.png",
+      "animationPath": "characters/forest-ranger/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -350,6 +358,7 @@
       "readmePath": "characters/desert-ranger/README.md",
       "previewPath": "characters/desert-ranger/preview.png",
       "spritePath": "characters/desert-ranger/sprite-sheet.png",
+      "animationPath": "characters/desert-ranger/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -382,6 +391,7 @@
       "readmePath": "characters/royal-ranger/README.md",
       "previewPath": "characters/royal-ranger/preview.png",
       "spritePath": "characters/royal-ranger/sprite-sheet.png",
+      "animationPath": "characters/royal-ranger/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -414,6 +424,7 @@
       "readmePath": "characters/apprentice-mage/README.md",
       "previewPath": "characters/apprentice-mage/preview.png",
       "spritePath": "characters/apprentice-mage/sprite-sheet.png",
+      "animationPath": "characters/apprentice-mage/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -446,6 +457,7 @@
       "readmePath": "characters/veteran-mage/README.md",
       "previewPath": "characters/veteran-mage/preview.png",
       "spritePath": "characters/veteran-mage/sprite-sheet.png",
+      "animationPath": "characters/veteran-mage/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -478,6 +490,7 @@
       "readmePath": "characters/forest-mage/README.md",
       "previewPath": "characters/forest-mage/preview.png",
       "spritePath": "characters/forest-mage/sprite-sheet.png",
+      "animationPath": "characters/forest-mage/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -510,6 +523,7 @@
       "readmePath": "characters/desert-mage/README.md",
       "previewPath": "characters/desert-mage/preview.png",
       "spritePath": "characters/desert-mage/sprite-sheet.png",
+      "animationPath": "characters/desert-mage/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -542,6 +556,7 @@
       "readmePath": "characters/royal-mage/README.md",
       "previewPath": "characters/royal-mage/preview.png",
       "spritePath": "characters/royal-mage/sprite-sheet.png",
+      "animationPath": "characters/royal-mage/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -574,6 +589,7 @@
       "readmePath": "characters/apprentice-cleric/README.md",
       "previewPath": "characters/apprentice-cleric/preview.png",
       "spritePath": "characters/apprentice-cleric/sprite-sheet.png",
+      "animationPath": "characters/apprentice-cleric/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -606,6 +622,7 @@
       "readmePath": "characters/veteran-cleric/README.md",
       "previewPath": "characters/veteran-cleric/preview.png",
       "spritePath": "characters/veteran-cleric/sprite-sheet.png",
+      "animationPath": "characters/veteran-cleric/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -638,6 +655,7 @@
       "readmePath": "characters/forest-cleric/README.md",
       "previewPath": "characters/forest-cleric/preview.png",
       "spritePath": "characters/forest-cleric/sprite-sheet.png",
+      "animationPath": "characters/forest-cleric/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -670,6 +688,7 @@
       "readmePath": "characters/desert-cleric/README.md",
       "previewPath": "characters/desert-cleric/preview.png",
       "spritePath": "characters/desert-cleric/sprite-sheet.png",
+      "animationPath": "characters/desert-cleric/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -702,6 +721,7 @@
       "readmePath": "characters/royal-cleric/README.md",
       "previewPath": "characters/royal-cleric/preview.png",
       "spritePath": "characters/royal-cleric/sprite-sheet.png",
+      "animationPath": "characters/royal-cleric/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -734,6 +754,7 @@
       "readmePath": "characters/apprentice-rogue/README.md",
       "previewPath": "characters/apprentice-rogue/preview.png",
       "spritePath": "characters/apprentice-rogue/sprite-sheet.png",
+      "animationPath": "characters/apprentice-rogue/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -766,6 +787,7 @@
       "readmePath": "characters/veteran-rogue/README.md",
       "previewPath": "characters/veteran-rogue/preview.png",
       "spritePath": "characters/veteran-rogue/sprite-sheet.png",
+      "animationPath": "characters/veteran-rogue/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -798,6 +820,7 @@
       "readmePath": "characters/forest-rogue/README.md",
       "previewPath": "characters/forest-rogue/preview.png",
       "spritePath": "characters/forest-rogue/sprite-sheet.png",
+      "animationPath": "characters/forest-rogue/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -830,6 +853,7 @@
       "readmePath": "characters/desert-rogue/README.md",
       "previewPath": "characters/desert-rogue/preview.png",
       "spritePath": "characters/desert-rogue/sprite-sheet.png",
+      "animationPath": "characters/desert-rogue/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -862,6 +886,7 @@
       "readmePath": "characters/royal-rogue/README.md",
       "previewPath": "characters/royal-rogue/preview.png",
       "spritePath": "characters/royal-rogue/sprite-sheet.png",
+      "animationPath": "characters/royal-rogue/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -894,6 +919,7 @@
       "readmePath": "characters/apprentice-barbarian/README.md",
       "previewPath": "characters/apprentice-barbarian/preview.png",
       "spritePath": "characters/apprentice-barbarian/sprite-sheet.png",
+      "animationPath": "characters/apprentice-barbarian/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -926,6 +952,7 @@
       "readmePath": "characters/veteran-barbarian/README.md",
       "previewPath": "characters/veteran-barbarian/preview.png",
       "spritePath": "characters/veteran-barbarian/sprite-sheet.png",
+      "animationPath": "characters/veteran-barbarian/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -958,6 +985,7 @@
       "readmePath": "characters/forest-barbarian/README.md",
       "previewPath": "characters/forest-barbarian/preview.png",
       "spritePath": "characters/forest-barbarian/sprite-sheet.png",
+      "animationPath": "characters/forest-barbarian/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -990,6 +1018,7 @@
       "readmePath": "characters/desert-barbarian/README.md",
       "previewPath": "characters/desert-barbarian/preview.png",
       "spritePath": "characters/desert-barbarian/sprite-sheet.png",
+      "animationPath": "characters/desert-barbarian/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1022,6 +1051,7 @@
       "readmePath": "characters/royal-barbarian/README.md",
       "previewPath": "characters/royal-barbarian/preview.png",
       "spritePath": "characters/royal-barbarian/sprite-sheet.png",
+      "animationPath": "characters/royal-barbarian/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1054,6 +1084,7 @@
       "readmePath": "characters/apprentice-paladin/README.md",
       "previewPath": "characters/apprentice-paladin/preview.png",
       "spritePath": "characters/apprentice-paladin/sprite-sheet.png",
+      "animationPath": "characters/apprentice-paladin/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1086,6 +1117,7 @@
       "readmePath": "characters/veteran-paladin/README.md",
       "previewPath": "characters/veteran-paladin/preview.png",
       "spritePath": "characters/veteran-paladin/sprite-sheet.png",
+      "animationPath": "characters/veteran-paladin/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1118,6 +1150,7 @@
       "readmePath": "characters/forest-paladin/README.md",
       "previewPath": "characters/forest-paladin/preview.png",
       "spritePath": "characters/forest-paladin/sprite-sheet.png",
+      "animationPath": "characters/forest-paladin/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1150,6 +1183,7 @@
       "readmePath": "characters/desert-paladin/README.md",
       "previewPath": "characters/desert-paladin/preview.png",
       "spritePath": "characters/desert-paladin/sprite-sheet.png",
+      "animationPath": "characters/desert-paladin/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1182,6 +1216,7 @@
       "readmePath": "characters/royal-paladin/README.md",
       "previewPath": "characters/royal-paladin/preview.png",
       "spritePath": "characters/royal-paladin/sprite-sheet.png",
+      "animationPath": "characters/royal-paladin/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1214,6 +1249,7 @@
       "readmePath": "characters/apprentice-monk/README.md",
       "previewPath": "characters/apprentice-monk/preview.png",
       "spritePath": "characters/apprentice-monk/sprite-sheet.png",
+      "animationPath": "characters/apprentice-monk/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1246,6 +1282,7 @@
       "readmePath": "characters/veteran-monk/README.md",
       "previewPath": "characters/veteran-monk/preview.png",
       "spritePath": "characters/veteran-monk/sprite-sheet.png",
+      "animationPath": "characters/veteran-monk/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1278,6 +1315,7 @@
       "readmePath": "characters/forest-monk/README.md",
       "previewPath": "characters/forest-monk/preview.png",
       "spritePath": "characters/forest-monk/sprite-sheet.png",
+      "animationPath": "characters/forest-monk/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1310,6 +1348,7 @@
       "readmePath": "characters/desert-monk/README.md",
       "previewPath": "characters/desert-monk/preview.png",
       "spritePath": "characters/desert-monk/sprite-sheet.png",
+      "animationPath": "characters/desert-monk/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1342,6 +1381,7 @@
       "readmePath": "characters/royal-monk/README.md",
       "previewPath": "characters/royal-monk/preview.png",
       "spritePath": "characters/royal-monk/sprite-sheet.png",
+      "animationPath": "characters/royal-monk/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1374,6 +1414,7 @@
       "readmePath": "characters/apprentice-alchemist/README.md",
       "previewPath": "characters/apprentice-alchemist/preview.png",
       "spritePath": "characters/apprentice-alchemist/sprite-sheet.png",
+      "animationPath": "characters/apprentice-alchemist/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1406,6 +1447,7 @@
       "readmePath": "characters/veteran-alchemist/README.md",
       "previewPath": "characters/veteran-alchemist/preview.png",
       "spritePath": "characters/veteran-alchemist/sprite-sheet.png",
+      "animationPath": "characters/veteran-alchemist/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1438,6 +1480,7 @@
       "readmePath": "characters/forest-alchemist/README.md",
       "previewPath": "characters/forest-alchemist/preview.png",
       "spritePath": "characters/forest-alchemist/sprite-sheet.png",
+      "animationPath": "characters/forest-alchemist/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1470,6 +1513,7 @@
       "readmePath": "characters/desert-alchemist/README.md",
       "previewPath": "characters/desert-alchemist/preview.png",
       "spritePath": "characters/desert-alchemist/sprite-sheet.png",
+      "animationPath": "characters/desert-alchemist/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1502,6 +1546,7 @@
       "readmePath": "characters/royal-alchemist/README.md",
       "previewPath": "characters/royal-alchemist/preview.png",
       "spritePath": "characters/royal-alchemist/sprite-sheet.png",
+      "animationPath": "characters/royal-alchemist/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1534,6 +1579,7 @@
       "readmePath": "characters/apprentice-bard/README.md",
       "previewPath": "characters/apprentice-bard/preview.png",
       "spritePath": "characters/apprentice-bard/sprite-sheet.png",
+      "animationPath": "characters/apprentice-bard/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1566,6 +1612,7 @@
       "readmePath": "characters/veteran-bard/README.md",
       "previewPath": "characters/veteran-bard/preview.png",
       "spritePath": "characters/veteran-bard/sprite-sheet.png",
+      "animationPath": "characters/veteran-bard/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1598,6 +1645,7 @@
       "readmePath": "characters/forest-bard/README.md",
       "previewPath": "characters/forest-bard/preview.png",
       "spritePath": "characters/forest-bard/sprite-sheet.png",
+      "animationPath": "characters/forest-bard/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1630,6 +1678,7 @@
       "readmePath": "characters/desert-bard/README.md",
       "previewPath": "characters/desert-bard/preview.png",
       "spritePath": "characters/desert-bard/sprite-sheet.png",
+      "animationPath": "characters/desert-bard/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1662,6 +1711,7 @@
       "readmePath": "characters/royal-bard/README.md",
       "previewPath": "characters/royal-bard/preview.png",
       "spritePath": "characters/royal-bard/sprite-sheet.png",
+      "animationPath": "characters/royal-bard/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1694,6 +1744,7 @@
       "readmePath": "characters/apprentice-farmer/README.md",
       "previewPath": "characters/apprentice-farmer/preview.png",
       "spritePath": "characters/apprentice-farmer/sprite-sheet.png",
+      "animationPath": "characters/apprentice-farmer/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1726,6 +1777,7 @@
       "readmePath": "characters/veteran-farmer/README.md",
       "previewPath": "characters/veteran-farmer/preview.png",
       "spritePath": "characters/veteran-farmer/sprite-sheet.png",
+      "animationPath": "characters/veteran-farmer/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1758,6 +1810,7 @@
       "readmePath": "characters/forest-farmer/README.md",
       "previewPath": "characters/forest-farmer/preview.png",
       "spritePath": "characters/forest-farmer/sprite-sheet.png",
+      "animationPath": "characters/forest-farmer/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1790,6 +1843,7 @@
       "readmePath": "characters/desert-farmer/README.md",
       "previewPath": "characters/desert-farmer/preview.png",
       "spritePath": "characters/desert-farmer/sprite-sheet.png",
+      "animationPath": "characters/desert-farmer/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1822,6 +1876,7 @@
       "readmePath": "characters/royal-farmer/README.md",
       "previewPath": "characters/royal-farmer/preview.png",
       "spritePath": "characters/royal-farmer/sprite-sheet.png",
+      "animationPath": "characters/royal-farmer/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1854,6 +1909,7 @@
       "readmePath": "characters/apprentice-guard/README.md",
       "previewPath": "characters/apprentice-guard/preview.png",
       "spritePath": "characters/apprentice-guard/sprite-sheet.png",
+      "animationPath": "characters/apprentice-guard/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1886,6 +1942,7 @@
       "readmePath": "characters/veteran-guard/README.md",
       "previewPath": "characters/veteran-guard/preview.png",
       "spritePath": "characters/veteran-guard/sprite-sheet.png",
+      "animationPath": "characters/veteran-guard/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1918,6 +1975,7 @@
       "readmePath": "characters/forest-guard/README.md",
       "previewPath": "characters/forest-guard/preview.png",
       "spritePath": "characters/forest-guard/sprite-sheet.png",
+      "animationPath": "characters/forest-guard/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1950,6 +2008,7 @@
       "readmePath": "characters/desert-guard/README.md",
       "previewPath": "characters/desert-guard/preview.png",
       "spritePath": "characters/desert-guard/sprite-sheet.png",
+      "animationPath": "characters/desert-guard/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -1982,6 +2041,7 @@
       "readmePath": "characters/royal-guard/README.md",
       "previewPath": "characters/royal-guard/preview.png",
       "spritePath": "characters/royal-guard/sprite-sheet.png",
+      "animationPath": "characters/royal-guard/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2014,6 +2074,7 @@
       "readmePath": "characters/apprentice-merchant/README.md",
       "previewPath": "characters/apprentice-merchant/preview.png",
       "spritePath": "characters/apprentice-merchant/sprite-sheet.png",
+      "animationPath": "characters/apprentice-merchant/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2046,6 +2107,7 @@
       "readmePath": "characters/veteran-merchant/README.md",
       "previewPath": "characters/veteran-merchant/preview.png",
       "spritePath": "characters/veteran-merchant/sprite-sheet.png",
+      "animationPath": "characters/veteran-merchant/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2078,6 +2140,7 @@
       "readmePath": "characters/forest-merchant/README.md",
       "previewPath": "characters/forest-merchant/preview.png",
       "spritePath": "characters/forest-merchant/sprite-sheet.png",
+      "animationPath": "characters/forest-merchant/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2110,6 +2173,7 @@
       "readmePath": "characters/desert-merchant/README.md",
       "previewPath": "characters/desert-merchant/preview.png",
       "spritePath": "characters/desert-merchant/sprite-sheet.png",
+      "animationPath": "characters/desert-merchant/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2142,6 +2206,7 @@
       "readmePath": "characters/royal-merchant/README.md",
       "previewPath": "characters/royal-merchant/preview.png",
       "spritePath": "characters/royal-merchant/sprite-sheet.png",
+      "animationPath": "characters/royal-merchant/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2174,6 +2239,7 @@
       "readmePath": "characters/apprentice-healer/README.md",
       "previewPath": "characters/apprentice-healer/preview.png",
       "spritePath": "characters/apprentice-healer/sprite-sheet.png",
+      "animationPath": "characters/apprentice-healer/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2206,6 +2272,7 @@
       "readmePath": "characters/veteran-healer/README.md",
       "previewPath": "characters/veteran-healer/preview.png",
       "spritePath": "characters/veteran-healer/sprite-sheet.png",
+      "animationPath": "characters/veteran-healer/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2238,6 +2305,7 @@
       "readmePath": "characters/forest-healer/README.md",
       "previewPath": "characters/forest-healer/preview.png",
       "spritePath": "characters/forest-healer/sprite-sheet.png",
+      "animationPath": "characters/forest-healer/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2270,6 +2338,7 @@
       "readmePath": "characters/desert-healer/README.md",
       "previewPath": "characters/desert-healer/preview.png",
       "spritePath": "characters/desert-healer/sprite-sheet.png",
+      "animationPath": "characters/desert-healer/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2302,6 +2371,7 @@
       "readmePath": "characters/royal-healer/README.md",
       "previewPath": "characters/royal-healer/preview.png",
       "spritePath": "characters/royal-healer/sprite-sheet.png",
+      "animationPath": "characters/royal-healer/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2334,6 +2404,7 @@
       "readmePath": "characters/apprentice-blacksmith/README.md",
       "previewPath": "characters/apprentice-blacksmith/preview.png",
       "spritePath": "characters/apprentice-blacksmith/sprite-sheet.png",
+      "animationPath": "characters/apprentice-blacksmith/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2366,6 +2437,7 @@
       "readmePath": "characters/veteran-blacksmith/README.md",
       "previewPath": "characters/veteran-blacksmith/preview.png",
       "spritePath": "characters/veteran-blacksmith/sprite-sheet.png",
+      "animationPath": "characters/veteran-blacksmith/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2398,6 +2470,7 @@
       "readmePath": "characters/forest-blacksmith/README.md",
       "previewPath": "characters/forest-blacksmith/preview.png",
       "spritePath": "characters/forest-blacksmith/sprite-sheet.png",
+      "animationPath": "characters/forest-blacksmith/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2430,6 +2503,7 @@
       "readmePath": "characters/desert-blacksmith/README.md",
       "previewPath": "characters/desert-blacksmith/preview.png",
       "spritePath": "characters/desert-blacksmith/sprite-sheet.png",
+      "animationPath": "characters/desert-blacksmith/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2462,6 +2536,7 @@
       "readmePath": "characters/royal-blacksmith/README.md",
       "previewPath": "characters/royal-blacksmith/preview.png",
       "spritePath": "characters/royal-blacksmith/sprite-sheet.png",
+      "animationPath": "characters/royal-blacksmith/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2494,6 +2569,7 @@
       "readmePath": "characters/apprentice-scholar/README.md",
       "previewPath": "characters/apprentice-scholar/preview.png",
       "spritePath": "characters/apprentice-scholar/sprite-sheet.png",
+      "animationPath": "characters/apprentice-scholar/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2526,6 +2602,7 @@
       "readmePath": "characters/veteran-scholar/README.md",
       "previewPath": "characters/veteran-scholar/preview.png",
       "spritePath": "characters/veteran-scholar/sprite-sheet.png",
+      "animationPath": "characters/veteran-scholar/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2558,6 +2635,7 @@
       "readmePath": "characters/forest-scholar/README.md",
       "previewPath": "characters/forest-scholar/preview.png",
       "spritePath": "characters/forest-scholar/sprite-sheet.png",
+      "animationPath": "characters/forest-scholar/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2590,6 +2668,7 @@
       "readmePath": "characters/desert-scholar/README.md",
       "previewPath": "characters/desert-scholar/preview.png",
       "spritePath": "characters/desert-scholar/sprite-sheet.png",
+      "animationPath": "characters/desert-scholar/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2622,6 +2701,7 @@
       "readmePath": "characters/royal-scholar/README.md",
       "previewPath": "characters/royal-scholar/preview.png",
       "spritePath": "characters/royal-scholar/sprite-sheet.png",
+      "animationPath": "characters/royal-scholar/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2654,6 +2734,7 @@
       "readmePath": "characters/apprentice-nomad/README.md",
       "previewPath": "characters/apprentice-nomad/preview.png",
       "spritePath": "characters/apprentice-nomad/sprite-sheet.png",
+      "animationPath": "characters/apprentice-nomad/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2686,6 +2767,7 @@
       "readmePath": "characters/veteran-nomad/README.md",
       "previewPath": "characters/veteran-nomad/preview.png",
       "spritePath": "characters/veteran-nomad/sprite-sheet.png",
+      "animationPath": "characters/veteran-nomad/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2718,6 +2800,7 @@
       "readmePath": "characters/forest-nomad/README.md",
       "previewPath": "characters/forest-nomad/preview.png",
       "spritePath": "characters/forest-nomad/sprite-sheet.png",
+      "animationPath": "characters/forest-nomad/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2750,6 +2833,7 @@
       "readmePath": "characters/desert-nomad/README.md",
       "previewPath": "characters/desert-nomad/preview.png",
       "spritePath": "characters/desert-nomad/sprite-sheet.png",
+      "animationPath": "characters/desert-nomad/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2782,6 +2866,7 @@
       "readmePath": "characters/royal-nomad/README.md",
       "previewPath": "characters/royal-nomad/preview.png",
       "spritePath": "characters/royal-nomad/sprite-sheet.png",
+      "animationPath": "characters/royal-nomad/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2814,6 +2899,7 @@
       "readmePath": "characters/apprentice-sailor/README.md",
       "previewPath": "characters/apprentice-sailor/preview.png",
       "spritePath": "characters/apprentice-sailor/sprite-sheet.png",
+      "animationPath": "characters/apprentice-sailor/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2846,6 +2932,7 @@
       "readmePath": "characters/veteran-sailor/README.md",
       "previewPath": "characters/veteran-sailor/preview.png",
       "spritePath": "characters/veteran-sailor/sprite-sheet.png",
+      "animationPath": "characters/veteran-sailor/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2878,6 +2965,7 @@
       "readmePath": "characters/forest-sailor/README.md",
       "previewPath": "characters/forest-sailor/preview.png",
       "spritePath": "characters/forest-sailor/sprite-sheet.png",
+      "animationPath": "characters/forest-sailor/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2910,6 +2998,7 @@
       "readmePath": "characters/desert-sailor/README.md",
       "previewPath": "characters/desert-sailor/preview.png",
       "spritePath": "characters/desert-sailor/sprite-sheet.png",
+      "animationPath": "characters/desert-sailor/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2942,6 +3031,7 @@
       "readmePath": "characters/royal-sailor/README.md",
       "previewPath": "characters/royal-sailor/preview.png",
       "spritePath": "characters/royal-sailor/sprite-sheet.png",
+      "animationPath": "characters/royal-sailor/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -2974,6 +3064,7 @@
       "readmePath": "characters/apprentice-scout/README.md",
       "previewPath": "characters/apprentice-scout/preview.png",
       "spritePath": "characters/apprentice-scout/sprite-sheet.png",
+      "animationPath": "characters/apprentice-scout/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3006,6 +3097,7 @@
       "readmePath": "characters/veteran-scout/README.md",
       "previewPath": "characters/veteran-scout/preview.png",
       "spritePath": "characters/veteran-scout/sprite-sheet.png",
+      "animationPath": "characters/veteran-scout/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3038,6 +3130,7 @@
       "readmePath": "characters/forest-scout/README.md",
       "previewPath": "characters/forest-scout/preview.png",
       "spritePath": "characters/forest-scout/sprite-sheet.png",
+      "animationPath": "characters/forest-scout/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3070,6 +3163,7 @@
       "readmePath": "characters/desert-scout/README.md",
       "previewPath": "characters/desert-scout/preview.png",
       "spritePath": "characters/desert-scout/sprite-sheet.png",
+      "animationPath": "characters/desert-scout/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3102,6 +3196,7 @@
       "readmePath": "characters/royal-scout/README.md",
       "previewPath": "characters/royal-scout/preview.png",
       "spritePath": "characters/royal-scout/sprite-sheet.png",
+      "animationPath": "characters/royal-scout/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3134,6 +3229,7 @@
       "readmePath": "characters/apprentice-priest/README.md",
       "previewPath": "characters/apprentice-priest/preview.png",
       "spritePath": "characters/apprentice-priest/sprite-sheet.png",
+      "animationPath": "characters/apprentice-priest/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3166,6 +3262,7 @@
       "readmePath": "characters/veteran-priest/README.md",
       "previewPath": "characters/veteran-priest/preview.png",
       "spritePath": "characters/veteran-priest/sprite-sheet.png",
+      "animationPath": "characters/veteran-priest/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3198,6 +3295,7 @@
       "readmePath": "characters/forest-priest/README.md",
       "previewPath": "characters/forest-priest/preview.png",
       "spritePath": "characters/forest-priest/sprite-sheet.png",
+      "animationPath": "characters/forest-priest/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3230,6 +3328,7 @@
       "readmePath": "characters/desert-priest/README.md",
       "previewPath": "characters/desert-priest/preview.png",
       "spritePath": "characters/desert-priest/sprite-sheet.png",
+      "animationPath": "characters/desert-priest/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3262,6 +3361,7 @@
       "readmePath": "characters/royal-priest/README.md",
       "previewPath": "characters/royal-priest/preview.png",
       "spritePath": "characters/royal-priest/sprite-sheet.png",
+      "animationPath": "characters/royal-priest/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3294,6 +3394,7 @@
       "readmePath": "characters/apprentice-queen/README.md",
       "previewPath": "characters/apprentice-queen/preview.png",
       "spritePath": "characters/apprentice-queen/sprite-sheet.png",
+      "animationPath": "characters/apprentice-queen/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3326,6 +3427,7 @@
       "readmePath": "characters/veteran-queen/README.md",
       "previewPath": "characters/veteran-queen/preview.png",
       "spritePath": "characters/veteran-queen/sprite-sheet.png",
+      "animationPath": "characters/veteran-queen/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3358,6 +3460,7 @@
       "readmePath": "characters/forest-queen/README.md",
       "previewPath": "characters/forest-queen/preview.png",
       "spritePath": "characters/forest-queen/sprite-sheet.png",
+      "animationPath": "characters/forest-queen/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3390,6 +3493,7 @@
       "readmePath": "characters/desert-queen/README.md",
       "previewPath": "characters/desert-queen/preview.png",
       "spritePath": "characters/desert-queen/sprite-sheet.png",
+      "animationPath": "characters/desert-queen/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3422,6 +3526,7 @@
       "readmePath": "characters/royal-queen/README.md",
       "previewPath": "characters/royal-queen/preview.png",
       "spritePath": "characters/royal-queen/sprite-sheet.png",
+      "animationPath": "characters/royal-queen/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3454,6 +3559,7 @@
       "readmePath": "characters/apprentice-king/README.md",
       "previewPath": "characters/apprentice-king/preview.png",
       "spritePath": "characters/apprentice-king/sprite-sheet.png",
+      "animationPath": "characters/apprentice-king/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3486,6 +3592,7 @@
       "readmePath": "characters/veteran-king/README.md",
       "previewPath": "characters/veteran-king/preview.png",
       "spritePath": "characters/veteran-king/sprite-sheet.png",
+      "animationPath": "characters/veteran-king/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3518,6 +3625,7 @@
       "readmePath": "characters/forest-king/README.md",
       "previewPath": "characters/forest-king/preview.png",
       "spritePath": "characters/forest-king/sprite-sheet.png",
+      "animationPath": "characters/forest-king/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3550,6 +3658,7 @@
       "readmePath": "characters/desert-king/README.md",
       "previewPath": "characters/desert-king/preview.png",
       "spritePath": "characters/desert-king/sprite-sheet.png",
+      "animationPath": "characters/desert-king/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3582,6 +3691,7 @@
       "readmePath": "characters/royal-king/README.md",
       "previewPath": "characters/royal-king/preview.png",
       "spritePath": "characters/royal-king/sprite-sheet.png",
+      "animationPath": "characters/royal-king/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3614,6 +3724,7 @@
       "readmePath": "characters/apprentice-witch/README.md",
       "previewPath": "characters/apprentice-witch/preview.png",
       "spritePath": "characters/apprentice-witch/sprite-sheet.png",
+      "animationPath": "characters/apprentice-witch/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3646,6 +3757,7 @@
       "readmePath": "characters/veteran-witch/README.md",
       "previewPath": "characters/veteran-witch/preview.png",
       "spritePath": "characters/veteran-witch/sprite-sheet.png",
+      "animationPath": "characters/veteran-witch/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3678,6 +3790,7 @@
       "readmePath": "characters/forest-witch/README.md",
       "previewPath": "characters/forest-witch/preview.png",
       "spritePath": "characters/forest-witch/sprite-sheet.png",
+      "animationPath": "characters/forest-witch/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3710,6 +3823,7 @@
       "readmePath": "characters/desert-witch/README.md",
       "previewPath": "characters/desert-witch/preview.png",
       "spritePath": "characters/desert-witch/sprite-sheet.png",
+      "animationPath": "characters/desert-witch/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3742,6 +3856,7 @@
       "readmePath": "characters/royal-witch/README.md",
       "previewPath": "characters/royal-witch/preview.png",
       "spritePath": "characters/royal-witch/sprite-sheet.png",
+      "animationPath": "characters/royal-witch/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3774,6 +3889,7 @@
       "readmePath": "characters/apprentice-necromancer/README.md",
       "previewPath": "characters/apprentice-necromancer/preview.png",
       "spritePath": "characters/apprentice-necromancer/sprite-sheet.png",
+      "animationPath": "characters/apprentice-necromancer/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3806,6 +3922,7 @@
       "readmePath": "characters/veteran-necromancer/README.md",
       "previewPath": "characters/veteran-necromancer/preview.png",
       "spritePath": "characters/veteran-necromancer/sprite-sheet.png",
+      "animationPath": "characters/veteran-necromancer/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3838,6 +3955,7 @@
       "readmePath": "characters/forest-necromancer/README.md",
       "previewPath": "characters/forest-necromancer/preview.png",
       "spritePath": "characters/forest-necromancer/sprite-sheet.png",
+      "animationPath": "characters/forest-necromancer/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3870,6 +3988,7 @@
       "readmePath": "characters/desert-necromancer/README.md",
       "previewPath": "characters/desert-necromancer/preview.png",
       "spritePath": "characters/desert-necromancer/sprite-sheet.png",
+      "animationPath": "characters/desert-necromancer/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3902,6 +4021,7 @@
       "readmePath": "characters/royal-necromancer/README.md",
       "previewPath": "characters/royal-necromancer/preview.png",
       "spritePath": "characters/royal-necromancer/sprite-sheet.png",
+      "animationPath": "characters/royal-necromancer/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3934,6 +4054,7 @@
       "readmePath": "characters/apprentice-druid/README.md",
       "previewPath": "characters/apprentice-druid/preview.png",
       "spritePath": "characters/apprentice-druid/sprite-sheet.png",
+      "animationPath": "characters/apprentice-druid/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3966,6 +4087,7 @@
       "readmePath": "characters/veteran-druid/README.md",
       "previewPath": "characters/veteran-druid/preview.png",
       "spritePath": "characters/veteran-druid/sprite-sheet.png",
+      "animationPath": "characters/veteran-druid/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -3998,6 +4120,7 @@
       "readmePath": "characters/forest-druid/README.md",
       "previewPath": "characters/forest-druid/preview.png",
       "spritePath": "characters/forest-druid/sprite-sheet.png",
+      "animationPath": "characters/forest-druid/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4030,6 +4153,7 @@
       "readmePath": "characters/desert-druid/README.md",
       "previewPath": "characters/desert-druid/preview.png",
       "spritePath": "characters/desert-druid/sprite-sheet.png",
+      "animationPath": "characters/desert-druid/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4062,6 +4186,7 @@
       "readmePath": "characters/royal-druid/README.md",
       "previewPath": "characters/royal-druid/preview.png",
       "spritePath": "characters/royal-druid/sprite-sheet.png",
+      "animationPath": "characters/royal-druid/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4094,6 +4219,7 @@
       "readmePath": "characters/apprentice-engineer/README.md",
       "previewPath": "characters/apprentice-engineer/preview.png",
       "spritePath": "characters/apprentice-engineer/sprite-sheet.png",
+      "animationPath": "characters/apprentice-engineer/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4126,6 +4252,7 @@
       "readmePath": "characters/veteran-engineer/README.md",
       "previewPath": "characters/veteran-engineer/preview.png",
       "spritePath": "characters/veteran-engineer/sprite-sheet.png",
+      "animationPath": "characters/veteran-engineer/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4158,6 +4285,7 @@
       "readmePath": "characters/forest-engineer/README.md",
       "previewPath": "characters/forest-engineer/preview.png",
       "spritePath": "characters/forest-engineer/sprite-sheet.png",
+      "animationPath": "characters/forest-engineer/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4190,6 +4318,7 @@
       "readmePath": "characters/desert-engineer/README.md",
       "previewPath": "characters/desert-engineer/preview.png",
       "spritePath": "characters/desert-engineer/sprite-sheet.png",
+      "animationPath": "characters/desert-engineer/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4222,6 +4351,7 @@
       "readmePath": "characters/royal-engineer/README.md",
       "previewPath": "characters/royal-engineer/preview.png",
       "spritePath": "characters/royal-engineer/sprite-sheet.png",
+      "animationPath": "characters/royal-engineer/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4254,6 +4384,7 @@
       "readmePath": "characters/apprentice-thief/README.md",
       "previewPath": "characters/apprentice-thief/preview.png",
       "spritePath": "characters/apprentice-thief/sprite-sheet.png",
+      "animationPath": "characters/apprentice-thief/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4286,6 +4417,7 @@
       "readmePath": "characters/veteran-thief/README.md",
       "previewPath": "characters/veteran-thief/preview.png",
       "spritePath": "characters/veteran-thief/sprite-sheet.png",
+      "animationPath": "characters/veteran-thief/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4318,6 +4450,7 @@
       "readmePath": "characters/forest-thief/README.md",
       "previewPath": "characters/forest-thief/preview.png",
       "spritePath": "characters/forest-thief/sprite-sheet.png",
+      "animationPath": "characters/forest-thief/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4350,6 +4483,7 @@
       "readmePath": "characters/desert-thief/README.md",
       "previewPath": "characters/desert-thief/preview.png",
       "spritePath": "characters/desert-thief/sprite-sheet.png",
+      "animationPath": "characters/desert-thief/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4382,6 +4516,7 @@
       "readmePath": "characters/royal-thief/README.md",
       "previewPath": "characters/royal-thief/preview.png",
       "spritePath": "characters/royal-thief/sprite-sheet.png",
+      "animationPath": "characters/royal-thief/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4414,6 +4549,7 @@
       "readmePath": "characters/apprentice-pirate/README.md",
       "previewPath": "characters/apprentice-pirate/preview.png",
       "spritePath": "characters/apprentice-pirate/sprite-sheet.png",
+      "animationPath": "characters/apprentice-pirate/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4446,6 +4582,7 @@
       "readmePath": "characters/veteran-pirate/README.md",
       "previewPath": "characters/veteran-pirate/preview.png",
       "spritePath": "characters/veteran-pirate/sprite-sheet.png",
+      "animationPath": "characters/veteran-pirate/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4478,6 +4615,7 @@
       "readmePath": "characters/forest-pirate/README.md",
       "previewPath": "characters/forest-pirate/preview.png",
       "spritePath": "characters/forest-pirate/sprite-sheet.png",
+      "animationPath": "characters/forest-pirate/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4510,6 +4648,7 @@
       "readmePath": "characters/desert-pirate/README.md",
       "previewPath": "characters/desert-pirate/preview.png",
       "spritePath": "characters/desert-pirate/sprite-sheet.png",
+      "animationPath": "characters/desert-pirate/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4542,6 +4681,7 @@
       "readmePath": "characters/royal-pirate/README.md",
       "previewPath": "characters/royal-pirate/preview.png",
       "spritePath": "characters/royal-pirate/sprite-sheet.png",
+      "animationPath": "characters/royal-pirate/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4574,6 +4714,7 @@
       "readmePath": "characters/apprentice-cartographer/README.md",
       "previewPath": "characters/apprentice-cartographer/preview.png",
       "spritePath": "characters/apprentice-cartographer/sprite-sheet.png",
+      "animationPath": "characters/apprentice-cartographer/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4606,6 +4747,7 @@
       "readmePath": "characters/veteran-cartographer/README.md",
       "previewPath": "characters/veteran-cartographer/preview.png",
       "spritePath": "characters/veteran-cartographer/sprite-sheet.png",
+      "animationPath": "characters/veteran-cartographer/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4638,6 +4780,7 @@
       "readmePath": "characters/forest-cartographer/README.md",
       "previewPath": "characters/forest-cartographer/preview.png",
       "spritePath": "characters/forest-cartographer/sprite-sheet.png",
+      "animationPath": "characters/forest-cartographer/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4670,6 +4813,7 @@
       "readmePath": "characters/desert-cartographer/README.md",
       "previewPath": "characters/desert-cartographer/preview.png",
       "spritePath": "characters/desert-cartographer/sprite-sheet.png",
+      "animationPath": "characters/desert-cartographer/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4702,6 +4846,7 @@
       "readmePath": "characters/royal-cartographer/README.md",
       "previewPath": "characters/royal-cartographer/preview.png",
       "spritePath": "characters/royal-cartographer/sprite-sheet.png",
+      "animationPath": "characters/royal-cartographer/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4734,6 +4879,7 @@
       "readmePath": "characters/apprentice-cook/README.md",
       "previewPath": "characters/apprentice-cook/preview.png",
       "spritePath": "characters/apprentice-cook/sprite-sheet.png",
+      "animationPath": "characters/apprentice-cook/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4766,6 +4912,7 @@
       "readmePath": "characters/veteran-cook/README.md",
       "previewPath": "characters/veteran-cook/preview.png",
       "spritePath": "characters/veteran-cook/sprite-sheet.png",
+      "animationPath": "characters/veteran-cook/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4798,6 +4945,7 @@
       "readmePath": "characters/forest-cook/README.md",
       "previewPath": "characters/forest-cook/preview.png",
       "spritePath": "characters/forest-cook/sprite-sheet.png",
+      "animationPath": "characters/forest-cook/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4830,6 +4978,7 @@
       "readmePath": "characters/desert-cook/README.md",
       "previewPath": "characters/desert-cook/preview.png",
       "spritePath": "characters/desert-cook/sprite-sheet.png",
+      "animationPath": "characters/desert-cook/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4862,6 +5011,7 @@
       "readmePath": "characters/royal-cook/README.md",
       "previewPath": "characters/royal-cook/preview.png",
       "spritePath": "characters/royal-cook/sprite-sheet.png",
+      "animationPath": "characters/royal-cook/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4893,6 +5043,7 @@
       "readmePath": "flora/oak/README.md",
       "previewPath": "flora/oak/preview.png",
       "spritePath": "flora/oak/sprite-sheet.png",
+      "animationPath": "flora/oak/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4924,6 +5075,7 @@
       "readmePath": "flora/pine/README.md",
       "previewPath": "flora/pine/preview.png",
       "spritePath": "flora/pine/sprite-sheet.png",
+      "animationPath": "flora/pine/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4955,6 +5107,7 @@
       "readmePath": "flora/willow/README.md",
       "previewPath": "flora/willow/preview.png",
       "spritePath": "flora/willow/sprite-sheet.png",
+      "animationPath": "flora/willow/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -4986,6 +5139,7 @@
       "readmePath": "flora/baobab/README.md",
       "previewPath": "flora/baobab/preview.png",
       "spritePath": "flora/baobab/sprite-sheet.png",
+      "animationPath": "flora/baobab/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5017,6 +5171,7 @@
       "readmePath": "flora/palm/README.md",
       "previewPath": "flora/palm/preview.png",
       "spritePath": "flora/palm/sprite-sheet.png",
+      "animationPath": "flora/palm/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5048,6 +5203,7 @@
       "readmePath": "flora/cherry/README.md",
       "previewPath": "flora/cherry/preview.png",
       "spritePath": "flora/cherry/sprite-sheet.png",
+      "animationPath": "flora/cherry/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5079,6 +5235,7 @@
       "readmePath": "flora/mangrove/README.md",
       "previewPath": "flora/mangrove/preview.png",
       "spritePath": "flora/mangrove/sprite-sheet.png",
+      "animationPath": "flora/mangrove/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5110,6 +5267,7 @@
       "readmePath": "flora/birch/README.md",
       "previewPath": "flora/birch/preview.png",
       "spritePath": "flora/birch/sprite-sheet.png",
+      "animationPath": "flora/birch/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5141,6 +5299,7 @@
       "readmePath": "flora/cedar/README.md",
       "previewPath": "flora/cedar/preview.png",
       "spritePath": "flora/cedar/sprite-sheet.png",
+      "animationPath": "flora/cedar/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5172,6 +5331,7 @@
       "readmePath": "flora/maple/README.md",
       "previewPath": "flora/maple/preview.png",
       "spritePath": "flora/maple/sprite-sheet.png",
+      "animationPath": "flora/maple/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5203,6 +5363,7 @@
       "readmePath": "flora/acacia/README.md",
       "previewPath": "flora/acacia/preview.png",
       "spritePath": "flora/acacia/sprite-sheet.png",
+      "animationPath": "flora/acacia/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5234,6 +5395,7 @@
       "readmePath": "flora/redwood/README.md",
       "previewPath": "flora/redwood/preview.png",
       "spritePath": "flora/redwood/sprite-sheet.png",
+      "animationPath": "flora/redwood/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5265,6 +5427,7 @@
       "readmePath": "flora/cypress/README.md",
       "previewPath": "flora/cypress/preview.png",
       "spritePath": "flora/cypress/sprite-sheet.png",
+      "animationPath": "flora/cypress/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5296,6 +5459,7 @@
       "readmePath": "flora/sakura/README.md",
       "previewPath": "flora/sakura/preview.png",
       "spritePath": "flora/sakura/sprite-sheet.png",
+      "animationPath": "flora/sakura/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5327,6 +5491,7 @@
       "readmePath": "flora/dead-tree/README.md",
       "previewPath": "flora/dead-tree/preview.png",
       "spritePath": "flora/dead-tree/sprite-sheet.png",
+      "animationPath": "flora/dead-tree/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5358,6 +5523,7 @@
       "readmePath": "flora/fruit-tree/README.md",
       "previewPath": "flora/fruit-tree/preview.png",
       "spritePath": "flora/fruit-tree/sprite-sheet.png",
+      "animationPath": "flora/fruit-tree/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5389,6 +5555,7 @@
       "readmePath": "flora/ancient-tree/README.md",
       "previewPath": "flora/ancient-tree/preview.png",
       "spritePath": "flora/ancient-tree/sprite-sheet.png",
+      "animationPath": "flora/ancient-tree/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5420,6 +5587,7 @@
       "readmePath": "flora/crystal-tree/README.md",
       "previewPath": "flora/crystal-tree/preview.png",
       "spritePath": "flora/crystal-tree/sprite-sheet.png",
+      "animationPath": "flora/crystal-tree/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5451,6 +5619,7 @@
       "readmePath": "flora/autumn-tree/README.md",
       "previewPath": "flora/autumn-tree/preview.png",
       "spritePath": "flora/autumn-tree/sprite-sheet.png",
+      "animationPath": "flora/autumn-tree/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5482,6 +5651,7 @@
       "readmePath": "flora/moon-tree/README.md",
       "previewPath": "flora/moon-tree/preview.png",
       "spritePath": "flora/moon-tree/sprite-sheet.png",
+      "animationPath": "flora/moon-tree/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5511,6 +5681,7 @@
       "readmePath": "flora/rose-bush/README.md",
       "previewPath": "flora/rose-bush/preview.png",
       "spritePath": "flora/rose-bush/sprite-sheet.png",
+      "animationPath": "flora/rose-bush/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5540,6 +5711,7 @@
       "readmePath": "flora/berry-bush/README.md",
       "previewPath": "flora/berry-bush/preview.png",
       "spritePath": "flora/berry-bush/sprite-sheet.png",
+      "animationPath": "flora/berry-bush/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5569,6 +5741,7 @@
       "readmePath": "flora/fern/README.md",
       "previewPath": "flora/fern/preview.png",
       "spritePath": "flora/fern/sprite-sheet.png",
+      "animationPath": "flora/fern/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5598,6 +5771,7 @@
       "readmePath": "flora/bamboo/README.md",
       "previewPath": "flora/bamboo/preview.png",
       "spritePath": "flora/bamboo/sprite-sheet.png",
+      "animationPath": "flora/bamboo/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5627,6 +5801,7 @@
       "readmePath": "flora/cactus/README.md",
       "previewPath": "flora/cactus/preview.png",
       "spritePath": "flora/cactus/sprite-sheet.png",
+      "animationPath": "flora/cactus/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5656,6 +5831,7 @@
       "readmePath": "flora/lavender/README.md",
       "previewPath": "flora/lavender/preview.png",
       "spritePath": "flora/lavender/sprite-sheet.png",
+      "animationPath": "flora/lavender/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5685,6 +5861,7 @@
       "readmePath": "flora/sunflower/README.md",
       "previewPath": "flora/sunflower/preview.png",
       "spritePath": "flora/sunflower/sprite-sheet.png",
+      "animationPath": "flora/sunflower/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5714,6 +5891,7 @@
       "readmePath": "flora/mushroom/README.md",
       "previewPath": "flora/mushroom/preview.png",
       "spritePath": "flora/mushroom/sprite-sheet.png",
+      "animationPath": "flora/mushroom/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5743,6 +5921,7 @@
       "readmePath": "flora/water-lily/README.md",
       "previewPath": "flora/water-lily/preview.png",
       "spritePath": "flora/water-lily/sprite-sheet.png",
+      "animationPath": "flora/water-lily/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5772,6 +5951,7 @@
       "readmePath": "flora/seaweed/README.md",
       "previewPath": "flora/seaweed/preview.png",
       "spritePath": "flora/seaweed/sprite-sheet.png",
+      "animationPath": "flora/seaweed/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5801,6 +5981,7 @@
       "readmePath": "flora/coral/README.md",
       "previewPath": "flora/coral/preview.png",
       "spritePath": "flora/coral/sprite-sheet.png",
+      "animationPath": "flora/coral/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5830,6 +6011,7 @@
       "readmePath": "flora/reeds/README.md",
       "previewPath": "flora/reeds/preview.png",
       "spritePath": "flora/reeds/sprite-sheet.png",
+      "animationPath": "flora/reeds/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5859,6 +6041,7 @@
       "readmePath": "flora/hedge/README.md",
       "previewPath": "flora/hedge/preview.png",
       "spritePath": "flora/hedge/sprite-sheet.png",
+      "animationPath": "flora/hedge/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5888,6 +6071,7 @@
       "readmePath": "flora/ivy/README.md",
       "previewPath": "flora/ivy/preview.png",
       "spritePath": "flora/ivy/sprite-sheet.png",
+      "animationPath": "flora/ivy/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5917,6 +6101,7 @@
       "readmePath": "flora/moss/README.md",
       "previewPath": "flora/moss/preview.png",
       "spritePath": "flora/moss/sprite-sheet.png",
+      "animationPath": "flora/moss/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5946,6 +6131,7 @@
       "readmePath": "flora/wheat/README.md",
       "previewPath": "flora/wheat/preview.png",
       "spritePath": "flora/wheat/sprite-sheet.png",
+      "animationPath": "flora/wheat/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -5975,6 +6161,7 @@
       "readmePath": "flora/sugarcane/README.md",
       "previewPath": "flora/sugarcane/preview.png",
       "spritePath": "flora/sugarcane/sprite-sheet.png",
+      "animationPath": "flora/sugarcane/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6004,6 +6191,7 @@
       "readmePath": "flora/blue-flower/README.md",
       "previewPath": "flora/blue-flower/preview.png",
       "spritePath": "flora/blue-flower/sprite-sheet.png",
+      "animationPath": "flora/blue-flower/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6034,6 +6222,7 @@
       "readmePath": "fauna/wolf/README.md",
       "previewPath": "fauna/wolf/preview.png",
       "spritePath": "fauna/wolf/sprite-sheet.png",
+      "animationPath": "fauna/wolf/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6064,6 +6253,7 @@
       "readmePath": "fauna/fox/README.md",
       "previewPath": "fauna/fox/preview.png",
       "spritePath": "fauna/fox/sprite-sheet.png",
+      "animationPath": "fauna/fox/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6094,6 +6284,7 @@
       "readmePath": "fauna/deer/README.md",
       "previewPath": "fauna/deer/preview.png",
       "spritePath": "fauna/deer/sprite-sheet.png",
+      "animationPath": "fauna/deer/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6124,6 +6315,7 @@
       "readmePath": "fauna/boar/README.md",
       "previewPath": "fauna/boar/preview.png",
       "spritePath": "fauna/boar/sprite-sheet.png",
+      "animationPath": "fauna/boar/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6154,6 +6346,7 @@
       "readmePath": "fauna/bear/README.md",
       "previewPath": "fauna/bear/preview.png",
       "spritePath": "fauna/bear/sprite-sheet.png",
+      "animationPath": "fauna/bear/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6184,6 +6377,7 @@
       "readmePath": "fauna/rabbit/README.md",
       "previewPath": "fauna/rabbit/preview.png",
       "spritePath": "fauna/rabbit/sprite-sheet.png",
+      "animationPath": "fauna/rabbit/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6214,6 +6408,7 @@
       "readmePath": "fauna/eagle/README.md",
       "previewPath": "fauna/eagle/preview.png",
       "spritePath": "fauna/eagle/sprite-sheet.png",
+      "animationPath": "fauna/eagle/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6244,6 +6439,7 @@
       "readmePath": "fauna/owl/README.md",
       "previewPath": "fauna/owl/preview.png",
       "spritePath": "fauna/owl/sprite-sheet.png",
+      "animationPath": "fauna/owl/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6274,6 +6470,7 @@
       "readmePath": "fauna/raven/README.md",
       "previewPath": "fauna/raven/preview.png",
       "spritePath": "fauna/raven/sprite-sheet.png",
+      "animationPath": "fauna/raven/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6304,6 +6501,7 @@
       "readmePath": "fauna/parrot/README.md",
       "previewPath": "fauna/parrot/preview.png",
       "spritePath": "fauna/parrot/sprite-sheet.png",
+      "animationPath": "fauna/parrot/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6334,6 +6532,7 @@
       "readmePath": "fauna/seagull/README.md",
       "previewPath": "fauna/seagull/preview.png",
       "spritePath": "fauna/seagull/sprite-sheet.png",
+      "animationPath": "fauna/seagull/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6364,6 +6563,7 @@
       "readmePath": "fauna/frog/README.md",
       "previewPath": "fauna/frog/preview.png",
       "spritePath": "fauna/frog/sprite-sheet.png",
+      "animationPath": "fauna/frog/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6394,6 +6594,7 @@
       "readmePath": "fauna/turtle/README.md",
       "previewPath": "fauna/turtle/preview.png",
       "spritePath": "fauna/turtle/sprite-sheet.png",
+      "animationPath": "fauna/turtle/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6424,6 +6625,7 @@
       "readmePath": "fauna/whale/README.md",
       "previewPath": "fauna/whale/preview.png",
       "spritePath": "fauna/whale/sprite-sheet.png",
+      "animationPath": "fauna/whale/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6454,6 +6656,7 @@
       "readmePath": "fauna/dolphin/README.md",
       "previewPath": "fauna/dolphin/preview.png",
       "spritePath": "fauna/dolphin/sprite-sheet.png",
+      "animationPath": "fauna/dolphin/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6484,6 +6687,7 @@
       "readmePath": "fauna/shark/README.md",
       "previewPath": "fauna/shark/preview.png",
       "spritePath": "fauna/shark/sprite-sheet.png",
+      "animationPath": "fauna/shark/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6514,6 +6718,7 @@
       "readmePath": "fauna/crab/README.md",
       "previewPath": "fauna/crab/preview.png",
       "spritePath": "fauna/crab/sprite-sheet.png",
+      "animationPath": "fauna/crab/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6544,6 +6749,7 @@
       "readmePath": "fauna/butterfly/README.md",
       "previewPath": "fauna/butterfly/preview.png",
       "spritePath": "fauna/butterfly/sprite-sheet.png",
+      "animationPath": "fauna/butterfly/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6574,6 +6780,7 @@
       "readmePath": "fauna/firefly/README.md",
       "previewPath": "fauna/firefly/preview.png",
       "spritePath": "fauna/firefly/sprite-sheet.png",
+      "animationPath": "fauna/firefly/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6604,6 +6811,7 @@
       "readmePath": "fauna/bee/README.md",
       "previewPath": "fauna/bee/preview.png",
       "spritePath": "fauna/bee/sprite-sheet.png",
+      "animationPath": "fauna/bee/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6634,6 +6842,7 @@
       "readmePath": "fauna/horse/README.md",
       "previewPath": "fauna/horse/preview.png",
       "spritePath": "fauna/horse/sprite-sheet.png",
+      "animationPath": "fauna/horse/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6664,6 +6873,7 @@
       "readmePath": "mythical-creatures/dragon-ember/README.md",
       "previewPath": "mythical-creatures/dragon-ember/preview.png",
       "spritePath": "mythical-creatures/dragon-ember/sprite-sheet.png",
+      "animationPath": "mythical-creatures/dragon-ember/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6694,6 +6904,7 @@
       "readmePath": "mythical-creatures/dragon-ice/README.md",
       "previewPath": "mythical-creatures/dragon-ice/preview.png",
       "spritePath": "mythical-creatures/dragon-ice/sprite-sheet.png",
+      "animationPath": "mythical-creatures/dragon-ice/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6724,6 +6935,7 @@
       "readmePath": "mythical-creatures/dragon-storm/README.md",
       "previewPath": "mythical-creatures/dragon-storm/preview.png",
       "spritePath": "mythical-creatures/dragon-storm/sprite-sheet.png",
+      "animationPath": "mythical-creatures/dragon-storm/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6754,6 +6966,7 @@
       "readmePath": "mythical-creatures/dragon-forest/README.md",
       "previewPath": "mythical-creatures/dragon-forest/preview.png",
       "spritePath": "mythical-creatures/dragon-forest/sprite-sheet.png",
+      "animationPath": "mythical-creatures/dragon-forest/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6784,6 +6997,7 @@
       "readmePath": "mythical-creatures/dragon-void/README.md",
       "previewPath": "mythical-creatures/dragon-void/preview.png",
       "spritePath": "mythical-creatures/dragon-void/sprite-sheet.png",
+      "animationPath": "mythical-creatures/dragon-void/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6814,6 +7028,7 @@
       "readmePath": "mythical-creatures/griffin/README.md",
       "previewPath": "mythical-creatures/griffin/preview.png",
       "spritePath": "mythical-creatures/griffin/sprite-sheet.png",
+      "animationPath": "mythical-creatures/griffin/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6844,6 +7059,7 @@
       "readmePath": "mythical-creatures/basilisk/README.md",
       "previewPath": "mythical-creatures/basilisk/preview.png",
       "spritePath": "mythical-creatures/basilisk/sprite-sheet.png",
+      "animationPath": "mythical-creatures/basilisk/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6874,6 +7090,7 @@
       "readmePath": "mythical-creatures/phoenix/README.md",
       "previewPath": "mythical-creatures/phoenix/preview.png",
       "spritePath": "mythical-creatures/phoenix/sprite-sheet.png",
+      "animationPath": "mythical-creatures/phoenix/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6904,6 +7121,7 @@
       "readmePath": "mythical-creatures/unicorn/README.md",
       "previewPath": "mythical-creatures/unicorn/preview.png",
       "spritePath": "mythical-creatures/unicorn/sprite-sheet.png",
+      "animationPath": "mythical-creatures/unicorn/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6934,6 +7152,7 @@
       "readmePath": "mythical-creatures/hydra/README.md",
       "previewPath": "mythical-creatures/hydra/preview.png",
       "spritePath": "mythical-creatures/hydra/sprite-sheet.png",
+      "animationPath": "mythical-creatures/hydra/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6964,6 +7183,7 @@
       "readmePath": "mythical-creatures/kraken/README.md",
       "previewPath": "mythical-creatures/kraken/preview.png",
       "spritePath": "mythical-creatures/kraken/sprite-sheet.png",
+      "animationPath": "mythical-creatures/kraken/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -6994,6 +7214,7 @@
       "readmePath": "mythical-creatures/minotaur/README.md",
       "previewPath": "mythical-creatures/minotaur/preview.png",
       "spritePath": "mythical-creatures/minotaur/sprite-sheet.png",
+      "animationPath": "mythical-creatures/minotaur/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7024,6 +7245,7 @@
       "readmePath": "mythical-creatures/golem/README.md",
       "previewPath": "mythical-creatures/golem/preview.png",
       "spritePath": "mythical-creatures/golem/sprite-sheet.png",
+      "animationPath": "mythical-creatures/golem/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7054,6 +7276,7 @@
       "readmePath": "mythical-creatures/fairy/README.md",
       "previewPath": "mythical-creatures/fairy/preview.png",
       "spritePath": "mythical-creatures/fairy/sprite-sheet.png",
+      "animationPath": "mythical-creatures/fairy/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7084,6 +7307,7 @@
       "readmePath": "mythical-creatures/sirena/README.md",
       "previewPath": "mythical-creatures/sirena/preview.png",
       "spritePath": "mythical-creatures/sirena/sprite-sheet.png",
+      "animationPath": "mythical-creatures/sirena/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7114,6 +7338,7 @@
       "readmePath": "mythical-creatures/werewolf/README.md",
       "previewPath": "mythical-creatures/werewolf/preview.png",
       "spritePath": "mythical-creatures/werewolf/sprite-sheet.png",
+      "animationPath": "mythical-creatures/werewolf/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7144,6 +7369,7 @@
       "readmePath": "mythical-creatures/vampire/README.md",
       "previewPath": "mythical-creatures/vampire/preview.png",
       "spritePath": "mythical-creatures/vampire/sprite-sheet.png",
+      "animationPath": "mythical-creatures/vampire/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7174,6 +7400,7 @@
       "readmePath": "mythical-creatures/djinn/README.md",
       "previewPath": "mythical-creatures/djinn/preview.png",
       "spritePath": "mythical-creatures/djinn/sprite-sheet.png",
+      "animationPath": "mythical-creatures/djinn/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7204,6 +7431,7 @@
       "readmePath": "mythical-creatures/thunderbird/README.md",
       "previewPath": "mythical-creatures/thunderbird/preview.png",
       "spritePath": "mythical-creatures/thunderbird/sprite-sheet.png",
+      "animationPath": "mythical-creatures/thunderbird/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7234,6 +7462,7 @@
       "readmePath": "mythical-creatures/kitsune/README.md",
       "previewPath": "mythical-creatures/kitsune/preview.png",
       "spritePath": "mythical-creatures/kitsune/sprite-sheet.png",
+      "animationPath": "mythical-creatures/kitsune/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7263,6 +7492,7 @@
       "readmePath": "mounts/mount-horse/README.md",
       "previewPath": "mounts/mount-horse/preview.png",
       "spritePath": "mounts/mount-horse/sprite-sheet.png",
+      "animationPath": "mounts/mount-horse/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7292,6 +7522,7 @@
       "readmePath": "mounts/warhorse/README.md",
       "previewPath": "mounts/warhorse/preview.png",
       "spritePath": "mounts/warhorse/sprite-sheet.png",
+      "animationPath": "mounts/warhorse/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7321,6 +7552,7 @@
       "readmePath": "mounts/camel/README.md",
       "previewPath": "mounts/camel/preview.png",
       "spritePath": "mounts/camel/sprite-sheet.png",
+      "animationPath": "mounts/camel/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7350,6 +7582,7 @@
       "readmePath": "mounts/elephant/README.md",
       "previewPath": "mounts/elephant/preview.png",
       "spritePath": "mounts/elephant/sprite-sheet.png",
+      "animationPath": "mounts/elephant/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7379,6 +7612,7 @@
       "readmePath": "mounts/dire-wolf/README.md",
       "previewPath": "mounts/dire-wolf/preview.png",
       "spritePath": "mounts/dire-wolf/sprite-sheet.png",
+      "animationPath": "mounts/dire-wolf/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7408,6 +7642,7 @@
       "readmePath": "mounts/griffin-mount/README.md",
       "previewPath": "mounts/griffin-mount/preview.png",
       "spritePath": "mounts/griffin-mount/sprite-sheet.png",
+      "animationPath": "mounts/griffin-mount/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7437,6 +7672,7 @@
       "readmePath": "mounts/dragon-mount/README.md",
       "previewPath": "mounts/dragon-mount/preview.png",
       "spritePath": "mounts/dragon-mount/sprite-sheet.png",
+      "animationPath": "mounts/dragon-mount/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7466,6 +7702,7 @@
       "readmePath": "mounts/giant-turtle/README.md",
       "previewPath": "mounts/giant-turtle/preview.png",
       "spritePath": "mounts/giant-turtle/sprite-sheet.png",
+      "animationPath": "mounts/giant-turtle/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7495,6 +7732,7 @@
       "readmePath": "mounts/elk-mount/README.md",
       "previewPath": "mounts/elk-mount/preview.png",
       "spritePath": "mounts/elk-mount/sprite-sheet.png",
+      "animationPath": "mounts/elk-mount/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7524,6 +7762,7 @@
       "readmePath": "mounts/sky-whale/README.md",
       "previewPath": "mounts/sky-whale/preview.png",
       "spritePath": "mounts/sky-whale/sprite-sheet.png",
+      "animationPath": "mounts/sky-whale/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7553,6 +7792,7 @@
       "readmePath": "mounts/mechanical-mount/README.md",
       "previewPath": "mounts/mechanical-mount/preview.png",
       "spritePath": "mounts/mechanical-mount/sprite-sheet.png",
+      "animationPath": "mounts/mechanical-mount/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7582,6 +7822,7 @@
       "readmePath": "mounts/sea-serpent/README.md",
       "previewPath": "mounts/sea-serpent/preview.png",
       "spritePath": "mounts/sea-serpent/sprite-sheet.png",
+      "animationPath": "mounts/sea-serpent/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7611,6 +7852,7 @@
       "readmePath": "props-and-weapons/sword/README.md",
       "previewPath": "props-and-weapons/sword/preview.png",
       "spritePath": "props-and-weapons/sword/sprite-sheet.png",
+      "animationPath": "props-and-weapons/sword/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7640,6 +7882,7 @@
       "readmePath": "props-and-weapons/greatsword/README.md",
       "previewPath": "props-and-weapons/greatsword/preview.png",
       "spritePath": "props-and-weapons/greatsword/sprite-sheet.png",
+      "animationPath": "props-and-weapons/greatsword/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7669,6 +7912,7 @@
       "readmePath": "props-and-weapons/dagger/README.md",
       "previewPath": "props-and-weapons/dagger/preview.png",
       "spritePath": "props-and-weapons/dagger/sprite-sheet.png",
+      "animationPath": "props-and-weapons/dagger/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7698,6 +7942,7 @@
       "readmePath": "props-and-weapons/spear/README.md",
       "previewPath": "props-and-weapons/spear/preview.png",
       "spritePath": "props-and-weapons/spear/sprite-sheet.png",
+      "animationPath": "props-and-weapons/spear/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7727,6 +7972,7 @@
       "readmePath": "props-and-weapons/pike/README.md",
       "previewPath": "props-and-weapons/pike/preview.png",
       "spritePath": "props-and-weapons/pike/sprite-sheet.png",
+      "animationPath": "props-and-weapons/pike/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7756,6 +8002,7 @@
       "readmePath": "props-and-weapons/halberd/README.md",
       "previewPath": "props-and-weapons/halberd/preview.png",
       "spritePath": "props-and-weapons/halberd/sprite-sheet.png",
+      "animationPath": "props-and-weapons/halberd/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7785,6 +8032,7 @@
       "readmePath": "props-and-weapons/bow/README.md",
       "previewPath": "props-and-weapons/bow/preview.png",
       "spritePath": "props-and-weapons/bow/sprite-sheet.png",
+      "animationPath": "props-and-weapons/bow/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7814,6 +8062,7 @@
       "readmePath": "props-and-weapons/crossbow/README.md",
       "previewPath": "props-and-weapons/crossbow/preview.png",
       "spritePath": "props-and-weapons/crossbow/sprite-sheet.png",
+      "animationPath": "props-and-weapons/crossbow/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7843,6 +8092,7 @@
       "readmePath": "props-and-weapons/staff/README.md",
       "previewPath": "props-and-weapons/staff/preview.png",
       "spritePath": "props-and-weapons/staff/sprite-sheet.png",
+      "animationPath": "props-and-weapons/staff/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7872,6 +8122,7 @@
       "readmePath": "props-and-weapons/wand/README.md",
       "previewPath": "props-and-weapons/wand/preview.png",
       "spritePath": "props-and-weapons/wand/sprite-sheet.png",
+      "animationPath": "props-and-weapons/wand/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7901,6 +8152,7 @@
       "readmePath": "props-and-weapons/hammer/README.md",
       "previewPath": "props-and-weapons/hammer/preview.png",
       "spritePath": "props-and-weapons/hammer/sprite-sheet.png",
+      "animationPath": "props-and-weapons/hammer/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7930,6 +8182,7 @@
       "readmePath": "props-and-weapons/axe/README.md",
       "previewPath": "props-and-weapons/axe/preview.png",
       "spritePath": "props-and-weapons/axe/sprite-sheet.png",
+      "animationPath": "props-and-weapons/axe/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7959,6 +8212,7 @@
       "readmePath": "props-and-weapons/shield/README.md",
       "previewPath": "props-and-weapons/shield/preview.png",
       "spritePath": "props-and-weapons/shield/sprite-sheet.png",
+      "animationPath": "props-and-weapons/shield/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -7988,6 +8242,7 @@
       "readmePath": "props-and-weapons/helmet/README.md",
       "previewPath": "props-and-weapons/helmet/preview.png",
       "spritePath": "props-and-weapons/helmet/sprite-sheet.png",
+      "animationPath": "props-and-weapons/helmet/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8017,6 +8272,7 @@
       "readmePath": "props-and-weapons/armor/README.md",
       "previewPath": "props-and-weapons/armor/preview.png",
       "spritePath": "props-and-weapons/armor/sprite-sheet.png",
+      "animationPath": "props-and-weapons/armor/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8046,6 +8302,7 @@
       "readmePath": "props-and-weapons/torch/README.md",
       "previewPath": "props-and-weapons/torch/preview.png",
       "spritePath": "props-and-weapons/torch/sprite-sheet.png",
+      "animationPath": "props-and-weapons/torch/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8075,6 +8332,7 @@
       "readmePath": "props-and-weapons/lantern/README.md",
       "previewPath": "props-and-weapons/lantern/preview.png",
       "spritePath": "props-and-weapons/lantern/sprite-sheet.png",
+      "animationPath": "props-and-weapons/lantern/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8104,6 +8362,7 @@
       "readmePath": "props-and-weapons/book/README.md",
       "previewPath": "props-and-weapons/book/preview.png",
       "spritePath": "props-and-weapons/book/sprite-sheet.png",
+      "animationPath": "props-and-weapons/book/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8133,6 +8392,7 @@
       "readmePath": "props-and-weapons/potion/README.md",
       "previewPath": "props-and-weapons/potion/preview.png",
       "spritePath": "props-and-weapons/potion/sprite-sheet.png",
+      "animationPath": "props-and-weapons/potion/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8162,6 +8422,7 @@
       "readmePath": "props-and-weapons/key/README.md",
       "previewPath": "props-and-weapons/key/preview.png",
       "spritePath": "props-and-weapons/key/sprite-sheet.png",
+      "animationPath": "props-and-weapons/key/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8191,6 +8452,7 @@
       "readmePath": "props-and-weapons/coin/README.md",
       "previewPath": "props-and-weapons/coin/preview.png",
       "spritePath": "props-and-weapons/coin/sprite-sheet.png",
+      "animationPath": "props-and-weapons/coin/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8220,6 +8482,7 @@
       "readmePath": "props-and-weapons/chest/README.md",
       "previewPath": "props-and-weapons/chest/preview.png",
       "spritePath": "props-and-weapons/chest/sprite-sheet.png",
+      "animationPath": "props-and-weapons/chest/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8249,6 +8512,7 @@
       "readmePath": "props-and-weapons/banner/README.md",
       "previewPath": "props-and-weapons/banner/preview.png",
       "spritePath": "props-and-weapons/banner/sprite-sheet.png",
+      "animationPath": "props-and-weapons/banner/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8278,6 +8542,7 @@
       "readmePath": "props-and-weapons/flag/README.md",
       "previewPath": "props-and-weapons/flag/preview.png",
       "spritePath": "props-and-weapons/flag/sprite-sheet.png",
+      "animationPath": "props-and-weapons/flag/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8307,6 +8572,7 @@
       "readmePath": "props-and-weapons/bell/README.md",
       "previewPath": "props-and-weapons/bell/preview.png",
       "spritePath": "props-and-weapons/bell/sprite-sheet.png",
+      "animationPath": "props-and-weapons/bell/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8336,6 +8602,7 @@
       "readmePath": "props-and-weapons/church-bell/README.md",
       "previewPath": "props-and-weapons/church-bell/preview.png",
       "spritePath": "props-and-weapons/church-bell/sprite-sheet.png",
+      "animationPath": "props-and-weapons/church-bell/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8366,6 +8633,7 @@
       "readmePath": "biomes-and-maps/forest/README.md",
       "previewPath": "biomes-and-maps/forest/preview.png",
       "spritePath": "biomes-and-maps/forest/sprite-sheet.png",
+      "animationPath": "biomes-and-maps/forest/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8396,6 +8664,7 @@
       "readmePath": "biomes-and-maps/desert/README.md",
       "previewPath": "biomes-and-maps/desert/preview.png",
       "spritePath": "biomes-and-maps/desert/sprite-sheet.png",
+      "animationPath": "biomes-and-maps/desert/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8426,6 +8695,7 @@
       "readmePath": "biomes-and-maps/tundra/README.md",
       "previewPath": "biomes-and-maps/tundra/preview.png",
       "spritePath": "biomes-and-maps/tundra/sprite-sheet.png",
+      "animationPath": "biomes-and-maps/tundra/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8456,6 +8726,7 @@
       "readmePath": "biomes-and-maps/swamp/README.md",
       "previewPath": "biomes-and-maps/swamp/preview.png",
       "spritePath": "biomes-and-maps/swamp/sprite-sheet.png",
+      "animationPath": "biomes-and-maps/swamp/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8486,6 +8757,7 @@
       "readmePath": "biomes-and-maps/volcanic/README.md",
       "previewPath": "biomes-and-maps/volcanic/preview.png",
       "spritePath": "biomes-and-maps/volcanic/sprite-sheet.png",
+      "animationPath": "biomes-and-maps/volcanic/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8516,6 +8788,7 @@
       "readmePath": "biomes-and-maps/coast/README.md",
       "previewPath": "biomes-and-maps/coast/preview.png",
       "spritePath": "biomes-and-maps/coast/sprite-sheet.png",
+      "animationPath": "biomes-and-maps/coast/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8546,6 +8819,7 @@
       "readmePath": "biomes-and-maps/beach/README.md",
       "previewPath": "biomes-and-maps/beach/preview.png",
       "spritePath": "biomes-and-maps/beach/sprite-sheet.png",
+      "animationPath": "biomes-and-maps/beach/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8576,6 +8850,7 @@
       "readmePath": "biomes-and-maps/ocean/README.md",
       "previewPath": "biomes-and-maps/ocean/preview.png",
       "spritePath": "biomes-and-maps/ocean/sprite-sheet.png",
+      "animationPath": "biomes-and-maps/ocean/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8606,6 +8881,7 @@
       "readmePath": "biomes-and-maps/coral-reef/README.md",
       "previewPath": "biomes-and-maps/coral-reef/preview.png",
       "spritePath": "biomes-and-maps/coral-reef/sprite-sheet.png",
+      "animationPath": "biomes-and-maps/coral-reef/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8636,6 +8912,7 @@
       "readmePath": "biomes-and-maps/mountain/README.md",
       "previewPath": "biomes-and-maps/mountain/preview.png",
       "spritePath": "biomes-and-maps/mountain/sprite-sheet.png",
+      "animationPath": "biomes-and-maps/mountain/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8666,6 +8943,7 @@
       "readmePath": "biomes-and-maps/canyon/README.md",
       "previewPath": "biomes-and-maps/canyon/preview.png",
       "spritePath": "biomes-and-maps/canyon/sprite-sheet.png",
+      "animationPath": "biomes-and-maps/canyon/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8696,6 +8974,7 @@
       "readmePath": "biomes-and-maps/river/README.md",
       "previewPath": "biomes-and-maps/river/preview.png",
       "spritePath": "biomes-and-maps/river/sprite-sheet.png",
+      "animationPath": "biomes-and-maps/river/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8726,6 +9005,7 @@
       "readmePath": "biomes-and-maps/village/README.md",
       "previewPath": "biomes-and-maps/village/preview.png",
       "spritePath": "biomes-and-maps/village/sprite-sheet.png",
+      "animationPath": "biomes-and-maps/village/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8756,6 +9036,7 @@
       "readmePath": "biomes-and-maps/castle/README.md",
       "previewPath": "biomes-and-maps/castle/preview.png",
       "spritePath": "biomes-and-maps/castle/sprite-sheet.png",
+      "animationPath": "biomes-and-maps/castle/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8786,6 +9067,7 @@
       "readmePath": "biomes-and-maps/ruins/README.md",
       "previewPath": "biomes-and-maps/ruins/preview.png",
       "spritePath": "biomes-and-maps/ruins/sprite-sheet.png",
+      "animationPath": "biomes-and-maps/ruins/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8816,6 +9098,7 @@
       "readmePath": "biomes-and-maps/cave/README.md",
       "previewPath": "biomes-and-maps/cave/preview.png",
       "spritePath": "biomes-and-maps/cave/sprite-sheet.png",
+      "animationPath": "biomes-and-maps/cave/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8846,6 +9129,7 @@
       "readmePath": "biomes-and-maps/sky-island/README.md",
       "previewPath": "biomes-and-maps/sky-island/preview.png",
       "spritePath": "biomes-and-maps/sky-island/sprite-sheet.png",
+      "animationPath": "biomes-and-maps/sky-island/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8876,6 +9160,7 @@
       "readmePath": "biomes-and-maps/moon-valley/README.md",
       "previewPath": "biomes-and-maps/moon-valley/preview.png",
       "spritePath": "biomes-and-maps/moon-valley/sprite-sheet.png",
+      "animationPath": "biomes-and-maps/moon-valley/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8906,6 +9191,7 @@
       "readmePath": "biomes-and-maps/flower-meadow/README.md",
       "previewPath": "biomes-and-maps/flower-meadow/preview.png",
       "spritePath": "biomes-and-maps/flower-meadow/sprite-sheet.png",
+      "animationPath": "biomes-and-maps/flower-meadow/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8936,6 +9222,7 @@
       "readmePath": "biomes-and-maps/haunted-marsh/README.md",
       "previewPath": "biomes-and-maps/haunted-marsh/preview.png",
       "spritePath": "biomes-and-maps/haunted-marsh/sprite-sheet.png",
+      "animationPath": "biomes-and-maps/haunted-marsh/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8965,6 +9252,7 @@
       "readmePath": "interiors/cottage/README.md",
       "previewPath": "interiors/cottage/preview.png",
       "spritePath": "interiors/cottage/sprite-sheet.png",
+      "animationPath": "interiors/cottage/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -8994,6 +9282,7 @@
       "readmePath": "interiors/forest-cabin/README.md",
       "previewPath": "interiors/forest-cabin/preview.png",
       "spritePath": "interiors/forest-cabin/sprite-sheet.png",
+      "animationPath": "interiors/forest-cabin/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9023,6 +9312,7 @@
       "readmePath": "interiors/castle-hall/README.md",
       "previewPath": "interiors/castle-hall/preview.png",
       "spritePath": "interiors/castle-hall/sprite-sheet.png",
+      "animationPath": "interiors/castle-hall/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9052,6 +9342,7 @@
       "readmePath": "interiors/throne-room/README.md",
       "previewPath": "interiors/throne-room/preview.png",
       "spritePath": "interiors/throne-room/sprite-sheet.png",
+      "animationPath": "interiors/throne-room/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9081,6 +9372,7 @@
       "readmePath": "interiors/library/README.md",
       "previewPath": "interiors/library/preview.png",
       "spritePath": "interiors/library/sprite-sheet.png",
+      "animationPath": "interiors/library/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9110,6 +9402,7 @@
       "readmePath": "interiors/alchemy-lab/README.md",
       "previewPath": "interiors/alchemy-lab/preview.png",
       "spritePath": "interiors/alchemy-lab/sprite-sheet.png",
+      "animationPath": "interiors/alchemy-lab/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9139,6 +9432,7 @@
       "readmePath": "interiors/blacksmith/README.md",
       "previewPath": "interiors/blacksmith/preview.png",
       "spritePath": "interiors/blacksmith/sprite-sheet.png",
+      "animationPath": "interiors/blacksmith/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9168,6 +9462,7 @@
       "readmePath": "interiors/tavern/README.md",
       "previewPath": "interiors/tavern/preview.png",
       "spritePath": "interiors/tavern/sprite-sheet.png",
+      "animationPath": "interiors/tavern/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9197,6 +9492,7 @@
       "readmePath": "interiors/church/README.md",
       "previewPath": "interiors/church/preview.png",
       "spritePath": "interiors/church/sprite-sheet.png",
+      "animationPath": "interiors/church/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9226,6 +9522,7 @@
       "readmePath": "interiors/spacious-church/README.md",
       "previewPath": "interiors/spacious-church/preview.png",
       "spritePath": "interiors/spacious-church/sprite-sheet.png",
+      "animationPath": "interiors/spacious-church/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9255,6 +9552,7 @@
       "readmePath": "interiors/market/README.md",
       "previewPath": "interiors/market/preview.png",
       "spritePath": "interiors/market/sprite-sheet.png",
+      "animationPath": "interiors/market/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9284,6 +9582,7 @@
       "readmePath": "interiors/harbor/README.md",
       "previewPath": "interiors/harbor/preview.png",
       "spritePath": "interiors/harbor/sprite-sheet.png",
+      "animationPath": "interiors/harbor/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9313,6 +9612,7 @@
       "readmePath": "interiors/lighthouse/README.md",
       "previewPath": "interiors/lighthouse/preview.png",
       "spritePath": "interiors/lighthouse/sprite-sheet.png",
+      "animationPath": "interiors/lighthouse/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9342,6 +9642,7 @@
       "readmePath": "interiors/wizard-tower/README.md",
       "previewPath": "interiors/wizard-tower/preview.png",
       "spritePath": "interiors/wizard-tower/sprite-sheet.png",
+      "animationPath": "interiors/wizard-tower/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9371,6 +9672,7 @@
       "readmePath": "interiors/dungeon/README.md",
       "previewPath": "interiors/dungeon/preview.png",
       "spritePath": "interiors/dungeon/sprite-sheet.png",
+      "animationPath": "interiors/dungeon/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9400,6 +9702,7 @@
       "readmePath": "interiors/crypt/README.md",
       "previewPath": "interiors/crypt/preview.png",
       "spritePath": "interiors/crypt/sprite-sheet.png",
+      "animationPath": "interiors/crypt/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9429,6 +9732,7 @@
       "readmePath": "interiors/greenhouse/README.md",
       "previewPath": "interiors/greenhouse/preview.png",
       "spritePath": "interiors/greenhouse/sprite-sheet.png",
+      "animationPath": "interiors/greenhouse/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9458,6 +9762,7 @@
       "readmePath": "interiors/workshop/README.md",
       "previewPath": "interiors/workshop/preview.png",
       "spritePath": "interiors/workshop/sprite-sheet.png",
+      "animationPath": "interiors/workshop/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9487,6 +9792,7 @@
       "readmePath": "interiors/bedroom/README.md",
       "previewPath": "interiors/bedroom/preview.png",
       "spritePath": "interiors/bedroom/sprite-sheet.png",
+      "animationPath": "interiors/bedroom/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9516,6 +9822,7 @@
       "readmePath": "interiors/kitchen/README.md",
       "previewPath": "interiors/kitchen/preview.png",
       "spritePath": "interiors/kitchen/sprite-sheet.png",
+      "animationPath": "interiors/kitchen/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9545,6 +9852,7 @@
       "readmePath": "interiors/ballroom/README.md",
       "previewPath": "interiors/ballroom/preview.png",
       "spritePath": "interiors/ballroom/sprite-sheet.png",
+      "animationPath": "interiors/ballroom/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9574,6 +9882,7 @@
       "readmePath": "interiors/observatory/README.md",
       "previewPath": "interiors/observatory/preview.png",
       "spritePath": "interiors/observatory/sprite-sheet.png",
+      "animationPath": "interiors/observatory/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9602,6 +9911,7 @@
       "readmePath": "scene-effects/rain/README.md",
       "previewPath": "scene-effects/rain/preview.png",
       "spritePath": "scene-effects/rain/sprite-sheet.png",
+      "animationPath": "scene-effects/rain/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9630,6 +9940,7 @@
       "readmePath": "scene-effects/snow/README.md",
       "previewPath": "scene-effects/snow/preview.png",
       "spritePath": "scene-effects/snow/sprite-sheet.png",
+      "animationPath": "scene-effects/snow/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9658,6 +9969,7 @@
       "readmePath": "scene-effects/fog/README.md",
       "previewPath": "scene-effects/fog/preview.png",
       "spritePath": "scene-effects/fog/sprite-sheet.png",
+      "animationPath": "scene-effects/fog/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9686,6 +9998,7 @@
       "readmePath": "scene-effects/dust/README.md",
       "previewPath": "scene-effects/dust/preview.png",
       "spritePath": "scene-effects/dust/sprite-sheet.png",
+      "animationPath": "scene-effects/dust/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9714,6 +10027,7 @@
       "readmePath": "scene-effects/leaves/README.md",
       "previewPath": "scene-effects/leaves/preview.png",
       "spritePath": "scene-effects/leaves/sprite-sheet.png",
+      "animationPath": "scene-effects/leaves/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9742,6 +10056,7 @@
       "readmePath": "scene-effects/embers/README.md",
       "previewPath": "scene-effects/embers/preview.png",
       "spritePath": "scene-effects/embers/sprite-sheet.png",
+      "animationPath": "scene-effects/embers/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9770,6 +10085,7 @@
       "readmePath": "scene-effects/sparks/README.md",
       "previewPath": "scene-effects/sparks/preview.png",
       "spritePath": "scene-effects/sparks/sprite-sheet.png",
+      "animationPath": "scene-effects/sparks/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9798,6 +10114,7 @@
       "readmePath": "scene-effects/magic-ring/README.md",
       "previewPath": "scene-effects/magic-ring/preview.png",
       "spritePath": "scene-effects/magic-ring/sprite-sheet.png",
+      "animationPath": "scene-effects/magic-ring/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9826,6 +10143,7 @@
       "readmePath": "scene-effects/water-splash/README.md",
       "previewPath": "scene-effects/water-splash/preview.png",
       "spritePath": "scene-effects/water-splash/sprite-sheet.png",
+      "animationPath": "scene-effects/water-splash/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9854,6 +10172,7 @@
       "readmePath": "scene-effects/wave-reflection/README.md",
       "previewPath": "scene-effects/wave-reflection/preview.png",
       "spritePath": "scene-effects/wave-reflection/sprite-sheet.png",
+      "animationPath": "scene-effects/wave-reflection/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9882,6 +10201,7 @@
       "readmePath": "scene-effects/light-rays/README.md",
       "previewPath": "scene-effects/light-rays/preview.png",
       "spritePath": "scene-effects/light-rays/sprite-sheet.png",
+      "animationPath": "scene-effects/light-rays/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9910,6 +10230,7 @@
       "readmePath": "scene-effects/fire/README.md",
       "previewPath": "scene-effects/fire/preview.png",
       "spritePath": "scene-effects/fire/sprite-sheet.png",
+      "animationPath": "scene-effects/fire/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9938,6 +10259,7 @@
       "readmePath": "scene-effects/earthquake/README.md",
       "previewPath": "scene-effects/earthquake/preview.png",
       "spritePath": "scene-effects/earthquake/sprite-sheet.png",
+      "animationPath": "scene-effects/earthquake/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9966,6 +10288,7 @@
       "readmePath": "scene-effects/birds-flock/README.md",
       "previewPath": "scene-effects/birds-flock/preview.png",
       "spritePath": "scene-effects/birds-flock/sprite-sheet.png",
+      "animationPath": "scene-effects/birds-flock/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -9994,6 +10317,7 @@
       "readmePath": "scene-effects/bells/README.md",
       "previewPath": "scene-effects/bells/preview.png",
       "spritePath": "scene-effects/bells/sprite-sheet.png",
+      "animationPath": "scene-effects/bells/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -10022,6 +10346,7 @@
       "readmePath": "scene-effects/wind-lines/README.md",
       "previewPath": "scene-effects/wind-lines/preview.png",
       "spritePath": "scene-effects/wind-lines/sprite-sheet.png",
+      "animationPath": "scene-effects/wind-lines/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -10050,6 +10375,7 @@
       "readmePath": "scene-effects/footsteps/README.md",
       "previewPath": "scene-effects/footsteps/preview.png",
       "spritePath": "scene-effects/footsteps/sprite-sheet.png",
+      "animationPath": "scene-effects/footsteps/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -10078,6 +10404,7 @@
       "readmePath": "scene-effects/sword-slash/README.md",
       "previewPath": "scene-effects/sword-slash/preview.png",
       "spritePath": "scene-effects/sword-slash/sprite-sheet.png",
+      "animationPath": "scene-effects/sword-slash/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -10106,6 +10433,7 @@
       "readmePath": "scene-effects/healing/README.md",
       "previewPath": "scene-effects/healing/preview.png",
       "spritePath": "scene-effects/healing/sprite-sheet.png",
+      "animationPath": "scene-effects/healing/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -10134,6 +10462,7 @@
       "readmePath": "scene-effects/portal/README.md",
       "previewPath": "scene-effects/portal/preview.png",
       "spritePath": "scene-effects/portal/sprite-sheet.png",
+      "animationPath": "scene-effects/portal/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -10162,6 +10491,7 @@
       "readmePath": "instruments/lute/README.md",
       "previewPath": "instruments/lute/preview.png",
       "spritePath": "instruments/lute/sprite-sheet.png",
+      "animationPath": "instruments/lute/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -10190,6 +10520,7 @@
       "readmePath": "instruments/flute/README.md",
       "previewPath": "instruments/flute/preview.png",
       "spritePath": "instruments/flute/sprite-sheet.png",
+      "animationPath": "instruments/flute/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -10218,6 +10549,7 @@
       "readmePath": "instruments/drum/README.md",
       "previewPath": "instruments/drum/preview.png",
       "spritePath": "instruments/drum/sprite-sheet.png",
+      "animationPath": "instruments/drum/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -10246,6 +10578,7 @@
       "readmePath": "instruments/harp/README.md",
       "previewPath": "instruments/harp/preview.png",
       "spritePath": "instruments/harp/sprite-sheet.png",
+      "animationPath": "instruments/harp/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -10274,6 +10607,7 @@
       "readmePath": "instruments/horn/README.md",
       "previewPath": "instruments/horn/preview.png",
       "spritePath": "instruments/horn/sprite-sheet.png",
+      "animationPath": "instruments/horn/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -10302,6 +10636,7 @@
       "readmePath": "instruments/bell-tower/README.md",
       "previewPath": "instruments/bell-tower/preview.png",
       "spritePath": "instruments/bell-tower/sprite-sheet.png",
+      "animationPath": "instruments/bell-tower/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -10330,6 +10665,7 @@
       "readmePath": "instruments/ocarina/README.md",
       "previewPath": "instruments/ocarina/preview.png",
       "spritePath": "instruments/ocarina/sprite-sheet.png",
+      "animationPath": "instruments/ocarina/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -10358,6 +10694,7 @@
       "readmePath": "instruments/panpipes/README.md",
       "previewPath": "instruments/panpipes/preview.png",
       "spritePath": "instruments/panpipes/sprite-sheet.png",
+      "animationPath": "instruments/panpipes/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -10386,6 +10723,7 @@
       "readmePath": "instruments/maraca/README.md",
       "previewPath": "instruments/maraca/preview.png",
       "spritePath": "instruments/maraca/sprite-sheet.png",
+      "animationPath": "instruments/maraca/sprite-sheet.gif",
       "deterministic": true
     },
     {
@@ -10414,6 +10752,7 @@
       "readmePath": "instruments/music-box/README.md",
       "previewPath": "instruments/music-box/preview.png",
       "spritePath": "instruments/music-box/sprite-sheet.png",
+      "animationPath": "instruments/music-box/sprite-sheet.gif",
       "deterministic": true
     }
   ],

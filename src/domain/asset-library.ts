@@ -15,6 +15,7 @@ export interface AssetLibraryItem {
   readmePath: string;
   previewPath: string;
   spritePath: string;
+  animationPath?: string;
   deterministic: true;
 }
 
@@ -24,7 +25,7 @@ export interface AssetLibraryCatalog { schemaVersion: 1; libraryVersion: string;
 export interface AssetLibraryQuery { query?: string; category?: string; limit?: number; }
 export interface AssetLibrarySearchResult { query: AssetLibraryQuery; total: number; categories: AssetLibraryCategory[]; items: AssetLibraryItem[]; presets: AssetLibraryPreset[]; }
 export interface AssetLibraryPresetComposition { preset: AssetLibraryPreset; items: AssetLibraryItem[]; layers: Array<{ id: string; assetId: string; role: "background" | "midground" | "foreground" | "effect"; order: number }>; deterministic: true; }
-export interface AssetLibraryAuditResult { operation: "audit_asset_library"; libraryVersion: string; totalItems: number; totalCategories: number; totalPresets: number; totalFolders: number; readmePaths: number; previewPaths: number; spritePaths: number; valid: boolean; violations: string[]; deterministic: true; sourcePreserved: true; }
+export interface AssetLibraryAuditResult { operation: "audit_asset_library"; libraryVersion: string; totalItems: number; totalCategories: number; totalPresets: number; totalFolders: number; readmePaths: number; previewPaths: number; spritePaths: number; animationPaths: number; valid: boolean; violations: string[]; deterministic: true; sourcePreserved: true; }
 export interface AssetLibrarySummaryResult { operation: "summarize_asset_library"; libraryVersion: string; totalItems: number; totalCategories: number; totalPresets: number; categories: Array<{ id: string; title: string; itemCount: number; examples: string[] }>; presets: Array<{ id: string; title: string; category: string; itemCount: number }>; deterministic: true; sourcePreserved: true; }
 import type { AssetSceneLayer } from "./asset-scene.js";
 export interface AssetScenePlanResult { operation: "plan_asset_scene"; libraryVersion: string; itemIds: string[]; layers: AssetSceneLayer[]; deterministic: true; sourcePreserved: true; }

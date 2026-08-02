@@ -67,7 +67,7 @@ function readme(seed: Seed, folder: string): string {
   return [`# ${seed.title}`, "", seed.description, "", `- **ID:** ${inline(seed.id)}`, `- **Categoría:** ${inline(seed.category)}`, "- **Formatos base:** PNG, GIF animado, SVG y JSON", "- **Archivos:** [preview.png](./preview.png), [sprite-sheet.png](./sprite-sheet.png), [sprite-sheet.gif](./sprite-sheet.gif), [manifest.json](./manifest.json)", "- **Reproducible:** sí; el catálogo y los previews se generan con la semilla derivada del ID.", "", "## Variantes", "", variants, "", "## Ejemplo MCP", "", `Busca este asset con ${inline("get_asset_library")} y después compón una receta con ${inline("create_asset_recipe")}. Para una salida animada, usa ${inline("run_asset_recipe")} con ${inline("animation_pixel_art")} o aplica el efecto indicado por la variante.`, "", "## Carpeta", "", inline(folder), ""].join("\n");
 }
 
-async function writeItem(seed: Seed): Promise<{ id: string; title: string; category: string; folder: string; kind: Kind; description: string; tags: string[]; variants: string[]; formats: ["png", "gif", "svg", "json"]; readmePath: string; previewPath: string; spritePath: string; deterministic: true }> {
+async function writeItem(seed: Seed): Promise<{ id: string; title: string; category: string; folder: string; kind: Kind; description: string; tags: string[]; variants: string[]; formats: ["png", "gif", "svg", "json"]; readmePath: string; previewPath: string; spritePath: string; animationPath: string; deterministic: true }> {
   const folder = `${seed.category}/${seed.id}`;
   const directory = path.join(root, seed.category, seed.id);
   await fs.mkdir(directory, { recursive: true });
@@ -86,7 +86,7 @@ async function writeItem(seed: Seed): Promise<{ id: string; title: string; categ
   const manifest = { schemaVersion: 1, id: seed.id, title: seed.title, category: seed.category, kind: seed.kind, source: "deterministic-library-generator-v1", seed: hash(seed.id), variants: seed.variants, assets: ["preview.png", "sprite-sheet.png", "sprite-sheet.gif", "preview.svg", "sprite-sheet.svg"], tags: seed.tags, sourcePreserved: true, deterministic: true };
   await fs.writeFile(path.join(directory, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
   await fs.writeFile(path.join(directory, "README.md"), readme(seed, folder), "utf8");
-  return { id: seed.id, title: seed.title, category: seed.category, folder, kind: seed.kind, description: seed.description, tags: seed.tags, variants: seed.variants, formats: ["png", "gif", "svg", "json"], readmePath: `${folder}/README.md`, previewPath: `${folder}/preview.png`, spritePath: `${folder}/sprite-sheet.png`, deterministic: true };
+  return { id: seed.id, title: seed.title, category: seed.category, folder, kind: seed.kind, description: seed.description, tags: seed.tags, variants: seed.variants, formats: ["png", "gif", "svg", "json"], readmePath: `${folder}/README.md`, previewPath: `${folder}/preview.png`, spritePath: `${folder}/sprite-sheet.png`, animationPath: `${folder}/sprite-sheet.gif`, deterministic: true };
 }
 
 async function main(): Promise<void> {

@@ -26,9 +26,11 @@ export class AssetLibraryAuditService {
         if (unsafeRelative(item.readmePath)) violations.push(`unsafe readme path: ${item.id}`);
         if (unsafeRelative(item.previewPath)) violations.push(`unsafe preview path: ${item.id}`);
         if (unsafeRelative(item.spritePath)) violations.push(`unsafe sprite path: ${item.id}`);
+        if (item.animationPath && unsafeRelative(item.animationPath)) violations.push(`unsafe animation path: ${item.id}`);
+        if (item.formats.includes("gif") && !item.animationPath) violations.push(`missing animation path: ${item.id}`);
       }
       for (const preset of catalog.presets) for (const itemId of preset.itemIds) if (!itemIds.has(itemId)) violations.push(`missing preset item: ${preset.id} -> ${itemId}`);
-      const payload: AssetLibraryAuditResult = { operation: "audit_asset_library", libraryVersion: catalog.libraryVersion, totalItems: catalog.items.length, totalCategories: catalog.categories.length, totalPresets: catalog.presets.length, totalFolders: new Set(catalog.items.map((item) => item.folder)).size, readmePaths: catalog.items.filter((item) => Boolean(item.readmePath)).length, previewPaths: catalog.items.filter((item) => Boolean(item.previewPath)).length, spritePaths: catalog.items.filter((item) => Boolean(item.spritePath)).length, valid: violations.length === 0, violations: violations.slice(0, 100), deterministic: true, sourcePreserved: true };
+      const payload: AssetLibraryAuditResult = { operation: "audit_asset_library", libraryVersion: catalog.libraryVersion, totalItems: catalog.items.length, totalCategories: catalog.categories.length, totalPresets: catalog.presets.length, totalFolders: new Set(catalog.items.map((item) => item.folder)).size, readmePaths: catalog.items.filter((item) => Boolean(item.readmePath)).length, previewPaths: catalog.items.filter((item) => Boolean(item.previewPath)).length, spritePaths: catalog.items.filter((item) => Boolean(item.spritePath)).length, animationPaths: catalog.items.filter((item) => Boolean(item.animationPath)).length, valid: violations.length === 0, violations: violations.slice(0, 100), deterministic: true, sourcePreserved: true };
       return { ok: true, message: JSON.stringify(payload) };
     } catch (error) { return fail(error); }
   }
