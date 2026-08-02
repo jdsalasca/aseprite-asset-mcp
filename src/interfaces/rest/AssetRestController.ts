@@ -8,6 +8,7 @@ const recipeSchema = z.object({ asset_id: z.string().min(1), input_filename: z.s
 const materialSchema = z.object({ input_filename: z.string().min(1), output_filename: z.string().min(1), material: z.enum(["water", "earth", "grass", "stone", "snow"]), seed: z.number().int(), intensity: z.number().min(0).max(1).default(0.6), format: z.enum(["png", "gif"]).optional() });
 const lightingSchema = z.object({ input_filename: z.string().min(1), output_filename: z.string().min(1), direction: z.enum(["north", "south", "east", "west", "north_east", "north_west", "south_east", "south_west"]), strength: z.number().min(0).max(1).default(0.7), ambient: z.number().min(0).max(1).default(0.35), format: z.enum(["png", "gif"]).optional() });
 const MAX_BODY_BYTES = 1024 * 1024;
+const rainSchema = z.object({ input_filename: z.string().min(1), output_filename: z.string().min(1), seed: z.number().int(), intensity: z.number().min(0).max(1).default(0.55), wind: z.number().min(-1).max(1).default(0), color, delay_ms: z.number().int().positive().default(90), format: z.enum(["png", "gif"]).optional() });
 
 export class AssetRestController {
   public constructor(private readonly useCases: AssetRestUseCases, private readonly version = "1.0.0") {}
@@ -32,6 +33,7 @@ export class AssetRestController {
       if (url.pathname === "/api/v1/effects/shadow") return this.operation(response, await this.useCases.spriteEffects.generateSpriteShadow(this.parseShadow(body)), origin);
       if (url.pathname === "/api/v1/effects/particles") return this.operation(response, await this.useCases.spriteEffects.generateParticleBurst(this.parseParticles(body)), origin);
       if (url.pathname === "/api/v1/effects/normal-map") return this.operation(response, await this.useCases.spriteEffects.generateNormalMap(this.parseNormalMap(body)), origin);
+      if (url.pathname === "/api/v1/effects/rain") { const value = rainSchema.parse(body); return this.operation(response, await this.useCases.spriteEffects.generateRainOverlay({ inputFilename: value.input_filename, outputFilename: value.output_filename, seed: value.seed, intensity: value.intensity, wind: value.wind, color: value.color, delayMs: value.delay_ms, ...(value.format ? { format: value.format } : {}) }), origin); }
       return this.send(response, 404, { error: "Ruta no encontrada" }, origin);
     } catch (error) { const message = error instanceof Error ? error.message : String(error); return this.send(response, message.startsWith("Request body exceeds") ? 413 : 400, { error: message }, origin); }
   }

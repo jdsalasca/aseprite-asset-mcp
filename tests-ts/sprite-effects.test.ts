@@ -41,3 +41,19 @@ test("normal map encodes alpha depth and keeps transparent pixels empty", async 
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-normal-")); const input = path.join(directory, "input.png"); const output = path.join(directory, "normal.png"); await makeSprite(input);
   const result = await service().generateNormalMap({ inputFilename: input, outputFilename: output, strength: 3 }); assert.equal(result.ok, true); const data = await sharp(output).raw().toBuffer({ resolveWithObject: true }); assert.deepEqual([...data.data.slice(0, 4)], [128, 128, 255, 0]); assert.equal(data.data[(1 * 4 + 1) * 4 + 3], 255);
 });
+
+test("rain overlay is seeded, preserves dimensions, and exports an animation when requested", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-rain-")); const input = path.join(directory, "input.png"); const first = path.join(directory, "first.gif"); const second = path.join(directory, "second.gif"); await makeSprite(input);
+  const rain = { inputFilename: input, outputFilename: first, seed: 17, intensity: 0.8, wind: 0.25, color: "#b7d7ff", delayMs: 90, format: "gif" as const };
+  assert.equal((await service().generateRainOverlay(rain)).ok, true);
+  assert.equal((await service().generateRainOverlay({ ...rain, outputFilename: second })).ok, true);
+  assert.deepEqual(await fs.readFile(first), await fs.readFile(second));
+  const metadata = await sharp(first, { animated: true }).metadata();
+  assert.equal(metadata.width, 4); assert.equal(metadata.height, 4); assert.equal(metadata.pages, 1);
+});
+
+test("rain overlay rejects invalid intensity and wind values", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-rain-invalid-")); const input = path.join(directory, "input.png"); await makeSprite(input);
+  const result = await service().generateRainOverlay({ inputFilename: input, outputFilename: path.join(directory, "out.png"), seed: 1, intensity: 1.5, wind: 0, color: "#ffffff" });
+  assert.equal(result.ok, false);
+});

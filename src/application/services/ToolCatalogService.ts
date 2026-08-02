@@ -34,6 +34,7 @@ const DESCRIPTION_OVERRIDES: Record<string, string> = {
   generate_sprite_shadow: "Generate a deterministic clipped shadow from sprite alpha.",
   generate_particle_burst: "Generate a deterministic animated particle burst GIF.",
   generate_normal_map: "Generate a deterministic normal map from sprite alpha depth.",
+  generate_rain_overlay: "Generate a seeded rain overlay while preserving sprite dimensions and timing.",
   create_asset_recipe: "Compose a deterministic multi-effect asset recipe without executing it.",
   execute_asset_recipe: "Execute a composed recipe through shared visual services and return every step.",
   get_asset_library: "Search 339 deterministic prebuilt assets and scene presets.",
@@ -47,7 +48,7 @@ function folderFor(name: string): string {
   if (name === "create_style_bible") return "asset/style";
   if (name.includes("material_texture")) return "asset/material";
   if (name.includes("depth_lighting")) return "asset/lighting";
-  if (name.includes("color_grade") || name.includes("outline") || name.includes("shadow") || name.includes("normal_map")) return "asset/effects";
+  if (name.includes("color_grade") || name.includes("outline") || name.includes("shadow") || name.includes("normal_map") || name.includes("rain")) return "asset/effects";
   if (name.includes("particle")) return "asset/particles";
   if (name === "create_asset_recipe" || name === "execute_asset_recipe") return "asset/recipes";
   if (name === "inspect_reference" || name === "run_asset_quality_gate") return "asset/quality";

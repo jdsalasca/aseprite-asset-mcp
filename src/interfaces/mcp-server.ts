@@ -192,6 +192,7 @@ const TOOL_NAMES = [
   "generate_sprite_shadow",
   "generate_particle_burst",
   "generate_normal_map",
+  "generate_rain_overlay",
   "create_asset_recipe",
   "execute_asset_recipe",
   "get_asset_library",

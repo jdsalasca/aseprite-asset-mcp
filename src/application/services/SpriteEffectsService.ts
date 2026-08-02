@@ -1,7 +1,7 @@
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { RasterCodec } from "../../domain/image-assets.js";
 import type { RasterFrame } from "../../domain/pixel-art.js";
-import type { ColorGradeInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteShadowInput } from "../../domain/sprite-effects.js";
+import type { ColorGradeInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteShadowInput } from "../../domain/sprite-effects.js";
 
 function ok(value: unknown): AssetOperationResult { return { ok: true, message: JSON.stringify(value) }; }
 function fail(error: unknown): AssetOperationResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
@@ -55,6 +55,40 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
   public async generateNormalMap(input: NormalMapInput): Promise<AssetOperationResult> {
     try {
       assertDifferent(input.inputFilename, input.outputFilename); const strength = input.strength ?? 2; if (!Number.isFinite(strength) || strength < 0 || strength > 8) throw new Error("Normal map strength must be between 0 and 8"); const source = await this.codec.decode(input.inputFilename); const frames = source.map((frame) => { const pixels = new Uint8ClampedArray(frame.pixels); const heightAt = (x: number, y: number) => alphaAt(frame, x, y) / 255; for (let y = 0; y < frame.height; y += 1) for (let x = 0; x < frame.width; x += 1) { const offset = (y * frame.width + x) * 4; if ((frame.pixels[offset + 3] ?? 0) === 0) { pixels.set([128, 128, 255, 0], offset); continue; } const dx = (heightAt(x + 1, y) - heightAt(x - 1, y)) * strength; const dy = (heightAt(x, y + 1) - heightAt(x, y - 1)) * strength; pixels.set([Math.round(clamp(128 - dx * 127, 0, 255)), Math.round(clamp(128 - dy * 127, 0, 255)), Math.round(clamp(255 - (Math.abs(dx) + Math.abs(dy)) * 35, 0, 255)), frame.pixels[offset + 3] ?? 0], offset); } return { ...frame, pixels }; }); const format = formatFor(frames, input.format); await this.codec.encode(frames, input.outputFilename, format); return outputMessage("generate_normal_map", input.inputFilename, input.outputFilename, frames.length, format);
+    } catch (error) { return fail(error); }
+  }
+
+  public async generateRainOverlay(input: RainOverlayInput): Promise<AssetOperationResult> {
+    try {
+      assertDifferent(input.inputFilename, input.outputFilename);
+      const color = rgba(input.color);
+      const intensity = input.intensity ?? 0.55;
+      const wind = input.wind ?? 0;
+      if (!Number.isFinite(input.seed) || !Number.isInteger(input.seed)) throw new Error("Rain seed must be an integer");
+      if (!Number.isFinite(intensity) || intensity < 0 || intensity > 1) throw new Error("Rain intensity must be between 0 and 1");
+      if (!Number.isFinite(wind) || wind < -1 || wind > 1) throw new Error("Rain wind must be between -1 and 1");
+      const source = await this.codec.decode(input.inputFilename);
+      const frames = source.map((frame, frameIndex) => {
+        const pixels = new Uint8ClampedArray(frame.pixels);
+        const drops = Math.max(1, Math.round(frame.width * frame.height * 0.08 * intensity));
+        const length = Math.max(2, Math.round(Math.min(frame.width, frame.height) * (0.16 + intensity * 0.2)));
+        for (let drop = 0; drop < drops; drop += 1) {
+          const base = hash(input.seed + frameIndex * 97, drop);
+          const startX = Math.floor(base * frame.width);
+          const startY = Math.floor(hash(input.seed + 193, drop) * frame.height);
+          const drift = Math.round(wind * length);
+          const alpha = Math.round(color[3] * (0.35 + hash(input.seed + 389, drop) * 0.65));
+          for (let segment = 0; segment < length; segment += 1) {
+            const x = startX + Math.round((drift * segment) / Math.max(1, length - 1));
+            const y = startY + segment;
+            setPixel(pixels, frame.width, frame.height, x, y, [color[0], color[1], color[2], alpha]);
+          }
+        }
+        return { ...frame, pixels, delayMs: input.delayMs ?? frame.delayMs ?? 90 };
+      });
+      const format = formatFor(frames, input.format);
+      await this.codec.encode(frames, input.outputFilename, format);
+      return outputMessage("generate_rain_overlay", input.inputFilename, input.outputFilename, frames.length, format);
     } catch (error) { return fail(error); }
   }
 }

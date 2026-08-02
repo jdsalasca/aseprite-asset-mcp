@@ -11,7 +11,7 @@ PowerShell:
 
 Health: GET http://127.0.0.1:3766/api/v1/health
 
-Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lighting y /api/v1/effects/outline, /api/v1/effects/color-grade, /api/v1/effects/shadow, /api/v1/effects/particles, /api/v1/effects/normal-map.
+Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lighting y /api/v1/effects/outline, /api/v1/effects/color-grade, /api/v1/effects/shadow, /api/v1/effects/particles, /api/v1/effects/normal-map, /api/v1/effects/rain.
 
 El sidecar solo escucha en 127.0.0.1, acepta CORS de localhost y 127.0.0.1, y rechaza orígenes externos. La UX asset-studio usa normalmente su gateway en 127.0.0.1:3765, que controla el proceso MCP por stdio y centraliza logs, diagnóstico y fallos.
 
@@ -243,7 +243,7 @@ Estas operaciones retornan metadata compacta y escriben un archivo nuevo. Todas 
 }
 ```
 
-También están disponibles `apply_color_grade`, `generate_sprite_shadow` y `generate_normal_map`.
+También están disponibles `apply_color_grade`, `generate_sprite_shadow`, `generate_normal_map` y `generate_rain_overlay`. La lluvia recibe `seed`, `intensity` y `wind`, conserva dimensiones y tiempos de frame, y puede exportar PNG o GIF de forma determinista.
 
 ## 10. Crear una receta compuesta
 
