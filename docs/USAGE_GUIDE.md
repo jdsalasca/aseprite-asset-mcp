@@ -11,7 +11,7 @@ PowerShell:
 
 Health: GET http://127.0.0.1:3766/api/v1/health
 
-Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lighting y /api/v1/effects/outline, /api/v1/effects/color-grade, /api/v1/effects/shadow, /api/v1/effects/particles, /api/v1/effects/normal-map, /api/v1/effects/rain, /api/v1/effects/motion, /api/v1/effects/upscale, /api/v1/effects/seamless, /api/v1/effects/water-reflection, /api/v1/effects/water-caustics y /api/v1/scenes/extend.
+Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lighting y /api/v1/effects/outline, /api/v1/effects/color-grade, /api/v1/effects/shadow, /api/v1/effects/particles, /api/v1/effects/normal-map, /api/v1/effects/rain, /api/v1/effects/motion, /api/v1/effects/upscale, /api/v1/effects/seamless, /api/v1/effects/water-reflection, /api/v1/effects/water-caustics, /api/v1/effects/day-night y /api/v1/scenes/extend.
 
 `/api/v1/effects/upscale` recibe `{ "input_filename": "hero.png", "output_filename": "hero-3x.png", "scale": 3 }`. Usa nearest-neighbor determinista, conserva transparencia y delays cuando la entrada es animada, rechaza sobrescribir la fuente y limita cada dimensión resultante a 4096 px.
 
@@ -22,6 +22,8 @@ Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lightin
 `/api/v1/effects/water-reflection` recibe `{ "input_filename": "ocean.png", "output_filename": "ocean-reflection.gif", "waterline": 32, "frames": 8, "seed": 7, "amplitude": 2, "opacity": 0.6 }`. Conserva el original, refleja los píxeles sobre la línea de agua, aplica desplazamiento de oleaje y añade un destello determinista por frame.
 
 `/api/v1/effects/water-caustics` recibe `{ "input_filename": "pool.png", "output_filename": "pool-caustics.gif", "frames": 8, "seed": 7, "intensity": 0.8, "scale": 4, "color": "#DFF6FF" }`. Modula solo píxeles opacos, conserva la transparencia y crea una animación de luz refractada reproducible.
+
+`/api/v1/effects/day-night` recibe `{ "input_filename": "village.png", "output_filename": "village-day-night.gif", "frames": 8, "seed": 23, "intensity": 0.8 }`. Interpola luz de día, atardecer, noche y amanecer con una semilla reproducible; conserva alpha, dimensiones, delays y la fuente.
 
 El sidecar solo escucha en 127.0.0.1, acepta CORS de localhost y 127.0.0.1, y rechaza orígenes externos. La UX asset-studio usa normalmente su gateway en 127.0.0.1:3765, que controla el proceso MCP por stdio y centraliza logs, diagnóstico y fallos.
 

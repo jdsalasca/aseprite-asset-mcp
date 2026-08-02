@@ -153,3 +153,29 @@ test("water caustics rejects invalid color, intensity, scale, and frame values",
   const result = await service().generateWaterCaustics({ inputFilename: input, outputFilename: path.join(directory, "out.gif"), frames: 1, seed: 1, intensity: 2, scale: 0, color: "nope" });
   assert.equal(result.ok, false);
 });
+
+test("day night cycle creates deterministic stages, preserves transparency, and keeps the source", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-day-night-"));
+  const input = path.join(directory, "input.png"); const first = path.join(directory, "first.gif"); const second = path.join(directory, "second.gif");
+  const pixels = new Uint8ClampedArray(8 * 8 * 4);
+  for (let y = 0; y < 8; y += 1) for (let x = 0; x < 8; x += 1) { const offset = (y * 8 + x) * 4; pixels[offset] = 170; pixels[offset + 1] = 120; pixels[offset + 2] = 70; pixels[offset + 3] = x === 0 || y === 0 ? 0 : 255; }
+  await sharp(Buffer.from(pixels), { raw: { width: 8, height: 8, channels: 4 } }).png().toFile(input);
+  const sourceBefore = await fs.readFile(input);
+  const cycle = { inputFilename: input, outputFilename: first, frames: 8, seed: 23, intensity: 0.8, delayMs: 75 };
+  assert.equal((await service().generateDayNightCycle(cycle)).ok, true);
+  assert.equal((await service().generateDayNightCycle({ ...cycle, outputFilename: second })).ok, true);
+  assert.deepEqual(await fs.readFile(first), await fs.readFile(second));
+  assert.deepEqual(await fs.readFile(input), sourceBefore);
+  const metadata = await sharp(first, { animated: true }).metadata();
+  assert.equal(metadata.pages, 8); assert.equal(metadata.width, 8); assert.equal(metadata.pageHeight, 8);
+  const output = await sharp(first).raw().toBuffer({ resolveWithObject: true });
+  assert.equal(output.data[3], 0); assert.equal(output.data[7], 0); assert.notDeepEqual([...output.data.slice(4, 7)], [170, 120, 70]);
+  const message = JSON.parse((await service().generateDayNightCycle(cycle)).message) as { operation: string; stages: string[] };
+  assert.equal(message.operation, "generate_day_night_cycle"); assert.deepEqual(message.stages, ["day", "sunset", "night", "sunrise"]);
+});
+
+test("day night cycle rejects invalid frame, intensity, and seed values", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-day-night-invalid-")); const input = path.join(directory, "input.png"); await makeSprite(input);
+  const result = await service().generateDayNightCycle({ inputFilename: input, outputFilename: path.join(directory, "out.gif"), frames: 3, seed: 1.5, intensity: 2 });
+  assert.equal(result.ok, false);
+});

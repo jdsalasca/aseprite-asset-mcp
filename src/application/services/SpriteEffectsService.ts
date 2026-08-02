@@ -1,7 +1,7 @@
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { RasterCodec } from "../../domain/image-assets.js";
 import type { RasterFrame } from "../../domain/pixel-art.js";
-import type { ColorGradeInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, SeamlessTextureInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteShadowInput, WaterCausticsInput, WaterReflectionInput } from "../../domain/sprite-effects.js";
+import type { ColorGradeInput, DayNightCycleInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, SeamlessTextureInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteShadowInput, WaterCausticsInput, WaterReflectionInput } from "../../domain/sprite-effects.js";
 
 function ok(value: unknown): AssetOperationResult { return { ok: true, message: JSON.stringify(value) }; }
 function fail(error: unknown): AssetOperationResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
@@ -32,6 +32,8 @@ function overlayPixel(pixels: Uint8ClampedArray, width: number, height: number, 
 }
 function outputMessage(operation: string, input: string | null, output: string, frames: number, format: SpriteEffectFormat): AssetOperationResult { return ok({ operation, ...(input ? { input } : {}), output, frames, format, deterministic: true, sourcePreserved: true }); }
 function averagePixel(left: Uint8ClampedArray, right: Uint8ClampedArray, leftOffset: number, rightOffset: number): [number, number, number, number] { return [Math.round(((left[leftOffset] ?? 0) + (right[rightOffset] ?? 0)) / 2), Math.round(((left[leftOffset + 1] ?? 0) + (right[rightOffset + 1] ?? 0)) / 2), Math.round(((left[leftOffset + 2] ?? 0) + (right[rightOffset + 2] ?? 0)) / 2), Math.round(((left[leftOffset + 3] ?? 0) + (right[rightOffset + 3] ?? 0)) / 2)]; }
+function interpolateChannel(left: number, right: number, progress: number): number { return Math.round(left + (right - left) * progress); }
+function interpolateRgb(left: [number, number, number], right: [number, number, number], progress: number): [number, number, number] { return [interpolateChannel(left[0], right[0], progress), interpolateChannel(left[1], right[1], progress), interpolateChannel(left[2], right[2], progress)]; }
 
 export class SpriteEffectsService implements SpriteEffectsGateway {
   public constructor(private readonly codec: RasterCodec) {}
@@ -264,6 +266,48 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
       const format = formatFor(frames, input.format);
       await this.codec.encode(frames, input.outputFilename, format);
       return outputMessage("generate_water_caustics", input.inputFilename, input.outputFilename, frames.length, format);
+    } catch (error) { return fail(error); }
+  }
+
+  public async generateDayNightCycle(input: DayNightCycleInput): Promise<AssetOperationResult> {
+    try {
+      assertDifferent(input.inputFilename, input.outputFilename);
+      const source = await this.codec.decode(input.inputFilename);
+      const firstFrame = source[0];
+      if (!firstFrame) throw new Error("Day-night cycle requires at least one source frame");
+      if (!Number.isInteger(input.frames) || input.frames < 4 || input.frames > 24) throw new Error("Day-night frames must be an integer from 4 to 24");
+      const intensity = input.intensity ?? 0.8;
+      if (!Number.isFinite(intensity) || intensity < 0 || intensity > 1) throw new Error("Day-night intensity must be between 0 and 1");
+      if (!Number.isInteger(input.seed)) throw new Error("Day-night seed must be an integer");
+      if (input.delayMs !== undefined && (!Number.isInteger(input.delayMs) || input.delayMs <= 0)) throw new Error("Day-night delay must be a positive integer");
+      const anchors: Array<{ color: [number, number, number]; strength: number }> = [
+        { color: [255, 255, 245], strength: 0.05 },
+        { color: [255, 155, 82], strength: 0.24 },
+        { color: [64, 82, 160], strength: 0.42 },
+        { color: [255, 190, 116], strength: 0.22 },
+      ];
+      const stages = ["day", "sunset", "night", "sunrise"] as const;
+      const frames = Array.from({ length: input.frames }, (_, frameIndex) => {
+        const sourceFrame = source[frameIndex % source.length] ?? firstFrame;
+        const pixels = new Uint8ClampedArray(sourceFrame.pixels);
+        const cyclePosition = (frameIndex / input.frames) * anchors.length;
+        const leftIndex = Math.floor(cyclePosition) % anchors.length;
+        const rightIndex = (leftIndex + 1) % anchors.length;
+        const progress = cyclePosition - Math.floor(cyclePosition);
+        const tint = interpolateRgb(anchors[leftIndex]!.color, anchors[rightIndex]!.color, progress);
+        const tintStrength = anchors[leftIndex]!.strength + (anchors[rightIndex]!.strength - anchors[leftIndex]!.strength) * progress;
+        for (let y = 0; y < sourceFrame.height; y += 1) for (let x = 0; x < sourceFrame.width; x += 1) {
+          const offset = (y * sourceFrame.width + x) * 4;
+          if ((sourceFrame.pixels[offset + 3] ?? 0) === 0) continue;
+          const variation = (hash(input.seed + frameIndex * 97, x + y * sourceFrame.width) - 0.5) * 0.06;
+          const mix = clamp(intensity * (tintStrength + variation), 0, 0.8);
+          for (let channel = 0; channel < 3; channel += 1) pixels[offset + channel] = Math.round((sourceFrame.pixels[offset + channel] ?? 0) * (1 - mix) + tint[channel]! * mix);
+        }
+        return { ...sourceFrame, pixels, delayMs: input.delayMs ?? sourceFrame.delayMs ?? 90 };
+      });
+      const format = formatFor(frames, input.format);
+      await this.codec.encode(frames, input.outputFilename, format);
+      return ok({ operation: "generate_day_night_cycle", input: input.inputFilename, output: input.outputFilename, frames: frames.length, format, stages, deterministic: true, sourcePreserved: true });
     } catch (error) { return fail(error); }
   }
 }

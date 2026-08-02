@@ -199,6 +199,7 @@ const TOOL_NAMES = [
   "generate_seamless_texture",
   "generate_water_reflection",
   "generate_water_caustics",
+  "generate_day_night_cycle",
   "create_asset_recipe",
   "execute_asset_recipe",
   "get_asset_library",
