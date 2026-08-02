@@ -27,6 +27,16 @@ test("Sharp codec decodes PNG and encodes GIF with frame delays", async () => {
   assert.deepEqual(metadata.delay, [80, 120]);
 });
 
+test("Sharp codec decodes an in-memory preview buffer without touching disk", async () => {
+  const codec = new SharpRasterCodec();
+  const encoded = await sharp(Buffer.from([12, 34, 56, 255, 200, 100, 20, 255]), { raw: { width: 2, height: 1, channels: 4 } }).png().toBuffer();
+  const frames = await codec.decodeBuffer(encoded);
+  assert.equal(frames.length, 1);
+  assert.equal(frames[0]?.width, 2);
+  assert.equal(frames[0]?.height, 1);
+  assert.deepEqual([...frames[0]!.pixels], [12, 34, 56, 255, 200, 100, 20, 255]);
+});
+
 test("asset service converts, inspects, validates, and packs without shelling out", async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "aseprite-asset-service-test-"));
   const inputA = path.join(directory, "a.png");
