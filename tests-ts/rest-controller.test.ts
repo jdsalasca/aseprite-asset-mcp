@@ -33,6 +33,7 @@ function fakeUseCases(): AssetRestUseCases {
     assetSceneAnimationComposer: { compose: async () => result("compose_asset_scene_animation") },
     assetLibraryVariantPack: { generate: async () => result("generate_library_variant_pack") },
     assetManifestAudit: { audit: async () => result("audit_asset_manifest") },
+    assetSceneRecommendation: { recommend: async () => result("recommend_asset_scene") },
     imageAssets: { upscalePixelArt: async () => result("upscale_pixel_art"), qualityBundle: async () => result("inspect_asset_bundle"), harmonizePalette: async () => result("harmonize_asset_palette") },
     batchQuality: { inspect: async () => result("inspect_asset_batch") },
     animationQuality: { inspect: async () => result("inspect_animation_quality") },
@@ -77,6 +78,9 @@ test("REST controller exposes the same recipe and effect application services", 
     const manifestAudit = await fetch(`${rest.url}/api/v1/assets/manifest-audit`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ manifest_filename: "scene.json" }) });
     assert.equal(manifestAudit.status, 200);
     assert.equal((await manifestAudit.json()).data.operation, "audit_asset_manifest");
+    const recommendations = await fetch(`${rest.url}/api/v1/library/recommendations`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ prompt: "tropical water", required_variants: ["water_reflection"], limit: 4, seed: 7 }) });
+    assert.equal(recommendations.status, 200);
+    assert.equal((await recommendations.json()).data.operation, "recommend_asset_scene");
     const scenePlan = await fetch(`${rest.url}/api/v1/library/scene-plan`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ item_ids: ["oak"] }) });
     assert.equal(scenePlan.status, 200);
     assert.equal((await scenePlan.json()).data.operation, "plan_asset_scene");

@@ -29,6 +29,7 @@ const DESCRIPTION_OVERRIDES: Record<string, string> = {
   audit_asset_library: "Audit library ids, references, categories, and asset paths.",
   summarize_asset_library: "Return compact library categories and preset navigation metadata.",
   audit_asset_manifest: "Audit generated manifest artifact paths, sizes, formats, and hashes.",
+  recommend_asset_scene: "Recommend explainable library assets for a deterministic scene composition.",
   plan_asset_scene: "Plan ordered scene layers from selected library assets.",
   compose_asset_scene: "Compose selected library previews into a deterministic scene PNG and manifest.",
   compose_asset_scene_animation: "Compose selected animated library previews into a deterministic scene GIF and frame manifest.",
@@ -77,6 +78,7 @@ function folderFor(name: string): string {
   if (name === "audit_asset_library") return "meta/asset-library";
   if (name === "summarize_asset_library") return "meta/asset-library";
   if (name === "audit_asset_manifest") return "meta/assets";
+  if (name === "recommend_asset_scene") return "library/recommendations";
   if (name === "plan_asset_scene") return "scene/composition";
   if (name === "compose_asset_scene") return "scene/composition";
   if (name === "compose_asset_scene_animation") return "scene/composition";

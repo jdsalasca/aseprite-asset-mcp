@@ -27,6 +27,8 @@ Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lightin
 
 `POST /api/v1/assets/manifest-audit` y el tool `audit_asset_manifest` reciben `{ "manifest_filename": "output/scene.json" }`. Inspeccionan las rutas de salida referenciadas por el JSON y devuelven tamaño, formato, SHA-256, `missingArtifacts`, `emptyArtifacts` y `valid`, para que la UX pueda bloquear una importación incompleta.
 
+`POST /api/v1/library/recommendations` y el tool `recommend_asset_scene` permiten pedir una composición con `{ "prompt": "coastal sunset water", "required_tags": ["tropical"], "required_variants": ["water_reflection", "day_night"], "limit": 8, "seed": 7 }`. El ranking es explicable y reproducible; usa la misma biblioteca que `plan_asset_scene`, sin duplicar lógica en la UX.
+
 `/api/v1/library/summary` y el tool `summarize_asset_library` devuelven solamente conteos, categorías ordenadas, hasta tres ejemplos por categoría y presets compactos. Es la primera llamada recomendada para que un agente o la UX navegue una biblioteca grande sin consumir el catálogo completo.
 
 `POST /api/v1/library/scene-plan` recibe `{ "item_ids": ["knight", "oak", "rain"] }` y usa el mismo servicio del tool `plan_asset_scene`. Resuelve IDs sin distinguir mayúsculas, conserva el orden solicitado, asigna roles de capa y falla cerrado ante IDs duplicados, traversal o assets inexistentes.
