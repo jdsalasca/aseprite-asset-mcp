@@ -1,0 +1,44 @@
+import type { IncomingMessage, ServerResponse } from "node:http";
+import * as z from "zod/v4";
+import type { AssetRecipeCreateInput } from "../../domain/asset-recipe.js";
+import type { AssetRestUseCases } from "../../application/ports/AssetRestPorts.js";
+
+const color = z.string().regex(/^#?(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/);
+const recipeSchema = z.object({ asset_id: z.string().min(1), input_filename: z.string().min(1), output_prefix: z.string().min(1), format: z.enum(["png", "gif"]).default("png"), steps: z.array(z.enum(["outline", "color_grade", "material_texture", "depth_lighting", "shadow", "particles", "normal_map", "quality_gate"])).min(1).max(8), seed: z.number().int().default(1), material: z.enum(["water", "earth", "grass", "stone", "snow"]).default("earth"), direction: z.enum(["north", "south", "east", "west", "north_east", "north_west", "south_east", "south_west"]).default("south_east") });
+const materialSchema = z.object({ input_filename: z.string().min(1), output_filename: z.string().min(1), material: z.enum(["water", "earth", "grass", "stone", "snow"]), seed: z.number().int(), intensity: z.number().min(0).max(1).default(0.6), format: z.enum(["png", "gif"]).optional() });
+const lightingSchema = z.object({ input_filename: z.string().min(1), output_filename: z.string().min(1), direction: z.enum(["north", "south", "east", "west", "north_east", "north_west", "south_east", "south_west"]), strength: z.number().min(0).max(1).default(0.7), ambient: z.number().min(0).max(1).default(0.35), format: z.enum(["png", "gif"]).optional() });
+
+export class AssetRestController {
+  public constructor(private readonly useCases: AssetRestUseCases, private readonly version = "1.0.0") {}
+
+  public async handle(request: IncomingMessage, response: ServerResponse): Promise<void> {
+    const origin = request.headers.origin;
+    try {
+      const url = new URL(request.url ?? "/", "http://" + (request.headers.host ?? "127.0.0.1"));
+      if (request.method === "OPTIONS") return this.send(response, 204, {}, origin);
+      if (request.method === "GET" && url.pathname === "/api/v1/health") return this.send(response, 200, { data: { ok: true, service: "aseprite-asset-mcp-rest", version: this.version, architecture: "hexagonal" } }, origin);
+      if (request.method !== "POST") return this.send(response, 404, { error: "Ruta no encontrada" }, origin);
+      const body = await this.readBody(request);
+      if (url.pathname === "/api/v1/recipes") return this.send(response, 200, { data: this.useCases.createRecipe(this.toRecipeInput(recipeSchema.parse(body))) }, origin);
+      if (url.pathname === "/api/v1/material-texture") { const value = materialSchema.parse(body); return this.operation(response, await this.useCases.applyMaterialTexture({ inputFilename: value.input_filename, outputFilename: value.output_filename, material: value.material, seed: value.seed, intensity: value.intensity, ...(value.format ? { format: value.format } : {}) }), origin); }
+      if (url.pathname === "/api/v1/depth-lighting") { const value = lightingSchema.parse(body); return this.operation(response, await this.useCases.applyDepthLighting({ inputFilename: value.input_filename, outputFilename: value.output_filename, direction: value.direction, strength: value.strength, ambient: value.ambient, ...(value.format ? { format: value.format } : {}) }), origin); }
+      if (url.pathname === "/api/v1/effects/outline") return this.operation(response, await this.useCases.spriteEffects.applyPixelOutline(this.parseOutline(body)), origin);
+      if (url.pathname === "/api/v1/effects/color-grade") return this.operation(response, await this.useCases.spriteEffects.applyColorGrade(this.parseColorGrade(body)), origin);
+      if (url.pathname === "/api/v1/effects/shadow") return this.operation(response, await this.useCases.spriteEffects.generateSpriteShadow(this.parseShadow(body)), origin);
+      if (url.pathname === "/api/v1/effects/particles") return this.operation(response, await this.useCases.spriteEffects.generateParticleBurst(this.parseParticles(body)), origin);
+      if (url.pathname === "/api/v1/effects/normal-map") return this.operation(response, await this.useCases.spriteEffects.generateNormalMap(this.parseNormalMap(body)), origin);
+      return this.send(response, 404, { error: "Ruta no encontrada" }, origin);
+    } catch (error) { return this.send(response, 400, { error: error instanceof Error ? error.message : String(error) }, origin); }
+  }
+
+  private toRecipeInput(value: z.infer<typeof recipeSchema>): AssetRecipeCreateInput { return { assetId: value.asset_id, inputFilename: value.input_filename, outputPrefix: value.output_prefix, format: value.format, steps: value.steps, seed: value.seed, material: value.material, direction: value.direction }; }
+  private parseOutline(body: unknown) { return z.object({ input_filename: z.string().min(1), output_filename: z.string().min(1), color, thickness: z.number().int().min(1).max(8).default(1), format: z.enum(["png", "gif"]).optional() }).transform((value) => ({ inputFilename: value.input_filename, outputFilename: value.output_filename, color: value.color, thickness: value.thickness, ...(value.format ? { format: value.format } : {}) })).parse(body); }
+  private parseColorGrade(body: unknown) { return z.object({ input_filename: z.string().min(1), output_filename: z.string().min(1), brightness: z.number().min(-1).max(1).default(0), contrast: z.number().min(0).max(2).default(1), saturation: z.number().min(0).max(2).default(1), format: z.enum(["png", "gif"]).optional() }).transform((value) => ({ inputFilename: value.input_filename, outputFilename: value.output_filename, brightness: value.brightness, contrast: value.contrast, saturation: value.saturation, ...(value.format ? { format: value.format } : {}) })).parse(body); }
+  private parseShadow(body: unknown) { return z.object({ input_filename: z.string().min(1), output_filename: z.string().min(1), offset_x: z.number().int().min(-32).max(32), offset_y: z.number().int().min(-32).max(32), color, opacity: z.number().min(0).max(1).default(0.45), format: z.enum(["png", "gif"]).optional() }).transform((value) => ({ inputFilename: value.input_filename, outputFilename: value.output_filename, offsetX: value.offset_x, offsetY: value.offset_y, color: value.color, opacity: value.opacity, ...(value.format ? { format: value.format } : {}) })).parse(body); }
+  private parseParticles(body: unknown) { return z.object({ output_filename: z.string().min(1), width: z.number().int().min(8).max(512), height: z.number().int().min(8).max(512), frames: z.number().int().min(2).max(24), particle_count: z.number().int().min(1).max(128), seed: z.number().int(), color, delay_ms: z.number().int().positive().default(80) }).transform((value) => ({ outputFilename: value.output_filename, width: value.width, height: value.height, frames: value.frames, particleCount: value.particle_count, seed: value.seed, color: value.color, delayMs: value.delay_ms })).parse(body); }
+  private parseNormalMap(body: unknown) { return z.object({ input_filename: z.string().min(1), output_filename: z.string().min(1), strength: z.number().min(0).max(8).default(2), format: z.enum(["png", "gif"]).optional() }).transform((value) => ({ inputFilename: value.input_filename, outputFilename: value.output_filename, strength: value.strength, ...(value.format ? { format: value.format } : {}) })).parse(body); }
+  private async readBody(request: IncomingMessage): Promise<unknown> { let raw = ""; for await (const chunk of request) raw += chunk; return raw ? JSON.parse(raw) : {}; }
+  private operation(response: ServerResponse, result: { ok: boolean; message: string }, origin?: string): void { let data: unknown; try { data = JSON.parse(result.message); } catch { data = { message: result.message }; } this.send(response, result.ok ? 200 : 422, { data, ...(result.ok ? {} : { error: result.message }) }, origin); }
+  private send(response: ServerResponse, status: number, data: unknown, origin?: string): void { const allowedOrigin = this.localOrigin(origin); response.writeHead(status, { "content-type": "application/json; charset=utf-8", "access-control-allow-origin": allowedOrigin, "access-control-allow-headers": "content-type", "access-control-allow-methods": "GET,POST,OPTIONS", vary: "origin" }); response.end(JSON.stringify(data)); }
+  private localOrigin(origin?: string): string { if (!origin) return "null"; try { const parsed = new URL(origin); return parsed.protocol === "http:" && (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1") ? origin : "null"; } catch { return "null"; } }
+}

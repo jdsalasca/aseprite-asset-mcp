@@ -1,5 +1,20 @@
 # Aseprite Asset MCP: usage guide
 
+## REST local para la UX
+
+El mismo runtime TypeScript puede publicar un sidecar HTTP local para una UX. Sus controladores adaptan JSON a los mismos casos de uso que registran las herramientas MCP; no duplican algoritmos.
+
+PowerShell:
+
+    $env:MCP_REST_PORT = "3766"
+    npm run mcp
+
+Health: GET http://127.0.0.1:3766/api/v1/health
+
+Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lighting y /api/v1/effects/outline, /api/v1/effects/color-grade, /api/v1/effects/shadow, /api/v1/effects/particles, /api/v1/effects/normal-map.
+
+El sidecar solo escucha en 127.0.0.1, acepta CORS de localhost y 127.0.0.1, y rechaza orígenes externos. La UX asset-studio usa normalmente su gateway en 127.0.0.1:3765, que controla el proceso MCP por stdio y centraliza logs, diagnóstico y fallos.
+
 This MCP is designed for compact, reproducible asset jobs. Prefer one recipe or batch job over many pixel-level calls.
 
 ## 1. Discover only the tools you need

@@ -32,6 +32,7 @@ import { DeterministicEnhancementService } from "../application/services/Determi
 import { SpriteEffectsService } from "../application/services/SpriteEffectsService.js";
 import { AssetRecipeComposerService } from "../application/services/AssetRecipeComposerService.js";
 import { AssetRecipeToolController } from "./controllers/AssetRecipeToolController.js";
+import { AssetRestController } from "./rest/AssetRestController.js";
 
 const SERVER_VERSION = "1.0.0";
 const TYPESCRIPT_VERSION = "6.0.3";
@@ -200,6 +201,7 @@ export class AsepriteMcpServerAdapter {
   private readonly assetJobs: AssetJobService;
   private readonly spriteEffects: SpriteEffectsService;
   private readonly recipes: AssetRecipeComposerService;
+  public readonly restController: AssetRestController;
 
   public constructor(private readonly assets: AssetGatewayPort, imageAssets?: PixelArtAssetService, jobStore?: AssetJobStorePort) {
     const rasterCodec = new SharpRasterCodec();
@@ -208,6 +210,7 @@ export class AsepriteMcpServerAdapter {
     this.visualAssets = new VisualAssetService(rasterCodec, manifestWriter);
     this.spriteEffects = new SpriteEffectsService(rasterCodec);
     this.recipes = new AssetRecipeComposerService();
+    this.restController = new AssetRestController({ createRecipe: (input) => this.recipes.compose(input), spriteEffects: this.spriteEffects, applyMaterialTexture: (input) => this.visualAssets.applyMaterialTexture(input), applyDepthLighting: (input) => this.visualAssets.applyDepthLighting(input) }, SERVER_VERSION);
     this.enhancements = new DeterministicEnhancementService(rasterCodec);
     this.assetJobs = new AssetJobService({ run: (input) => this.imageAssets.runBatch(input) }, jobStore ?? new InMemoryAssetJobStore(), { artifactResolver: new FileAssetArtifactResolver(() => new Date().toISOString(), process.env.ASSET_ARTIFACT_ROOT ? [process.env.ASSET_ARTIFACT_ROOT] : []), timeoutMs: 5 * 60 * 1000 });
     this.server = new McpServer({ name: "aseprite-asset-mcp", version: SERVER_VERSION });
@@ -273,6 +276,17 @@ async function main(): Promise<void> {
   const gateway = new AsepriteCliGateway();
   const jobStore = new JsonAssetJobStore(process.env.ASSET_JOB_STORE_PATH ?? path.join(process.cwd(), ".asset-studio", "jobs.json"));
   const adapter = new AsepriteMcpServerAdapter(gateway, undefined, jobStore);
+  const restPort = Number(process.env.MCP_REST_PORT ?? 0);
+  let restServer: import("node:http").Server | undefined;
+  if (Number.isInteger(restPort) && restPort > 0) {
+    const { createServer } = await import("node:http");
+    restServer = createServer((request, response) => { void adapter.restController.handle(request, response); });
+    await new Promise<void>((resolve, reject) => { restServer!.once("error", reject); restServer!.listen(restPort, "127.0.0.1", () => { restServer!.removeAllListeners("error"); console.error(`Aseprite MCP REST controls listening on http://127.0.0.1:${restPort}`); resolve(); }); });
+  }
+  const closeRest = () => { restServer?.close(); };
+  process.once("SIGTERM", closeRest);
+  process.once("SIGINT", closeRest);
+  process.stdin.once("end", closeRest);
   await adapter.server.connect(new StdioServerTransport());
   console.error("Aseprite MCP TypeScript server running on stdio");
 }
