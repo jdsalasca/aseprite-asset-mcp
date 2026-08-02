@@ -65,6 +65,8 @@ Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lightin
 
 `/api/v1/effects/grain` recibe `{ "input_filename": "ground.png", "output_filename": "ground-grain.png", "seed": 17, "intensity": 0.8, "scale": 2 }`. Aplica una variación de luminancia reproducible por celdas, conserva alpha, frames y la fuente, y resulta útil para tierra, agua, piedra, follaje y superficies envejecidas.
 
+`/api/v1/effects/dither` recibe `{ "input_filename": "hero.png", "output_filename": "hero-dither.png", "dark_color": "#202030", "light_color": "#F0E8C8", "strength": 1, "scale": 1 }`. Usa una matriz Bayer 4x4 para distribuir dos colores según la luminancia, reduce bandas de color, conserva alpha, frames y la fuente, y permite controlar la escala de los píxeles del patrón.
+
 `/api/v1/variants/pack` recibe `{ "input_filename": "forest-ranger.png", "output_prefix": "forest-ranger-variants", "variants": ["rain", "night", "birds", "day_night"], "frames": 8, "seed": 17, "delay_ms": 90 }`. Devuelve todos los artifacts generados en una sola respuesta para reducir llamadas y tokens del agente. Las fuentes estáticas se pueden animar; si se solicitan varios frames, el formato efectivo debe ser GIF.
 
 `/api/v1/assets/quality-bundle` recibe `{ "filename": "forest-ranger.png", "max_colors": 64, "max_isolated_pixels": 4 }` y devuelve inspección, violaciones, recomendaciones y las garantías `deterministic`/`sourcePreserved` sin generar archivos. Es el camino recomendado para que la UX valide antes de encadenar mejoras.

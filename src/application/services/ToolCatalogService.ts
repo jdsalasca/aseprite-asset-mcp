@@ -61,6 +61,7 @@ const DESCRIPTION_OVERRIDES: Record<string, string> = {
   apply_sprite_specular_highlight: "Apply deterministic inward specular highlights to sprites.",
   apply_sprite_color_ramp: "Map sprite luminance into deterministic shadow, midtone, and highlight palette bands.",
   apply_sprite_grain: "Apply deterministic seeded grain to opaque sprites for material and weathered-surface detail.",
+  apply_sprite_dither: "Apply deterministic Bayer dithering between two palette colors while preserving alpha.",
   apply_color_grade: "Apply deterministic brightness, contrast, and saturation grading.",
   generate_sprite_shadow: "Generate a deterministic clipped shadow from sprite alpha.",
   generate_particle_burst: "Generate a deterministic animated particle burst GIF.",
@@ -101,7 +102,7 @@ function folderFor(name: string): string {
   if (name === "generate_scene_effect_stack") return "asset/effects";
   if (name.includes("material_texture")) return "asset/material";
   if (name.includes("depth_lighting")) return "asset/lighting";
-  if (name.includes("color_grade") || name.includes("color_ramp") || name.includes("grain") || name.includes("outline") || name.includes("background") || name.includes("cleanup") || name.includes("glow") || name.includes("rim_light") || name.includes("ambient_occlusion") || name.includes("specular_highlight") || name.includes("shadow") || name.includes("normal_map") || name.includes("rain") || name.includes("motion") || name.includes("seamless") || name.includes("reflection") || name.includes("caustics") || name.includes("day_night") || name.includes("variant_pack")) return "asset/effects";
+  if (name.includes("color_grade") || name.includes("color_ramp") || name.includes("grain") || name.includes("dither") || name.includes("outline") || name.includes("background") || name.includes("cleanup") || name.includes("glow") || name.includes("rim_light") || name.includes("ambient_occlusion") || name.includes("specular_highlight") || name.includes("shadow") || name.includes("normal_map") || name.includes("rain") || name.includes("motion") || name.includes("seamless") || name.includes("reflection") || name.includes("caustics") || name.includes("day_night") || name.includes("variant_pack")) return "asset/effects";
   if (name.includes("particle")) return "asset/particles";
   if (name === "create_asset_recipe" || name === "execute_asset_recipe") return "asset/recipes";
   if (name === "inspect_reference" || name === "run_asset_quality_gate") return "asset/quality";

@@ -12,6 +12,7 @@ export interface SpriteAmbientOcclusionInput extends SpriteEffectBaseInput { col
 export interface SpriteSpecularHighlightInput extends SpriteEffectBaseInput { color: string; direction: SpriteRimLightDirection; radius?: number | undefined; strength?: number | undefined; }
 export interface SpriteColorRampInput extends SpriteEffectBaseInput { shadowColor: string; midColor: string; highlightColor: string; shadowThreshold?: number | undefined; highlightThreshold?: number | undefined; }
 export interface SpriteGrainInput extends SpriteEffectBaseInput { seed: number; intensity?: number | undefined; scale?: number | undefined; }
+export interface SpriteDitherInput extends SpriteEffectBaseInput { darkColor: string; lightColor: string; strength?: number | undefined; scale?: number | undefined; }
 export interface ColorGradeInput extends SpriteEffectBaseInput { brightness?: number | undefined; contrast?: number | undefined; saturation?: number | undefined; }
 export interface SpriteShadowInput extends SpriteEffectBaseInput { offsetX: number; offsetY: number; color: string; opacity?: number | undefined; }
 export interface ParticleBurstInput { outputFilename: string; width: number; height: number; frames: number; particleCount: number; seed: number; color: string; delayMs?: number | undefined; }
@@ -34,6 +35,7 @@ export interface SpriteEffectsGateway {
   applySpriteSpecularHighlight(input: SpriteSpecularHighlightInput): Promise<AssetOperationResult>;
   applySpriteColorRamp(input: SpriteColorRampInput): Promise<AssetOperationResult>;
   applySpriteGrain(input: SpriteGrainInput): Promise<AssetOperationResult>;
+  applySpriteDither(input: SpriteDitherInput): Promise<AssetOperationResult>;
   applyColorGrade(input: ColorGradeInput): Promise<AssetOperationResult>;
   generateSpriteShadow(input: SpriteShadowInput): Promise<AssetOperationResult>;
   generateParticleBurst(input: ParticleBurstInput): Promise<AssetOperationResult>;
