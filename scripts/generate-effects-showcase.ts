@@ -42,7 +42,8 @@ async function run(): Promise<void> {
     await effects.generateParticleBurst({ outputFilename: particles, width: 32, height: 32, frames: 8, particleCount: 18, seed: 4217, color: "#FFD166", delayMs: 80 }),
   ];
   if (operations.some((operation) => !operation.ok)) throw new Error(operations.find((operation) => !operation.ok)?.message ?? "Effects showcase generation failed");
-  await fs.writeFile(path.join(outputDirectory, "manifest.json"), JSON.stringify({ schemaVersion: 1, seed: 4217, source: "hero-base.png", outputs: ["hero-outline.png", "hero-color-grade.png", "hero-shadow.png", "hero-normal-map.png", "hero-particles.gif"], operations: operations.map((operation) => JSON.parse(operation.message)) }, null, 2) + "\n", "utf8");
+  const portableOperations = operations.map((operation) => { const parsed = JSON.parse(operation.message) as Record<string, unknown>; for (const key of ["input", "output"]) { if (typeof parsed[key] === "string") parsed[key] = path.relative(outputDirectory, String(parsed[key])).replaceAll(path.sep, "/"); } return parsed; });
+  await fs.writeFile(path.join(outputDirectory, "manifest.json"), JSON.stringify({ schemaVersion: 1, seed: 4217, source: "hero-base.png", outputs: ["hero-outline.png", "hero-color-grade.png", "hero-shadow.png", "hero-normal-map.png", "hero-particles.gif"], operations: portableOperations }, null, 2) + "\n", "utf8");
   console.log(JSON.stringify({ outputDirectory, files: [base, outline, graded, shadow, normalMap, particles] }, null, 2));
 }
 

@@ -12,8 +12,8 @@
   "operations": [
     {
       "operation": "apply_pixel_outline",
-      "input": "C:\\Users\\jdsal\\Documents\\Programming-personal\\aseprite-mcp\\examples\\effects\\hero-base.png",
-      "output": "C:\\Users\\jdsal\\Documents\\Programming-personal\\aseprite-mcp\\examples\\effects\\hero-outline.png",
+      "input": "hero-base.png",
+      "output": "hero-outline.png",
       "frames": 1,
       "format": "png",
       "deterministic": true,
@@ -21,8 +21,8 @@
     },
     {
       "operation": "apply_color_grade",
-      "input": "C:\\Users\\jdsal\\Documents\\Programming-personal\\aseprite-mcp\\examples\\effects\\hero-base.png",
-      "output": "C:\\Users\\jdsal\\Documents\\Programming-personal\\aseprite-mcp\\examples\\effects\\hero-color-grade.png",
+      "input": "hero-base.png",
+      "output": "hero-color-grade.png",
       "frames": 1,
       "format": "png",
       "deterministic": true,
@@ -30,8 +30,8 @@
     },
     {
       "operation": "generate_sprite_shadow",
-      "input": "C:\\Users\\jdsal\\Documents\\Programming-personal\\aseprite-mcp\\examples\\effects\\hero-base.png",
-      "output": "C:\\Users\\jdsal\\Documents\\Programming-personal\\aseprite-mcp\\examples\\effects\\hero-shadow.png",
+      "input": "hero-base.png",
+      "output": "hero-shadow.png",
       "frames": 1,
       "format": "png",
       "deterministic": true,
@@ -39,8 +39,8 @@
     },
     {
       "operation": "generate_normal_map",
-      "input": "C:\\Users\\jdsal\\Documents\\Programming-personal\\aseprite-mcp\\examples\\effects\\hero-base.png",
-      "output": "C:\\Users\\jdsal\\Documents\\Programming-personal\\aseprite-mcp\\examples\\effects\\hero-normal-map.png",
+      "input": "hero-base.png",
+      "output": "hero-normal-map.png",
       "frames": 1,
       "format": "png",
       "deterministic": true,
@@ -48,7 +48,7 @@
     },
     {
       "operation": "generate_particle_burst",
-      "output": "C:\\Users\\jdsal\\Documents\\Programming-personal\\aseprite-mcp\\examples\\effects\\hero-particles.gif",
+      "output": "hero-particles.gif",
       "frames": 8,
       "format": "gif",
       "deterministic": true,
