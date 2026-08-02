@@ -45,6 +45,8 @@ Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lightin
 
 `/api/v1/assets/sprite-hitboxes` recibe `{ "filename": "hero.gif", "output_filename": "hero-hitboxes.json", "mode": "components", "padding": 1, "min_component_pixels": 1 }`. Reutiliza el puerto de geometría, genera hitboxes por componente o la unión por frame, recorta el padding al canvas y escribe un manifest separado con `deterministic: true` y `sourcePreserved: true`.
 
+`/api/v1/assets/sprite-runtime-bundle` recibe `{ "input_filename": "hero.gif", "sheet_filename": "hero-runtime-sheet.png", "sheet_manifest_filename": "hero-runtime-sheet.json", "hitbox_manifest_filename": "hero-runtime-hitboxes.json", "bundle_manifest_filename": "hero-runtime.json", "columns": 4, "sheet_padding": 1, "hitbox_mode": "components", "hitbox_padding": 1 }`. Ejecuta la misma capa de aplicación que el tool MCP y devuelve un manifest raíz con los dos artifacts, reduciendo llamadas de la UX y del agente.
+
 `/api/v1/assets/animation-quality` recibe `{ "filename": "hero-walk.gif" }` y devuelve transiciones compactas, frames duplicados, delays, deriva de paleta, estado de loop y recomendaciones antes de exportar al motor.
 
 `/api/v1/library/presets/generate` recibe `{ "preset_id": "coastal-sunset", "output_prefix": "art/coast", "width": 64, "height": 40, "seed": 9 }`. Resuelve el preset, conserva sus capas en la respuesta y delega en `generate_environment_pack`; así una persona puede pasar de explorar a generar una escena sin encadenar llamadas manuales.

@@ -125,6 +125,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `inspect_animation_quality`: audita una animación en una sola llamada, detecta frames duplicados, cambios por transición, timing irregular, deriva de paleta y costura de loop.
 - `inspect_sprite_geometry`: calcula bounds alfa, componentes conectados, baseline y pivotes por frame para placement estable.
 - `generate_sprite_hitboxes`: deriva un manifest JSON de colisión desde esa geometría, con modo `components` o `union` y padding acotado, sin duplicar análisis raster.
+- `build_sprite_runtime_bundle`: empaqueta spritesheet, timing e hitboxes en una sola llamada y publica un manifest runtime navegable.
 - `normalize_sprite`: recorta PNG/GIF a los bounds alfa compartidos, añade padding determinista, conserva los delays y escribe un manifest JSON con pivote para motores 2D.
 - `build_animation_sheet`: convierte todos los frames de una animación en un PNG spritesheet con coordenadas, pivotes `bottom_center`, delays y duración de loop en un manifest navegable.
 - `inspect_sprite_geometry`: calcula bounds alfa, componentes conectados, baseline y pivotes por frame para detectar jitter antes de colisiones o composición de escenas.
@@ -212,6 +213,7 @@ POST /api/v1/assets/normalize-sprite
 POST /api/v1/assets/animation-sheet
 POST /api/v1/assets/sprite-geometry
 POST /api/v1/assets/sprite-hitboxes
+POST /api/v1/assets/sprite-runtime-bundle
 GET /api/v1/library/items/forest-ranger
 GET /api/v1/library/presets/living-forest
 GET /api/v1/library/items/forest-ranger/preview

@@ -16,6 +16,7 @@ import type { SpriteNormalizationService } from "../services/SpriteNormalization
 import type { AnimationSheetService } from "../services/AnimationSheetService.js";
 import type { SpriteGeometryService } from "../services/SpriteGeometryService.js";
 import type { SpriteHitboxService } from "../services/SpriteHitboxService.js";
+import type { SpriteRuntimeBundleService } from "../services/SpriteRuntimeBundleService.js";
 
 export interface AssetRestUseCases {
   createRecipe(input: AssetRecipeCreateInput): AssetRecipePlan;
@@ -34,6 +35,7 @@ export interface AssetRestUseCases {
   animationSheet: Pick<AnimationSheetService, "build">;
   spriteGeometry: Pick<SpriteGeometryService, "inspect">;
   spriteHitbox: Pick<SpriteHitboxService, "generate">;
+  spriteRuntimeBundle: Pick<SpriteRuntimeBundleService, "build">;
   contactSheet: Pick<ContactSheetService, "build">;
   visualAssets: Pick<VisualAssetGateway, "extendScene" | "generateBiomeTransition">;
 }

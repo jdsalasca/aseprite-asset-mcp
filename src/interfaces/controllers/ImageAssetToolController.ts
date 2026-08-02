@@ -10,9 +10,10 @@ import type { SpriteNormalizationService } from "../../application/services/Spri
 import type { AnimationSheetService } from "../../application/services/AnimationSheetService.js";
 import type { SpriteGeometryService } from "../../application/services/SpriteGeometryService.js";
 import type { SpriteHitboxService } from "../../application/services/SpriteHitboxService.js";
+import type { SpriteRuntimeBundleService } from "../../application/services/SpriteRuntimeBundleService.js";
 
 export class ImageAssetToolController {
-  public constructor(private readonly assets: ExportAnimationPort, private readonly imageAssets: PixelArtAssetService, private readonly contactSheets: ContactSheetService, private readonly batchQuality: AssetBatchQualityService, private readonly animationQuality: AnimationQualityService, private readonly spriteNormalization: SpriteNormalizationService, private readonly animationSheet: AnimationSheetService, private readonly spriteGeometry: SpriteGeometryService, private readonly spriteHitbox: SpriteHitboxService) {}
+  public constructor(private readonly assets: ExportAnimationPort, private readonly imageAssets: PixelArtAssetService, private readonly contactSheets: ContactSheetService, private readonly batchQuality: AssetBatchQualityService, private readonly animationQuality: AnimationQualityService, private readonly spriteNormalization: SpriteNormalizationService, private readonly animationSheet: AnimationSheetService, private readonly spriteGeometry: SpriteGeometryService, private readonly spriteHitbox: SpriteHitboxService, private readonly spriteRuntimeBundle: SpriteRuntimeBundleService) {}
 
   public register(server: McpServer): void {
     server.registerTool("convert_image_to_pixel_art", {
@@ -97,6 +98,11 @@ export class ImageAssetToolController {
       description: "Generate a deterministic collision manifest from sprite geometry using component or union hitboxes with bounded padding.",
       inputSchema: { filename: z.string().min(1), output_filename: z.string().min(1), mode: z.enum(["components", "union"]).default("components"), padding: z.number().int().min(0).max(16).default(0), min_component_pixels: z.number().int().min(1).max(4096).default(1) },
     }, async ({ filename, output_filename, mode, padding, min_component_pixels }) => this.result(await this.spriteHitbox.generate({ filename, outputFilename: output_filename, mode, padding, minComponentPixels: min_component_pixels })));
+
+    server.registerTool("build_sprite_runtime_bundle", {
+      description: "Build one deterministic runtime bundle with an animation sheet, timing manifest, and sprite hitbox manifest.",
+      inputSchema: { input_filename: z.string().min(1), sheet_filename: z.string().min(1), sheet_manifest_filename: z.string().min(1), hitbox_manifest_filename: z.string().min(1), bundle_manifest_filename: z.string().min(1), columns: z.number().int().min(1).max(16).optional(), sheet_padding: z.number().int().min(0).max(64).default(0), hitbox_mode: z.enum(["components", "union"]).default("components"), hitbox_padding: z.number().int().min(0).max(16).default(0), min_component_pixels: z.number().int().min(1).max(4096).default(1) },
+    }, async ({ input_filename, sheet_filename, sheet_manifest_filename, hitbox_manifest_filename, bundle_manifest_filename, columns, sheet_padding, hitbox_mode, hitbox_padding, min_component_pixels }) => this.result(await this.spriteRuntimeBundle.build({ inputFilename: input_filename, sheetFilename: sheet_filename, sheetManifestFilename: sheet_manifest_filename, hitboxManifestFilename: hitbox_manifest_filename, bundleManifestFilename: bundle_manifest_filename, ...(columns === undefined ? {} : { columns }), sheetPadding: sheet_padding, hitboxMode: hitbox_mode, hitboxPadding: hitbox_padding, minComponentPixels: min_component_pixels })));
 
     server.registerTool("build_texture_atlas", {
       description: "Pack equal-size image frames into one PNG texture atlas.",

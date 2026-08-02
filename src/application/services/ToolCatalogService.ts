@@ -24,6 +24,7 @@ const DESCRIPTION_OVERRIDES: Record<string, string> = {
   build_animation_sheet: "Assemble animation frames into a PNG spritesheet with timing and pivot metadata.",
   inspect_sprite_geometry: "Inspect alpha bounds, connected components, baseline, and pivots per animation frame.",
   generate_sprite_hitboxes: "Generate component or union hitboxes from deterministic sprite geometry.",
+  build_sprite_runtime_bundle: "Build one runtime bundle with an animation sheet, timing manifest, and hitboxes.",
   validate_asset_quality: "Validate palette size and isolated-pixel limits.",
   build_texture_atlas: "Pack equal-size images into one texture atlas.",
   run_asset_recipe: "Run or preview one compact asset recipe.",
@@ -66,6 +67,7 @@ const DESCRIPTION_OVERRIDES: Record<string, string> = {
 function folderFor(name: string): string {
   if (name === "get_asset_library" || name === "get_asset_library_item" || name === "get_asset_preset" || name === "compose_asset_preset" || name === "generate_asset_preset") return "meta/asset-library";
   if (name === "build_contact_sheet") return "asset/preview";
+  if (name === "build_sprite_runtime_bundle") return "asset/runtime";
   if (name === "server_capabilities" || name.startsWith("get_tools_")) return "meta/catalog";
   if (name === "create_style_bible") return "asset/style";
   if (name === "generate_scene_effect_stack") return "asset/effects";
