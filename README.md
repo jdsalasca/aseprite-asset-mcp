@@ -138,6 +138,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `get_asset_library_item`: resuelve README, manifest, preview y sprite sheet de un asset concreto.
 - `get_asset_preset`: devuelve composiciones listas como `living-forest`, `coastal-sunset`, `fantasy-quest` y `rainy-village`.
 - `generate_asset_preset`: ejecuta un preset completo y devuelve terreno, mapa, preview, oleaje cuando aplica y transición temporal en una respuesta compacta.
+- `generate_scene_effect_stack`: agrupa en una sola llamada lluvia, partículas, caústicas/reflejos, día-noche, granularidad de material e iluminación direccional; infiere dimensiones para partículas, devuelve todos los artifacts y preserva la fuente.
 - `generate_motion_pack`: crea ciclos `idle`, `walk`, `run`, `jump` o `attack` desde un sprite estático o animado.
 - `generate_variant_pack`: crea en una sola llamada hasta nueve variantes deterministas (`rain`, `fire`, `earthquake`, `birds`, `night`, `day_night`, `walk`, `water_reflection` y `water_caustics`) y devuelve un manifiesto compacto de artifacts.
 
@@ -199,6 +200,7 @@ GET /api/v1/library/items/forest-ranger/preview
 GET /api/v1/library/items/forest-ranger/sprite
 GET /api/v1/library/presets/living-forest/compose
 POST /api/v1/library/presets/generate
+POST /api/v1/effects/scene-stack
 ```
 
 Las dos últimas rutas sirven PNG/GIF de forma binaria desde el adaptador de archivos, validando primero el id del catálogo y bloqueando escapes del directorio `assets/folders`. Asset Studio las consume para mostrar previews reales en `PixelAssetGrid`.
@@ -221,3 +223,20 @@ Las variantes (`rain`, `fire`, `earthquake`, `birds`, `wave-reflection`, `day`, 
 ```
 
 La respuesta contiene `artifacts[]` con ruta, operación, cantidad de frames, formato y las garantías `deterministic` y `sourcePreserved`. Las fuentes PNG estáticas también pueden producir GIFs animados; el servidor rechaza explícitamente pedir varios frames con formato PNG.
+
+`generate_scene_effect_stack` reduce llamadas repetidas del agente cuando se quiere probar una escena completa. Selecciona efectos únicos y el servicio reutiliza los puertos existentes de efectos, materiales e iluminación:
+
+```json
+{
+  "input_filename": "art/forest-ranger.png",
+  "output_prefix": "art/forest-ranger-scene",
+  "effects": ["material_texture", "depth_lighting", "rain", "particles", "water_caustics", "day_night"],
+  "frames": 8,
+  "seed": 17,
+  "material": "earth",
+  "direction": "south_east",
+  "format": "gif"
+}
+```
+
+El equivalente REST es `POST /api/v1/effects/scene-stack`; devuelve un manifest compacto con un artifact por efecto y mantiene `deterministic: true` y `sourcePreserved: true`.

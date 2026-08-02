@@ -24,8 +24,10 @@ import { WorkflowPlanToolController } from "./controllers/WorkflowPlanToolContro
 import { SpriteEffectsToolController } from "./controllers/SpriteEffectsToolController.js";
 import { AssetVariantPackToolController } from "./controllers/AssetVariantPackToolController.js";
 import { AssetPresetGenerationToolController } from "./controllers/AssetPresetGenerationToolController.js";
+import { SceneEffectStackToolController } from "./controllers/SceneEffectStackToolController.js";
 import { AssetVariantPackService } from "../application/services/AssetVariantPackService.js";
 import { AssetPresetGenerationService } from "../application/services/AssetPresetGenerationService.js";
+import { SceneEffectStackService } from "../application/services/SceneEffectStackService.js";
 import { AssetJobService } from "../application/services/AssetJobService.js";
 import { InMemoryAssetJobStore } from "../infrastructure/jobs/InMemoryAssetJobStore.js";
 import { JsonAssetJobStore } from "../infrastructure/jobs/JsonAssetJobStore.js";
@@ -207,6 +209,7 @@ const TOOL_NAMES = [
   "generate_day_night_cycle",
   "generate_variant_pack",
   "generate_asset_preset",
+  "generate_scene_effect_stack",
   "create_asset_recipe",
   "execute_asset_recipe",
   "get_asset_library",
@@ -226,6 +229,7 @@ export class AsepriteMcpServerAdapter {
   private readonly spriteEffects: SpriteEffectsService;
   private readonly variantPack: AssetVariantPackService;
   private readonly presetGeneration: AssetPresetGenerationService;
+  private readonly sceneEffectStack: SceneEffectStackService;
   private readonly recipeExecutor: AssetRecipeExecutionService;
   private readonly recipes: AssetRecipeComposerService;
   private readonly assetLibrary: AssetLibraryService;
@@ -241,6 +245,7 @@ export class AsepriteMcpServerAdapter {
     this.recipes = new AssetRecipeComposerService();
     this.assetLibrary = new AssetLibraryService(new FileAssetLibraryAdapter());
     this.presetGeneration = new AssetPresetGenerationService(this.assetLibrary, this.visualAssets);
+    this.sceneEffectStack = new SceneEffectStackService(rasterCodec, this.spriteEffects, this.visualAssets);
     this.recipeExecutor = new AssetRecipeExecutionService({
       applyPixelOutline: (input) => this.spriteEffects.applyPixelOutline(input),
       applyColorGrade: (input) => this.spriteEffects.applyColorGrade(input),
@@ -251,7 +256,7 @@ export class AsepriteMcpServerAdapter {
       generateNormalMap: (input) => this.spriteEffects.generateNormalMap(input),
       runQualityGate: (input) => this.visualAssets.runQualityGate(input),
     });
-    this.restController = new AssetRestController({ createRecipe: (input) => this.recipes.compose(input), executeRecipe: (input) => this.recipeExecutor.execute(this.recipes.compose(input)), spriteEffects: this.spriteEffects, variantPack: this.variantPack, presetGeneration: this.presetGeneration, applyMaterialTexture: (input) => this.visualAssets.applyMaterialTexture(input), applyDepthLighting: (input) => this.visualAssets.applyDepthLighting(input), assetLibrary: this.assetLibrary, imageAssets: this.imageAssets, visualAssets: this.visualAssets }, SERVER_VERSION);
+    this.restController = new AssetRestController({ createRecipe: (input) => this.recipes.compose(input), executeRecipe: (input) => this.recipeExecutor.execute(this.recipes.compose(input)), spriteEffects: this.spriteEffects, variantPack: this.variantPack, presetGeneration: this.presetGeneration, sceneEffectStack: this.sceneEffectStack, applyMaterialTexture: (input) => this.visualAssets.applyMaterialTexture(input), applyDepthLighting: (input) => this.visualAssets.applyDepthLighting(input), assetLibrary: this.assetLibrary, imageAssets: this.imageAssets, visualAssets: this.visualAssets }, SERVER_VERSION);
     this.enhancements = new DeterministicEnhancementService(rasterCodec);
     this.assetJobs = new AssetJobService({ run: (input) => this.imageAssets.runBatch(input) }, jobStore ?? new InMemoryAssetJobStore(), { artifactResolver: new FileAssetArtifactResolver(() => new Date().toISOString(), process.env.ASSET_ARTIFACT_ROOT ? [process.env.ASSET_ARTIFACT_ROOT] : []), timeoutMs: 5 * 60 * 1000 });
     this.server = new McpServer({ name: "aseprite-asset-mcp", version: SERVER_VERSION });
@@ -295,6 +300,7 @@ export class AsepriteMcpServerAdapter {
     new SpriteEffectsToolController(this.spriteEffects).register(this.server);
     new AssetVariantPackToolController(this.variantPack).register(this.server);
     new AssetPresetGenerationToolController(this.presetGeneration).register(this.server);
+    new SceneEffectStackToolController(this.sceneEffectStack).register(this.server);
     new AssetRecipeToolController(this.recipes, this.recipeExecutor).register(this.server);
     new AssetLibraryToolController(this.assetLibrary).register(this.server);
     new EnhancementToolController(this.visualAssets, this.enhancements).register(this.server);

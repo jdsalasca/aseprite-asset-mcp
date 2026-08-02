@@ -45,6 +45,7 @@ const DESCRIPTION_OVERRIDES: Record<string, string> = {
   generate_day_night_cycle: "Generate deterministic day, sunset, night, and sunrise frames while preserving transparency.",
   generate_variant_pack: "Generate several deterministic environmental variants from one source asset.",
   generate_asset_preset: "Generate a complete deterministic scene from a library preset.",
+  generate_scene_effect_stack: "Generate selected scene effects in one deterministic response while preserving the source.",
   create_asset_recipe: "Compose a deterministic multi-effect asset recipe without executing it.",
   execute_asset_recipe: "Execute a composed recipe through shared visual services and return every step.",
   get_asset_library: "Search 339 deterministic prebuilt assets and scene presets.",
@@ -57,6 +58,7 @@ function folderFor(name: string): string {
   if (name === "get_asset_library" || name === "get_asset_library_item" || name === "get_asset_preset" || name === "compose_asset_preset" || name === "generate_asset_preset") return "meta/asset-library";
   if (name === "server_capabilities" || name.startsWith("get_tools_")) return "meta/catalog";
   if (name === "create_style_bible") return "asset/style";
+  if (name === "generate_scene_effect_stack") return "asset/effects";
   if (name.includes("material_texture")) return "asset/material";
   if (name.includes("depth_lighting")) return "asset/lighting";
   if (name.includes("color_grade") || name.includes("outline") || name.includes("shadow") || name.includes("normal_map") || name.includes("rain") || name.includes("motion") || name.includes("seamless") || name.includes("reflection") || name.includes("caustics") || name.includes("day_night") || name.includes("variant_pack")) return "asset/effects";
