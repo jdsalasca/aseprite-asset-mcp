@@ -41,6 +41,7 @@ Ver también:
 - [Guía de uso](docs/USAGE_GUIDE.md)
 - [Recetas y reglas de calidad](docs/ASSET_RECIPES.md)
 - [Ejemplos visuales](docs/media/)
+- [Showcase de efectos deterministas](examples/effects/manifest.json)
 
 ## Requisitos
 

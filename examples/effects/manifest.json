@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "seed": 4217,
+  "source": "hero-base.png",
+  "outputs": [
+    "hero-outline.png",
+    "hero-color-grade.png",
+    "hero-shadow.png",
+    "hero-normal-map.png",
+    "hero-particles.gif"
+  ],
+  "operations": [
+    {
+      "operation": "apply_pixel_outline",
+      "input": "C:\\Users\\jdsal\\Documents\\Programming-personal\\aseprite-mcp\\examples\\effects\\hero-base.png",
+      "output": "C:\\Users\\jdsal\\Documents\\Programming-personal\\aseprite-mcp\\examples\\effects\\hero-outline.png",
+      "frames": 1,
+      "format": "png",
+      "deterministic": true,
+      "sourcePreserved": true
+    },
+    {
+      "operation": "apply_color_grade",
+      "input": "C:\\Users\\jdsal\\Documents\\Programming-personal\\aseprite-mcp\\examples\\effects\\hero-base.png",
+      "output": "C:\\Users\\jdsal\\Documents\\Programming-personal\\aseprite-mcp\\examples\\effects\\hero-color-grade.png",
+      "frames": 1,
+      "format": "png",
+      "deterministic": true,
+      "sourcePreserved": true
+    },
+    {
+      "operation": "generate_sprite_shadow",
+      "input": "C:\\Users\\jdsal\\Documents\\Programming-personal\\aseprite-mcp\\examples\\effects\\hero-base.png",
+      "output": "C:\\Users\\jdsal\\Documents\\Programming-personal\\aseprite-mcp\\examples\\effects\\hero-shadow.png",
+      "frames": 1,
+      "format": "png",
+      "deterministic": true,
+      "sourcePreserved": true
+    },
+    {
+      "operation": "generate_normal_map",
+      "input": "C:\\Users\\jdsal\\Documents\\Programming-personal\\aseprite-mcp\\examples\\effects\\hero-base.png",
+      "output": "C:\\Users\\jdsal\\Documents\\Programming-personal\\aseprite-mcp\\examples\\effects\\hero-normal-map.png",
+      "frames": 1,
+      "format": "png",
+      "deterministic": true,
+      "sourcePreserved": true
+    },
+    {
+      "operation": "generate_particle_burst",
+      "output": "C:\\Users\\jdsal\\Documents\\Programming-personal\\aseprite-mcp\\examples\\effects\\hero-particles.gif",
+      "frames": 8,
+      "format": "gif",
+      "deterministic": true,
+      "sourcePreserved": true
+    }
+  ]
+}

@@ -193,7 +193,10 @@ Use `dry_run:true` first for large jobs.
 npm run typecheck
 npm test
 npm run showcase
+npm run showcase:effects
 ```
+
+`showcase:effects` genera y versiona un sprite de referencia con outline, color grade, sombra, normal map, partículas GIF y `examples/effects/manifest.json`.
 
 ## 8. Mejorar sprites de forma determinista
 

@@ -29,6 +29,9 @@ ENV/
 !examples/swordsman/swordsman.png
 !examples/swordsman/swordsman_slash.gif
 !examples/swordsman/swordsman_slash_sheet.png
+!examples/effects/
+!examples/effects/*.png
+!examples/effects/*.gif
 
 # TypeScript workflow outputs
 artifacts/
