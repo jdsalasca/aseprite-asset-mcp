@@ -295,6 +295,27 @@ test("sprite color temperature rejects invalid ranges", async () => {
   assert.equal(invalidIntensity.ok, false); assert.match(invalidIntensity.message, /intensity/i);
 });
 
+test("sprite silhouette is deterministic, preserves alpha, and keeps the source intact", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-silhouette-"));
+  const input = path.join(directory, "input.png"); const first = path.join(directory, "first.png"); const second = path.join(directory, "second.png");
+  await makeSprite(input); const sourceBefore = await fs.readFile(input);
+  const operation = { inputFilename: input, outputFilename: first, color: "#08111F", opacity: 0.6 };
+  assert.equal((await service().generateSpriteSilhouette(operation)).ok, true);
+  assert.equal((await service().generateSpriteSilhouette({ ...operation, outputFilename: second })).ok, true);
+  assert.deepEqual(await fs.readFile(first), await fs.readFile(second)); assert.deepEqual(await fs.readFile(input), sourceBefore);
+  const source = await sharp(input).raw().toBuffer({ resolveWithObject: true }); const output = await sharp(first).raw().toBuffer({ resolveWithObject: true });
+  const opaqueOffset = (1 * 4 + 1) * 4;
+  assert.equal(output.data[3], 0); assert.equal(output.data[opaqueOffset], 8); assert.equal(output.data[opaqueOffset + 1], 17); assert.equal(output.data[opaqueOffset + 2], 31); assert.equal(output.data[opaqueOffset + 3], Math.round((source.data[opaqueOffset + 3] ?? 0) * 0.6));
+});
+
+test("sprite silhouette rejects invalid opacity and colors", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-silhouette-invalid-")); const input = path.join(directory, "input.png"); await makeSprite(input);
+  const invalidOpacity = await service().generateSpriteSilhouette({ inputFilename: input, outputFilename: path.join(directory, "opacity.png"), color: "#ffffff", opacity: 1.1 });
+  const invalidColor = await service().generateSpriteSilhouette({ inputFilename: input, outputFilename: path.join(directory, "color.png"), color: "#gggggg", opacity: 1 });
+  assert.equal(invalidOpacity.ok, false); assert.match(invalidOpacity.message, /opacity/i);
+  assert.equal(invalidColor.ok, false); assert.match(invalidColor.message, /color/i);
+});
+
 test("particle burst generation is seeded and exports the requested frame count", async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-particles-")); const first = path.join(directory, "first.gif"); const second = path.join(directory, "second.gif");
   assert.equal((await service().generateParticleBurst({ outputFilename: first, width: 32, height: 32, frames: 6, particleCount: 20, seed: 7, color: "#ffcc55" })).ok, true); assert.equal((await service().generateParticleBurst({ outputFilename: second, width: 32, height: 32, frames: 6, particleCount: 20, seed: 7, color: "#ffcc55" })).ok, true); assert.deepEqual(await fs.readFile(first), await fs.readFile(second)); assert.equal((await sharp(first, { animated: true }).metadata()).pages, 6);

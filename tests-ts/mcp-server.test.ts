@@ -131,6 +131,7 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("apply_sprite_grain"));
     assert.ok(tools.includes("apply_sprite_dither"));
     assert.ok(tools.includes("apply_sprite_color_temperature"));
+    assert.ok(tools.includes("generate_sprite_silhouette"));
     assert.ok(tools.includes("build_sprite_runtime_bundle"));
     assert.ok(tools.includes("generate_sprite_anchors"));
     assert.ok(tools.includes("validate_asset_quality"));

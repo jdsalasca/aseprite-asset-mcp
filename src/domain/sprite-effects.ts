@@ -6,6 +6,7 @@ export interface PixelOutlineInput extends SpriteEffectBaseInput { color: string
 export interface RemoveBackgroundInput extends SpriteEffectBaseInput { backgroundColor: string; tolerance?: number | undefined; connectedOnly?: boolean | undefined; }
 export interface CleanupIsolatedPixelsInput extends SpriteEffectBaseInput { minNeighbors?: number | undefined; iterations?: number | undefined; }
 export interface SpriteGlowInput extends SpriteEffectBaseInput { color: string; radius?: number | undefined; opacity?: number | undefined; }
+export interface SpriteSilhouetteInput extends SpriteEffectBaseInput { color: string; opacity?: number | undefined; }
 export type SpriteRimLightDirection = "north" | "north_east" | "east" | "south_east" | "south" | "south_west" | "west" | "north_west";
 export interface SpriteRimLightInput extends SpriteEffectBaseInput { color: string; direction: SpriteRimLightDirection; strength?: number | undefined; }
 export interface SpriteAmbientOcclusionInput extends SpriteEffectBaseInput { color: string; radius?: number | undefined; strength?: number | undefined; }
@@ -31,6 +32,7 @@ export interface SpriteEffectsGateway {
   removeBackground(input: RemoveBackgroundInput): Promise<AssetOperationResult>;
   cleanupIsolatedPixels(input: CleanupIsolatedPixelsInput): Promise<AssetOperationResult>;
   generateSpriteGlow(input: SpriteGlowInput): Promise<AssetOperationResult>;
+  generateSpriteSilhouette(input: SpriteSilhouetteInput): Promise<AssetOperationResult>;
   applySpriteRimLight(input: SpriteRimLightInput): Promise<AssetOperationResult>;
   applySpriteAmbientOcclusion(input: SpriteAmbientOcclusionInput): Promise<AssetOperationResult>;
   applySpriteSpecularHighlight(input: SpriteSpecularHighlightInput): Promise<AssetOperationResult>;

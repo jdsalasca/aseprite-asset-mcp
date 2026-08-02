@@ -151,6 +151,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `remove_background`: elimina un color de fondo por RGB con tolerancia opcional; en modo conectado solo remueve coincidencias alcanzables desde el borde y conserva colores encerrados.
 - `cleanup_isolated_pixels`: corrige ruido de píxeles opacos aislados con un umbral de vecinos e iteraciones acotadas, preservando grupos conectados y la fuente.
 - `generate_sprite_glow`: crea un aura de color determinista alrededor de píxeles opacos para magia, fuego, lámparas y efectos de escena, sin alterar la silueta original.
+- `generate_sprite_silhouette`: crea una máscara monocromática determinista para sombras, colisiones, previews y capas de iluminación, preservando alpha, frames y la fuente.
 - `apply_sprite_rim_light`: ilumina únicamente los bordes expuestos de un sprite según una dirección cardinal o diagonal; conserva alfa, frames y la fuente.
 - `apply_sprite_ambient_occlusion`: oscurece de forma determinista bordes internos y cavidades según la vecindad alfa, sin alterar transparencia ni la fuente.
 - `apply_sprite_specular_highlight`: añade una banda especular determinista hacia dentro de la silueta para metal, agua, cristal y magia; conserva alfa, frames y la fuente.
@@ -230,6 +231,7 @@ POST /api/v1/effects/upscale
 POST /api/v1/effects/remove-background
 POST /api/v1/effects/cleanup
 POST /api/v1/effects/glow
+POST /api/v1/effects/silhouette
 POST /api/v1/effects/rim-light
 POST /api/v1/effects/ambient-occlusion
 POST /api/v1/effects/specular-highlight
