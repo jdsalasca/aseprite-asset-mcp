@@ -65,6 +65,8 @@ import { FileAssetManifestAuditAdapter } from "../infrastructure/assets/FileAsse
 import { AssetManifestAuditToolController } from "./controllers/AssetManifestAuditToolController.js";
 import { AssetSceneRecommendationService } from "../application/services/AssetSceneRecommendationService.js";
 import { AssetSceneRecommendationToolController } from "./controllers/AssetSceneRecommendationToolController.js";
+import { AssetSceneBundleService } from "../application/services/AssetSceneBundleService.js";
+import { AssetSceneBundleToolController } from "./controllers/AssetSceneBundleToolController.js";
 
 const SERVER_VERSION = "1.0.0";
 const TYPESCRIPT_VERSION = "6.0.3";
@@ -257,6 +259,7 @@ const TOOL_NAMES = [
   "generate_library_variant_pack",
   "audit_asset_manifest",
   "recommend_asset_scene",
+  "build_scene_bundle",
 ];
 
 export class AsepriteMcpServerAdapter {
@@ -291,6 +294,7 @@ export class AsepriteMcpServerAdapter {
   private readonly assetLibraryVariantPack: AssetLibraryVariantPackService;
   private readonly assetManifestAudit: AssetManifestAuditService;
   private readonly assetSceneRecommendation: AssetSceneRecommendationService;
+  private readonly assetSceneBundle: AssetSceneBundleService;
   public readonly restController: AssetRestController;
 
   public constructor(private readonly assets: AssetGatewayPort, imageAssets?: PixelArtAssetService, jobStore?: AssetJobStorePort) {
@@ -320,6 +324,7 @@ export class AsepriteMcpServerAdapter {
     this.assetLibraryVariantPack = new AssetLibraryVariantPackService(libraryPort, new FileAssetLibrarySourceAdapter(libraryPort), this.variantPack, manifestWriter);
     this.assetManifestAudit = new AssetManifestAuditService(new FileAssetManifestAuditAdapter(process.env.ASSET_ARTIFACT_ROOT ? [process.env.ASSET_ARTIFACT_ROOT] : []));
     this.assetSceneRecommendation = new AssetSceneRecommendationService(new FileAssetLibraryAdapter());
+    this.assetSceneBundle = new AssetSceneBundleService(this.assetSceneComposer, this.assetSceneAnimationComposer);
     this.presetGeneration = new AssetPresetGenerationService(this.assetLibrary, this.visualAssets);
     this.sceneEffectStack = new SceneEffectStackService(rasterCodec, this.spriteEffects, this.visualAssets);
     this.recipeExecutor = new AssetRecipeExecutionService({
@@ -332,7 +337,7 @@ export class AsepriteMcpServerAdapter {
       generateNormalMap: (input) => this.spriteEffects.generateNormalMap(input),
       runQualityGate: (input) => this.visualAssets.runQualityGate(input),
     });
-    this.restController = new AssetRestController({ createRecipe: (input) => this.recipes.compose(input), executeRecipe: (input) => this.recipeExecutor.execute(this.recipes.compose(input)), spriteEffects: this.spriteEffects, variantPack: this.variantPack, presetGeneration: this.presetGeneration, sceneEffectStack: this.sceneEffectStack, applyMaterialTexture: (input) => this.visualAssets.applyMaterialTexture(input), applyDepthLighting: (input) => this.visualAssets.applyDepthLighting(input), assetLibrary: this.assetLibrary, assetLibraryAudit: this.assetLibraryAudit, assetLibrarySummary: this.assetLibrarySummary, assetScenePlanner: this.assetScenePlanner, assetSceneComposer: this.assetSceneComposer, assetSceneAnimationComposer: this.assetSceneAnimationComposer, assetLibraryVariantPack: this.assetLibraryVariantPack, assetManifestAudit: this.assetManifestAudit, assetSceneRecommendation: this.assetSceneRecommendation, imageAssets: this.imageAssets, batchQuality: this.batchQuality, animationQuality: this.animationQuality, spriteNormalization: this.spriteNormalization, animationSheet: this.animationSheet, spriteGeometry: this.spriteGeometry, spriteHitbox: this.spriteHitbox, spriteRuntimeBundle: this.spriteRuntimeBundle, spriteAnchors: this.spriteAnchors, contactSheet: this.contactSheets, visualAssets: { extendScene: (input) => this.visualAssets.extendScene(input), generateBiomeTransition: (input) => this.visualAssets.generateBiomeTransition(input) } }, SERVER_VERSION);
+    this.restController = new AssetRestController({ createRecipe: (input) => this.recipes.compose(input), executeRecipe: (input) => this.recipeExecutor.execute(this.recipes.compose(input)), spriteEffects: this.spriteEffects, variantPack: this.variantPack, presetGeneration: this.presetGeneration, sceneEffectStack: this.sceneEffectStack, applyMaterialTexture: (input) => this.visualAssets.applyMaterialTexture(input), applyDepthLighting: (input) => this.visualAssets.applyDepthLighting(input), assetLibrary: this.assetLibrary, assetLibraryAudit: this.assetLibraryAudit, assetLibrarySummary: this.assetLibrarySummary, assetScenePlanner: this.assetScenePlanner, assetSceneComposer: this.assetSceneComposer, assetSceneAnimationComposer: this.assetSceneAnimationComposer, assetLibraryVariantPack: this.assetLibraryVariantPack, assetManifestAudit: this.assetManifestAudit, assetSceneRecommendation: this.assetSceneRecommendation, assetSceneBundle: this.assetSceneBundle, imageAssets: this.imageAssets, batchQuality: this.batchQuality, animationQuality: this.animationQuality, spriteNormalization: this.spriteNormalization, animationSheet: this.animationSheet, spriteGeometry: this.spriteGeometry, spriteHitbox: this.spriteHitbox, spriteRuntimeBundle: this.spriteRuntimeBundle, spriteAnchors: this.spriteAnchors, contactSheet: this.contactSheets, visualAssets: { extendScene: (input) => this.visualAssets.extendScene(input), generateBiomeTransition: (input) => this.visualAssets.generateBiomeTransition(input) } }, SERVER_VERSION);
     this.enhancements = new DeterministicEnhancementService(rasterCodec);
     this.assetJobs = new AssetJobService({ run: (input) => this.imageAssets.runBatch(input) }, jobStore ?? new InMemoryAssetJobStore(), { artifactResolver: new FileAssetArtifactResolver(() => new Date().toISOString(), process.env.ASSET_ARTIFACT_ROOT ? [process.env.ASSET_ARTIFACT_ROOT] : []), timeoutMs: 5 * 60 * 1000 });
     this.server = new McpServer({ name: "aseprite-asset-mcp", version: SERVER_VERSION });
@@ -382,6 +387,7 @@ export class AsepriteMcpServerAdapter {
     new AssetLibraryVariantPackToolController(this.assetLibraryVariantPack).register(this.server);
     new AssetManifestAuditToolController(this.assetManifestAudit).register(this.server);
     new AssetSceneRecommendationToolController(this.assetSceneRecommendation).register(this.server);
+    new AssetSceneBundleToolController(this.assetSceneBundle).register(this.server);
     new EnhancementToolController(this.visualAssets, this.enhancements).register(this.server);
     new AssetJobToolController(this.assetJobs).register(this.server);
     new LayerFrameToolController(this.assets).register(this.server);

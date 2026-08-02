@@ -26,6 +26,7 @@ import type { AssetSceneAnimationComposerService } from "../services/AssetSceneA
 import type { AssetLibraryVariantPackService } from "../services/AssetLibraryVariantPackService.js";
 import type { AssetManifestAuditService } from "../services/AssetManifestAuditService.js";
 import type { AssetSceneRecommendationService } from "../services/AssetSceneRecommendationService.js";
+import type { AssetSceneBundleService } from "../services/AssetSceneBundleService.js";
 
 export interface AssetRestUseCases {
   createRecipe(input: AssetRecipeCreateInput): AssetRecipePlan;
@@ -45,6 +46,7 @@ export interface AssetRestUseCases {
   assetLibraryVariantPack: Pick<AssetLibraryVariantPackService, "generate">;
   assetManifestAudit: Pick<AssetManifestAuditService, "audit">;
   assetSceneRecommendation: Pick<AssetSceneRecommendationService, "recommend">;
+  assetSceneBundle: Pick<AssetSceneBundleService, "build">;
   imageAssets: Pick<PixelArtAssetService, "upscalePixelArt" | "qualityBundle" | "harmonizePalette">;
   batchQuality: Pick<AssetBatchQualityService, "inspect">;
   animationQuality: Pick<AnimationQualityService, "inspect">;

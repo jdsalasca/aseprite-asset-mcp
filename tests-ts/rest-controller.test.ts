@@ -34,6 +34,7 @@ function fakeUseCases(): AssetRestUseCases {
     assetLibraryVariantPack: { generate: async () => result("generate_library_variant_pack") },
     assetManifestAudit: { audit: async () => result("audit_asset_manifest") },
     assetSceneRecommendation: { recommend: async () => result("recommend_asset_scene") },
+    assetSceneBundle: { build: async () => result("build_scene_bundle") },
     imageAssets: { upscalePixelArt: async () => result("upscale_pixel_art"), qualityBundle: async () => result("inspect_asset_bundle"), harmonizePalette: async () => result("harmonize_asset_palette") },
     batchQuality: { inspect: async () => result("inspect_asset_batch") },
     animationQuality: { inspect: async () => result("inspect_animation_quality") },
@@ -81,6 +82,9 @@ test("REST controller exposes the same recipe and effect application services", 
     const recommendations = await fetch(`${rest.url}/api/v1/library/recommendations`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ prompt: "tropical water", required_variants: ["water_reflection"], limit: 4, seed: 7 }) });
     assert.equal(recommendations.status, 200);
     assert.equal((await recommendations.json()).data.operation, "recommend_asset_scene");
+    const sceneBundle = await fetch(`${rest.url}/api/v1/library/scene-bundle`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ item_ids: ["oak"], output_prefix: "out/bundle", width: 64, height: 64, padding: 2, frames: 8, delay_ms: 90 }) });
+    assert.equal(sceneBundle.status, 200);
+    assert.equal((await sceneBundle.json()).data.operation, "build_scene_bundle");
     const scenePlan = await fetch(`${rest.url}/api/v1/library/scene-plan`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ item_ids: ["oak"] }) });
     assert.equal(scenePlan.status, 200);
     assert.equal((await scenePlan.json()).data.operation, "plan_asset_scene");

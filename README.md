@@ -124,6 +124,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `inspect_asset_batch`: audita hasta 32 assets en una sola llamada, conserva el orden, aísla fallos de decodificación y devuelve un resumen `valid/invalid/failed` sin transferir buffers de píxeles.
 - `audit_asset_manifest`: revisa los archivos referenciados por un manifest generado, detecta faltantes o archivos vacíos y devuelve formato, tamaño y hash SHA-256 en una respuesta compacta.
 - `recommend_asset_scene`: recibe un prompt de mundo, tags o efectos y devuelve una selección determinista de assets con ranking, razones y cobertura de tipos/variantes para componer escenas con menos llamadas.
+- `build_scene_bundle`: compone en una llamada la versión PNG, la animación GIF y sus manifests de una escena, reutilizando los compositores existentes y deteniéndose si falla la composición estática.
 - `inspect_animation_quality`: audita una animación en una sola llamada, detecta frames duplicados, cambios por transición, timing irregular, deriva de paleta y costura de loop.
 - `inspect_sprite_geometry`: calcula bounds alfa, componentes conectados, baseline y pivotes por frame para placement estable.
 - `generate_sprite_hitboxes`: deriva un manifest JSON de colisión desde esa geometría, con modo `components` o `union` y padding acotado, sin duplicar análisis raster.
@@ -253,6 +254,8 @@ Las dos últimas rutas sirven PNG/GIF de forma binaria desde el adaptador de arc
 `audit_asset_manifest` y `POST /api/v1/assets/manifest-audit` reciben `{ "manifest_filename": "output/scene.json" }`. El caso de uso extrae rutas de salida conocidas, comprueba existencia y tamaño, calcula SHA-256 y marca `valid: false` si falta o está vacío algún artefacto. Con `ASSET_ARTIFACT_ROOT` se puede restringir la auditoría a una raíz permitida.
 
 `recommend_asset_scene` y `POST /api/v1/library/recommendations` reciben opcionalmente `prompt`, `category`, `required_kinds`, `required_tags`, `required_variants`, `limit` y `seed`. Devuelven `suggestedItemIds`, scores y razones como `prompt:water`, `tag:tropical` o `variant:water_reflection`; el resultado se puede pasar directamente a `plan_asset_scene` o `compose_asset_scene`.
+
+`build_scene_bundle` y `POST /api/v1/library/scene-bundle` reciben `item_ids`, `output_prefix`, `width`, `height`, `padding`, `frames` y `delay_ms`. Generan `scene.png`, `scene.json`, `scene.gif` y `scene-animation.json` dentro del prefijo indicado con una respuesta compacta.
 
 La composición es fail-closed: si el preset contiene una referencia inexistente, no devuelve una escena parcial. Ejecuta `audit_asset_library` para localizar y corregir el catálogo antes de componer.
 
