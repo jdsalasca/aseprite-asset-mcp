@@ -50,6 +50,33 @@ test("background removal supports global mode and rejects invalid contracts", as
   assert.match(invalidTolerance.message, /tolerance/i);
 });
 
+test("cleanup removes isolated opaque pixels deterministically while preserving connected clusters", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-cleanup-"));
+  const input = path.join(directory, "input.png"); const first = path.join(directory, "first.png"); const second = path.join(directory, "second.png");
+  const pixels = new Uint8ClampedArray(7 * 7 * 4);
+  const set = (x: number, y: number, color: [number, number, number, number]) => pixels.set(color, (y * 7 + x) * 4);
+  set(1, 1, [240, 80, 60, 255]);
+  for (const [x, y] of [[4, 4], [5, 4], [4, 5], [5, 5]] as const) set(x, y, [80, 180, 240, 255]);
+  await sharp(Buffer.from(pixels), { raw: { width: 7, height: 7, channels: 4 } }).png().toFile(input);
+  const operation = { inputFilename: input, outputFilename: first, minNeighbors: 1, iterations: 1 };
+  assert.equal((await service().cleanupIsolatedPixels(operation)).ok, true);
+  assert.equal((await service().cleanupIsolatedPixels({ ...operation, outputFilename: second })).ok, true);
+  assert.deepEqual(await fs.readFile(first), await fs.readFile(second));
+  const output = await sharp(first).raw().toBuffer({ resolveWithObject: true });
+  assert.equal(output.data[(1 * 7 + 1) * 4 + 3], 0);
+  assert.equal(output.data[(4 * 7 + 4) * 4 + 3], 255);
+  assert.equal(output.data[(5 * 7 + 5) * 4 + 3], 255);
+  assert.deepEqual(await fs.readFile(input), await sharp(Buffer.from(pixels), { raw: { width: 7, height: 7, channels: 4 } }).png().toBuffer());
+});
+
+test("cleanup rejects invalid thresholds and iteration counts", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-cleanup-invalid-")); const input = path.join(directory, "input.png"); await makeSprite(input);
+  const invalidNeighbors = await service().cleanupIsolatedPixels({ inputFilename: input, outputFilename: path.join(directory, "neighbors.png"), minNeighbors: 9 });
+  const invalidIterations = await service().cleanupIsolatedPixels({ inputFilename: input, outputFilename: path.join(directory, "iterations.png"), iterations: 5 });
+  assert.equal(invalidNeighbors.ok, false); assert.match(invalidNeighbors.message, /neighbors/i);
+  assert.equal(invalidIterations.ok, false); assert.match(invalidIterations.message, /iterations/i);
+});
+
 test("color grade is deterministic and rejects invalid ranges", async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-grade-")); const input = path.join(directory, "input.png"); const first = path.join(directory, "first.png"); const second = path.join(directory, "second.png"); await makeSprite(input);
   assert.equal((await service().applyColorGrade({ inputFilename: input, outputFilename: first, brightness: 0.1, contrast: 1.2, saturation: 0.8 })).ok, true); assert.equal((await service().applyColorGrade({ inputFilename: input, outputFilename: second, brightness: 0.1, contrast: 1.2, saturation: 0.8 })).ok, true); assert.deepEqual(await fs.readFile(first), await fs.readFile(second));

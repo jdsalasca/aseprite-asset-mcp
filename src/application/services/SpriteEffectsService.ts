@@ -1,7 +1,7 @@
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { RasterCodec } from "../../domain/image-assets.js";
 import type { RasterFrame } from "../../domain/pixel-art.js";
-import type { ColorGradeInput, DayNightCycleInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteShadowInput, WaterCausticsInput, WaterReflectionInput } from "../../domain/sprite-effects.js";
+import type { CleanupIsolatedPixelsInput, ColorGradeInput, DayNightCycleInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteShadowInput, WaterCausticsInput, WaterReflectionInput } from "../../domain/sprite-effects.js";
 
 function ok(value: unknown): AssetOperationResult { return { ok: true, message: JSON.stringify(value) }; }
 function fail(error: unknown): AssetOperationResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
@@ -86,6 +86,34 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
         return { ...frame, pixels };
       });
       const format = formatFor(frames, input.format); await this.codec.encode(frames, input.outputFilename, format); return outputMessage("remove_background", input.inputFilename, input.outputFilename, frames.length, format);
+    } catch (error) { return fail(error); }
+  }
+
+  public async cleanupIsolatedPixels(input: CleanupIsolatedPixelsInput): Promise<AssetOperationResult> {
+    try {
+      assertDifferent(input.inputFilename, input.outputFilename);
+      const minNeighbors = input.minNeighbors ?? 1;
+      const iterations = input.iterations ?? 1;
+      if (!Number.isInteger(minNeighbors) || minNeighbors < 1 || minNeighbors > 8) throw new Error("Cleanup neighbors must be an integer from 1 to 8");
+      if (!Number.isInteger(iterations) || iterations < 1 || iterations > 4) throw new Error("Cleanup iterations must be an integer from 1 to 4");
+      const source = await this.codec.decode(input.inputFilename);
+      const frames = source.map((frame) => {
+        let pixels = new Uint8ClampedArray(frame.pixels);
+        for (let iteration = 0; iteration < iterations; iteration += 1) {
+          const next = new Uint8ClampedArray(pixels);
+          const alphaAtPixels = (x: number, y: number): number => x < 0 || y < 0 || x >= frame.width || y >= frame.height ? 0 : pixels[(y * frame.width + x) * 4 + 3] ?? 0;
+          for (let y = 0; y < frame.height; y += 1) for (let x = 0; x < frame.width; x += 1) {
+            const offset = (y * frame.width + x) * 4;
+            if ((pixels[offset + 3] ?? 0) === 0) continue;
+            let neighbors = 0;
+            for (let dy = -1; dy <= 1; dy += 1) for (let dx = -1; dx <= 1; dx += 1) if ((dx !== 0 || dy !== 0) && alphaAtPixels(x + dx, y + dy) > 0) neighbors += 1;
+            if (neighbors < minNeighbors) next[offset + 3] = 0;
+          }
+          pixels = next;
+        }
+        return { ...frame, pixels };
+      });
+      const format = formatFor(frames, input.format); await this.codec.encode(frames, input.outputFilename, format); return outputMessage("cleanup_isolated_pixels", input.inputFilename, input.outputFilename, frames.length, format);
     } catch (error) { return fail(error); }
   }
 
