@@ -151,3 +151,9 @@ docker compose run --rm aseprite-mcp-dev
 ## Licencia y proyecto
 
 Proyecto independiente: [`jdsalasca/aseprite-asset-mcp`](https://github.com/jdsalasca/aseprite-asset-mcp). Conserva la licencia MIT.
+
+## Ejecución de recetas compuestas
+
+create_asset_recipe genera un plan revisable y execute_asset_recipe lo ejecuta paso a paso usando los mismos servicios de efectos, materiales, iluminación y calidad. El pipeline conserva la fuente, detiene la primera operación fallida y devuelve el artifact final.
+
+La UX puede invocar POST /api/v1/recipes/execute cuando MCP_REST_PORT está habilitado.

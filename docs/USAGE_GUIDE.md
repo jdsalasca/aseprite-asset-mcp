@@ -279,3 +279,9 @@ Para agentes, usar primero una búsqueda compacta:
 ```
 
 `start_asset_job` devuelve `progress: { completed, total }`; `get_asset_job_status` permite refrescarlo sin cargar artifacts completos. Se puede configurar `ASSET_ARTIFACT_ROOT` para restringir outputs y `ASSET_JOB_STORE_PATH` para persistir el estado fuera del repositorio.
+
+## Ejecutar una receta compuesta
+
+El tool execute_asset_recipe y el endpoint REST POST /api/v1/recipes/execute ejecutan el plan de create_asset_recipe con una tubería real. Cada paso recibe la salida anterior y la quality gate valida el último archivo; si una operación falla, no se ejecutan pasos posteriores.
+
+La entrada conserva asset_id, input_filename, output_prefix, steps, seed, material y direction del creador de recetas. El servidor limita cuerpos REST a 1 MiB y responde 413 cuando la UX envía un payload mayor.

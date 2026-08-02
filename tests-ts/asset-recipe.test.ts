@@ -12,6 +12,10 @@ test("asset recipe composer creates deterministic compact steps", () => {
   assert.equal(first.schemaVersion, 1);
   assert.equal(first.sourcePreserved, true);
   assert.deepEqual(first.steps.map((step) => step.operation), ["apply_pixel_outline", "apply_material_texture", "apply_depth_lighting", "run_asset_quality_gate"]);
+  assert.equal(first.steps[0]?.inputFilename, "art/hero.png");
+  assert.equal(first.steps[1]?.inputFilename, "art/hero-outline.png");
+  assert.equal(first.steps[2]?.inputFilename, "art/hero-material_texture.png");
+  assert.equal(first.steps[3]?.inputFilename, "art/hero-depth_lighting.png");
   assert.equal(first.steps[1]?.arguments.material, "stone");
   assert.equal(first.steps[2]?.arguments.direction, "south_west");
 });
@@ -22,4 +26,5 @@ test("asset recipe composer rejects empty, oversized, and traversal recipes", ()
   assert.throws(() => service.compose({ assetId: "hero", inputFilename: "hero.png", outputPrefix: "out", steps: [] }), /between 1 and 8/);
   assert.throws(() => service.compose({ assetId: "hero", inputFilename: "hero.png", outputPrefix: "out", steps: ["outline", "outline", "outline", "outline", "outline", "outline", "outline", "outline", "outline"] }), /between 1 and 8/);
   assert.throws(() => service.compose({ assetId: "hero", inputFilename: "hero.png", outputPrefix: "../out", steps: ["outline"] }), /traversal/);
+  assert.throws(() => service.compose({ assetId: "hero", inputFilename: "../hero.png", outputPrefix: "out", steps: ["outline"] }), /traversal/);
 });

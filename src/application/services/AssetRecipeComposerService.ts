@@ -7,20 +7,26 @@ const DEFAULT_MATERIAL = "earth";
 
 function outputName(prefix: string, step: AssetRecipeStep, format: "png" | "gif"): string { return `${prefix}-${step}.${step === "particles" ? "gif" : format}`; }
 
+function hasTraversal(filename: string): boolean { return filename.split(/[\\/]/).includes(".."); }
 export class AssetRecipeComposerService {
   public compose(input: AssetRecipeCreateInput): AssetRecipePlan {
     this.validate(input);
     const seed = input.seed ?? 1;
     const format = input.format ?? "png";
     const steps = [...new Set(input.steps)];
-    const plans = steps.map((step) => this.stepFor(step, input, seed, format));
+    let currentInput = input.inputFilename;
+    const plans = steps.map((step) => {
+      const plan = this.stepFor(step, { ...input, inputFilename: currentInput }, seed, format);
+      if (plan.outputFilename) currentInput = plan.outputFilename;
+      return plan;
+    });
     const recipeId = createHash("sha256").update(JSON.stringify({ assetId: input.assetId, inputFilename: input.inputFilename, outputPrefix: input.outputPrefix, format, steps, seed, material: input.material ?? DEFAULT_MATERIAL, direction: input.direction ?? DEFAULT_DIRECTION })).digest("hex").slice(0, 16);
     return { recipeId, schemaVersion: 1, algorithmVersion: VERSION, assetId: input.assetId, inputFilename: input.inputFilename, outputPrefix: input.outputPrefix, format, seed, steps: plans, sourcePreserved: true, deterministic: true };
   }
 
   private validate(input: AssetRecipeCreateInput): void {
     if (!input.assetId.trim() || !input.inputFilename.trim() || !input.outputPrefix.trim()) throw new Error("Asset id, input filename, and output prefix are required");
-    if (input.inputFilename.includes("\0") || input.outputPrefix.includes("\0") || input.outputPrefix.split(/[\\/]/).includes("..")) throw new Error("Recipe paths contain an invalid traversal segment");
+    if (input.inputFilename.includes("\0") || input.outputPrefix.includes("\0") || input.inputFilename.split(/[\\/]/).includes("..") || input.outputPrefix.split(/[\\/]/).includes("..")) throw new Error("Recipe paths contain an invalid traversal segment");
     if (!input.steps.length || input.steps.length > 8) throw new Error("A recipe must contain between 1 and 8 steps");
     if (input.seed !== undefined && !Number.isInteger(input.seed)) throw new Error("Recipe seed must be an integer");
   }

@@ -31,6 +31,7 @@ import path from "node:path";
 import { DeterministicEnhancementService } from "../application/services/DeterministicEnhancementService.js";
 import { SpriteEffectsService } from "../application/services/SpriteEffectsService.js";
 import { AssetRecipeComposerService } from "../application/services/AssetRecipeComposerService.js";
+import { AssetRecipeExecutionService } from "../application/services/AssetRecipeExecutionService.js";
 import { AssetRecipeToolController } from "./controllers/AssetRecipeToolController.js";
 import { AssetRestController } from "./rest/AssetRestController.js";
 
@@ -189,6 +190,7 @@ const TOOL_NAMES = [
   "generate_particle_burst",
   "generate_normal_map",
   "create_asset_recipe",
+  "execute_asset_recipe",
 ];
 
 export class AsepriteMcpServerAdapter {
@@ -200,6 +202,7 @@ export class AsepriteMcpServerAdapter {
   private readonly enhancements: DeterministicEnhancementService;
   private readonly assetJobs: AssetJobService;
   private readonly spriteEffects: SpriteEffectsService;
+  private readonly recipeExecutor: AssetRecipeExecutionService;
   private readonly recipes: AssetRecipeComposerService;
   public readonly restController: AssetRestController;
 
@@ -210,7 +213,17 @@ export class AsepriteMcpServerAdapter {
     this.visualAssets = new VisualAssetService(rasterCodec, manifestWriter);
     this.spriteEffects = new SpriteEffectsService(rasterCodec);
     this.recipes = new AssetRecipeComposerService();
-    this.restController = new AssetRestController({ createRecipe: (input) => this.recipes.compose(input), spriteEffects: this.spriteEffects, applyMaterialTexture: (input) => this.visualAssets.applyMaterialTexture(input), applyDepthLighting: (input) => this.visualAssets.applyDepthLighting(input) }, SERVER_VERSION);
+    this.recipeExecutor = new AssetRecipeExecutionService({
+      applyPixelOutline: (input) => this.spriteEffects.applyPixelOutline(input),
+      applyColorGrade: (input) => this.spriteEffects.applyColorGrade(input),
+      applyMaterialTexture: (input) => this.visualAssets.applyMaterialTexture(input),
+      applyDepthLighting: (input) => this.visualAssets.applyDepthLighting(input),
+      generateSpriteShadow: (input) => this.spriteEffects.generateSpriteShadow(input),
+      generateParticleBurst: (input) => this.spriteEffects.generateParticleBurst(input),
+      generateNormalMap: (input) => this.spriteEffects.generateNormalMap(input),
+      runQualityGate: (input) => this.visualAssets.runQualityGate(input),
+    });
+    this.restController = new AssetRestController({ createRecipe: (input) => this.recipes.compose(input), executeRecipe: (input) => this.recipeExecutor.execute(this.recipes.compose(input)), spriteEffects: this.spriteEffects, applyMaterialTexture: (input) => this.visualAssets.applyMaterialTexture(input), applyDepthLighting: (input) => this.visualAssets.applyDepthLighting(input) }, SERVER_VERSION);
     this.enhancements = new DeterministicEnhancementService(rasterCodec);
     this.assetJobs = new AssetJobService({ run: (input) => this.imageAssets.runBatch(input) }, jobStore ?? new InMemoryAssetJobStore(), { artifactResolver: new FileAssetArtifactResolver(() => new Date().toISOString(), process.env.ASSET_ARTIFACT_ROOT ? [process.env.ASSET_ARTIFACT_ROOT] : []), timeoutMs: 5 * 60 * 1000 });
     this.server = new McpServer({ name: "aseprite-asset-mcp", version: SERVER_VERSION });
@@ -252,7 +265,7 @@ export class AsepriteMcpServerAdapter {
     new ImageAssetToolController(this.assets, this.imageAssets).register(this.server);
     new VisualAssetToolController(this.visualAssets).register(this.server);
     new SpriteEffectsToolController(this.spriteEffects).register(this.server);
-    new AssetRecipeToolController(this.recipes).register(this.server);
+    new AssetRecipeToolController(this.recipes, this.recipeExecutor).register(this.server);
     new EnhancementToolController(this.visualAssets, this.enhancements).register(this.server);
     new AssetJobToolController(this.assetJobs).register(this.server);
     new LayerFrameToolController(this.assets).register(this.server);
