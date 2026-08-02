@@ -23,6 +23,9 @@ import { SceneExportToolController } from "./controllers/SceneExportToolControll
 import { WorkflowPlanToolController } from "./controllers/WorkflowPlanToolController.js";
 import { AssetJobService } from "../application/services/AssetJobService.js";
 import { InMemoryAssetJobStore } from "../infrastructure/jobs/InMemoryAssetJobStore.js";
+import { JsonAssetJobStore } from "../infrastructure/jobs/JsonAssetJobStore.js";
+import type { AssetJobStorePort } from "../application/ports/AssetJobPorts.js";
+import path from "node:path";
 import { DeterministicEnhancementService } from "../application/services/DeterministicEnhancementService.js";
 
 const SERVER_VERSION = "1.0.0";
@@ -182,13 +185,13 @@ export class AsepriteMcpServerAdapter {
   private readonly enhancements: DeterministicEnhancementService;
   private readonly assetJobs: AssetJobService;
 
-  public constructor(private readonly assets: AssetGatewayPort, imageAssets?: PixelArtAssetService) {
+  public constructor(private readonly assets: AssetGatewayPort, imageAssets?: PixelArtAssetService, jobStore?: AssetJobStorePort) {
     const rasterCodec = new SharpRasterCodec();
     const manifestWriter = new JsonAssetManifestWriter();
     this.imageAssets = imageAssets ?? new PixelArtAssetService(rasterCodec, manifestWriter);
     this.visualAssets = new VisualAssetService(rasterCodec, manifestWriter);
     this.enhancements = new DeterministicEnhancementService(rasterCodec);
-    this.assetJobs = new AssetJobService({ run: (input) => this.imageAssets.runBatch(input) }, new InMemoryAssetJobStore());
+    this.assetJobs = new AssetJobService({ run: (input) => this.imageAssets.runBatch(input) }, jobStore ?? new InMemoryAssetJobStore());
     this.server = new McpServer({ name: "aseprite-asset-mcp", version: SERVER_VERSION });
     this.registerTools();
   }
@@ -243,7 +246,8 @@ export class AsepriteMcpServerAdapter {
 
 async function main(): Promise<void> {
   const gateway = new AsepriteCliGateway();
-  const adapter = new AsepriteMcpServerAdapter(gateway);
+  const jobStore = new JsonAssetJobStore(process.env.ASSET_JOB_STORE_PATH ?? path.join(process.cwd(), ".asset-studio", "jobs.json"));
+  const adapter = new AsepriteMcpServerAdapter(gateway, undefined, jobStore);
   await adapter.server.connect(new StdioServerTransport());
   console.error("Aseprite MCP TypeScript server running on stdio");
 }

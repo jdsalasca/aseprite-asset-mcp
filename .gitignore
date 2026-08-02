@@ -32,4 +32,5 @@ ENV/
 
 # TypeScript workflow outputs
 artifacts/
+.asset-studio/
 node_modules/
