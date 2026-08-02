@@ -9,9 +9,10 @@ import type { AnimationQualityService } from "../../application/services/Animati
 import type { SpriteNormalizationService } from "../../application/services/SpriteNormalizationService.js";
 import type { AnimationSheetService } from "../../application/services/AnimationSheetService.js";
 import type { SpriteGeometryService } from "../../application/services/SpriteGeometryService.js";
+import type { SpriteHitboxService } from "../../application/services/SpriteHitboxService.js";
 
 export class ImageAssetToolController {
-  public constructor(private readonly assets: ExportAnimationPort, private readonly imageAssets: PixelArtAssetService, private readonly contactSheets: ContactSheetService, private readonly batchQuality: AssetBatchQualityService, private readonly animationQuality: AnimationQualityService, private readonly spriteNormalization: SpriteNormalizationService, private readonly animationSheet: AnimationSheetService, private readonly spriteGeometry: SpriteGeometryService) {}
+  public constructor(private readonly assets: ExportAnimationPort, private readonly imageAssets: PixelArtAssetService, private readonly contactSheets: ContactSheetService, private readonly batchQuality: AssetBatchQualityService, private readonly animationQuality: AnimationQualityService, private readonly spriteNormalization: SpriteNormalizationService, private readonly animationSheet: AnimationSheetService, private readonly spriteGeometry: SpriteGeometryService, private readonly spriteHitbox: SpriteHitboxService) {}
 
   public register(server: McpServer): void {
     server.registerTool("convert_image_to_pixel_art", {
@@ -91,6 +92,11 @@ export class ImageAssetToolController {
       description: "Inspect per-frame alpha bounds, connected components, baseline, and bottom-center pivots for scene placement.",
       inputSchema: { filename: z.string().min(1), min_component_pixels: z.number().int().min(1).max(4096).default(1) },
     }, async ({ filename, min_component_pixels }) => this.result(await this.spriteGeometry.inspect({ filename, minComponentPixels: min_component_pixels })));
+
+    server.registerTool("generate_sprite_hitboxes", {
+      description: "Generate a deterministic collision manifest from sprite geometry using component or union hitboxes with bounded padding.",
+      inputSchema: { filename: z.string().min(1), output_filename: z.string().min(1), mode: z.enum(["components", "union"]).default("components"), padding: z.number().int().min(0).max(16).default(0), min_component_pixels: z.number().int().min(1).max(4096).default(1) },
+    }, async ({ filename, output_filename, mode, padding, min_component_pixels }) => this.result(await this.spriteHitbox.generate({ filename, outputFilename: output_filename, mode, padding, minComponentPixels: min_component_pixels })));
 
     server.registerTool("build_texture_atlas", {
       description: "Pack equal-size image frames into one PNG texture atlas.",

@@ -23,6 +23,7 @@ const DESCRIPTION_OVERRIDES: Record<string, string> = {
   normalize_sprite: "Crop raster frames to shared alpha bounds and write deterministic pivot metadata.",
   build_animation_sheet: "Assemble animation frames into a PNG spritesheet with timing and pivot metadata.",
   inspect_sprite_geometry: "Inspect alpha bounds, connected components, baseline, and pivots per animation frame.",
+  generate_sprite_hitboxes: "Generate component or union hitboxes from deterministic sprite geometry.",
   validate_asset_quality: "Validate palette size and isolated-pixel limits.",
   build_texture_atlas: "Pack equal-size images into one texture atlas.",
   run_asset_recipe: "Run or preview one compact asset recipe.",

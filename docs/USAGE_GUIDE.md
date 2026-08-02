@@ -11,7 +11,7 @@ PowerShell:
 
 Health: GET http://127.0.0.1:3766/api/v1/health
 
-Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lighting y /api/v1/effects/outline, /api/v1/effects/color-grade, /api/v1/effects/shadow, /api/v1/effects/particles, /api/v1/effects/normal-map, /api/v1/effects/rain, /api/v1/effects/motion, /api/v1/effects/upscale, /api/v1/assets/palette-harmonize, /api/v1/assets/contact-sheet, /api/v1/assets/quality-batch, /api/v1/assets/animation-quality, /api/v1/assets/normalize-sprite, /api/v1/effects/seamless, /api/v1/effects/water-reflection, /api/v1/effects/water-caustics, /api/v1/effects/day-night, /api/v1/effects/scene-stack, /api/v1/variants/pack, /api/v1/scenes/extend y /api/v1/scenes/biome-transition.
+Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lighting y /api/v1/effects/outline, /api/v1/effects/color-grade, /api/v1/effects/shadow, /api/v1/effects/particles, /api/v1/effects/normal-map, /api/v1/effects/rain, /api/v1/effects/motion, /api/v1/effects/upscale, /api/v1/assets/palette-harmonize, /api/v1/assets/contact-sheet, /api/v1/assets/quality-batch, /api/v1/assets/animation-quality, /api/v1/assets/normalize-sprite, /api/v1/assets/sprite-geometry, /api/v1/assets/sprite-hitboxes, /api/v1/effects/seamless, /api/v1/effects/water-reflection, /api/v1/effects/water-caustics, /api/v1/effects/day-night, /api/v1/effects/scene-stack, /api/v1/variants/pack, /api/v1/scenes/extend y /api/v1/scenes/biome-transition.
 
 `/api/v1/effects/upscale` recibe `{ "input_filename": "hero.png", "output_filename": "hero-3x.png", "scale": 3 }`. Usa nearest-neighbor determinista, conserva transparencia y delays cuando la entrada es animada, rechaza sobrescribir la fuente y limita cada dimensión resultante a 4096 px.
 
@@ -42,6 +42,8 @@ Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lightin
 `/api/v1/assets/animation-sheet` recibe `{ "input_filename": "hero.gif", "output_filename": "hero-sheet.png", "manifest_filename": "hero-sheet.json", "columns": 4, "padding": 1 }`. Ensambla la animación en una rejilla PNG, calcula coordenadas/pivotes por frame y conserva `delaysMs`, `totalDurationMs` y `loopDurationMs` en el manifest.
 
 `/api/v1/assets/sprite-geometry` recibe `{ "filename": "hero.gif", "min_component_pixels": 1 }`. Es una inspección de solo lectura para scene placement: reporta componentes alfa 4-conectados, bounds, baseline, pivote y drift entre frames sin generar ni sobrescribir assets.
+
+`/api/v1/assets/sprite-hitboxes` recibe `{ "filename": "hero.gif", "output_filename": "hero-hitboxes.json", "mode": "components", "padding": 1, "min_component_pixels": 1 }`. Reutiliza el puerto de geometría, genera hitboxes por componente o la unión por frame, recorta el padding al canvas y escribe un manifest separado con `deterministic: true` y `sourcePreserved: true`.
 
 `/api/v1/assets/animation-quality` recibe `{ "filename": "hero-walk.gif" }` y devuelve transiciones compactas, frames duplicados, delays, deriva de paleta, estado de loop y recomendaciones antes de exportar al motor.
 
