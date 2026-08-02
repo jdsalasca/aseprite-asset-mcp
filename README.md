@@ -126,6 +126,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `generate_world_map`: crea mapas multi-bioma deterministas con landmarks y preview.
 - `generate_beach_scene`: crea costa, arena, tierra, preview y oleaje animado.
 - `extend_scene`: amplía un mapa JSON existente por sus bordes, conserva capas y desplaza landmarks de forma determinista.
+- `generate_seamless_texture`: iguala bordes opuestos para texturas repetibles de agua, tierra, piedra o hierba sin alterar la fuente.
 - `generate_time_of_day_pack`: crea transición día, atardecer, noche y amanecer.
 - `generate_environment_pack`: empaqueta playa, bosque, aldea o cueva en una sola llamada.
 - `create_asset_recipe`: compone outline, grading, materiales, luz, sombras, partículas, normal map y quality gate en un plan determinista sin ejecutar cambios.
@@ -180,6 +181,7 @@ Ejemplos REST:
 GET /api/v1/library?query=rain&limit=12
 POST /api/v1/effects/motion
 POST /api/v1/effects/upscale
+POST /api/v1/effects/seamless
 GET /api/v1/library/items/forest-ranger
 GET /api/v1/library/presets/living-forest
 GET /api/v1/library/items/forest-ranger/preview

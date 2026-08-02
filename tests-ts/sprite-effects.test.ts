@@ -73,3 +73,29 @@ test("motion pack rejects unsupported frame counts and amplitudes", async () => 
   const result = await service().generateMotionPack({ inputFilename: input, outputFilename: path.join(directory, "out.gif"), motion: "run", frames: 1, seed: 1, amplitude: 20 });
   assert.equal(result.ok, false);
 });
+
+test("seamless texture makes opposite borders match deterministically and preserves the source", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-seamless-"));
+  const input = path.join(directory, "input.png");
+  const first = path.join(directory, "first.png");
+  const second = path.join(directory, "second.png");
+  const pixels = new Uint8ClampedArray(4 * 4 * 4);
+  for (let y = 0; y < 4; y += 1) for (let x = 0; x < 4; x += 1) {
+    const offset = (y * 4 + x) * 4;
+    pixels[offset] = x === 0 ? 240 : x === 3 ? 30 : 80;
+    pixels[offset + 1] = y === 0 ? 220 : y === 3 ? 40 : 100;
+    pixels[offset + 2] = 60;
+    pixels[offset + 3] = (y === 0 && (x === 0 || x === 3)) ? 0 : 255;
+  }
+  await sharp(Buffer.from(pixels), { raw: { width: 4, height: 4, channels: 4 } }).png().toFile(input);
+  const sourceBefore = await fs.readFile(input);
+  const texture = { inputFilename: input, outputFilename: first, seamWidth: 2 };
+  assert.equal((await service().generateSeamlessTexture(texture)).ok, true);
+  assert.equal((await service().generateSeamlessTexture({ ...texture, outputFilename: second })).ok, true);
+  assert.deepEqual(await fs.readFile(first), await fs.readFile(second));
+  assert.deepEqual(await fs.readFile(input), sourceBefore);
+  const data = await sharp(first).raw().toBuffer({ resolveWithObject: true });
+  for (let y = 0; y < 4; y += 1) assert.deepEqual([...data.data.slice((y * 4) * 4, (y * 4 + 1) * 4)], [...data.data.slice((y * 4 + 3) * 4, (y * 4 + 4) * 4)]);
+  for (let x = 0; x < 4; x += 1) assert.deepEqual([...data.data.slice(x * 4, x * 4 + 4)], [...data.data.slice((3 * 4 + x) * 4, (3 * 4 + x + 1) * 4)]);
+  assert.equal((await service().generateSeamlessTexture({ ...texture, outputFilename: path.join(directory, "invalid.png"), seamWidth: 3 })).ok, false);
+});

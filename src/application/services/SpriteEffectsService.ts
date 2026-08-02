@@ -1,7 +1,7 @@
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { RasterCodec } from "../../domain/image-assets.js";
 import type { RasterFrame } from "../../domain/pixel-art.js";
-import type { ColorGradeInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteShadowInput } from "../../domain/sprite-effects.js";
+import type { ColorGradeInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, SeamlessTextureInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteShadowInput } from "../../domain/sprite-effects.js";
 
 function ok(value: unknown): AssetOperationResult { return { ok: true, message: JSON.stringify(value) }; }
 function fail(error: unknown): AssetOperationResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
@@ -14,6 +14,7 @@ function hash(seed: number, index: number): number { let value = Math.imul(seed 
 function alphaAt(frame: RasterFrame, x: number, y: number): number { if (x < 0 || y < 0 || x >= frame.width || y >= frame.height) return 0; return frame.pixels[(y * frame.width + x) * 4 + 3] ?? 0; }
 function setPixel(pixels: Uint8ClampedArray, width: number, height: number, x: number, y: number, color: [number, number, number, number]): void { if (x < 0 || y < 0 || x >= width || y >= height) return; pixels.set(color, (y * width + x) * 4); }
 function outputMessage(operation: string, input: string | null, output: string, frames: number, format: SpriteEffectFormat): AssetOperationResult { return ok({ operation, ...(input ? { input } : {}), output, frames, format, deterministic: true, sourcePreserved: true }); }
+function averagePixel(left: Uint8ClampedArray, right: Uint8ClampedArray, leftOffset: number, rightOffset: number): [number, number, number, number] { return [Math.round(((left[leftOffset] ?? 0) + (right[rightOffset] ?? 0)) / 2), Math.round(((left[leftOffset + 1] ?? 0) + (right[rightOffset + 1] ?? 0)) / 2), Math.round(((left[leftOffset + 2] ?? 0) + (right[rightOffset + 2] ?? 0)) / 2), Math.round(((left[leftOffset + 3] ?? 0) + (right[rightOffset + 3] ?? 0)) / 2)]; }
 
 export class SpriteEffectsService implements SpriteEffectsGateway {
   public constructor(private readonly codec: RasterCodec) {}
@@ -127,6 +128,36 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
       const format = formatFor(frames, input.format);
       await this.codec.encode(frames, input.outputFilename, format);
       return outputMessage("generate_motion_pack", input.inputFilename, input.outputFilename, frames.length, format);
+    } catch (error) { return fail(error); }
+  }
+
+  public async generateSeamlessTexture(input: SeamlessTextureInput): Promise<AssetOperationResult> {
+    try {
+      assertDifferent(input.inputFilename, input.outputFilename);
+      const source = await this.codec.decode(input.inputFilename);
+      const requestedWidth = input.seamWidth ?? 1;
+      if (!Number.isInteger(requestedWidth) || requestedWidth < 1 || requestedWidth > 32) throw new Error("Seam width must be an integer from 1 to 32");
+      const frames = source.map((frame) => {
+        if (frame.width < 2 || frame.height < 2 || requestedWidth > Math.floor(Math.min(frame.width, frame.height) / 2)) throw new Error("Seam width must not exceed half of the smallest frame dimension");
+        const seamWidth = requestedWidth;
+        const pixels = new Uint8ClampedArray(frame.pixels);
+        for (let y = 0; y < frame.height; y += 1) for (let band = 0; band < seamWidth; band += 1) {
+          const leftOffset = (y * frame.width + band) * 4;
+          const rightOffset = (y * frame.width + frame.width - 1 - band) * 4;
+          const mixed = averagePixel(frame.pixels, frame.pixels, leftOffset, rightOffset);
+          pixels.set(mixed, leftOffset); pixels.set(mixed, rightOffset);
+        }
+        for (let x = 0; x < frame.width; x += 1) for (let band = 0; band < seamWidth; band += 1) {
+          const topOffset = (band * frame.width + x) * 4;
+          const bottomOffset = ((frame.height - 1 - band) * frame.width + x) * 4;
+          const mixed = averagePixel(pixels, pixels, topOffset, bottomOffset);
+          pixels.set(mixed, topOffset); pixels.set(mixed, bottomOffset);
+        }
+        return { ...frame, pixels };
+      });
+      const format = formatFor(frames, input.format);
+      await this.codec.encode(frames, input.outputFilename, format);
+      return outputMessage("generate_seamless_texture", input.inputFilename, input.outputFilename, frames.length, format);
     } catch (error) { return fail(error); }
   }
 }

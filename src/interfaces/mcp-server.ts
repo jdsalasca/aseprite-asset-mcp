@@ -196,6 +196,7 @@ const TOOL_NAMES = [
   "generate_normal_map",
   "generate_rain_overlay",
   "generate_motion_pack",
+  "generate_seamless_texture",
   "create_asset_recipe",
   "execute_asset_recipe",
   "get_asset_library",

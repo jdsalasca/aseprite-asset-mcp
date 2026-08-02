@@ -15,7 +15,7 @@ function result(operation: string): AssetOperationResult { return { ok: true, me
 const libraryCatalog: AssetLibraryCatalog = { schemaVersion: 1, libraryVersion: "test", categories: [{ id: "flora", title: "Flora", description: "Plants", itemCount: 1 }], items: [{ id: "oak", title: "Oak", category: "flora", folder: "flora/oak", kind: "sprite", description: "Tree", tags: ["tree"], variants: ["rain"], formats: ["png", "svg", "json"], readmePath: "flora/oak/README.md", previewPath: "flora/oak/preview.png", spritePath: "flora/oak/sprite-sheet.png", deterministic: true }], presets: [{ id: "test-preset", title: "Test preset", description: "Oak", category: "flora", itemIds: ["oak"], recommendedTools: ["generate_world_map"], deterministic: true }] };
 class FakeLibrary implements AssetLibraryPort { public async load(): Promise<AssetLibraryCatalog> { return libraryCatalog; } public async read() { return { data: new Uint8Array([137, 80, 78, 71]), contentType: "image/png" }; } }
 function fakeUseCases(): AssetRestUseCases {
-  const effects: SpriteEffectsGateway = { applyPixelOutline: async () => result("apply_pixel_outline"), applyColorGrade: async () => result("apply_color_grade"), generateSpriteShadow: async () => result("generate_sprite_shadow"), generateParticleBurst: async () => result("generate_particle_burst"), generateNormalMap: async () => result("generate_normal_map"), generateRainOverlay: async () => result("generate_rain_overlay"), generateMotionPack: async () => result("generate_motion_pack") };
+  const effects: SpriteEffectsGateway = { applyPixelOutline: async () => result("apply_pixel_outline"), applyColorGrade: async () => result("apply_color_grade"), generateSpriteShadow: async () => result("generate_sprite_shadow"), generateParticleBurst: async () => result("generate_particle_burst"), generateNormalMap: async () => result("generate_normal_map"), generateRainOverlay: async () => result("generate_rain_overlay"), generateMotionPack: async () => result("generate_motion_pack"), generateSeamlessTexture: async () => result("generate_seamless_texture") };
   return {
     createRecipe: (input) => new AssetRecipeComposerService().compose(input),
     executeRecipe: async (input) => ({ ok: true, recipeId: "test-recipe", outputFilename: input.inputFilename, steps: [], sourcePreserved: true, deterministic: true }),
@@ -87,6 +87,9 @@ test("REST controller exposes the same recipe and effect application services", 
     const extension = await fetch(`${rest.url}/api/v1/scenes/extend`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_map_filename: "map.json", output_map_filename: "map-expanded.json", top: 2, right: 3, bottom: 1, left: 4, seed: 9 }) });
     assert.equal(extension.status, 200);
     assert.equal((await extension.json()).data.operation, "extend_scene");
+    const seamless = await fetch(`${rest.url}/api/v1/effects/seamless`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_filename: "hero.png", output_filename: "hero-seamless.png", seam_width: 2 }) });
+    assert.equal(seamless.status, 200);
+    assert.equal((await seamless.json()).data.operation, "generate_seamless_texture");
 
     const invalid = await fetch(`${rest.url}/api/v1/effects/outline`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_filename: "hero.png", output_filename: "hero-outline.png", color: "nope" }) });
     assert.equal(invalid.status, 400);

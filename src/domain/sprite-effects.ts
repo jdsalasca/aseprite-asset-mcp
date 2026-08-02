@@ -10,6 +10,7 @@ export interface NormalMapInput extends SpriteEffectBaseInput { strength?: numbe
 export interface RainOverlayInput extends SpriteEffectBaseInput { seed: number; intensity?: number | undefined; wind?: number | undefined; color: string; delayMs?: number | undefined; }
 export type MotionKind = "idle" | "walk" | "run" | "jump" | "attack";
 export interface MotionPackInput extends SpriteEffectBaseInput { motion: MotionKind; frames: number; seed: number; amplitude?: number | undefined; delayMs?: number | undefined; }
+export interface SeamlessTextureInput extends SpriteEffectBaseInput { seamWidth?: number | undefined; }
 
 export interface SpriteEffectsGateway {
   applyPixelOutline(input: PixelOutlineInput): Promise<AssetOperationResult>;
@@ -19,4 +20,5 @@ export interface SpriteEffectsGateway {
   generateNormalMap(input: NormalMapInput): Promise<AssetOperationResult>;
   generateRainOverlay(input: RainOverlayInput): Promise<AssetOperationResult>;
   generateMotionPack(input: MotionPackInput): Promise<AssetOperationResult>;
+  generateSeamlessTexture(input: SeamlessTextureInput): Promise<AssetOperationResult>;
 }
