@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "desert-scholar",
+  "title": "desert scholar",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 1662397787,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "scholar"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

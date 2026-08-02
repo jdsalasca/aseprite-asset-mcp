@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "forest-sailor",
+  "title": "forest sailor",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 1212595199,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "sailor"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

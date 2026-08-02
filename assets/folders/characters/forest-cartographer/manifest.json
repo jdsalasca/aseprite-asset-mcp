@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "forest-cartographer",
+  "title": "forest cartographer",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 3503429333,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "cartographer"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

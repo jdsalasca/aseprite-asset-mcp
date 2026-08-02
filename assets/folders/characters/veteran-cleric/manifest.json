@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "veteran-cleric",
+  "title": "veteran cleric",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 2316974607,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "cleric"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

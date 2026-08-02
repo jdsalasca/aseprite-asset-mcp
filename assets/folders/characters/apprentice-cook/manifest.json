@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "apprentice-cook",
+  "title": "apprentice cook",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 246274265,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "cook"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

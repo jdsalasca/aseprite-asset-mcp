@@ -1,5 +1,9 @@
 # Asset Studio + Aseprite MCP
 
+## Orquestación y diagnóstico
+
+Al iniciar, el orquestador intenta detectar Aseprite en este orden: ruta indicada en la UX, ASEPRITE_PATH y rutas comunes del sistema operativo. Si encuentra el ejecutable, persiste la ruta resuelta y la entrega al proceso MCP junto con MCP_REST_PORT; si falla, el panel muestra el diagnóstico y el último error. El MCP puede exponer en paralelo su sidecar REST local usando los mismos servicios de aplicación.
+
 El proyecto `asset-studio` es un repositorio independiente que consume este MCP mediante el cliente MCP oficial sobre stdio.
 
 ## Repositorios locales

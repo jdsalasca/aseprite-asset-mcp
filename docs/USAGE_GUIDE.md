@@ -1,5 +1,84 @@
 # Aseprite Asset MCP: usage guide
 
+## REST local para la UX
+
+El mismo runtime TypeScript puede publicar un sidecar HTTP local para una UX. Sus controladores adaptan JSON a los mismos casos de uso que registran las herramientas MCP; no duplican algoritmos.
+
+PowerShell:
+
+    $env:MCP_REST_PORT = "3766"
+    npm run mcp
+
+Health: GET http://127.0.0.1:3766/api/v1/health
+
+Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lighting, /api/v1/assets/enhancement-bundle, /api/v1/assets/enhancement-batch y /api/v1/effects/outline, /api/v1/effects/color-grade, /api/v1/effects/shadow, /api/v1/effects/particles, /api/v1/effects/normal-map, /api/v1/effects/rain, /api/v1/effects/motion, /api/v1/effects/upscale, /api/v1/assets/palette-harmonize, /api/v1/assets/contact-sheet, /api/v1/assets/quality-batch, /api/v1/assets/animation-quality, /api/v1/assets/normalize-sprite, /api/v1/assets/sprite-geometry, /api/v1/assets/sprite-hitboxes, /api/v1/effects/seamless, /api/v1/effects/water-reflection, /api/v1/effects/water-caustics, /api/v1/effects/day-night, /api/v1/effects/scene-stack, /api/v1/variants/pack, /api/v1/scenes/extend y /api/v1/scenes/biome-transition. La auditoría está disponible como GET /api/v1/library/audit y el resumen de navegación como GET /api/v1/library/summary.
+
+`/api/v1/effects/upscale` recibe `{ "input_filename": "hero.png", "output_filename": "hero-3x.png", "scale": 3 }`. Usa nearest-neighbor determinista, conserva transparencia y delays cuando la entrada es animada, rechaza sobrescribir la fuente y limita cada dimensión resultante a 4096 px.
+
+`/api/v1/assets/palette-harmonize` recibe `{ "input_filename": "hero.png", "output_filename": "hero-harmonized.png", "accent_color": "#3155D8", "strength": 0.8, "max_colors": 16 }`. Genera una paleta compartida determinista, conserva transparencia y timing de GIF y nunca sobrescribe el origen.
+
+`/api/v1/assets/contact-sheet` recibe `{ "input_filenames": ["rain.gif", "night.gif"], "output_filename": "variants-sheet.png", "manifest_filename": "variants-sheet.json", "cell_width": 32, "cell_height": 32, "columns": 2, "padding": 2 }`. Redimensiona solo cuando el sprite excede la celda, centra cada preview y escribe posiciones/orígenes en el manifest.
+
+`/api/v1/scenes/extend` recibe `{ "input_map_filename": "world-map.json", "output_map_filename": "world-map-expanded.json", "top": 2, "right": 8, "bottom": 1, "left": 4, "seed": 9 }`. Lee el mapa mediante el puerto de manifiestos, preserva el centro y las capas, desplaza landmarks y puede escribir un preview PNG.
+
+`/api/v1/scenes/biome-transition` recibe `{ "input_map_filename": "world-map.json", "output_map_filename": "world-map-transitions.json", "preview_filename": "world-map-transitions.png", "transition_width": 2, "seed": 73 }`. Calcula la banda alrededor de fronteras de biomas y entrega metadatos deterministas para que el motor aplique espuma, hierba, roca u otros tiles de transición sin tocar el mapa original.
+
+`/api/v1/library/audit` y el tool `audit_asset_library` auditan el catálogo sin generar archivos. Comprueban duplicados de IDs, categorías desconocidas, referencias de presets inexistentes y rutas absolutas o con escapes `..`; devuelven conteos de assets, carpetas, presets, categorías, README, previews y sprites junto con `valid`, `violations`, `deterministic` y `sourcePreserved`.
+
+`POST /api/v1/assets/manifest-audit` y el tool `audit_asset_manifest` reciben `{ "manifest_filename": "output/scene.json" }`. Inspeccionan las rutas de salida referenciadas por el JSON y devuelven tamaño, formato, SHA-256, `missingArtifacts`, `emptyArtifacts` y `valid`, para que la UX pueda bloquear una importación incompleta.
+
+`POST /api/v1/library/recommendations` y el tool `recommend_asset_scene` permiten pedir una composición con `{ "prompt": "coastal sunset water", "required_tags": ["tropical"], "required_variants": ["water_reflection", "day_night"], "limit": 8, "seed": 7 }`. El ranking es explicable y reproducible; usa la misma biblioteca que `plan_asset_scene`, sin duplicar lógica en la UX.
+
+`POST /api/v1/library/scene-bundle` y el tool `build_scene_bundle` reciben `{ "item_ids": ["ocean", "palm"], "output_prefix": "output/scene-bundle", "width": 128, "height": 96, "padding": 2, "frames": 8, "delay_ms": 90 }`. Devuelven PNG, GIF y sus manifests como un bundle; si la parte estática falla, la animación no se ejecuta.
+
+`/api/v1/library/summary` y el tool `summarize_asset_library` devuelven solamente conteos, categorías ordenadas, hasta tres ejemplos por categoría y presets compactos. Es la primera llamada recomendada para que un agente o la UX navegue una biblioteca grande sin consumir el catálogo completo.
+
+`POST /api/v1/library/scene-plan` recibe `{ "item_ids": ["knight", "oak", "rain"] }` y usa el mismo servicio del tool `plan_asset_scene`. Resuelve IDs sin distinguir mayúsculas, conserva el orden solicitado, asigna roles de capa y falla cerrado ante IDs duplicados, traversal o assets inexistentes.
+
+`POST /api/v1/library/scene-compose` recibe `{ "item_ids": ["oak", "rain"], "output_filename": "output/scene.png", "manifest_filename": "output/scene.json", "width": 64, "height": 64, "padding": 2 }` y usa el mismo servicio del tool `compose_asset_scene`. Lee las previews del catálogo, compone un PNG determinista y escribe un manifest con las coordenadas de cada capa; los assets fuente permanecen intactos. Rechaza colisiones de nombres, dimensiones fuera de rango, IDs duplicados, traversal y referencias inexistentes.
+
+`POST /api/v1/library/scene-animation-compose` recibe los mismos campos más `{ "frames": 8, "delay_ms": 90 }` y usa `compose_asset_scene_animation`. Las previews PNG/GIF se decodifican desde memoria, cada capa rota sus frames de forma cíclica y el resultado se exporta como GIF con `frameLayers` en el manifest para inspección humana o consumo directo del juego.
+
+`POST /api/v1/library/variants/pack` recibe `{ "item_ids": ["oak", "pine"], "output_prefix": "output/library-variants", "variants": ["rain", "walk", "birds"], "frames": 8, "seed": 9, "delay_ms": 90 }`. Genera los outputs agrupados por asset y `output/library-variants.json`; los algoritmos permanecen centralizados en `AssetVariantPackService` y los temporales de previews se eliminan al terminar.
+
+`/api/v1/effects/seamless` recibe `{ "input_filename": "water.png", "output_filename": "water-seamless.png", "seam_width": 2 }` y hace coincidir bordes opuestos para repetir el asset en mapas y fondos.
+
+`/api/v1/effects/water-reflection` recibe `{ "input_filename": "ocean.png", "output_filename": "ocean-reflection.gif", "waterline": 32, "frames": 8, "seed": 7, "amplitude": 2, "opacity": 0.6 }`. Conserva el original, refleja los píxeles sobre la línea de agua, aplica desplazamiento de oleaje y añade un destello determinista por frame.
+
+`/api/v1/effects/water-caustics` recibe `{ "input_filename": "pool.png", "output_filename": "pool-caustics.gif", "frames": 8, "seed": 7, "intensity": 0.8, "scale": 4, "color": "#DFF6FF" }`. Modula solo píxeles opacos, conserva la transparencia y crea una animación de luz refractada reproducible.
+
+`/api/v1/effects/day-night` recibe `{ "input_filename": "village.png", "output_filename": "village-day-night.gif", "frames": 8, "seed": 23, "intensity": 0.8 }`. Interpola luz de día, atardecer, noche y amanecer con una semilla reproducible; conserva alpha, dimensiones, delays y la fuente.
+
+`/api/v1/variants/pack` recibe `{ "input_filename": "forest-ranger.png", "output_prefix": "forest-ranger-variants", "variants": ["rain", "night", "birds", "day_night"], "frames": 8, "seed": 17, "delay_ms": 90 }`. Devuelve todos los artifacts generados en una sola respuesta para reducir llamadas y tokens del agente. Las fuentes estáticas se pueden animar; si se solicitan varios frames, el formato efectivo debe ser GIF.
+
+`/api/v1/assets/quality-bundle` recibe `{ "filename": "forest-ranger.png", "max_colors": 64, "max_isolated_pixels": 4 }` y devuelve inspección, violaciones, recomendaciones y las garantías `deterministic`/`sourcePreserved` sin generar archivos. Es el camino recomendado para que la UX valide antes de encadenar mejoras.
+
+`/api/v1/assets/enhancement-bundle` recibe `{ "filename": "hero.png", "output_filename": "hero-enhanced.png", "format": "png", "goals": ["cleanup", "terrain_grain", "directional_lighting"], "max_colors": 64, "seed": 7 }`. Ejecuta el mismo caso de uso que `apply_enhancement_bundle`: inspección, plan, aplicación no destructiva y quality gate en una sola llamada.
+
+`/api/v1/assets/enhancement-batch` recibe una lista `items` con `filename`, `output_filename` y `format`. El servicio bloquea colisiones entre fuentes y salidas antes de materializar, conserva el orden, continúa después de un error individual y devuelve un resumen compacto para la UX.
+
+`/api/v1/assets/quality-batch` recibe `{ "filenames": ["hero.png", "hero-rain.gif"], "max_colors": 64, "max_isolated_pixels": 4 }`. Ejecuta el mismo quality bundle por un puerto compartido, conserva el orden, aísla errores por archivo y devuelve `summary: { total, valid, invalid, failed }`.
+
+`/api/v1/assets/normalize-sprite` recibe `{ "input_filename": "hero.gif", "output_filename": "hero-normalized.gif", "manifest_filename": "hero-normalized.json", "padding": 1, "pivot": "bottom_center", "format": "gif" }`. Recorta usando el union de píxeles opacos de todos los frames, conserva sus delays, evita sobrescribir input/output/manifest y devuelve dimensiones, bounds y pivote en una respuesta compacta.
+
+`/api/v1/assets/animation-sheet` recibe `{ "input_filename": "hero.gif", "output_filename": "hero-sheet.png", "manifest_filename": "hero-sheet.json", "columns": 4, "padding": 1 }`. Ensambla la animación en una rejilla PNG, calcula coordenadas/pivotes por frame y conserva `delaysMs`, `totalDurationMs` y `loopDurationMs` en el manifest.
+
+`/api/v1/assets/sprite-geometry` recibe `{ "filename": "hero.gif", "min_component_pixels": 1 }`. Es una inspección de solo lectura para scene placement: reporta componentes alfa 4-conectados, bounds, baseline, pivote y drift entre frames sin generar ni sobrescribir assets.
+
+`/api/v1/assets/sprite-hitboxes` recibe `{ "filename": "hero.gif", "output_filename": "hero-hitboxes.json", "mode": "components", "padding": 1, "min_component_pixels": 1 }`. Reutiliza el puerto de geometría, genera hitboxes por componente o la unión por frame, recorta el padding al canvas y escribe un manifest separado con `deterministic: true` y `sourcePreserved: true`.
+
+`/api/v1/assets/sprite-runtime-bundle` recibe `{ "input_filename": "hero.gif", "sheet_filename": "hero-runtime-sheet.png", "sheet_manifest_filename": "hero-runtime-sheet.json", "hitbox_manifest_filename": "hero-runtime-hitboxes.json", "bundle_manifest_filename": "hero-runtime.json", "columns": 4, "sheet_padding": 1, "hitbox_mode": "components", "hitbox_padding": 1 }`. Ejecuta la misma capa de aplicación que el tool MCP y devuelve un manifest raíz con los dos artifacts, reduciendo llamadas de la UX y del agente.
+
+`/api/v1/assets/sprite-anchors` recibe `{ "filename": "hero.gif", "output_filename": "hero-anchors.json", "min_component_pixels": 1 }`. Deriva seis anchors de placement por frame desde la geometría compartida y conserva frames transparentes como `null` explícito para que el motor no invente posiciones.
+
+`/api/v1/assets/animation-quality` recibe `{ "filename": "hero-walk.gif" }` y devuelve transiciones compactas, frames duplicados, delays, deriva de paleta, estado de loop y recomendaciones antes de exportar al motor.
+
+`/api/v1/library/presets/generate` recibe `{ "preset_id": "coastal-sunset", "output_prefix": "art/coast", "width": 64, "height": 40, "seed": 9 }`. Resuelve el preset, conserva sus capas en la respuesta y delega en `generate_environment_pack`; así una persona puede pasar de explorar a generar una escena sin encadenar llamadas manuales.
+
+`/api/v1/effects/scene-stack` recibe `{ "input_filename": "forest.png", "output_prefix": "forest-scene", "effects": ["material_texture", "depth_lighting", "rain", "particles", "day_night"], "frames": 8, "seed": 17, "material": "earth", "direction": "south_east", "format": "gif" }`. Ejecuta el conjunto seleccionado mediante los mismos servicios de aplicación del MCP, infiere el tamaño de partículas desde el primer frame, genera un artifact por efecto y no altera el original.
+
+El sidecar solo escucha en 127.0.0.1, acepta CORS de localhost y 127.0.0.1, y rechaza orígenes externos. La UX asset-studio usa normalmente su gateway en 127.0.0.1:3765, que controla el proceso MCP por stdio y centraliza logs, diagnóstico y fallos.
+
 This MCP is designed for compact, reproducible asset jobs. Prefer one recipe or batch job over many pixel-level calls.
 
 ## 1. Discover only the tools you need
@@ -39,6 +118,44 @@ Useful folders are `asset/style`, `asset/quality`, `asset/tilemap`, `asset/world
 ```
 
 Reuse the same style file for every sprite and map in the scene.
+
+## Deterministic material texture
+
+Use `apply_material_texture` when an existing PNG/GIF needs procedural grain without changing the source. The same `seed`, `material`, and `intensity` always produce the same output, and transparent pixels remain transparent:
+
+```json
+{
+  "name": "apply_material_texture",
+  "arguments": {
+    "input_filename": "art/coastal/beach-preview.png",
+    "output_filename": "art/coastal/beach-preview-earth.png",
+    "material": "earth",
+    "seed": 42,
+    "intensity": 0.65,
+    "format": "png"
+  }
+}
+```
+
+Supported materials are `water`, `earth`, `grass`, `stone`, and `snow`. Keep `input_filename` and `output_filename` different; this is enforced before decoding.
+
+## Depth lighting for sprites
+
+Use `apply_depth_lighting` after material texture when a sprite needs more volume. It calculates deterministic edge exposure from the selected light direction and keeps alpha untouched:
+
+```json
+{
+  "name": "apply_depth_lighting",
+  "arguments": {
+    "input_filename": "art/hero/hero-textured.png",
+    "output_filename": "art/hero/hero-lit.png",
+    "direction": "south_east",
+    "strength": 0.7,
+    "ambient": 0.35,
+    "format": "png"
+  }
+}
+```
 
 ## 3. Generate terrain assets
 
@@ -155,4 +272,80 @@ Use `dry_run:true` first for large jobs.
 npm run typecheck
 npm test
 npm run showcase
+npm run showcase:effects
 ```
+
+`showcase:effects` genera y versiona un sprite de referencia con outline, color grade, sombra, normal map, partículas GIF y `examples/effects/manifest.json`.
+
+## 8. Mejorar sprites de forma determinista
+
+Estas operaciones retornan metadata compacta y escriben un archivo nuevo. Todas preservan el input.
+
+```json
+{
+  "name":"apply_pixel_outline",
+  "arguments":{
+    "input_filename":"art/hero.png",
+    "output_filename":"art/hero-outline.png",
+    "color":"#172033",
+    "thickness":1
+  }
+}
+```
+
+```json
+{
+  "name":"generate_particle_burst",
+  "arguments":{
+    "output_filename":"art/hit.gif",
+    "width":32,
+    "height":32,
+    "frames":8,
+    "seed":4217,
+    "color":"#ffd166"
+  }
+}
+```
+
+También están disponibles `apply_color_grade`, `generate_sprite_shadow`, `generate_normal_map` y `generate_rain_overlay`. La lluvia recibe `seed`, `intensity` y `wind`, conserva dimensiones y tiempos de frame, y puede exportar PNG o GIF de forma determinista.
+
+## 10. Crear una receta compuesta
+
+El feature creator genera un contrato revisable y no destructivo para que una UX o un agente decida qué pasos ejecutar:
+
+```json
+{
+  "name":"create_asset_recipe",
+  "arguments":{
+    "asset_id":"hero",
+    "input_filename":"art/hero.png",
+    "output_prefix":"art/hero",
+    "format":"png",
+    "steps":["outline","material_texture","depth_lighting","shadow","quality_gate"],
+    "seed":4217,
+    "material":"stone",
+    "direction":"south_west"
+  }
+}
+```
+
+El resultado incluye `recipeId`, outputs separados, argumentos de cada tool, `sourcePreserved: true` y `deterministic: true`. La ejecución permanece bajo control explícito del consumidor.
+
+## 9. Descubrimiento, progreso y seguridad
+
+Para agentes, usar primero una búsqueda compacta:
+
+```json
+{
+  "name":"get_tools_search",
+  "arguments":{"query":"lighting","limit":5}
+}
+```
+
+`start_asset_job` devuelve `progress: { completed, total }`; `get_asset_job_status` permite refrescarlo sin cargar artifacts completos. Se puede configurar `ASSET_ARTIFACT_ROOT` para restringir outputs y `ASSET_JOB_STORE_PATH` para persistir el estado fuera del repositorio.
+
+## Ejecutar una receta compuesta
+
+El tool execute_asset_recipe y el endpoint REST POST /api/v1/recipes/execute ejecutan el plan de create_asset_recipe con una tubería real. Cada paso recibe la salida anterior y la quality gate valida el último archivo; si una operación falla, no se ejecutan pasos posteriores.
+
+La entrada conserva asset_id, input_filename, output_prefix, steps, seed, material y direction del creador de recetas. El servidor limita cuerpos REST a 1 MiB y responde 413 cuando la UX envía un payload mayor.

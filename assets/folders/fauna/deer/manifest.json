@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "deer",
+  "title": "deer",
+  "category": "fauna",
+  "kind": "sprite",
+  "source": "deterministic-library-generator-v1",
+  "seed": 2615775125,
+  "variants": [
+    "idle",
+    "walk",
+    "hit",
+    "sleep",
+    "rain"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "fauna",
+    "wildlife",
+    "animation"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

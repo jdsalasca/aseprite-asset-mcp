@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "wave-reflection",
+  "title": "wave reflection",
+  "category": "scene-effects",
+  "kind": "effect",
+  "source": "deterministic-library-generator-v1",
+  "seed": 3223488430,
+  "variants": [
+    "subtle",
+    "strong",
+    "loop"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "effect",
+    "particles",
+    "animation"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "veteran-nomad",
+  "title": "veteran nomad",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 897421746,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "nomad"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

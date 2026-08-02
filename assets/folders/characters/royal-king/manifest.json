@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "royal-king",
+  "title": "royal king",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 3240759700,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "king"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

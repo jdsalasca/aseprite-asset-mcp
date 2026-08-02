@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "seed": 4217,
+  "source": "hero-base.png",
+  "outputs": [
+    "hero-outline.png",
+    "hero-color-grade.png",
+    "hero-shadow.png",
+    "hero-normal-map.png",
+    "hero-particles.gif"
+  ],
+  "operations": [
+    {
+      "operation": "apply_pixel_outline",
+      "input": "hero-base.png",
+      "output": "hero-outline.png",
+      "frames": 1,
+      "format": "png",
+      "deterministic": true,
+      "sourcePreserved": true
+    },
+    {
+      "operation": "apply_color_grade",
+      "input": "hero-base.png",
+      "output": "hero-color-grade.png",
+      "frames": 1,
+      "format": "png",
+      "deterministic": true,
+      "sourcePreserved": true
+    },
+    {
+      "operation": "generate_sprite_shadow",
+      "input": "hero-base.png",
+      "output": "hero-shadow.png",
+      "frames": 1,
+      "format": "png",
+      "deterministic": true,
+      "sourcePreserved": true
+    },
+    {
+      "operation": "generate_normal_map",
+      "input": "hero-base.png",
+      "output": "hero-normal-map.png",
+      "frames": 1,
+      "format": "png",
+      "deterministic": true,
+      "sourcePreserved": true
+    },
+    {
+      "operation": "generate_particle_burst",
+      "output": "hero-particles.gif",
+      "frames": 8,
+      "format": "gif",
+      "deterministic": true,
+      "sourcePreserved": true
+    }
+  ]
+}

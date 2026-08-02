@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "royal-druid",
+  "title": "royal druid",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 1742011649,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "druid"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

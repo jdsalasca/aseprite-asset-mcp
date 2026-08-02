@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "desert-queen",
+  "title": "desert queen",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 655286391,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "queen"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

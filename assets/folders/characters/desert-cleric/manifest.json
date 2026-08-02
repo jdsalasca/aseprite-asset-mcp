@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "desert-cleric",
+  "title": "desert cleric",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 2376447287,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "cleric"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

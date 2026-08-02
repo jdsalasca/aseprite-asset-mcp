@@ -176,6 +176,48 @@ export function convertRasterFrames(frames: RasterFrame[], options: PixelArtOpti
   });
 }
 
+function parseHexColor(value: string): [number, number, number] {
+  const normalized = value.trim().replace(/^#/, "");
+  if (!/^(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(normalized)) throw new Error("Accent color must be a 6 or 8 digit hexadecimal color");
+  return [Number.parseInt(normalized.slice(0, 2), 16), Number.parseInt(normalized.slice(2, 4), 16), Number.parseInt(normalized.slice(4, 6), 16)];
+}
+
+function hexColor(red: number, green: number, blue: number): string {
+  return `#${[red, green, blue].map((value) => clampByte(value).toString(16).padStart(2, "0")).join("").toUpperCase()}`;
+}
+
+/** Apply one deterministic hue family to every frame, then quantize the shared output palette. */
+export function harmonizeRasterFrames(frames: RasterFrame[], accentColor: string, strength: number, maxColors: number): { frames: RasterFrame[]; palette: string[] } {
+  if (frames.length === 0) throw new Error("At least one frame is required");
+  if (!Number.isFinite(strength) || strength < 0 || strength > 1) throw new Error("Strength must be between 0 and 1");
+  const [accentRed, accentGreen, accentBlue] = parseHexColor(accentColor);
+  const transformed = frames.map((frame) => {
+    assertFrame(frame);
+    const pixels = new Uint8ClampedArray(frame.pixels);
+    for (let offset = 0; offset < pixels.length; offset += 4) {
+      const alpha = pixels[offset + 3] ?? 0;
+      if (alpha === 0) { pixels[offset] = 0; pixels[offset + 1] = 0; pixels[offset + 2] = 0; continue; }
+      const red = pixels[offset] ?? 0;
+      const green = pixels[offset + 1] ?? 0;
+      const blue = pixels[offset + 2] ?? 0;
+      const luminance = (0.2126 * red + 0.7152 * green + 0.0722 * blue) / 255;
+      const accentScale = 0.35 + luminance * 0.65;
+      pixels[offset] = clampByte(red * (1 - strength) + accentRed * accentScale * strength);
+      pixels[offset + 1] = clampByte(green * (1 - strength) + accentGreen * accentScale * strength);
+      pixels[offset + 2] = clampByte(blue * (1 - strength) + accentBlue * accentScale * strength);
+    }
+    return { width: frame.width, height: frame.height, pixels, ...(frame.delayMs === undefined ? {} : { delayMs: frame.delayMs }) };
+  });
+  const first = transformed[0]!;
+  const quantized = convertRasterFrames(transformed, { width: first.width, height: first.height, maxColors, resizeMode: "nearest", dither: "none", alphaThreshold: 1 });
+  const palette = [...new Set(quantized.flatMap((frame) => {
+    const colors = new Set<string>();
+    for (let offset = 0; offset < frame.pixels.length; offset += 4) if ((frame.pixels[offset + 3] ?? 0) > 0) colors.add(hexColor(frame.pixels[offset] ?? 0, frame.pixels[offset + 1] ?? 0, frame.pixels[offset + 2] ?? 0));
+    return [...colors];
+  }))].sort();
+  return { frames: quantized, palette };
+}
+
 export function inspectRasterFrame(frame: RasterFrame, alphaThreshold = 1): PixelArtQualityReport {
   assertFrame(frame);
   const colors = new Set<string>();

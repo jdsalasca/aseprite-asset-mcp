@@ -12,8 +12,29 @@ const DESCRIPTION_OVERRIDES: Record<string, string> = {
   run_lua_script: "Run a bounded trusted Aseprite script.",
   convert_image_to_pixel_art: "Convert one image to pixel art with a bounded palette.",
   convert_animation_to_pixel_art: "Convert all frames to pixel art and preserve delays.",
+  upscale_pixel_art: "Upscale sprites with deterministic nearest-neighbor pixels and preserved transparency.",
+  harmonize_asset_palette: "Harmonize a sprite palette toward an accent color with bounded deterministic output.",
+  build_contact_sheet: "Fit heterogeneous sprites into a deterministic preview sheet and navigable manifest.",
   export_animation_gif: "Export a raster animation or Aseprite sprite as GIF.",
   inspect_asset: "Inspect dimensions, frames, colors, transparency, and delays.",
+  inspect_asset_bundle: "Inspect one asset and return quality violations and recommendations in one compact response.",
+  inspect_asset_batch: "Inspect up to 32 assets in one compact quality report.",
+  inspect_animation_quality: "Audit animation frames, timing, palette drift, and loop seams.",
+  normalize_sprite: "Crop raster frames to shared alpha bounds and write deterministic pivot metadata.",
+  build_animation_sheet: "Assemble animation frames into a PNG spritesheet with timing and pivot metadata.",
+  inspect_sprite_geometry: "Inspect alpha bounds, connected components, baseline, and pivots per animation frame.",
+  generate_sprite_hitboxes: "Generate component or union hitboxes from deterministic sprite geometry.",
+  build_sprite_runtime_bundle: "Build one runtime bundle with an animation sheet, timing manifest, and hitboxes.",
+  generate_sprite_anchors: "Generate deterministic placement anchors from sprite geometry.",
+  audit_asset_library: "Audit library ids, references, categories, and asset paths.",
+  summarize_asset_library: "Return compact library categories and preset navigation metadata.",
+  audit_asset_manifest: "Audit generated manifest artifact paths, sizes, formats, and hashes.",
+  recommend_asset_scene: "Recommend explainable library assets for a deterministic scene composition.",
+  build_scene_bundle: "Build static and animated scene outputs plus manifests in one call.",
+  plan_asset_scene: "Plan ordered scene layers from selected library assets.",
+  compose_asset_scene: "Compose selected library previews into a deterministic scene PNG and manifest.",
+  compose_asset_scene_animation: "Compose selected animated library previews into a deterministic scene GIF and frame manifest.",
+  generate_library_variant_pack: "Generate deterministic variants for multiple library assets in one request.",
   validate_asset_quality: "Validate palette size and isolated-pixel limits.",
   build_texture_atlas: "Pack equal-size images into one texture atlas.",
   run_asset_recipe: "Run or preview one compact asset recipe.",
@@ -25,16 +46,59 @@ const DESCRIPTION_OVERRIDES: Record<string, string> = {
   build_terrain_tileset: "Build terrain variants and adjacency metadata.",
   generate_world_map: "Generate a seeded multi-biome map manifest.",
   generate_beach_scene: "Generate a beach map with animated waves.",
+  extend_scene: "Extend a scene deterministically while preserving layers and landmarks.",
+  generate_biome_transition: "Generate deterministic transition metadata and a preview overlay between adjacent map biomes.",
   generate_time_of_day_pack: "Generate day, sunset, night, and sunrise frames.",
   generate_environment_pack: "Generate a complete themed environment pack.",
+  apply_material_texture: "Add deterministic material grain and highlights while preserving transparency.",
+  apply_depth_lighting: "Add deterministic depth-aware directional lighting while preserving transparency.",
+  apply_pixel_outline: "Add a deterministic pixel outline around opaque sprite edges.",
+  apply_color_grade: "Apply deterministic brightness, contrast, and saturation grading.",
+  generate_sprite_shadow: "Generate a deterministic clipped shadow from sprite alpha.",
+  generate_particle_burst: "Generate a deterministic animated particle burst GIF.",
+  generate_normal_map: "Generate a deterministic normal map from sprite alpha depth.",
+  generate_rain_overlay: "Generate a seeded rain overlay while preserving sprite dimensions and timing.",
+  generate_motion_pack: "Generate a deterministic movement cycle from a static or animated sprite.",
+  generate_seamless_texture: "Make opposite texture borders match for repeatable pixel-art backgrounds.",
+  generate_water_reflection: "Generate deterministic animated reflections for oceans, beaches, and wave scenes.",
+  generate_water_caustics: "Generate deterministic animated light caustics for water surfaces and flooded interiors.",
+  generate_day_night_cycle: "Generate deterministic day, sunset, night, and sunrise frames while preserving transparency.",
+  generate_variant_pack: "Generate several deterministic environmental variants from one source asset.",
+  generate_asset_preset: "Generate a complete deterministic scene from a library preset.",
+  generate_scene_effect_stack: "Generate selected scene effects in one deterministic response while preserving the source.",
+  create_asset_recipe: "Compose a deterministic multi-effect asset recipe without executing it.",
+  execute_asset_recipe: "Execute a composed recipe through shared visual services and return every step.",
+  get_asset_library: "Search 339 deterministic prebuilt assets and scene presets.",
+  get_asset_library_item: "Resolve one asset folder, manifest, README, preview, and sprite sheet.",
+  get_asset_preset: "Resolve a ready-to-compose world preset and recommended tools.",
+  compose_asset_preset: "Compose one preset into ordered assets and layers in a single compact response.",
 };
 
 function folderFor(name: string): string {
+  if (name === "get_asset_library" || name === "get_asset_library_item" || name === "get_asset_preset" || name === "compose_asset_preset" || name === "generate_asset_preset") return "meta/asset-library";
+  if (name === "audit_asset_library") return "meta/asset-library";
+  if (name === "summarize_asset_library") return "meta/asset-library";
+  if (name === "audit_asset_manifest") return "meta/assets";
+  if (name === "recommend_asset_scene") return "library/recommendations";
+  if (name === "build_scene_bundle") return "library/scenes";
+  if (name === "plan_asset_scene") return "scene/composition";
+  if (name === "compose_asset_scene") return "scene/composition";
+  if (name === "compose_asset_scene_animation") return "scene/composition";
+  if (name === "generate_library_variant_pack") return "library/variants";
+  if (name === "build_contact_sheet") return "asset/preview";
+  if (name === "build_sprite_runtime_bundle") return "asset/runtime";
+  if (name === "generate_sprite_anchors") return "asset/runtime";
   if (name === "server_capabilities" || name.startsWith("get_tools_")) return "meta/catalog";
   if (name === "create_style_bible") return "asset/style";
+  if (name === "generate_scene_effect_stack") return "asset/effects";
+  if (name.includes("material_texture")) return "asset/material";
+  if (name.includes("depth_lighting")) return "asset/lighting";
+  if (name.includes("color_grade") || name.includes("outline") || name.includes("shadow") || name.includes("normal_map") || name.includes("rain") || name.includes("motion") || name.includes("seamless") || name.includes("reflection") || name.includes("caustics") || name.includes("day_night") || name.includes("variant_pack")) return "asset/effects";
+  if (name.includes("particle")) return "asset/particles";
+  if (name === "create_asset_recipe" || name === "execute_asset_recipe") return "asset/recipes";
   if (name === "inspect_reference" || name === "run_asset_quality_gate") return "asset/quality";
   if (name.includes("terrain") || name.includes("tilemap")) return "asset/tilemap";
-  if (name.includes("world") || name.includes("beach") || name.includes("environment") || name.includes("map")) return "asset/world";
+  if (name === "extend_scene" || name === "generate_biome_transition" || name.includes("world") || name.includes("beach") || name.includes("environment") || name.includes("map")) return "asset/world";
   if (name.includes("time_of_day") || name.includes("weather") || name.includes("wave")) return "asset/environment";
   if (name.endsWith("_plan") || name.includes("recipe") || name.includes("asset_pack")) return "asset/recipes";
   if (name.includes("preview")) return "asset/preview";
@@ -84,5 +148,12 @@ export class ToolCatalogService {
   public byFolder(folder: string): ToolDescriptor[] {
     const normalized = folder.trim().toLowerCase().replaceAll("\\", "/").replace(/^\/+|\/+$/g, "");
     return this.descriptors.filter((descriptor) => descriptor.folder === normalized || descriptor.folder.startsWith(`${normalized}/`));
+  }
+
+  public search(query: string, limit = 20): ToolDescriptor[] {
+    const normalized = query.trim().toLowerCase();
+    if (!normalized) return [];
+    const boundedLimit = Number.isInteger(limit) ? Math.max(1, Math.min(100, limit)) : 20;
+    return this.descriptors.filter((descriptor) => `${descriptor.name} ${descriptor.description} ${descriptor.folder}`.toLowerCase().includes(normalized)).slice(0, boundedLimit);
   }
 }

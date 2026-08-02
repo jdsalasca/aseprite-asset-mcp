@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "forest-bard",
+  "title": "forest bard",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 1576565060,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "bard"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

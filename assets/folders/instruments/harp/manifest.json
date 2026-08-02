@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "harp",
+  "title": "harp",
+  "category": "instruments",
+  "kind": "prop",
+  "source": "deterministic-library-generator-v1",
+  "seed": 3502455904,
+  "variants": [
+    "clean",
+    "played",
+    "golden"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "instrument",
+    "culture",
+    "prop"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

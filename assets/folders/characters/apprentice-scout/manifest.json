@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "apprentice-scout",
+  "title": "apprentice scout",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 3464356981,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "scout"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

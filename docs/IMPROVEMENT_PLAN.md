@@ -1,0 +1,98 @@
+# Plan de mejoras cohesionadas
+
+## Objetivo arquitectónico
+
+Los tres repositorios colaboran mediante contratos estables, pero cada uno conserva una responsabilidad clara:
+
+```text
+pixel-art-ui       UX presentacional y accesible
+        ↓
+asset-studio       casos de uso, persistencia de configuración y gateway humano
+        ↓
+aseprite-mcp       dominio de assets, generación determinista y adaptadores externos
+```
+
+Las abstracciones no contienen nombres de SDK, Aseprite, Node, HTTP ni filesystem. Los nombres concretos viven en adaptadores.
+
+## Fases
+
+### Fase 1 · Foundation hexagonal — implementada en la rama de integración
+
+- separar puertos genéricos de sesión de herramientas, persistencia, procesos y capacidades de asset;
+- extraer composición del servidor HTTP a controladores y servicios;
+- persistir configuración del Asset Studio en JSON local, sin secretos;
+- dividir componentes UI en módulos pequeños;
+- añadir pruebas de contratos y validación de errores.
+- mantener el contrato de runtime genérico y dividir el adaptador concreto por capacidad;
+- proteger la frontera con una prueba arquitectónica que rechaza nombres concretos fuera de infraestructura.
+
+### Fase 2 · Asset enhancement application — implementada
+
+- `InspectAsset`, `SuggestEnhancementPlan` y `ApplyEnhancementPlan` como casos de uso;
+- recetas de materiales, iluminación y partículas como estrategias independientes;
+- caché por hash de input, receta, estilo y versión;
+- jobs cancelables para operaciones largas;
+- manifiestos compactos y recursos MCP.
+
+Ya están disponibles el planificador determinista `suggest_enhancement_plan`, la ejecución segura `apply_enhancement_plan`, `apply_material_texture` para granularidad de agua/tierra/grass/piedra/nieve y los jobs asíncronos `start_asset_job`, `get_asset_job_status` y `cancel_asset_job`. La ejecución rechaza sobrescribir la fuente, escribe un PNG/GIF separado, ejecuta automáticamente el quality gate y aplica pasadas reproducibles de limpieza, granularidad, flujo de agua, iluminación, partículas y transición temporal. El registro MCP está separado en controladores por capacidad y estos consumen puertos genéricos, dejando `AsepriteCliGateway` como adaptador concreto.
+
+El adaptador CLI concreto ahora es un compositor delgado: `AsepriteLayerAdapter`, `AsepriteDrawingAdapter`, `AsepriteExportAdapter`, `AsepritePaletteAdapter`, `AsepriteTextAdapter`, `AsepriteAnimationAdapter`, `AsepriteEffectsAdapter` y `AsepriteSceneAdapter` implementan las capacidades aisladas sobre `AsepriteCommandAdapter`.
+
+### Fase 3 · Persistencia y observabilidad — jobs y artifacts implementados
+
+- `JsonAssetJobStore` implementa el puerto genérico de jobs y recupera estados tras reinicios;
+- transiciones condicionales evitan que workers o cancelaciones sobrescriban estados más nuevos;
+- `AssetArtifactResolverPort` mantiene la abstracción genérica y `FileAssetArtifactResolver` calcula formato, tamaño y SHA-256 en infraestructura;
+- `MaterialTextureService` encapsula la granularidad determinista y `VisualAssetService` solo compone el caso de uso visual;
+- `DepthLightingService` encapsula sombreado direccional por exposición de bordes, ambiente y fuerza, con salida no destructiva;
+- los jobs completados conservan metadata de artifacts y el store JSON la recupera después de reiniciar;
+- el archivo runtime vive fuera de Git mediante `ASSET_JOB_STORE_PATH` o `.asset-studio/jobs.json`;
+- repositorio de artifacts y jobs;
+- logs estructurados con correlación;
+- límites de rutas y tamaño;
+- health checks y métricas de duración, caché y errores.
+
+### Fase 4 · UX de producción — comparación y navegación base implementadas
+
+- editor de recetas;
+- preview antes/después y frames; `PixelCompare` y `PixelFrameStrip` ya están publicados en la rama de integración y `AssetPreviewPanel` usa la comparación accesible;
+- informes de calidad accionables;
+- accesibilidad, teclado, alto contraste y reduced motion;
+- pruebas visuales y E2E contra el gateway real; la integración HTTP y el preview SSR ya tienen pruebas TDD.
+
+### Fase 5 · Releases
+
+- build reproducible;
+- `npm pack --dry-run` e instalación desde tarball;
+- publicación versionada de `@jdsalas/pixel-ui`;
+- CI para los tres repositorios;
+- releases y documentación cruzada.
+
+La publicación npm queda protegida por autenticación: el workflow no contiene tokens y requiere configurar el secreto de publicación en GitHub o iniciar sesión localmente.
+
+### Lote actual · 10 mejoras de alto impacto
+
+- `apply_pixel_outline`: siluetas limpias para sprites sin tocar la fuente.
+- `apply_color_grade`: brillo, contraste y saturación reproducibles para variantes de estilo.
+- `generate_sprite_shadow`: sombra recortada derivada del alpha.
+- `generate_particle_burst`: ráfaga GIF sembrada con cadencia visible y número de frames estable.
+- `generate_normal_map`: normal map RGBA derivado de la profundidad del alpha.
+- `ToolCatalogService.search` y `get_tools_search`: descubrimiento compacto para que agentes no carguen todo el catálogo.
+- validación de lotes: rechaza entradas vacías y limita batches antes de iniciar workers.
+- progreso de job: expone `completed`/`total` para UIs y agentes.
+- timeout configurable: evita workers colgados y deja el job en estado `failed` con diagnóstico.
+- roots de artifacts: `ASSET_ARTIFACT_ROOT` limita salidas a rutas permitidas y bloquea null bytes.
+
+### Lote feature creator
+
+`AssetRecipeComposerService` y `create_asset_recipe` componen una receta de múltiples efectos con hash estable, semilla, material, dirección de luz, nombres de output aislados y quality gate. El planner no ejecuta ni sobrescribe archivos: produce un contrato pequeño para que Asset Studio o un agente lo revise y ejecute paso a paso.
+
+## Criterios de diseño
+
+- dominio puro y pequeño;
+- casos de uso que dependan de puertos, no de adaptadores;
+- adaptadores concretos para MCP SDK, Node, Aseprite CLI, filesystem y browser;
+- controladores delgados: traducen entrada/salida y delegan;
+- componentes UX sin lógica de negocio;
+- ningún singleton global salvo la composición raíz;
+- pruebas unitarias antes de cada extracción y pruebas de integración después.

@@ -13,6 +13,22 @@ export interface ConvertImageInput extends PixelArtOptions {
   format?: ImageOutputFormat | undefined;
 }
 
+export interface UpscalePixelArtInput {
+  inputFilename: string;
+  outputFilename: string;
+  scale: number;
+  format?: ImageOutputFormat | undefined;
+}
+
+export interface PaletteHarmonizeInput {
+  inputFilename: string;
+  outputFilename: string;
+  accentColor: string;
+  strength: number;
+  maxColors: number;
+  format?: ImageOutputFormat | undefined;
+}
+
 export interface AssetInspection {
   filename: string;
   frameCount: number;
@@ -29,6 +45,8 @@ export interface AssetQualityInput {
   maxIsolatedPixels?: number | undefined;
 }
 
+export interface AssetQualityBundleInput extends AssetQualityInput {}
+
 export interface TextureAtlasInput {
   inputFilenames: string[];
   outputFilename: string;
@@ -40,8 +58,22 @@ export interface AssetPackInput extends TextureAtlasInput {
   manifestFilename: string;
 }
 
+export interface ContactSheetInput {
+  inputFilenames: string[];
+  outputFilename: string;
+  manifestFilename: string;
+  cellWidth: number;
+  cellHeight: number;
+  columns?: number | undefined;
+  padding?: number | undefined;
+}
+
 export interface AssetManifestWriter {
   write(filename: string, value: unknown): Promise<void>;
+}
+
+export interface AssetManifestReader {
+  read<T>(filename: string): Promise<T>;
 }
 
 export type AssetRecipe = "pixel_art" | "animation_pixel_art" | "gif" | "atlas";

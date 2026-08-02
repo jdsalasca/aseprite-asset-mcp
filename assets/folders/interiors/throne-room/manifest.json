@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "throne-room",
+  "title": "throne room",
+  "category": "interiors",
+  "kind": "scene",
+  "source": "deterministic-library-generator-v1",
+  "seed": 2113429977,
+  "variants": [
+    "day",
+    "night",
+    "firelight",
+    "rain"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "interior",
+    "architecture",
+    "scene"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

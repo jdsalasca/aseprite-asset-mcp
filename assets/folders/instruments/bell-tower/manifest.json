@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "bell-tower",
+  "title": "bell tower",
+  "category": "instruments",
+  "kind": "prop",
+  "source": "deterministic-library-generator-v1",
+  "seed": 987653596,
+  "variants": [
+    "clean",
+    "played",
+    "golden"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "instrument",
+    "culture",
+    "prop"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "desert-cook",
+  "title": "desert cook",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 17514023,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "cook"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

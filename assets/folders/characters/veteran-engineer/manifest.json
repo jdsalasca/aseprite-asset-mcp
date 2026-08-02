@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "veteran-engineer",
+  "title": "veteran engineer",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 1652400150,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "engineer"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

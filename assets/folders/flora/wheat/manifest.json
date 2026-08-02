@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "wheat",
+  "title": "wheat",
+  "category": "flora",
+  "kind": "prop",
+  "source": "deterministic-library-generator-v1",
+  "seed": 71087248,
+  "variants": [
+    "rain",
+    "wind",
+    "snow",
+    "fire"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "plant",
+    "nature",
+    "decor"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

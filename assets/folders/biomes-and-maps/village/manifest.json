@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "village",
+  "title": "village",
+  "category": "biomes-and-maps",
+  "kind": "scene",
+  "source": "deterministic-library-generator-v1",
+  "seed": 1192893027,
+  "variants": [
+    "day",
+    "sunset",
+    "night",
+    "rain",
+    "storm"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "map",
+    "scene",
+    "tileset"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

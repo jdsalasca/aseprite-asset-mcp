@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "apprentice-priest",
+  "title": "apprentice priest",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 4262846922,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "priest"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

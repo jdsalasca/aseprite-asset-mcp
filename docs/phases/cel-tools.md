@@ -6,7 +6,7 @@ Status: implemented and verified on the migration branch.
 
 This slice migrates `import_image_as_layer`, `create_cel`, `clear_cel`, `copy_cel`, and `copy_frame`.
 
-The MCP adapter calls the application service and the `AsepriteGateway` port. The CLI adapter validates all paths, layer names, frame indexes, coordinates, and copy flags before building Lua.
+The MCP adapter calls the application service and the `AssetGateway` port. The CLI adapter validates all paths, layer names, frame indexes, coordinates, and copy flags before building Lua.
 
 ## TDD and bug hunting
 

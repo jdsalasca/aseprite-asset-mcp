@@ -6,7 +6,7 @@ Status: implemented and verified on the migration branch.
 
 This slice migrates `set_cel_position`, `tween_cel_positions`, `offset_cel_positions`, and `propagate_frame_to_range`.
 
-The MCP adapter calls the application service and the `AsepriteGateway` port. The CLI adapter validates paths, layer names, frame indexes, ranges, coordinates, and optional source frames before running Lua.
+The MCP adapter calls the application service and the `AssetGateway` port. The CLI adapter validates paths, layer names, frame indexes, ranges, coordinates, and optional source frames before running Lua.
 
 ## TDD and bug hunting
 

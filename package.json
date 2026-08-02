@@ -18,11 +18,18 @@
     "asset:scene": "tsx scripts/scene-workflow.ts",
     "asset:paint": "tsx scripts/paint-godot-assets.ts",
     "asset:creatures": "tsx scripts/paint-creature-assets.ts",
+    "asset:battle-impact": "tsx scripts/paint-battle-impact.ts",
+    "asset:steam-pack": "tsx scripts/paint-steam-visual-pack.ts",
+    "asset:deck-portraits": "tsx scripts/paint-creature-deck-portraits.ts",
+    "asset:npc-expressions": "tsx scripts/paint-npc-expressions.ts",
+    "asset:healing-fx": "tsx scripts/paint-healing-spark.ts",
     "asset:odiseum-style": "tsx scripts/boost-odiseum-style.ts",
     "asset:odiseum-world": "tsx scripts/paint-odiseum-world.ts",
     "asset:library": "tsx scripts/paint-reusable-asset-library.ts",
+    "asset:library:catalog": "tsx scripts/generate-asset-library.ts",
     "asset:cozy-nature": "tsx scripts/paint-cozy-nature-assets.ts",
-    "showcase": "tsx scripts/generate-showcase.ts"
+    "showcase": "tsx scripts/generate-showcase.ts",
+    "showcase:effects": "tsx scripts/generate-effects-showcase.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",

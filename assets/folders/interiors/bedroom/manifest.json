@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "bedroom",
+  "title": "bedroom",
+  "category": "interiors",
+  "kind": "scene",
+  "source": "deterministic-library-generator-v1",
+  "seed": 385580919,
+  "variants": [
+    "day",
+    "night",
+    "firelight",
+    "rain"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "interior",
+    "architecture",
+    "scene"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "tavern",
+  "title": "tavern",
+  "category": "interiors",
+  "kind": "scene",
+  "source": "deterministic-library-generator-v1",
+  "seed": 894472651,
+  "variants": [
+    "day",
+    "night",
+    "firelight",
+    "rain"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "interior",
+    "architecture",
+    "scene"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

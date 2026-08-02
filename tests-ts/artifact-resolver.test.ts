@@ -1,0 +1,49 @@
+import assert from "node:assert/strict";
+import { mkdtemp, writeFile } from "node:fs/promises";
+import path from "node:path";
+import test from "node:test";
+import { FileAssetArtifactResolver } from "../src/infrastructure/jobs/FileAssetArtifactResolver.js";
+
+test("file artifact resolver records deterministic metadata", async () => {
+  const directory = await mkdtemp(path.join(process.cwd(), ".artifact-test-"));
+  const output = path.join(directory, "sprite.GIF");
+  await writeFile(output, Buffer.from("pixel-art"));
+  const resolver = new FileAssetArtifactResolver(() => "2026-08-02T00:00:00.000Z");
+
+  const [artifact] = await resolver.resolve("job_hash", { jobs: [{ recipe: "gif", inputFilenames: ["source.png"], outputFilename: output }], dryRun: false });
+
+  assert.equal(artifact?.jobId, "job_hash");
+  assert.equal(artifact?.format, "gif");
+  assert.equal(artifact?.sizeBytes, 9);
+  assert.equal(artifact?.sha256, "c34b4a0d0888dc4635e11d52fed9d1848320fb9f7af4a8f8df23a55c5e237f72");
+  assert.equal(artifact?.createdAt, "2026-08-02T00:00:00.000Z");
+});
+
+test("file artifact resolver fails when a successful job output is missing", async () => {
+  const resolver = new FileAssetArtifactResolver();
+  await assert.rejects(() => resolver.resolve("job_missing", { jobs: [{ recipe: "gif", inputFilenames: ["source.png"], outputFilename: path.join(process.cwd(), ".missing-output.gif") }], dryRun: false }));
+});
+
+test("file artifact resolver gives equal-content outputs distinct ids", async () => {
+  const directory = await mkdtemp(path.join(process.cwd(), ".artifact-distinct-"));
+  const first = path.join(directory, "first.png");
+  const second = path.join(directory, "second.png");
+  await writeFile(first, Buffer.from("same"));
+  await writeFile(second, Buffer.from("same"));
+  const resolver = new FileAssetArtifactResolver();
+  const artifacts = await resolver.resolve("job_same", { jobs: [{ recipe: "atlas", inputFilenames: ["a.png"], outputFilename: first }, { recipe: "atlas", inputFilenames: ["b.png"], outputFilename: second }], dryRun: false });
+
+  assert.equal(artifacts.length, 2);
+  assert.notEqual(artifacts[0]?.id, artifacts[1]?.id);
+});
+
+test("file artifact resolver enforces configured roots and rejects null bytes", async () => {
+  const directory = await mkdtemp(path.join(process.cwd(), ".artifact-allowed-"));
+  const output = path.join(directory, "safe.png");
+  await writeFile(output, Buffer.from("safe"));
+  const resolver = new FileAssetArtifactResolver(undefined, [directory]);
+
+  await assert.doesNotReject(() => resolver.resolve("job_allowed", { jobs: [{ recipe: "atlas", inputFilenames: ["source.png"], outputFilename: output }], dryRun: false }));
+  await assert.rejects(() => resolver.resolve("job_escape", { jobs: [{ recipe: "atlas", inputFilenames: ["source.png"], outputFilename: path.join(directory, "..", "outside.png") }], dryRun: false }), /outside allowed roots/);
+  await assert.rejects(() => resolver.resolve("job_null", { jobs: [{ recipe: "atlas", inputFilenames: ["source.png"], outputFilename: `${output}\0bad` }], dryRun: false }), /invalid null byte/);
+});

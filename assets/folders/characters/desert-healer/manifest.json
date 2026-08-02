@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "desert-healer",
+  "title": "desert healer",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 1762537578,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "healer"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

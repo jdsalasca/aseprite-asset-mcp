@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "warhorse",
+  "title": "warhorse",
+  "category": "mounts",
+  "kind": "sprite",
+  "source": "deterministic-library-generator-v1",
+  "seed": 4267551846,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "jump"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "mount",
+    "travel",
+    "animation"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

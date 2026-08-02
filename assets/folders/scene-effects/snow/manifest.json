@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "snow",
+  "title": "snow",
+  "category": "scene-effects",
+  "kind": "effect",
+  "source": "deterministic-library-generator-v1",
+  "seed": 2223183858,
+  "variants": [
+    "subtle",
+    "strong",
+    "loop"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "effect",
+    "particles",
+    "animation"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

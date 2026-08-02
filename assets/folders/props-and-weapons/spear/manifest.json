@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "spear",
+  "title": "spear",
+  "category": "props-and-weapons",
+  "kind": "prop",
+  "source": "deterministic-library-generator-v1",
+  "seed": 2574777438,
+  "variants": [
+    "clean",
+    "glow",
+    "rain",
+    "fire"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "prop",
+    "equipment",
+    "world"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

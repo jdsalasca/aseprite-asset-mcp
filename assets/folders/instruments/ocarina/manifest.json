@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "ocarina",
+  "title": "ocarina",
+  "category": "instruments",
+  "kind": "prop",
+  "source": "deterministic-library-generator-v1",
+  "seed": 2075539290,
+  "variants": [
+    "clean",
+    "played",
+    "golden"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "instrument",
+    "culture",
+    "prop"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

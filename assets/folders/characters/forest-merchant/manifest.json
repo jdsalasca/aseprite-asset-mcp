@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "forest-merchant",
+  "title": "forest merchant",
+  "category": "characters",
+  "kind": "character",
+  "source": "deterministic-library-generator-v1",
+  "seed": 1216993091,
+  "variants": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "celebrate"
+  ],
+  "assets": [
+    "preview.png",
+    "sprite-sheet.png",
+    "sprite-sheet.gif",
+    "preview.svg",
+    "sprite-sheet.svg"
+  ],
+  "tags": [
+    "character",
+    "walk",
+    "animation",
+    "merchant"
+  ],
+  "sourcePreserved": true,
+  "deterministic": true
+}

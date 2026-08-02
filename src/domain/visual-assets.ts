@@ -1,4 +1,4 @@
-import type { AsepriteResult } from "./aseprite.js";
+import type { AssetOperationResult } from "./asset-operations.js";
 
 export type DetailLevel = "low" | "medium" | "high";
 export type TerrainKind = "water" | "sand" | "grass" | "rock" | "snow" | "mud";
@@ -65,12 +65,50 @@ export interface BeachSceneInput extends WorldMapInput {
   waveDelayMs?: number | undefined;
 }
 
+export interface SceneExtensionInput {
+  inputMapFilename: string;
+  outputMapFilename: string;
+  previewFilename?: string | undefined;
+  padding: { top: number; right: number; bottom: number; left: number };
+  seed: number;
+}
+
+export interface BiomeTransitionInput {
+  inputMapFilename: string;
+  outputMapFilename: string;
+  previewFilename?: string | undefined;
+  transitionWidth: number;
+  seed: number;
+}
+
 export interface TimeOfDayInput {
   inputFilename: string;
   outputFilename: string;
   manifestFilename?: string | undefined;
   steps?: number | undefined;
   delayMs?: number | undefined;
+}
+
+export type MaterialTextureKind = "water" | "earth" | "grass" | "stone" | "snow";
+
+export interface MaterialTextureInput {
+  inputFilename: string;
+  outputFilename: string;
+  material: MaterialTextureKind;
+  seed: number;
+  intensity?: number | undefined;
+  format?: "png" | "gif" | undefined;
+}
+
+export type LightDirection = "north" | "south" | "east" | "west" | "north_east" | "north_west" | "south_east" | "south_west";
+
+export interface DepthLightingInput {
+  inputFilename: string;
+  outputFilename: string;
+  direction: LightDirection;
+  strength?: number | undefined;
+  ambient?: number | undefined;
+  format?: "png" | "gif" | undefined;
 }
 
 export type EnvironmentKind = "beach" | "forest" | "village" | "cave";
@@ -86,12 +124,16 @@ export interface EnvironmentPackInput {
 }
 
 export interface VisualAssetGateway {
-  createStyleBible(input: StyleBibleInput): Promise<AsepriteResult>;
-  inspectReference(filename: string): Promise<AsepriteResult>;
-  runQualityGate(input: QualityGateInput): Promise<AsepriteResult>;
-  buildTerrainTileset(input: TerrainTilesetInput): Promise<AsepriteResult>;
-  generateWorldMap(input: WorldMapInput): Promise<AsepriteResult>;
-  generateBeachScene(input: BeachSceneInput): Promise<AsepriteResult>;
-  generateTimeOfDayPack(input: TimeOfDayInput): Promise<AsepriteResult>;
-  generateEnvironmentPack(input: EnvironmentPackInput): Promise<AsepriteResult>;
+  createStyleBible(input: StyleBibleInput): Promise<AssetOperationResult>;
+  inspectReference(filename: string): Promise<AssetOperationResult>;
+  runQualityGate(input: QualityGateInput): Promise<AssetOperationResult>;
+  buildTerrainTileset(input: TerrainTilesetInput): Promise<AssetOperationResult>;
+  generateWorldMap(input: WorldMapInput): Promise<AssetOperationResult>;
+  generateBeachScene(input: BeachSceneInput): Promise<AssetOperationResult>;
+  extendScene(input: SceneExtensionInput): Promise<AssetOperationResult>;
+  generateBiomeTransition(input: BiomeTransitionInput): Promise<AssetOperationResult>;
+  generateTimeOfDayPack(input: TimeOfDayInput): Promise<AssetOperationResult>;
+  applyMaterialTexture(input: MaterialTextureInput): Promise<AssetOperationResult>;
+  applyDepthLighting(input: DepthLightingInput): Promise<AssetOperationResult>;
+  generateEnvironmentPack(input: EnvironmentPackInput): Promise<AssetOperationResult>;
 }
