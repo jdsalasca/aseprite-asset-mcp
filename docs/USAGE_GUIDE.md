@@ -11,11 +11,13 @@ PowerShell:
 
 Health: GET http://127.0.0.1:3766/api/v1/health
 
-Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lighting y /api/v1/effects/outline, /api/v1/effects/color-grade, /api/v1/effects/shadow, /api/v1/effects/particles, /api/v1/effects/normal-map, /api/v1/effects/rain, /api/v1/effects/motion, /api/v1/effects/upscale, /api/v1/assets/palette-harmonize, /api/v1/effects/seamless, /api/v1/effects/water-reflection, /api/v1/effects/water-caustics, /api/v1/effects/day-night, /api/v1/effects/scene-stack, /api/v1/variants/pack, /api/v1/scenes/extend y /api/v1/scenes/biome-transition.
+Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lighting y /api/v1/effects/outline, /api/v1/effects/color-grade, /api/v1/effects/shadow, /api/v1/effects/particles, /api/v1/effects/normal-map, /api/v1/effects/rain, /api/v1/effects/motion, /api/v1/effects/upscale, /api/v1/assets/palette-harmonize, /api/v1/assets/contact-sheet, /api/v1/effects/seamless, /api/v1/effects/water-reflection, /api/v1/effects/water-caustics, /api/v1/effects/day-night, /api/v1/effects/scene-stack, /api/v1/variants/pack, /api/v1/scenes/extend y /api/v1/scenes/biome-transition.
 
 `/api/v1/effects/upscale` recibe `{ "input_filename": "hero.png", "output_filename": "hero-3x.png", "scale": 3 }`. Usa nearest-neighbor determinista, conserva transparencia y delays cuando la entrada es animada, rechaza sobrescribir la fuente y limita cada dimensión resultante a 4096 px.
 
 `/api/v1/assets/palette-harmonize` recibe `{ "input_filename": "hero.png", "output_filename": "hero-harmonized.png", "accent_color": "#3155D8", "strength": 0.8, "max_colors": 16 }`. Genera una paleta compartida determinista, conserva transparencia y timing de GIF y nunca sobrescribe el origen.
+
+`/api/v1/assets/contact-sheet` recibe `{ "input_filenames": ["rain.gif", "night.gif"], "output_filename": "variants-sheet.png", "manifest_filename": "variants-sheet.json", "cell_width": 32, "cell_height": 32, "columns": 2, "padding": 2 }`. Redimensiona solo cuando el sprite excede la celda, centra cada preview y escribe posiciones/orígenes en el manifest.
 
 `/api/v1/scenes/extend` recibe `{ "input_map_filename": "world-map.json", "output_map_filename": "world-map-expanded.json", "top": 2, "right": 8, "bottom": 1, "left": 4, "seed": 9 }`. Lee el mapa mediante el puerto de manifiestos, preserva el centro y las capas, desplaza landmarks y puede escribir un preview PNG.
 

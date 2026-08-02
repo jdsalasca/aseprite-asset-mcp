@@ -58,6 +58,16 @@ export interface AssetPackInput extends TextureAtlasInput {
   manifestFilename: string;
 }
 
+export interface ContactSheetInput {
+  inputFilenames: string[];
+  outputFilename: string;
+  manifestFilename: string;
+  cellWidth: number;
+  cellHeight: number;
+  columns?: number | undefined;
+  padding?: number | undefined;
+}
+
 export interface AssetManifestWriter {
   write(filename: string, value: unknown): Promise<void>;
 }

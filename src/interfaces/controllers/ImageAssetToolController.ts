@@ -3,9 +3,10 @@ import * as z from "zod/v4";
 import type { ExportAnimationPort } from "../../application/ports/AssetCapabilityPorts.js";
 import { PixelArtAssetService } from "../../application/services/PixelArtAssetService.js";
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
+import type { ContactSheetService } from "../../application/services/ContactSheetService.js";
 
 export class ImageAssetToolController {
-  public constructor(private readonly assets: ExportAnimationPort, private readonly imageAssets: PixelArtAssetService) {}
+  public constructor(private readonly assets: ExportAnimationPort, private readonly imageAssets: PixelArtAssetService, private readonly contactSheets: ContactSheetService) {}
 
   public register(server: McpServer): void {
     server.registerTool("convert_image_to_pixel_art", {
@@ -33,6 +34,11 @@ export class ImageAssetToolController {
       description: "Apply a deterministic accent palette to a PNG or GIF, preserve transparency and timing, and cap output colors without overwriting the source.",
       inputSchema: { input_filename: z.string().min(1), output_filename: z.string().min(1), accent_color: z.string().regex(/^#?(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/), strength: z.number().min(0).max(1).default(0.65), max_colors: z.number().int().min(2).max(64).default(16), format: z.enum(["png", "gif"]).optional() },
     }, async ({ input_filename, output_filename, accent_color, strength, max_colors, format }) => this.result(await this.imageAssets.harmonizePalette({ inputFilename: input_filename, outputFilename: output_filename, accentColor: accent_color, strength, maxColors: max_colors, ...(format ? { format } : {}) })));
+
+    server.registerTool("build_contact_sheet", {
+      description: "Fit heterogeneous sprite previews into a deterministic nearest-neighbor contact sheet and write a navigable JSON manifest.",
+      inputSchema: { input_filenames: z.array(z.string().min(1)).min(1).max(64), output_filename: z.string().min(1), manifest_filename: z.string().min(1), cell_width: z.number().int().min(8).max(512), cell_height: z.number().int().min(8).max(512), columns: z.number().int().min(1).max(16).optional(), padding: z.number().int().min(0).max(64).default(0) },
+    }, async ({ input_filenames, output_filename, manifest_filename, cell_width, cell_height, columns, padding }) => this.result(await this.contactSheets.build({ inputFilenames: [...input_filenames], outputFilename: output_filename, manifestFilename: manifest_filename, cellWidth: cell_width, cellHeight: cell_height, ...(columns === undefined ? {} : { columns }), padding })));
 
     server.registerTool("export_animation_gif", {
       description: "Convert a PNG, GIF, or animated image into a GIF while preserving frames.",

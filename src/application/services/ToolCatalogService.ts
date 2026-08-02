@@ -14,6 +14,7 @@ const DESCRIPTION_OVERRIDES: Record<string, string> = {
   convert_animation_to_pixel_art: "Convert all frames to pixel art and preserve delays.",
   upscale_pixel_art: "Upscale sprites with deterministic nearest-neighbor pixels and preserved transparency.",
   harmonize_asset_palette: "Harmonize a sprite palette toward an accent color with bounded deterministic output.",
+  build_contact_sheet: "Fit heterogeneous sprites into a deterministic preview sheet and navigable manifest.",
   export_animation_gif: "Export a raster animation or Aseprite sprite as GIF.",
   inspect_asset: "Inspect dimensions, frames, colors, transparency, and delays.",
   inspect_asset_bundle: "Inspect one asset and return quality violations and recommendations in one compact response.",
@@ -58,6 +59,7 @@ const DESCRIPTION_OVERRIDES: Record<string, string> = {
 
 function folderFor(name: string): string {
   if (name === "get_asset_library" || name === "get_asset_library_item" || name === "get_asset_preset" || name === "compose_asset_preset" || name === "generate_asset_preset") return "meta/asset-library";
+  if (name === "build_contact_sheet") return "asset/preview";
   if (name === "server_capabilities" || name.startsWith("get_tools_")) return "meta/catalog";
   if (name === "create_style_bible") return "asset/style";
   if (name === "generate_scene_effect_stack") return "asset/effects";

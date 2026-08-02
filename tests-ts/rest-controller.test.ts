@@ -27,6 +27,7 @@ function fakeUseCases(): AssetRestUseCases {
     applyDepthLighting: async () => result("apply_depth_lighting"),
     assetLibrary: new AssetLibraryService(new FakeLibrary()),
     imageAssets: { upscalePixelArt: async () => result("upscale_pixel_art"), qualityBundle: async () => result("inspect_asset_bundle"), harmonizePalette: async () => result("harmonize_asset_palette") },
+    contactSheet: { build: async () => result("build_contact_sheet") },
     visualAssets: { extendScene: async () => result("extend_scene"), generateBiomeTransition: async () => result("generate_biome_transition") },
   };
 }
@@ -90,6 +91,9 @@ test("REST controller exposes the same recipe and effect application services", 
     const harmonize = await fetch(`${rest.url}/api/v1/assets/palette-harmonize`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_filename: "hero.png", output_filename: "hero-harmonized.png", accent_color: "#3155d8", strength: 0.8, max_colors: 8 }) });
     assert.equal(harmonize.status, 200);
     assert.equal((await harmonize.json()).data.operation, "harmonize_asset_palette");
+    const contactSheet = await fetch(`${rest.url}/api/v1/assets/contact-sheet`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_filenames: ["oak.png", "hero.png"], output_filename: "preview-sheet.png", manifest_filename: "preview-sheet.json", cell_width: 32, cell_height: 32, columns: 2, padding: 2 }) });
+    assert.equal(contactSheet.status, 200);
+    assert.equal((await contactSheet.json()).data.operation, "build_contact_sheet");
     const extension = await fetch(`${rest.url}/api/v1/scenes/extend`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_map_filename: "map.json", output_map_filename: "map-expanded.json", top: 2, right: 3, bottom: 1, left: 4, seed: 9 }) });
     assert.equal(extension.status, 200);
     assert.equal((await extension.json()).data.operation, "extend_scene");

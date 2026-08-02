@@ -9,6 +9,7 @@ import type { PixelArtAssetService } from "../services/PixelArtAssetService.js";
 import type { AssetVariantPackGateway } from "../../domain/asset-variant-pack.js";
 import type { AssetPresetGenerationGateway } from "../../domain/asset-preset-generation.js";
 import type { SceneEffectStackGateway } from "../../domain/scene-effect-stack.js";
+import type { ContactSheetService } from "../services/ContactSheetService.js";
 
 export interface AssetRestUseCases {
   createRecipe(input: AssetRecipeCreateInput): AssetRecipePlan;
@@ -21,6 +22,7 @@ export interface AssetRestUseCases {
   applyDepthLighting(input: DepthLightingInput): Promise<AssetOperationResult>;
   assetLibrary: AssetLibraryService;
   imageAssets: Pick<PixelArtAssetService, "upscalePixelArt" | "qualityBundle" | "harmonizePalette">;
+  contactSheet: Pick<ContactSheetService, "build">;
   visualAssets: Pick<VisualAssetGateway, "extendScene" | "generateBiomeTransition">;
 }
 
