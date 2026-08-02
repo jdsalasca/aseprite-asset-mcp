@@ -22,6 +22,8 @@ import { EffectsToolController } from "./controllers/EffectsToolController.js";
 import { SceneExportToolController } from "./controllers/SceneExportToolController.js";
 import { WorkflowPlanToolController } from "./controllers/WorkflowPlanToolController.js";
 import { SpriteEffectsToolController } from "./controllers/SpriteEffectsToolController.js";
+import { AssetVariantPackToolController } from "./controllers/AssetVariantPackToolController.js";
+import { AssetVariantPackService } from "../application/services/AssetVariantPackService.js";
 import { AssetJobService } from "../application/services/AssetJobService.js";
 import { InMemoryAssetJobStore } from "../infrastructure/jobs/InMemoryAssetJobStore.js";
 import { JsonAssetJobStore } from "../infrastructure/jobs/JsonAssetJobStore.js";
@@ -200,6 +202,7 @@ const TOOL_NAMES = [
   "generate_water_reflection",
   "generate_water_caustics",
   "generate_day_night_cycle",
+  "generate_variant_pack",
   "create_asset_recipe",
   "execute_asset_recipe",
   "get_asset_library",
@@ -217,6 +220,7 @@ export class AsepriteMcpServerAdapter {
   private readonly enhancements: DeterministicEnhancementService;
   private readonly assetJobs: AssetJobService;
   private readonly spriteEffects: SpriteEffectsService;
+  private readonly variantPack: AssetVariantPackService;
   private readonly recipeExecutor: AssetRecipeExecutionService;
   private readonly recipes: AssetRecipeComposerService;
   private readonly assetLibrary: AssetLibraryService;
@@ -228,6 +232,7 @@ export class AsepriteMcpServerAdapter {
     this.imageAssets = imageAssets ?? new PixelArtAssetService(rasterCodec, manifestWriter);
     this.visualAssets = new VisualAssetService(rasterCodec, manifestWriter, undefined, undefined, manifestWriter);
     this.spriteEffects = new SpriteEffectsService(rasterCodec);
+    this.variantPack = new AssetVariantPackService(rasterCodec, this.spriteEffects);
     this.recipes = new AssetRecipeComposerService();
     this.assetLibrary = new AssetLibraryService(new FileAssetLibraryAdapter());
     this.recipeExecutor = new AssetRecipeExecutionService({
@@ -240,7 +245,7 @@ export class AsepriteMcpServerAdapter {
       generateNormalMap: (input) => this.spriteEffects.generateNormalMap(input),
       runQualityGate: (input) => this.visualAssets.runQualityGate(input),
     });
-    this.restController = new AssetRestController({ createRecipe: (input) => this.recipes.compose(input), executeRecipe: (input) => this.recipeExecutor.execute(this.recipes.compose(input)), spriteEffects: this.spriteEffects, applyMaterialTexture: (input) => this.visualAssets.applyMaterialTexture(input), applyDepthLighting: (input) => this.visualAssets.applyDepthLighting(input), assetLibrary: this.assetLibrary, imageAssets: this.imageAssets, visualAssets: this.visualAssets }, SERVER_VERSION);
+    this.restController = new AssetRestController({ createRecipe: (input) => this.recipes.compose(input), executeRecipe: (input) => this.recipeExecutor.execute(this.recipes.compose(input)), spriteEffects: this.spriteEffects, variantPack: this.variantPack, applyMaterialTexture: (input) => this.visualAssets.applyMaterialTexture(input), applyDepthLighting: (input) => this.visualAssets.applyDepthLighting(input), assetLibrary: this.assetLibrary, imageAssets: this.imageAssets, visualAssets: this.visualAssets }, SERVER_VERSION);
     this.enhancements = new DeterministicEnhancementService(rasterCodec);
     this.assetJobs = new AssetJobService({ run: (input) => this.imageAssets.runBatch(input) }, jobStore ?? new InMemoryAssetJobStore(), { artifactResolver: new FileAssetArtifactResolver(() => new Date().toISOString(), process.env.ASSET_ARTIFACT_ROOT ? [process.env.ASSET_ARTIFACT_ROOT] : []), timeoutMs: 5 * 60 * 1000 });
     this.server = new McpServer({ name: "aseprite-asset-mcp", version: SERVER_VERSION });
@@ -282,6 +287,7 @@ export class AsepriteMcpServerAdapter {
     new ImageAssetToolController(this.assets, this.imageAssets).register(this.server);
     new VisualAssetToolController(this.visualAssets).register(this.server);
     new SpriteEffectsToolController(this.spriteEffects).register(this.server);
+    new AssetVariantPackToolController(this.variantPack).register(this.server);
     new AssetRecipeToolController(this.recipes, this.recipeExecutor).register(this.server);
     new AssetLibraryToolController(this.assetLibrary).register(this.server);
     new EnhancementToolController(this.visualAssets, this.enhancements).register(this.server);

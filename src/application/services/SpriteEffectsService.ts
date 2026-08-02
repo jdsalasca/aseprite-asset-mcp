@@ -88,7 +88,12 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
       if (!Number.isFinite(intensity) || intensity < 0 || intensity > 1) throw new Error("Rain intensity must be between 0 and 1");
       if (!Number.isFinite(wind) || wind < -1 || wind > 1) throw new Error("Rain wind must be between -1 and 1");
       const source = await this.codec.decode(input.inputFilename);
-      const frames = source.map((frame, frameIndex) => {
+      const frameCount = input.frames ?? source.length;
+      if (!Number.isInteger(frameCount) || frameCount < 1 || frameCount > 24) throw new Error("Rain frames must be an integer from 1 to 24");
+      if (frameCount > 1 && input.format === "png") throw new Error("Rain animations with more than one frame require GIF format");
+      const frames = Array.from({ length: frameCount }, (_, frameIndex) => {
+        const frame = source[frameIndex % source.length];
+        if (!frame) throw new Error("Rain requires at least one source frame");
         const pixels = new Uint8ClampedArray(frame.pixels);
         const drops = Math.max(1, Math.round(frame.width * frame.height * 0.08 * intensity));
         const length = Math.max(2, Math.round(Math.min(frame.width, frame.height) * (0.16 + intensity * 0.2)));
@@ -104,6 +109,11 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
             setPixel(pixels, frame.width, frame.height, x, y, [color[0], color[1], color[2], alpha]);
           }
         }
+        // Tiny sprites can otherwise produce identical frames and be compacted by GIF encoders.
+        const cadenceX = (Math.abs(input.seed) + frameIndex * 3) % frame.width;
+        const cadenceY = (Math.abs(input.seed * 3) + frameIndex * 5) % frame.height;
+        const cadenceAlpha = 64 + ((frameIndex * 37 + Math.abs(input.seed)) % 160);
+        setPixel(pixels, frame.width, frame.height, cadenceX, cadenceY, [color[0], color[1], color[2], cadenceAlpha]);
         return { ...frame, pixels, delayMs: input.delayMs ?? frame.delayMs ?? 90 };
       });
       const format = formatFor(frames, input.format);

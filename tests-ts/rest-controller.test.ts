@@ -20,6 +20,7 @@ function fakeUseCases(): AssetRestUseCases {
     createRecipe: (input) => new AssetRecipeComposerService().compose(input),
     executeRecipe: async (input) => ({ ok: true, recipeId: "test-recipe", outputFilename: input.inputFilename, steps: [], sourcePreserved: true, deterministic: true }),
     spriteEffects: effects,
+    variantPack: { generateVariantPack: async () => result("generate_variant_pack") },
     applyMaterialTexture: async () => result("apply_material_texture"),
     applyDepthLighting: async () => result("apply_depth_lighting"),
     assetLibrary: new AssetLibraryService(new FakeLibrary()),
@@ -99,6 +100,9 @@ test("REST controller exposes the same recipe and effect application services", 
     const dayNight = await fetch(`${rest.url}/api/v1/effects/day-night`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_filename: "hero.png", output_filename: "hero-day-night.gif", frames: 8, seed: 23, intensity: 0.8 }) });
     assert.equal(dayNight.status, 200);
     assert.equal((await dayNight.json()).data.operation, "generate_day_night_cycle");
+    const variantPack = await fetch(`${rest.url}/api/v1/variants/pack`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_filename: "oak.png", output_prefix: "oak-variants", variants: ["rain", "fire", "birds"], frames: 6, seed: 4 }) });
+    assert.equal(variantPack.status, 200);
+    assert.equal((await variantPack.json()).data.operation, "generate_variant_pack");
 
     const invalid = await fetch(`${rest.url}/api/v1/effects/outline`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_filename: "hero.png", output_filename: "hero-outline.png", color: "nope" }) });
     assert.equal(invalid.status, 400);

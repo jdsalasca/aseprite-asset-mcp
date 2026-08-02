@@ -137,6 +137,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `get_asset_library_item`: resuelve README, manifest, preview y sprite sheet de un asset concreto.
 - `get_asset_preset`: devuelve composiciones listas como `living-forest`, `coastal-sunset`, `fantasy-quest` y `rainy-village`.
 - `generate_motion_pack`: crea ciclos `idle`, `walk`, `run`, `jump` o `attack` desde un sprite estático o animado.
+- `generate_variant_pack`: crea en una sola llamada hasta nueve variantes deterministas (`rain`, `fire`, `earthquake`, `birds`, `night`, `day_night`, `walk`, `water_reflection` y `water_caustics`) y devuelve un manifiesto compacto de artifacts.
 
 Las operaciones de imagen no necesitan abrir Aseprite; eso reduce latencia y tokens para conversiones masivas. Las operaciones sobre `.aseprite` siguen pasando por el adaptador CLI hexagonal y mantienen la compatibilidad con Godot.
 
@@ -188,6 +189,7 @@ POST /api/v1/effects/seamless
 POST /api/v1/effects/water-reflection
 POST /api/v1/effects/water-caustics
 POST /api/v1/effects/day-night
+POST /api/v1/variants/pack
 GET /api/v1/library/items/forest-ranger
 GET /api/v1/library/presets/living-forest
 GET /api/v1/library/items/forest-ranger/preview
@@ -200,3 +202,18 @@ Las dos últimas rutas sirven PNG/GIF de forma binaria desde el adaptador de arc
 `compose_asset_preset` y `GET /api/v1/library/presets/:id/compose` devuelven en una sola respuesta los assets y las capas ordenadas (`background`, `midground`, `foreground`, `effect`), reduciendo búsquedas repetidas de los agentes.
 
 Las variantes (`rain`, `fire`, `earthquake`, `birds`, `wave-reflection`, `day`, `sunset`, `night`, `walk`, `attack`, etc.) son contratos para los algoritmos existentes: se aplican sobre una copia del asset y conservan la fuente.
+
+`generate_variant_pack` evita nueve llamadas del agente cuando se necesita explorar un asset en distintos contextos. Ejemplo MCP/REST equivalente:
+
+```json
+{
+  "input_filename": "art/forest-ranger.png",
+  "output_prefix": "art/forest-ranger-variants",
+  "variants": ["rain", "night", "birds", "day_night"],
+  "frames": 8,
+  "seed": 17,
+  "delay_ms": 90
+}
+```
+
+La respuesta contiene `artifacts[]` con ruta, operación, cantidad de frames, formato y las garantías `deterministic` y `sourcePreserved`. Las fuentes PNG estáticas también pueden producir GIFs animados; el servidor rechaza explícitamente pedir varios frames con formato PNG.

@@ -58,6 +58,18 @@ test("rain overlay rejects invalid intensity and wind values", async () => {
   assert.equal(result.ok, false);
 });
 
+test("rain overlay can animate a static source when frames are requested", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-rain-static-")); const input = path.join(directory, "input.png"); const output = path.join(directory, "out.gif"); await makeSprite(input);
+  const result = await service().generateRainOverlay({ inputFilename: input, outputFilename: output, seed: 8, intensity: 0.8, wind: 0.2, color: "#B7D7FF", frames: 4, delayMs: 70, format: "gif" });
+  assert.equal(result.ok, true); assert.equal((await sharp(output, { animated: true }).metadata()).pages, 4);
+});
+
+test("rain overlay rejects multiple requested frames with PNG output", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-rain-format-")); const input = path.join(directory, "input.png"); await makeSprite(input);
+  const result = await service().generateRainOverlay({ inputFilename: input, outputFilename: path.join(directory, "out.png"), seed: 8, intensity: 0.8, wind: 0.2, color: "#B7D7FF", frames: 2, format: "png" });
+  assert.equal(result.ok, false); assert.match(result.message, /GIF format/);
+});
+
 test("motion pack creates a deterministic walk cycle from a static asset", async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-motion-")); const input = path.join(directory, "input.png"); const first = path.join(directory, "first.gif"); const second = path.join(directory, "second.gif"); await makeSprite(input); const sourceBefore = await fs.readFile(input);
   const motion = { inputFilename: input, outputFilename: first, motion: "walk" as const, frames: 8, seed: 11, amplitude: 2, delayMs: 70 };
