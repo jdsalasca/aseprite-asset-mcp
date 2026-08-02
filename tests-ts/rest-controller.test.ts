@@ -34,6 +34,7 @@ function fakeUseCases(): AssetRestUseCases {
     spriteGeometry: { inspect: async () => result("inspect_sprite_geometry") },
     spriteHitbox: { generate: async () => result("generate_sprite_hitboxes") },
     spriteRuntimeBundle: { build: async () => result("build_sprite_runtime_bundle") },
+    spriteAnchors: { generate: async () => result("generate_sprite_anchors") },
     contactSheet: { build: async () => result("build_contact_sheet") },
     visualAssets: { extendScene: async () => result("extend_scene"), generateBiomeTransition: async () => result("generate_biome_transition") },
   };
@@ -146,6 +147,9 @@ test("REST controller exposes the same recipe and effect application services", 
     const runtimeBundle = await fetch(`${rest.url}/api/v1/assets/sprite-runtime-bundle`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_filename: "hero.gif", sheet_filename: "hero-sheet.png", sheet_manifest_filename: "hero-sheet.json", hitbox_manifest_filename: "hero-hitboxes.json", bundle_manifest_filename: "hero-runtime.json", columns: 4, sheet_padding: 1, hitbox_mode: "components", hitbox_padding: 1 }) });
     assert.equal(runtimeBundle.status, 200);
     assert.equal((await runtimeBundle.json()).data.operation, "build_sprite_runtime_bundle");
+    const anchors = await fetch(`${rest.url}/api/v1/assets/sprite-anchors`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ filename: "hero.gif", output_filename: "hero-anchors.json", min_component_pixels: 1 }) });
+    assert.equal(anchors.status, 200);
+    assert.equal((await anchors.json()).data.operation, "generate_sprite_anchors");
     const generatedPreset = await fetch(`${rest.url}/api/v1/library/presets/generate`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ preset_id: "coastal-sunset", output_prefix: "art/coast", width: 32, height: 24, seed: 9 }) });
     assert.equal(generatedPreset.status, 200);
     assert.equal((await generatedPreset.json()).data.operation, "generate_asset_preset");

@@ -51,6 +51,7 @@ import { AnimationSheetService } from "../application/services/AnimationSheetSer
 import { SpriteGeometryService } from "../application/services/SpriteGeometryService.js";
 import { SpriteHitboxService } from "../application/services/SpriteHitboxService.js";
 import { SpriteRuntimeBundleService } from "../application/services/SpriteRuntimeBundleService.js";
+import { SpriteAnchorsService } from "../application/services/SpriteAnchorsService.js";
 
 const SERVER_VERSION = "1.0.0";
 const TYPESCRIPT_VERSION = "6.0.3";
@@ -194,6 +195,7 @@ const TOOL_NAMES = [
   "inspect_sprite_geometry",
   "generate_sprite_hitboxes",
   "build_sprite_runtime_bundle",
+  "generate_sprite_anchors",
   "validate_asset_quality",
   "build_texture_atlas",
   "run_asset_recipe",
@@ -249,6 +251,7 @@ export class AsepriteMcpServerAdapter {
   private readonly spriteGeometry: SpriteGeometryService;
   private readonly spriteHitbox: SpriteHitboxService;
   private readonly spriteRuntimeBundle: SpriteRuntimeBundleService;
+  private readonly spriteAnchors: SpriteAnchorsService;
   private readonly visualAssets: VisualAssetService;
   private readonly enhancements: DeterministicEnhancementService;
   private readonly assetJobs: AssetJobService;
@@ -273,6 +276,7 @@ export class AsepriteMcpServerAdapter {
     this.spriteGeometry = new SpriteGeometryService(rasterCodec);
     this.spriteHitbox = new SpriteHitboxService(this.spriteGeometry, manifestWriter);
     this.spriteRuntimeBundle = new SpriteRuntimeBundleService(this.animationSheet, this.spriteHitbox, manifestWriter);
+    this.spriteAnchors = new SpriteAnchorsService(this.spriteGeometry, manifestWriter);
     this.visualAssets = new VisualAssetService(rasterCodec, manifestWriter, undefined, undefined, manifestWriter);
     this.spriteEffects = new SpriteEffectsService(rasterCodec);
     this.variantPack = new AssetVariantPackService(rasterCodec, this.spriteEffects);
@@ -290,7 +294,7 @@ export class AsepriteMcpServerAdapter {
       generateNormalMap: (input) => this.spriteEffects.generateNormalMap(input),
       runQualityGate: (input) => this.visualAssets.runQualityGate(input),
     });
-    this.restController = new AssetRestController({ createRecipe: (input) => this.recipes.compose(input), executeRecipe: (input) => this.recipeExecutor.execute(this.recipes.compose(input)), spriteEffects: this.spriteEffects, variantPack: this.variantPack, presetGeneration: this.presetGeneration, sceneEffectStack: this.sceneEffectStack, applyMaterialTexture: (input) => this.visualAssets.applyMaterialTexture(input), applyDepthLighting: (input) => this.visualAssets.applyDepthLighting(input), assetLibrary: this.assetLibrary, imageAssets: this.imageAssets, batchQuality: this.batchQuality, animationQuality: this.animationQuality, spriteNormalization: this.spriteNormalization, animationSheet: this.animationSheet, spriteGeometry: this.spriteGeometry, spriteHitbox: this.spriteHitbox, spriteRuntimeBundle: this.spriteRuntimeBundle, contactSheet: this.contactSheets, visualAssets: { extendScene: (input) => this.visualAssets.extendScene(input), generateBiomeTransition: (input) => this.visualAssets.generateBiomeTransition(input) } }, SERVER_VERSION);
+    this.restController = new AssetRestController({ createRecipe: (input) => this.recipes.compose(input), executeRecipe: (input) => this.recipeExecutor.execute(this.recipes.compose(input)), spriteEffects: this.spriteEffects, variantPack: this.variantPack, presetGeneration: this.presetGeneration, sceneEffectStack: this.sceneEffectStack, applyMaterialTexture: (input) => this.visualAssets.applyMaterialTexture(input), applyDepthLighting: (input) => this.visualAssets.applyDepthLighting(input), assetLibrary: this.assetLibrary, imageAssets: this.imageAssets, batchQuality: this.batchQuality, animationQuality: this.animationQuality, spriteNormalization: this.spriteNormalization, animationSheet: this.animationSheet, spriteGeometry: this.spriteGeometry, spriteHitbox: this.spriteHitbox, spriteRuntimeBundle: this.spriteRuntimeBundle, spriteAnchors: this.spriteAnchors, contactSheet: this.contactSheets, visualAssets: { extendScene: (input) => this.visualAssets.extendScene(input), generateBiomeTransition: (input) => this.visualAssets.generateBiomeTransition(input) } }, SERVER_VERSION);
     this.enhancements = new DeterministicEnhancementService(rasterCodec);
     this.assetJobs = new AssetJobService({ run: (input) => this.imageAssets.runBatch(input) }, jobStore ?? new InMemoryAssetJobStore(), { artifactResolver: new FileAssetArtifactResolver(() => new Date().toISOString(), process.env.ASSET_ARTIFACT_ROOT ? [process.env.ASSET_ARTIFACT_ROOT] : []), timeoutMs: 5 * 60 * 1000 });
     this.server = new McpServer({ name: "aseprite-asset-mcp", version: SERVER_VERSION });
@@ -329,7 +333,7 @@ export class AsepriteMcpServerAdapter {
       inputSchema: { query: z.string().min(1), limit: z.number().int().min(1).max(100).default(20) },
     }, async ({ query, limit }) => this.text({ query, tools: this.catalog.search(query, limit) }));
 
-    new ImageAssetToolController(this.assets, this.imageAssets, this.contactSheets, this.batchQuality, this.animationQuality, this.spriteNormalization, this.animationSheet, this.spriteGeometry, this.spriteHitbox, this.spriteRuntimeBundle).register(this.server);
+    new ImageAssetToolController(this.assets, this.imageAssets, this.contactSheets, this.batchQuality, this.animationQuality, this.spriteNormalization, this.animationSheet, this.spriteGeometry, this.spriteHitbox, this.spriteRuntimeBundle, this.spriteAnchors).register(this.server);
     new VisualAssetToolController(this.visualAssets).register(this.server);
     new SpriteEffectsToolController(this.spriteEffects).register(this.server);
     new AssetVariantPackToolController(this.variantPack).register(this.server);
