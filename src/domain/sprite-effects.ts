@@ -8,6 +8,7 @@ export interface CleanupIsolatedPixelsInput extends SpriteEffectBaseInput { minN
 export interface SpriteGlowInput extends SpriteEffectBaseInput { color: string; radius?: number | undefined; opacity?: number | undefined; }
 export type SpriteRimLightDirection = "north" | "north_east" | "east" | "south_east" | "south" | "south_west" | "west" | "north_west";
 export interface SpriteRimLightInput extends SpriteEffectBaseInput { color: string; direction: SpriteRimLightDirection; strength?: number | undefined; }
+export interface SpriteAmbientOcclusionInput extends SpriteEffectBaseInput { color: string; radius?: number | undefined; strength?: number | undefined; }
 export interface ColorGradeInput extends SpriteEffectBaseInput { brightness?: number | undefined; contrast?: number | undefined; saturation?: number | undefined; }
 export interface SpriteShadowInput extends SpriteEffectBaseInput { offsetX: number; offsetY: number; color: string; opacity?: number | undefined; }
 export interface ParticleBurstInput { outputFilename: string; width: number; height: number; frames: number; particleCount: number; seed: number; color: string; delayMs?: number | undefined; }
@@ -26,6 +27,7 @@ export interface SpriteEffectsGateway {
   cleanupIsolatedPixels(input: CleanupIsolatedPixelsInput): Promise<AssetOperationResult>;
   generateSpriteGlow(input: SpriteGlowInput): Promise<AssetOperationResult>;
   applySpriteRimLight(input: SpriteRimLightInput): Promise<AssetOperationResult>;
+  applySpriteAmbientOcclusion(input: SpriteAmbientOcclusionInput): Promise<AssetOperationResult>;
   applyColorGrade(input: ColorGradeInput): Promise<AssetOperationResult>;
   generateSpriteShadow(input: SpriteShadowInput): Promise<AssetOperationResult>;
   generateParticleBurst(input: ParticleBurstInput): Promise<AssetOperationResult>;

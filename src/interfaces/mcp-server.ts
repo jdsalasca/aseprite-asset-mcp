@@ -241,6 +241,7 @@ const TOOL_NAMES = [
   "cleanup_isolated_pixels",
   "generate_sprite_glow",
   "apply_sprite_rim_light",
+  "apply_sprite_ambient_occlusion",
   "apply_color_grade",
   "generate_sprite_shadow",
   "generate_particle_burst",

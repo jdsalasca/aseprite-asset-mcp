@@ -130,6 +130,32 @@ test("sprite rim light rejects invalid direction and strength", async () => {
   assert.equal(invalidStrength.ok, false); assert.equal(invalidDirection.ok, false);
 });
 
+test("sprite ambient occlusion darkens cavity edges deterministically without changing alpha or source", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-ambient-occlusion-"));
+  const input = path.join(directory, "input.png"); const first = path.join(directory, "first.png"); const second = path.join(directory, "second.png");
+  const pixels = new Uint8ClampedArray(5 * 5 * 4);
+  for (let y = 1; y < 4; y += 1) for (let x = 1; x < 4; x += 1) pixels.set([220, 90, 40, 255], (y * 5 + x) * 4);
+  await sharp(Buffer.from(pixels), { raw: { width: 5, height: 5, channels: 4 } }).png().toFile(input);
+  const sourceBefore = await fs.readFile(input);
+  const operation = { inputFilename: input, outputFilename: first, color: "#000000", radius: 1, strength: 1 };
+  assert.equal((await service().applySpriteAmbientOcclusion(operation)).ok, true);
+  assert.equal((await service().applySpriteAmbientOcclusion({ ...operation, outputFilename: second })).ok, true);
+  assert.deepEqual(await fs.readFile(first), await fs.readFile(second)); assert.deepEqual(await fs.readFile(input), sourceBefore);
+  const output = await sharp(first).raw().toBuffer({ resolveWithObject: true });
+  const pixel = (x: number, y: number) => Array.from(output.data.slice((y * 5 + x) * 4, (y * 5 + x + 1) * 4));
+  assert.deepEqual(pixel(2, 2), [220, 90, 40, 255]);
+  assert.notDeepEqual(pixel(2, 1), [220, 90, 40, 255]);
+  assert.equal(pixel(2, 1)[3], 255);
+  assert.deepEqual(pixel(0, 0), [0, 0, 0, 0]);
+});
+
+test("sprite ambient occlusion rejects invalid radius and strength", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-ambient-invalid-")); const input = path.join(directory, "input.png"); await makeSprite(input);
+  const invalidRadius = await service().applySpriteAmbientOcclusion({ inputFilename: input, outputFilename: path.join(directory, "radius.png"), color: "#000000", radius: 5, strength: 0.5 });
+  const invalidStrength = await service().applySpriteAmbientOcclusion({ inputFilename: input, outputFilename: path.join(directory, "strength.png"), color: "#000000", radius: 1, strength: 2 });
+  assert.equal(invalidRadius.ok, false); assert.equal(invalidStrength.ok, false);
+});
+
 test("particle burst generation is seeded and exports the requested frame count", async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-particles-")); const first = path.join(directory, "first.gif"); const second = path.join(directory, "second.gif");
   assert.equal((await service().generateParticleBurst({ outputFilename: first, width: 32, height: 32, frames: 6, particleCount: 20, seed: 7, color: "#ffcc55" })).ok, true); assert.equal((await service().generateParticleBurst({ outputFilename: second, width: 32, height: 32, frames: 6, particleCount: 20, seed: 7, color: "#ffcc55" })).ok, true); assert.deepEqual(await fs.readFile(first), await fs.readFile(second)); assert.equal((await sharp(first, { animated: true }).metadata()).pages, 6);

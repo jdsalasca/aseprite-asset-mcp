@@ -57,6 +57,7 @@ const DESCRIPTION_OVERRIDES: Record<string, string> = {
   cleanup_isolated_pixels: "Remove deterministic isolated opaque pixels while preserving connected clusters.",
   generate_sprite_glow: "Generate a deterministic colored glow around opaque sprite pixels.",
   apply_sprite_rim_light: "Apply deterministic directional rim light to exposed sprite edges.",
+  apply_sprite_ambient_occlusion: "Apply deterministic ambient occlusion to exposed sprite cavities.",
   apply_color_grade: "Apply deterministic brightness, contrast, and saturation grading.",
   generate_sprite_shadow: "Generate a deterministic clipped shadow from sprite alpha.",
   generate_particle_burst: "Generate a deterministic animated particle burst GIF.",
@@ -97,7 +98,7 @@ function folderFor(name: string): string {
   if (name === "generate_scene_effect_stack") return "asset/effects";
   if (name.includes("material_texture")) return "asset/material";
   if (name.includes("depth_lighting")) return "asset/lighting";
-  if (name.includes("color_grade") || name.includes("outline") || name.includes("background") || name.includes("cleanup") || name.includes("glow") || name.includes("rim_light") || name.includes("shadow") || name.includes("normal_map") || name.includes("rain") || name.includes("motion") || name.includes("seamless") || name.includes("reflection") || name.includes("caustics") || name.includes("day_night") || name.includes("variant_pack")) return "asset/effects";
+  if (name.includes("color_grade") || name.includes("outline") || name.includes("background") || name.includes("cleanup") || name.includes("glow") || name.includes("rim_light") || name.includes("ambient_occlusion") || name.includes("shadow") || name.includes("normal_map") || name.includes("rain") || name.includes("motion") || name.includes("seamless") || name.includes("reflection") || name.includes("caustics") || name.includes("day_night") || name.includes("variant_pack")) return "asset/effects";
   if (name.includes("particle")) return "asset/particles";
   if (name === "create_asset_recipe" || name === "execute_asset_recipe") return "asset/recipes";
   if (name === "inspect_reference" || name === "run_asset_quality_gate") return "asset/quality";
