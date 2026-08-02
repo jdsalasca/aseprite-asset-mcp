@@ -39,6 +39,7 @@ const DESCRIPTION_OVERRIDES: Record<string, string> = {
   generate_rain_overlay: "Generate a seeded rain overlay while preserving sprite dimensions and timing.",
   generate_motion_pack: "Generate a deterministic movement cycle from a static or animated sprite.",
   generate_seamless_texture: "Make opposite texture borders match for repeatable pixel-art backgrounds.",
+  generate_water_reflection: "Generate deterministic animated reflections for oceans, beaches, and wave scenes.",
   create_asset_recipe: "Compose a deterministic multi-effect asset recipe without executing it.",
   execute_asset_recipe: "Execute a composed recipe through shared visual services and return every step.",
   get_asset_library: "Search 339 deterministic prebuilt assets and scene presets.",
@@ -53,7 +54,7 @@ function folderFor(name: string): string {
   if (name === "create_style_bible") return "asset/style";
   if (name.includes("material_texture")) return "asset/material";
   if (name.includes("depth_lighting")) return "asset/lighting";
-  if (name.includes("color_grade") || name.includes("outline") || name.includes("shadow") || name.includes("normal_map") || name.includes("rain") || name.includes("motion") || name.includes("seamless")) return "asset/effects";
+  if (name.includes("color_grade") || name.includes("outline") || name.includes("shadow") || name.includes("normal_map") || name.includes("rain") || name.includes("motion") || name.includes("seamless") || name.includes("reflection")) return "asset/effects";
   if (name.includes("particle")) return "asset/particles";
   if (name === "create_asset_recipe" || name === "execute_asset_recipe") return "asset/recipes";
   if (name === "inspect_reference" || name === "run_asset_quality_gate") return "asset/quality";

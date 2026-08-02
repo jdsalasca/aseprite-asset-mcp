@@ -1,7 +1,7 @@
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { RasterCodec } from "../../domain/image-assets.js";
 import type { RasterFrame } from "../../domain/pixel-art.js";
-import type { ColorGradeInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, SeamlessTextureInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteShadowInput } from "../../domain/sprite-effects.js";
+import type { ColorGradeInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, SeamlessTextureInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteShadowInput, WaterReflectionInput } from "../../domain/sprite-effects.js";
 
 function ok(value: unknown): AssetOperationResult { return { ok: true, message: JSON.stringify(value) }; }
 function fail(error: unknown): AssetOperationResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
@@ -13,6 +13,16 @@ function blend(value: number, factor: number): number { return Math.round(clamp(
 function hash(seed: number, index: number): number { let value = Math.imul(seed + index * 374761393, 668265263); value = Math.imul(value ^ (value >>> 13), 1274126177); return ((value ^ (value >>> 16)) >>> 0) / 4294967295; }
 function alphaAt(frame: RasterFrame, x: number, y: number): number { if (x < 0 || y < 0 || x >= frame.width || y >= frame.height) return 0; return frame.pixels[(y * frame.width + x) * 4 + 3] ?? 0; }
 function setPixel(pixels: Uint8ClampedArray, width: number, height: number, x: number, y: number, color: [number, number, number, number]): void { if (x < 0 || y < 0 || x >= width || y >= height) return; pixels.set(color, (y * width + x) * 4); }
+function compositePixel(pixels: Uint8ClampedArray, width: number, height: number, x: number, y: number, color: [number, number, number, number]): void {
+  if (x < 0 || y < 0 || x >= width || y >= height || color[3] <= 0) return;
+  const offset = (y * width + x) * 4;
+  const sourceAlpha = clamp(color[3] / 255, 0, 1);
+  const destinationAlpha = clamp((pixels[offset + 3] ?? 0) / 255, 0, 1);
+  const outputAlpha = sourceAlpha + destinationAlpha * (1 - sourceAlpha);
+  if (outputAlpha <= 0) return;
+  for (let channel = 0; channel < 3; channel += 1) pixels[offset + channel] = Math.round(((color[channel] ?? 0) * sourceAlpha + (pixels[offset + channel] ?? 0) * destinationAlpha * (1 - sourceAlpha)) / outputAlpha);
+  pixels[offset + 3] = Math.round(outputAlpha * 255);
+}
 function outputMessage(operation: string, input: string | null, output: string, frames: number, format: SpriteEffectFormat): AssetOperationResult { return ok({ operation, ...(input ? { input } : {}), output, frames, format, deterministic: true, sourcePreserved: true }); }
 function averagePixel(left: Uint8ClampedArray, right: Uint8ClampedArray, leftOffset: number, rightOffset: number): [number, number, number, number] { return [Math.round(((left[leftOffset] ?? 0) + (right[rightOffset] ?? 0)) / 2), Math.round(((left[leftOffset + 1] ?? 0) + (right[rightOffset + 1] ?? 0)) / 2), Math.round(((left[leftOffset + 2] ?? 0) + (right[rightOffset + 2] ?? 0)) / 2), Math.round(((left[leftOffset + 3] ?? 0) + (right[rightOffset + 3] ?? 0)) / 2)]; }
 
@@ -158,6 +168,53 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
       const format = formatFor(frames, input.format);
       await this.codec.encode(frames, input.outputFilename, format);
       return outputMessage("generate_seamless_texture", input.inputFilename, input.outputFilename, frames.length, format);
+    } catch (error) { return fail(error); }
+  }
+
+  public async generateWaterReflection(input: WaterReflectionInput): Promise<AssetOperationResult> {
+    try {
+      assertDifferent(input.inputFilename, input.outputFilename);
+      const source = await this.codec.decode(input.inputFilename);
+      const firstFrame = source[0];
+      if (!firstFrame) throw new Error("Water reflection requires at least one source frame");
+      if (!Number.isInteger(input.waterline) || input.waterline < 1 || input.waterline >= firstFrame.height) throw new Error("Waterline must be an integer inside the frame");
+      if (!Number.isInteger(input.frames) || input.frames < 2 || input.frames > 24) throw new Error("Reflection frames must be an integer from 2 to 24");
+      const amplitude = input.amplitude ?? 1;
+      if (!Number.isFinite(amplitude) || amplitude < 0 || amplitude > 8) throw new Error("Reflection amplitude must be between 0 and 8");
+      const opacity = input.opacity ?? 0.6;
+      if (!Number.isFinite(opacity) || opacity < 0 || opacity > 1) throw new Error("Reflection opacity must be between 0 and 1");
+      if (!Number.isInteger(input.seed)) throw new Error("Reflection seed must be an integer");
+      if (input.delayMs !== undefined && (!Number.isInteger(input.delayMs) || input.delayMs <= 0)) throw new Error("Reflection delay must be a positive integer");
+      const frames = Array.from({ length: input.frames }, (_, frameIndex) => {
+        const sourceFrame = source[frameIndex % source.length] ?? firstFrame;
+        const pixels = new Uint8ClampedArray(sourceFrame.pixels);
+        const waterHeight = sourceFrame.height - input.waterline;
+        const framePulse = (frameIndex + 1) / input.frames;
+        let hasReflection = false;
+        for (let y = 0; y < input.waterline; y += 1) for (let x = 0; x < sourceFrame.width; x += 1) {
+          const sourceOffset = (y * sourceFrame.width + x) * 4;
+          const sourceAlpha = sourceFrame.pixels[sourceOffset + 3] ?? 0;
+          if (sourceAlpha === 0) continue;
+          const reflectedY = input.waterline + (input.waterline - 1 - y);
+          const wave = Math.round(Math.sin((x + input.seed * 0.37 + frameIndex * 1.35) * 0.72) * amplitude);
+          const ripple = Math.round(Math.sin((y + input.seed + frameIndex) * 0.81) * amplitude * 0.25);
+          const targetY = Math.max(input.waterline, reflectedY + ripple);
+          if (targetY >= sourceFrame.height) continue;
+          const fade = clamp(1 - (targetY - input.waterline) / Math.max(1, waterHeight), 0, 1);
+          const reflectedAlpha = Math.max(1, Math.round(sourceAlpha * opacity * fade * framePulse));
+          compositePixel(pixels, sourceFrame.width, sourceFrame.height, x + wave, targetY, [sourceFrame.pixels[sourceOffset] ?? 0, sourceFrame.pixels[sourceOffset + 1] ?? 0, sourceFrame.pixels[sourceOffset + 2] ?? 0, reflectedAlpha]);
+          hasReflection = true;
+        }
+        if (hasReflection && opacity > 0) {
+          const shimmerX = Math.abs((input.seed * 31 + frameIndex * 3) % sourceFrame.width);
+          const shimmerY = input.waterline + Math.abs((input.seed + frameIndex) % waterHeight);
+          compositePixel(pixels, sourceFrame.width, sourceFrame.height, shimmerX, shimmerY, [220, 240, 255, 255]);
+        }
+        return { width: sourceFrame.width, height: sourceFrame.height, pixels, delayMs: input.delayMs ?? sourceFrame.delayMs ?? 90 };
+      });
+      const format = formatFor(frames, input.format);
+      await this.codec.encode(frames, input.outputFilename, format);
+      return outputMessage("generate_water_reflection", input.inputFilename, input.outputFilename, frames.length, format);
     } catch (error) { return fail(error); }
   }
 }

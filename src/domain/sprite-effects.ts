@@ -11,6 +11,7 @@ export interface RainOverlayInput extends SpriteEffectBaseInput { seed: number; 
 export type MotionKind = "idle" | "walk" | "run" | "jump" | "attack";
 export interface MotionPackInput extends SpriteEffectBaseInput { motion: MotionKind; frames: number; seed: number; amplitude?: number | undefined; delayMs?: number | undefined; }
 export interface SeamlessTextureInput extends SpriteEffectBaseInput { seamWidth?: number | undefined; }
+export interface WaterReflectionInput extends SpriteEffectBaseInput { waterline: number; frames: number; seed: number; amplitude?: number | undefined; opacity?: number | undefined; delayMs?: number | undefined; }
 
 export interface SpriteEffectsGateway {
   applyPixelOutline(input: PixelOutlineInput): Promise<AssetOperationResult>;
@@ -21,4 +22,5 @@ export interface SpriteEffectsGateway {
   generateRainOverlay(input: RainOverlayInput): Promise<AssetOperationResult>;
   generateMotionPack(input: MotionPackInput): Promise<AssetOperationResult>;
   generateSeamlessTexture(input: SeamlessTextureInput): Promise<AssetOperationResult>;
+  generateWaterReflection(input: WaterReflectionInput): Promise<AssetOperationResult>;
 }

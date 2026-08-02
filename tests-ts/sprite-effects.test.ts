@@ -99,3 +99,34 @@ test("seamless texture makes opposite borders match deterministically and preser
   for (let x = 0; x < 4; x += 1) assert.deepEqual([...data.data.slice(x * 4, x * 4 + 4)], [...data.data.slice((3 * 4 + x) * 4, (3 * 4 + x + 1) * 4)]);
   assert.equal((await service().generateSeamlessTexture({ ...texture, outputFilename: path.join(directory, "invalid.png"), seamWidth: 3 })).ok, false);
 });
+
+test("water reflection creates deterministic animated pixels below the waterline and preserves the source", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-water-reflection-"));
+  const input = path.join(directory, "input.png");
+  const first = path.join(directory, "first.gif");
+  const second = path.join(directory, "second.gif");
+  const pixels = new Uint8ClampedArray(8 * 8 * 4);
+  const set = (x: number, y: number, color: [number, number, number, number]) => pixels.set(color, (y * 8 + x) * 4);
+  set(3, 3, [240, 100, 40, 255]);
+  set(4, 2, [80, 220, 255, 255]);
+  await sharp(Buffer.from(pixels), { raw: { width: 8, height: 8, channels: 4 } }).png().toFile(input);
+  const sourceBefore = await fs.readFile(input);
+  const reflection = { inputFilename: input, outputFilename: first, waterline: 4, frames: 4, seed: 17, amplitude: 1, opacity: 0.65, delayMs: 70 };
+  assert.equal((await service().generateWaterReflection(reflection)).ok, true);
+  assert.equal((await service().generateWaterReflection({ ...reflection, outputFilename: second })).ok, true);
+  assert.deepEqual(await fs.readFile(first), await fs.readFile(second));
+  assert.deepEqual(await fs.readFile(input), sourceBefore);
+  const metadata = await sharp(first, { animated: true }).metadata();
+  assert.equal(metadata.pages, 4); assert.equal(metadata.width, 8); assert.equal(metadata.pageHeight, 8); assert.equal(metadata.height, 32);
+  const data = await sharp(first, { animated: true }).raw().toBuffer({ resolveWithObject: true });
+  let reflectedAlpha = 0;
+  for (let page = 0; page < 4; page += 1) for (let y = 4; y < 8; y += 1) for (let x = 0; x < 8; x += 1) reflectedAlpha += data.data[((page * 8 + y) * 8 + x) * 4 + 3] ?? 0;
+  assert.ok(reflectedAlpha > 0);
+  assert.equal(JSON.parse((await service().generateWaterReflection(reflection)).message).operation, "generate_water_reflection");
+});
+
+test("water reflection rejects invalid waterline, frame, amplitude, and opacity values", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-water-reflection-invalid-")); const input = path.join(directory, "input.png"); await makeSprite(input);
+  const result = await service().generateWaterReflection({ inputFilename: input, outputFilename: path.join(directory, "out.gif"), waterline: 0, frames: 1, seed: 1, amplitude: 20, opacity: 2 });
+  assert.equal(result.ok, false);
+});
