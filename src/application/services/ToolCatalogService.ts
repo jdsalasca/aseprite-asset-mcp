@@ -12,6 +12,7 @@ const DESCRIPTION_OVERRIDES: Record<string, string> = {
   run_lua_script: "Run a bounded trusted Aseprite script.",
   convert_image_to_pixel_art: "Convert one image to pixel art with a bounded palette.",
   convert_animation_to_pixel_art: "Convert all frames to pixel art and preserve delays.",
+  upscale_pixel_art: "Upscale sprites with deterministic nearest-neighbor pixels and preserved transparency.",
   export_animation_gif: "Export a raster animation or Aseprite sprite as GIF.",
   inspect_asset: "Inspect dimensions, frames, colors, transparency, and delays.",
   validate_asset_quality: "Validate palette size and isolated-pixel limits.",

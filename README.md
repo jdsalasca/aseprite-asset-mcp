@@ -115,6 +115,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `batch_asset_job`: agrupa varias recetas en una sola llamada y devuelve un resultado compacto.
 - `convert_image_to_pixel_art`: convierte PNG, JPG, WebP y otros formatos soportados por Sharp con resize box/nearest, paleta limitada, transparencia y dithering Bayer opcional.
 - `convert_animation_to_pixel_art`: procesa todos los frames con una paleta global y conserva sus delays en GIF.
+- `upscale_pixel_art`: aumenta sprites estáticos o animados con nearest-neighbor determinista, conserva transparencia/delays y limita la salida a 4096 px.
 - `export_animation_gif`: exporta una imagen animada o un `.aseprite` a GIF.
 - `inspect_asset` y `validate_asset_quality`: reportan dimensiones, frames, colores, transparencia, delays y pixeles aislados antes de exportar.
 - `build_texture_atlas`: empaqueta imágenes del mismo tamaño en un atlas PNG con columnas y padding.
@@ -177,6 +178,7 @@ Ejemplos REST:
 ```text
 GET /api/v1/library?query=rain&limit=12
 POST /api/v1/effects/motion
+POST /api/v1/effects/upscale
 GET /api/v1/library/items/forest-ranger
 GET /api/v1/library/presets/living-forest
 GET /api/v1/library/items/forest-ranger/preview

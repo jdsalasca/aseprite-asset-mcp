@@ -13,6 +13,13 @@ export interface ConvertImageInput extends PixelArtOptions {
   format?: ImageOutputFormat | undefined;
 }
 
+export interface UpscalePixelArtInput {
+  inputFilename: string;
+  outputFilename: string;
+  scale: number;
+  format?: ImageOutputFormat | undefined;
+}
+
 export interface AssetInspection {
   filename: string;
   frameCount: number;

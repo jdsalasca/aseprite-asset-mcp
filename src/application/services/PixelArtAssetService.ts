@@ -11,6 +11,7 @@ import type {
   ImageOutputFormat,
   RasterCodec,
   TextureAtlasInput,
+  UpscalePixelArtInput,
 } from "../../domain/image-assets.js";
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { PixelArtQualityReport, RasterFrame } from "../../domain/pixel-art.js";
@@ -25,6 +26,25 @@ function assertPathPair(inputFilename: string, outputFilename: string): void {
 function assertOutputDiffersFromInputs(inputFilenames: string[], outputFilename: string): void {
   const output = path.resolve(outputFilename).toLowerCase();
   if (inputFilenames.some((filename) => path.resolve(filename).toLowerCase() === output)) throw new Error("Output filename must be different from an input asset");
+}
+
+function upscaleFrame(frame: RasterFrame, scale: number): RasterFrame {
+  const width = frame.width * scale;
+  const height = frame.height * scale;
+  const pixels = new Uint8ClampedArray(width * height * 4);
+  for (let sourceY = 0; sourceY < frame.height; sourceY += 1) {
+    for (let sourceX = 0; sourceX < frame.width; sourceX += 1) {
+      const sourceOffset = (sourceY * frame.width + sourceX) * 4;
+      for (let offsetY = 0; offsetY < scale; offsetY += 1) {
+        const targetRow = (sourceY * scale + offsetY) * width;
+        for (let offsetX = 0; offsetX < scale; offsetX += 1) {
+          const targetOffset = (targetRow + sourceX * scale + offsetX) * 4;
+          pixels.set(frame.pixels.subarray(sourceOffset, sourceOffset + 4), targetOffset);
+        }
+      }
+    }
+  }
+  return { width, height, pixels, ...(frame.delayMs === undefined ? {} : { delayMs: frame.delayMs }) };
 }
 
 function atlasFrame(frames: RasterFrame[], columns: number, padding: number): RasterFrame {
@@ -68,6 +88,21 @@ export class PixelArtAssetService {
       const frames = await this.codec.decode(inputFilename);
       await this.codec.encode(frames, outputFilename, "gif");
       return ok({ operation: "export_animation_gif", input: inputFilename, output: outputFilename, frames: frames.length });
+    } catch (error) { return fail(error); }
+  }
+
+  public async upscalePixelArt(input: UpscalePixelArtInput): Promise<AssetOperationResult> {
+    try {
+      assertPathPair(input.inputFilename, input.outputFilename);
+      if (!Number.isInteger(input.scale) || input.scale < 2 || input.scale > 16) throw new Error("Scale must be an integer between 2 and 16");
+      const source = await this.codec.decode(input.inputFilename);
+      const first = source[0];
+      if (!first) throw new Error("Input asset has no frames");
+      if (first.width * input.scale > 4096 || first.height * input.scale > 4096) throw new Error("Upscaled dimensions must not exceed 4096 pixels");
+      const frames = source.map((frame) => upscaleFrame(frame, input.scale));
+      const format = input.format ?? (frames.length > 1 ? "gif" : "png");
+      await this.codec.encode(frames, input.outputFilename, format);
+      return ok({ operation: "upscale_pixel_art", input: input.inputFilename, output: input.outputFilename, scale: input.scale, frames: frames.length, width: first.width * input.scale, height: first.height * input.scale, format, deterministic: true, sourcePreserved: true });
     } catch (error) { return fail(error); }
   }
 

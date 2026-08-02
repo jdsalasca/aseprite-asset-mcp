@@ -80,6 +80,39 @@ test("atlas and pack operations reject overwriting an input asset", async () => 
   assert.match(pack.message, /different from an input asset/);
 });
 
+test("pixel upscale uses nearest-neighbor, preserves transparency and animation timing", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "aseprite-upscale-test-"));
+  const input = path.join(directory, "source.png");
+  const output = path.join(directory, "upscaled.png");
+  await sharp(Buffer.from([
+    255, 0, 0, 255, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 255, 0, 255,
+  ]), { raw: { width: 2, height: 2, channels: 4 } }).png().toFile(input);
+  const service = new PixelArtAssetService(new SharpRasterCodec());
+
+  const result = await service.upscalePixelArt({ inputFilename: input, outputFilename: output, scale: 3 });
+  assert.equal(result.ok, true);
+  const pixels = await sharp(output).raw().toBuffer({ resolveWithObject: true });
+  assert.deepEqual(pixels.info, { format: "raw", width: 6, height: 6, channels: 4, depth: "uchar", premultiplied: false, hasAlpha: true, size: 144 });
+  assert.deepEqual([...pixels.data.subarray(0, 4)], [255, 0, 0, 255]);
+  assert.deepEqual([...pixels.data.subarray(4, 8)], [255, 0, 0, 255]);
+  assert.deepEqual([...pixels.data.subarray(8, 12)], [255, 0, 0, 255]);
+  assert.deepEqual([...pixels.data.subarray(12, 16)], [0, 0, 0, 0]);
+  const animatedInput = path.join(directory, "source.gif");
+  const animatedOutput = path.join(directory, "upscaled.gif");
+  const codec = new SharpRasterCodec();
+  await codec.encode([
+    { width: 1, height: 1, pixels: new Uint8ClampedArray([255, 0, 0, 255]), delayMs: 70 },
+    { width: 1, height: 1, pixels: new Uint8ClampedArray([0, 0, 255, 255]), delayMs: 130 },
+  ], animatedInput, "gif");
+  const animatedResult = await service.upscalePixelArt({ inputFilename: animatedInput, outputFilename: animatedOutput, scale: 2 });
+  assert.equal(animatedResult.ok, true);
+  const animatedMetadata = await sharp(animatedOutput, { animated: true }).metadata();
+  assert.equal(animatedMetadata.pages, 2);
+  assert.deepEqual(animatedMetadata.delay, [70, 130]);
+  assert.equal((await service.upscalePixelArt({ inputFilename: input, outputFilename: input, scale: 2 })).ok, false);
+});
+
 test("batch asset jobs return one compact plan", async () => {
   const service = new PixelArtAssetService(new SharpRasterCodec());
   const result = await service.runBatch({ jobs: [

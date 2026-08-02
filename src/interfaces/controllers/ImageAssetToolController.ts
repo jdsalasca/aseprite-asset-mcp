@@ -24,6 +24,11 @@ export class ImageAssetToolController {
       },
     }, async ({ input_filename, output_filename, width, height, max_colors, resize_mode, dither, alpha_threshold }) => this.result(await this.imageAssets.convertImage({ inputFilename: input_filename, outputFilename: output_filename, width, height, maxColors: max_colors, resizeMode: resize_mode, dither, alphaThreshold: alpha_threshold, format: "gif" }, true)));
 
+    server.registerTool("upscale_pixel_art", {
+      description: "Upscale one image or animation with deterministic nearest-neighbor pixels and preserved transparency.",
+      inputSchema: { input_filename: z.string().min(1), output_filename: z.string().min(1), scale: z.number().int().min(2).max(16), format: z.enum(["png", "gif"]).optional() },
+    }, async ({ input_filename, output_filename, scale, format }) => this.result(await this.imageAssets.upscalePixelArt({ inputFilename: input_filename, outputFilename: output_filename, scale, ...(format ? { format } : {}) })));
+
     server.registerTool("export_animation_gif", {
       description: "Convert a PNG, GIF, or animated image into a GIF while preserving frames.",
       inputSchema: { input_filename: z.string().min(1), output_filename: z.string().min(1) },

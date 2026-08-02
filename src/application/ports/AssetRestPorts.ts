@@ -4,6 +4,7 @@ import type { AssetRecipeExecutionResult } from "../services/AssetRecipeExecutio
 import type { ColorGradeInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, SpriteEffectsGateway, SpriteShadowInput } from "../../domain/sprite-effects.js";
 import type { DepthLightingInput, MaterialTextureInput } from "../../domain/visual-assets.js";
 import type { AssetLibraryService } from "../services/AssetLibraryService.js";
+import type { PixelArtAssetService } from "../services/PixelArtAssetService.js";
 
 export interface AssetRestUseCases {
   createRecipe(input: AssetRecipeCreateInput): AssetRecipePlan;
@@ -12,6 +13,7 @@ export interface AssetRestUseCases {
   applyMaterialTexture(input: MaterialTextureInput): Promise<AssetOperationResult>;
   applyDepthLighting(input: DepthLightingInput): Promise<AssetOperationResult>;
   assetLibrary: AssetLibraryService;
+  imageAssets: Pick<PixelArtAssetService, "upscalePixelArt">;
 }
 
 export type AssetRestEffectInput = PixelOutlineInput | ColorGradeInput | SpriteShadowInput | ParticleBurstInput | NormalMapInput;
