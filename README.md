@@ -137,6 +137,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `get_asset_library`: busca una biblioteca de 339 items preconstruidos en 10 categorías, con resultados compactos para reducir tokens.
 - `get_asset_library_item`: resuelve README, manifest, preview y sprite sheet de un asset concreto.
 - `get_asset_preset`: devuelve composiciones listas como `living-forest`, `coastal-sunset`, `fantasy-quest` y `rainy-village`.
+- `generate_asset_preset`: ejecuta un preset completo y devuelve terreno, mapa, preview, oleaje cuando aplica y transición temporal en una respuesta compacta.
 - `generate_motion_pack`: crea ciclos `idle`, `walk`, `run`, `jump` o `attack` desde un sprite estático o animado.
 - `generate_variant_pack`: crea en una sola llamada hasta nueve variantes deterministas (`rain`, `fire`, `earthquake`, `birds`, `night`, `day_night`, `walk`, `water_reflection` y `water_caustics`) y devuelve un manifiesto compacto de artifacts.
 
@@ -197,6 +198,7 @@ GET /api/v1/library/presets/living-forest
 GET /api/v1/library/items/forest-ranger/preview
 GET /api/v1/library/items/forest-ranger/sprite
 GET /api/v1/library/presets/living-forest/compose
+POST /api/v1/library/presets/generate
 ```
 
 Las dos últimas rutas sirven PNG/GIF de forma binaria desde el adaptador de archivos, validando primero el id del catálogo y bloqueando escapes del directorio `assets/folders`. Asset Studio las consume para mostrar previews reales en `PixelAssetGrid`.

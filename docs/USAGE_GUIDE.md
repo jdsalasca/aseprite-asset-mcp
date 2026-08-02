@@ -29,6 +29,8 @@ Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lightin
 
 `/api/v1/assets/quality-bundle` recibe `{ "filename": "forest-ranger.png", "max_colors": 64, "max_isolated_pixels": 4 }` y devuelve inspección, violaciones, recomendaciones y las garantías `deterministic`/`sourcePreserved` sin generar archivos. Es el camino recomendado para que la UX valide antes de encadenar mejoras.
 
+`/api/v1/library/presets/generate` recibe `{ "preset_id": "coastal-sunset", "output_prefix": "art/coast", "width": 64, "height": 40, "seed": 9 }`. Resuelve el preset, conserva sus capas en la respuesta y delega en `generate_environment_pack`; así una persona puede pasar de explorar a generar una escena sin encadenar llamadas manuales.
+
 El sidecar solo escucha en 127.0.0.1, acepta CORS de localhost y 127.0.0.1, y rechaza orígenes externos. La UX asset-studio usa normalmente su gateway en 127.0.0.1:3765, que controla el proceso MCP por stdio y centraliza logs, diagnóstico y fallos.
 
 This MCP is designed for compact, reproducible asset jobs. Prefer one recipe or batch job over many pixel-level calls.

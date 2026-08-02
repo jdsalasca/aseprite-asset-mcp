@@ -21,6 +21,7 @@ function fakeUseCases(): AssetRestUseCases {
     executeRecipe: async (input) => ({ ok: true, recipeId: "test-recipe", outputFilename: input.inputFilename, steps: [], sourcePreserved: true, deterministic: true }),
     spriteEffects: effects,
     variantPack: { generateVariantPack: async () => result("generate_variant_pack") },
+    presetGeneration: { generate: async () => result("generate_asset_preset") },
     applyMaterialTexture: async () => result("apply_material_texture"),
     applyDepthLighting: async () => result("apply_depth_lighting"),
     assetLibrary: new AssetLibraryService(new FakeLibrary()),
@@ -106,6 +107,9 @@ test("REST controller exposes the same recipe and effect application services", 
     const qualityBundle = await fetch(`${rest.url}/api/v1/assets/quality-bundle`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ filename: "hero.png", max_colors: 32, max_isolated_pixels: 4 }) });
     assert.equal(qualityBundle.status, 200);
     assert.equal((await qualityBundle.json()).data.operation, "inspect_asset_bundle");
+    const generatedPreset = await fetch(`${rest.url}/api/v1/library/presets/generate`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ preset_id: "coastal-sunset", output_prefix: "art/coast", width: 32, height: 24, seed: 9 }) });
+    assert.equal(generatedPreset.status, 200);
+    assert.equal((await generatedPreset.json()).data.operation, "generate_asset_preset");
 
     const invalid = await fetch(`${rest.url}/api/v1/effects/outline`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_filename: "hero.png", output_filename: "hero-outline.png", color: "nope" }) });
     assert.equal(invalid.status, 400);
