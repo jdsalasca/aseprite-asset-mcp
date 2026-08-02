@@ -35,3 +35,11 @@ test("asset preset generation fails compactly for unknown presets", async () => 
   assert.equal(generated.ok, false);
   assert.match(generated.message, /preset/i);
 });
+
+test("asset preset generation rejects unsafe output prefixes before delegating", async () => {
+  let delegated = false;
+  const service = new AssetPresetGenerationService(new AssetLibraryService({ load: async () => catalog, read: async () => ({ data: new Uint8Array(), contentType: "image/png" }) }), { generateEnvironmentPack: async () => { delegated = true; return result("generate_environment_pack"); } });
+  const nullByte = await service.generate({ presetId: "coastal-sunset", outputPrefix: "out\0bad", width: 32, height: 24, seed: 1 });
+  const traversal = await service.generate({ presetId: "coastal-sunset", outputPrefix: "out/../bad", width: 32, height: 24, seed: 1 });
+  assert.equal(nullByte.ok, false); assert.equal(traversal.ok, false); assert.equal(delegated, false);
+});

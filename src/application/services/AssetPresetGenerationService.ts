@@ -18,6 +18,8 @@ export class AssetPresetGenerationService implements AssetPresetGenerationGatewa
   public async generate(input: AssetPresetGenerationInput): Promise<AssetOperationResult> {
     try {
       if (!input.presetId.trim() || !input.outputPrefix.trim()) throw new Error("Preset id and output prefix are required");
+      if (input.presetId.includes("\0") || input.outputPrefix.includes("\0")) throw new Error("Preset identifiers cannot contain null bytes");
+      if (/(^|[\\/])\.\.([\\/]|$)/.test(input.outputPrefix)) throw new Error("Preset output prefix cannot contain traversal segments");
       if (!Number.isInteger(input.seed)) throw new Error("Preset seed must be an integer");
       const preset = await this.library.preset(input.presetId);
       if (!preset) throw new Error(`Asset preset not found: ${input.presetId}`);
