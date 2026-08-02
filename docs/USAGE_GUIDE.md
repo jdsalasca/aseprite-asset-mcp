@@ -37,6 +37,8 @@ Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lightin
 
 `/api/v1/assets/quality-batch` recibe `{ "filenames": ["hero.png", "hero-rain.gif"], "max_colors": 64, "max_isolated_pixels": 4 }`. Ejecuta el mismo quality bundle por un puerto compartido, conserva el orden, aísla errores por archivo y devuelve `summary: { total, valid, invalid, failed }`.
 
+`/api/v1/assets/animation-quality` recibe `{ "filename": "hero-walk.gif" }` y devuelve transiciones compactas, frames duplicados, delays, deriva de paleta, estado de loop y recomendaciones antes de exportar al motor.
+
 `/api/v1/library/presets/generate` recibe `{ "preset_id": "coastal-sunset", "output_prefix": "art/coast", "width": 64, "height": 40, "seed": 9 }`. Resuelve el preset, conserva sus capas en la respuesta y delega en `generate_environment_pack`; así una persona puede pasar de explorar a generar una escena sin encadenar llamadas manuales.
 
 `/api/v1/effects/scene-stack` recibe `{ "input_filename": "forest.png", "output_prefix": "forest-scene", "effects": ["material_texture", "depth_lighting", "rain", "particles", "day_night"], "frames": 8, "seed": 17, "material": "earth", "direction": "south_east", "format": "gif" }`. Ejecuta el conjunto seleccionado mediante los mismos servicios de aplicación del MCP, infiere el tamaño de partículas desde el primer frame, genera un artifact por efecto y no altera el original.

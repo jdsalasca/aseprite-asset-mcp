@@ -5,9 +5,10 @@ import { PixelArtAssetService } from "../../application/services/PixelArtAssetSe
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { ContactSheetService } from "../../application/services/ContactSheetService.js";
 import type { AssetBatchQualityService } from "../../application/services/AssetBatchQualityService.js";
+import type { AnimationQualityService } from "../../application/services/AnimationQualityService.js";
 
 export class ImageAssetToolController {
-  public constructor(private readonly assets: ExportAnimationPort, private readonly imageAssets: PixelArtAssetService, private readonly contactSheets: ContactSheetService, private readonly batchQuality: AssetBatchQualityService) {}
+  public constructor(private readonly assets: ExportAnimationPort, private readonly imageAssets: PixelArtAssetService, private readonly contactSheets: ContactSheetService, private readonly batchQuality: AssetBatchQualityService, private readonly animationQuality: AnimationQualityService) {}
 
   public register(server: McpServer): void {
     server.registerTool("convert_image_to_pixel_art", {
@@ -67,6 +68,11 @@ export class ImageAssetToolController {
       description: "Inspect up to 32 sprites in one deterministic quality pass and return a compact collection summary.",
       inputSchema: { filenames: z.array(z.string().min(1)).min(1).max(32), max_colors: z.number().int().min(1).max(256).default(256), max_isolated_pixels: z.number().int().nonnegative().default(9007199254740991) },
     }, async ({ filenames, max_colors, max_isolated_pixels }) => this.result(await this.batchQuality.inspect({ filenames: [...filenames], maxColors: max_colors, maxIsolatedPixels: max_isolated_pixels })));
+
+    server.registerTool("inspect_animation_quality", {
+      description: "Audit an animation for duplicate frames, timing, palette drift, movement bounds, and loop seam issues.",
+      inputSchema: { filename: z.string().min(1) },
+    }, async ({ filename }) => this.result(await this.animationQuality.inspect({ filename })));
 
     server.registerTool("build_texture_atlas", {
       description: "Pack equal-size image frames into one PNG texture atlas.",

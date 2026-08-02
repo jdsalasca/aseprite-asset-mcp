@@ -122,6 +122,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `inspect_asset` y `validate_asset_quality`: reportan dimensiones, frames, colores, transparencia, delays y pixeles aislados antes de exportar.
 - `inspect_asset_bundle`: combina inspección, quality gate, violaciones y recomendaciones deterministas en una sola respuesta compacta.
 - `inspect_asset_batch`: audita hasta 32 assets en una sola llamada, conserva el orden, aísla fallos de decodificación y devuelve un resumen `valid/invalid/failed` sin transferir buffers de píxeles.
+- `inspect_animation_quality`: audita una animación en una sola llamada, detecta frames duplicados, cambios por transición, timing irregular, deriva de paleta y costura de loop.
 - `build_texture_atlas`: empaqueta imágenes del mismo tamaño en un atlas PNG con columnas y padding.
 - `export_asset_pack`: entrega el atlas y un manifiesto JSON con la posición de cada asset.
 - `create_style_bible`: fija paleta, luz, escala, detalle y semilla para mantener consistencia.
@@ -201,6 +202,7 @@ POST /api/v1/effects/day-night
 POST /api/v1/variants/pack
 POST /api/v1/assets/quality-bundle
 POST /api/v1/assets/quality-batch
+POST /api/v1/assets/animation-quality
 GET /api/v1/library/items/forest-ranger
 GET /api/v1/library/presets/living-forest
 GET /api/v1/library/items/forest-ranger/preview
