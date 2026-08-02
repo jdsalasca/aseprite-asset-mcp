@@ -243,6 +243,7 @@ const TOOL_NAMES = [
   "apply_sprite_rim_light",
   "apply_sprite_ambient_occlusion",
   "apply_sprite_specular_highlight",
+  "apply_sprite_color_ramp",
   "apply_color_grade",
   "generate_sprite_shadow",
   "generate_particle_burst",

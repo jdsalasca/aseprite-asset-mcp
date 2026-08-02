@@ -183,6 +183,33 @@ test("sprite specular highlight rejects invalid direction, radius, and strength"
   assert.equal(invalidDirection.ok, false); assert.equal(invalidRadius.ok, false); assert.equal(invalidStrength.ok, false);
 });
 
+test("sprite color ramp maps luminance into deterministic palette bands and preserves alpha/source", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-color-ramp-"));
+  const input = path.join(directory, "input.png"); const first = path.join(directory, "first.png"); const second = path.join(directory, "second.png");
+  const pixels = new Uint8ClampedArray(3 * 1 * 4);
+  pixels.set([20, 20, 20, 255], 0); pixels.set([120, 120, 120, 128], 4); pixels.set([240, 240, 240, 255], 8);
+  await sharp(Buffer.from(pixels), { raw: { width: 3, height: 1, channels: 4 } }).png().toFile(input);
+  const sourceBefore = await fs.readFile(input);
+  const operation = { inputFilename: input, outputFilename: first, shadowColor: "#101020", midColor: "#6080A0", highlightColor: "#FFFFFF", shadowThreshold: 0.3, highlightThreshold: 0.7 };
+  const apply = (service() as unknown as { applySpriteColorRamp(value: typeof operation): Promise<{ ok: boolean; message: string }> }).applySpriteColorRamp;
+  assert.equal((await apply.call(service(), operation)).ok, true);
+  assert.equal((await apply.call(service(), { ...operation, outputFilename: second })).ok, true);
+  assert.deepEqual(await fs.readFile(first), await fs.readFile(second)); assert.deepEqual(await fs.readFile(input), sourceBefore);
+  const output = await sharp(first).raw().toBuffer({ resolveWithObject: true });
+  assert.deepEqual(Array.from(output.data.slice(0, 4)), [16, 16, 32, 255]);
+  assert.deepEqual(Array.from(output.data.slice(4, 8)), [96, 128, 160, 128]);
+  assert.deepEqual(Array.from(output.data.slice(8, 12)), [255, 255, 255, 255]);
+});
+
+test("sprite color ramp rejects invalid threshold ordering and colors", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-color-ramp-invalid-")); const input = path.join(directory, "input.png"); await makeSprite(input);
+  const apply = (service() as unknown as { applySpriteColorRamp(value: unknown): Promise<{ ok: boolean; message: string }> }).applySpriteColorRamp;
+  const invalidOrder = await apply.call(service(), { inputFilename: input, outputFilename: path.join(directory, "order.png"), shadowColor: "#000000", midColor: "#888888", highlightColor: "#FFFFFF", shadowThreshold: 0.8, highlightThreshold: 0.2 });
+  const invalidColor = await apply.call(service(), { inputFilename: input, outputFilename: path.join(directory, "color.png"), shadowColor: "bad", midColor: "#888888", highlightColor: "#FFFFFF" });
+  assert.equal(invalidOrder.ok, false); assert.match(invalidOrder.message, /threshold/i);
+  assert.equal(invalidColor.ok, false); assert.match(invalidColor.message, /color/i);
+});
+
 test("particle burst generation is seeded and exports the requested frame count", async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-particles-")); const first = path.join(directory, "first.gif"); const second = path.join(directory, "second.gif");
   assert.equal((await service().generateParticleBurst({ outputFilename: first, width: 32, height: 32, frames: 6, particleCount: 20, seed: 7, color: "#ffcc55" })).ok, true); assert.equal((await service().generateParticleBurst({ outputFilename: second, width: 32, height: 32, frames: 6, particleCount: 20, seed: 7, color: "#ffcc55" })).ok, true); assert.deepEqual(await fs.readFile(first), await fs.readFile(second)); assert.equal((await sharp(first, { animated: true }).metadata()).pages, 6);

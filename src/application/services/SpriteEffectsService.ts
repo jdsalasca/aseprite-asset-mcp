@@ -1,7 +1,7 @@
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { RasterCodec } from "../../domain/image-assets.js";
 import type { RasterFrame } from "../../domain/pixel-art.js";
-import type { CleanupIsolatedPixelsInput, ColorGradeInput, DayNightCycleInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SpriteAmbientOcclusionInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteGlowInput, SpriteRimLightInput, SpriteRimLightDirection, SpriteShadowInput, SpriteSpecularHighlightInput, WaterCausticsInput, WaterReflectionInput } from "../../domain/sprite-effects.js";
+import type { CleanupIsolatedPixelsInput, ColorGradeInput, DayNightCycleInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SpriteAmbientOcclusionInput, SpriteColorRampInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteGlowInput, SpriteRimLightInput, SpriteRimLightDirection, SpriteShadowInput, SpriteSpecularHighlightInput, WaterCausticsInput, WaterReflectionInput } from "../../domain/sprite-effects.js";
 
 function ok(value: unknown): AssetOperationResult { return { ok: true, message: JSON.stringify(value) }; }
 function fail(error: unknown): AssetOperationResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
@@ -230,6 +230,29 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
         return { ...frame, pixels };
       });
       const format = formatFor(frames, input.format); await this.codec.encode(frames, input.outputFilename, format); return outputMessage("apply_sprite_specular_highlight", input.inputFilename, input.outputFilename, frames.length, format);
+    } catch (error) { return fail(error); }
+  }
+
+  public async applySpriteColorRamp(input: SpriteColorRampInput): Promise<AssetOperationResult> {
+    try {
+      assertDifferent(input.inputFilename, input.outputFilename);
+      const shadow = rgba(input.shadowColor); const mid = rgba(input.midColor); const highlight = rgba(input.highlightColor);
+      const shadowThreshold = input.shadowThreshold ?? 0.3; const highlightThreshold = input.highlightThreshold ?? 0.7;
+      if (!Number.isFinite(shadowThreshold) || !Number.isFinite(highlightThreshold) || shadowThreshold < 0 || shadowThreshold > 1 || highlightThreshold < 0 || highlightThreshold > 1 || shadowThreshold >= highlightThreshold) throw new Error("Color ramp thresholds must be ordered between 0 and 1");
+      const source = await this.codec.decode(input.inputFilename);
+      const frames = source.map((frame) => {
+        const pixels = new Uint8ClampedArray(frame.pixels);
+        for (let offset = 0; offset < frame.pixels.length; offset += 4) {
+          const sourceAlpha = frame.pixels[offset + 3] ?? 0; if (sourceAlpha === 0) continue;
+          const luma = ((frame.pixels[offset] ?? 0) * 0.2126 + (frame.pixels[offset + 1] ?? 0) * 0.7152 + (frame.pixels[offset + 2] ?? 0) * 0.0722) / 255;
+          const color = luma <= shadowThreshold ? shadow : luma >= highlightThreshold ? highlight : mid;
+          const mix = clamp(color[3] / 255, 0, 1);
+          for (let channel = 0; channel < 3; channel += 1) pixels[offset + channel] = Math.round((frame.pixels[offset + channel] ?? 0) * (1 - mix) + (color[channel] ?? 0) * mix);
+          pixels[offset + 3] = sourceAlpha;
+        }
+        return { ...frame, pixels };
+      });
+      const format = formatFor(frames, input.format); await this.codec.encode(frames, input.outputFilename, format); return outputMessage("apply_sprite_color_ramp", input.inputFilename, input.outputFilename, frames.length, format);
     } catch (error) { return fail(error); }
   }
 
