@@ -54,3 +54,23 @@ test("cancellation cannot be overwritten while the worker starts", async () => {
   await new Promise<void>((resolve) => setImmediate(resolve));
   assert.equal((await service.get("job_race"))?.status, "cancelled");
 });
+
+test("job state and input are isolated from caller mutations", async () => {
+  const store = new InMemoryAssetJobStore();
+  let observedInput!: AssetJobRecord["jobs"];
+  const service = new AssetJobService({
+    run: async (input) => {
+      observedInput = input.jobs;
+      return { ok: true, message: "isolated" };
+    },
+  }, store, { next: () => "job_isolated" });
+  const input = { jobs: [{ recipe: "gif" as const, inputFilenames: ["source.png"] }], dryRun: false };
+
+  const started = await service.start(input);
+  started.jobs[0]!.inputFilenames[0] = "mutated-after-start.png";
+  input.jobs[0]!.inputFilenames[0] = "mutated-input.png";
+
+  await new Promise<void>((resolve) => setImmediate(resolve));
+  assert.equal((await service.get("job_isolated"))?.jobs[0]?.inputFilenames[0], "source.png");
+  assert.equal(observedInput[0]?.inputFilenames[0], "source.png");
+});

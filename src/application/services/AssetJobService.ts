@@ -8,11 +8,12 @@ export class AssetJobService {
   public constructor(private readonly runner: AssetJobRunnerPort, private readonly store: AssetJobStorePort, private readonly ids: JobIdPort = new RandomJobId()) {}
 
   public async start(input: AssetJobInput): Promise<AssetJobRecord> {
+    const isolatedInput = structuredClone(input);
     const now = new Date().toISOString();
-    const record: AssetJobRecord = { id: this.ids.next(), status: "queued", jobs: input.jobs, createdAt: now, updatedAt: now };
+    const record: AssetJobRecord = { id: this.ids.next(), status: "queued", jobs: isolatedInput.jobs, createdAt: now, updatedAt: now };
     await this.store.save(record);
-    void this.execute(record, input);
-    return record;
+    void this.execute(record, isolatedInput);
+    return structuredClone(record);
   }
 
   public get(id: string): Promise<AssetJobRecord | undefined> { return this.store.get(id); }
