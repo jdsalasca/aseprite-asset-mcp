@@ -130,6 +130,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `get_asset_library`: busca una biblioteca de 339 items preconstruidos en 10 categorías, con resultados compactos para reducir tokens.
 - `get_asset_library_item`: resuelve README, manifest, preview y sprite sheet de un asset concreto.
 - `get_asset_preset`: devuelve composiciones listas como `living-forest`, `coastal-sunset`, `fantasy-quest` y `rainy-village`.
+- `generate_motion_pack`: crea ciclos `idle`, `walk`, `run`, `jump` o `attack` desde un sprite estático o animado.
 
 Las operaciones de imagen no necesitan abrir Aseprite; eso reduce latencia y tokens para conversiones masivas. Las operaciones sobre `.aseprite` siguen pasando por el adaptador CLI hexagonal y mantienen la compatibilidad con Godot.
 
@@ -175,6 +176,7 @@ Ejemplos REST:
 
 ```text
 GET /api/v1/library?query=rain&limit=12
+POST /api/v1/effects/motion
 GET /api/v1/library/items/forest-ranger
 GET /api/v1/library/presets/living-forest
 GET /api/v1/library/items/forest-ranger/preview

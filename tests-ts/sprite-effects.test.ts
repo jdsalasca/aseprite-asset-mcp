@@ -57,3 +57,19 @@ test("rain overlay rejects invalid intensity and wind values", async () => {
   const result = await service().generateRainOverlay({ inputFilename: input, outputFilename: path.join(directory, "out.png"), seed: 1, intensity: 1.5, wind: 0, color: "#ffffff" });
   assert.equal(result.ok, false);
 });
+
+test("motion pack creates a deterministic walk cycle from a static asset", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-motion-")); const input = path.join(directory, "input.png"); const first = path.join(directory, "first.gif"); const second = path.join(directory, "second.gif"); await makeSprite(input); const sourceBefore = await fs.readFile(input);
+  const motion = { inputFilename: input, outputFilename: first, motion: "walk" as const, frames: 8, seed: 11, amplitude: 2, delayMs: 70 };
+  assert.equal((await service().generateMotionPack(motion)).ok, true);
+  assert.equal((await service().generateMotionPack({ ...motion, outputFilename: second })).ok, true);
+  assert.deepEqual(await fs.readFile(first), await fs.readFile(second));
+  assert.deepEqual(await fs.readFile(input), sourceBefore);
+  const metadata = await sharp(first, { animated: true }).metadata(); assert.equal(metadata.pages, 8); assert.equal(metadata.width, 4); assert.equal(metadata.pageHeight, 4); assert.equal(metadata.height, 32);
+});
+
+test("motion pack rejects unsupported frame counts and amplitudes", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-motion-invalid-")); const input = path.join(directory, "input.png"); await makeSprite(input);
+  const result = await service().generateMotionPack({ inputFilename: input, outputFilename: path.join(directory, "out.gif"), motion: "run", frames: 1, seed: 1, amplitude: 20 });
+  assert.equal(result.ok, false);
+});

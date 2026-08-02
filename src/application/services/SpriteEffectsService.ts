@@ -1,7 +1,7 @@
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { RasterCodec } from "../../domain/image-assets.js";
 import type { RasterFrame } from "../../domain/pixel-art.js";
-import type { ColorGradeInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteShadowInput } from "../../domain/sprite-effects.js";
+import type { ColorGradeInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteShadowInput } from "../../domain/sprite-effects.js";
 
 function ok(value: unknown): AssetOperationResult { return { ok: true, message: JSON.stringify(value) }; }
 function fail(error: unknown): AssetOperationResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
@@ -89,6 +89,44 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
       const format = formatFor(frames, input.format);
       await this.codec.encode(frames, input.outputFilename, format);
       return outputMessage("generate_rain_overlay", input.inputFilename, input.outputFilename, frames.length, format);
+    } catch (error) { return fail(error); }
+  }
+
+  public async generateMotionPack(input: MotionPackInput): Promise<AssetOperationResult> {
+    try {
+      assertDifferent(input.inputFilename, input.outputFilename);
+      if (!Number.isInteger(input.frames) || input.frames < 2 || input.frames > 24) throw new Error("Motion frame count must be an integer from 2 to 24");
+      if (!Number.isInteger(input.seed)) throw new Error("Motion seed must be an integer");
+      const amplitude = input.amplitude ?? 2;
+      if (!Number.isFinite(amplitude) || amplitude < 0 || amplitude > 8) throw new Error("Motion amplitude must be between 0 and 8");
+      const source = await this.codec.decode(input.inputFilename);
+      const phaseOffset = Math.abs(input.seed) % input.frames;
+      const frames = Array.from({ length: input.frames }, (_, frameIndex) => {
+        const sourceFrame = source[frameIndex % source.length]!;
+        const phase = (frameIndex + phaseOffset) / input.frames;
+        const wave = Math.sin(phase * Math.PI * 2);
+        const bounce = Math.abs(Math.sin(phase * Math.PI));
+        const attack = phase < 0.5 ? phase * 2 : 2 - phase * 2;
+        const offset = input.motion === "idle"
+          ? { x: 0, y: Math.round(wave * amplitude * 0.35) }
+          : input.motion === "walk"
+            ? { x: Math.round(wave * amplitude * 0.2), y: Math.round(Math.abs(wave) * amplitude) }
+            : input.motion === "run"
+              ? { x: Math.round(wave * amplitude * 0.45), y: Math.round(Math.abs(wave) * amplitude * 1.35) }
+              : input.motion === "jump"
+                ? { x: Math.round(wave * amplitude * 0.2), y: -Math.round(bounce * amplitude * 2) }
+                : { x: Math.round(attack * amplitude), y: Math.round(Math.abs(wave) * amplitude * 0.25) };
+        const pixels = new Uint8ClampedArray(sourceFrame.width * sourceFrame.height * 4);
+        for (let y = 0; y < sourceFrame.height; y += 1) for (let x = 0; x < sourceFrame.width; x += 1) {
+          const sourceOffset = (y * sourceFrame.width + x) * 4;
+          if ((sourceFrame.pixels[sourceOffset + 3] ?? 0) === 0) continue;
+          setPixel(pixels, sourceFrame.width, sourceFrame.height, x + offset.x, y + offset.y, [sourceFrame.pixels[sourceOffset] ?? 0, sourceFrame.pixels[sourceOffset + 1] ?? 0, sourceFrame.pixels[sourceOffset + 2] ?? 0, sourceFrame.pixels[sourceOffset + 3] ?? 0]);
+        }
+        return { width: sourceFrame.width, height: sourceFrame.height, pixels, delayMs: input.delayMs ?? sourceFrame.delayMs ?? 90 };
+      });
+      const format = formatFor(frames, input.format);
+      await this.codec.encode(frames, input.outputFilename, format);
+      return outputMessage("generate_motion_pack", input.inputFilename, input.outputFilename, frames.length, format);
     } catch (error) { return fail(error); }
   }
 }

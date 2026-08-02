@@ -92,6 +92,11 @@ async function main(): Promise<void> {
   for (const seed of seeds) items.push(await writeItem(seed));
   const categoryIds = [...new Set(items.map((item) => item.category))];
   const categories = categoryIds.map((id) => ({ id, title: id.replaceAll("-", " "), description: categoryDescriptions[id] ?? "Reusable deterministic pixel-art assets.", itemCount: items.filter((item) => item.category === id).length }));
+  for (const category of categories) {
+    const categoryItems = items.filter((item) => item.category === category.id);
+    const examples = categoryItems.slice(0, 12).map((item) => `- [${item.title}](./${item.id}/README.md): ${item.description}`).join("\n");
+    await fs.writeFile(path.join(root, category.id, "README.md"), [`# ${category.title}`, "", category.description, "", `Esta carpeta contiene ${category.itemCount} assets deterministas. Cada subcarpeta documenta sus previews, sprite sheets, manifest y variantes.`, "", "## Ejemplos", "", examples, "", "## Uso", "", "Busca por categoría con `get_asset_library`, resuelve un item con `get_asset_library_item` y aplica las variantes con los algoritmos del MCP sobre una copia del asset.", ""].join("\n"), "utf8");
+  }
   const presets = [
     { id: "living-forest", title: "Living forest", description: "Trees, wildlife, rain and fire-ready effects for a layered forest scene.", category: "flora", itemIds: ["oak", "pine", "wolf", "owl", "rain", "fire"], recommendedTools: ["generate_world_map", "generate_environment_pack", "generate_time_of_day_pack"], deterministic: true as const },
     { id: "coastal-sunset", title: "Coastal sunset", description: "Beach, ocean, reflections, birds and a time-of-day transition.", category: "biomes-and-maps", itemIds: ["beach", "ocean", "coral-reef", "seagull", "wave-reflection", "coast"], recommendedTools: ["generate_beach_scene", "generate_time_of_day_pack", "apply_depth_lighting"], deterministic: true as const },

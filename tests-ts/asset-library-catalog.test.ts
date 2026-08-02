@@ -25,3 +25,14 @@ test("file adapter serves a generated preview as binary data", async () => {
   assert.equal(binary.contentType, "image/png");
   assert.ok(binary.data.byteLength > 20);
 });
+
+test("every generated folder and category has a navigation README", async () => {
+  const directories = await fs.readdir(path.resolve("assets/folders"), { withFileTypes: true });
+  const folders = directories.filter((entry) => entry.isDirectory()).map((entry) => entry.name);
+  assert.ok(folders.length >= 10);
+  for (const folder of folders) assert.equal((await fs.stat(path.resolve("assets/folders", folder, "README.md"))).isFile(), true, `missing category README: ${folder}`);
+  const nested = (await fs.readdir(path.resolve("assets/folders"), { withFileTypes: true })).filter((entry) => entry.isDirectory());
+  for (const category of nested) {
+    for (const item of await fs.readdir(path.resolve("assets/folders", category.name), { withFileTypes: true })) if (item.isDirectory()) assert.equal((await fs.stat(path.resolve("assets/folders", category.name, item.name, "README.md"))).isFile(), true, `missing item README: ${category.name}/${item.name}`);
+  }
+});
