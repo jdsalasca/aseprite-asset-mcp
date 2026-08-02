@@ -175,6 +175,7 @@ const TOOL_NAMES = [
   "generate_beach_scene",
   "generate_time_of_day_pack",
   "generate_environment_pack",
+  "apply_material_texture",
 ];
 
 export class AsepriteMcpServerAdapter {

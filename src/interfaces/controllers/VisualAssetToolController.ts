@@ -44,6 +44,11 @@ export class VisualAssetToolController {
       inputSchema: { input_filename: z.string().min(1), output_filename: z.string().min(1), manifest_filename: z.string().min(1).optional(), steps: z.number().int().min(2).max(24).default(8), delay_ms: z.number().int().positive().default(180) },
     }, async ({ input_filename, output_filename, manifest_filename, steps, delay_ms }) => this.result(await this.visualAssets.generateTimeOfDayPack({ inputFilename: input_filename, outputFilename: output_filename, ...(manifest_filename ? { manifestFilename: manifest_filename } : {}), steps, delayMs: delay_ms })));
 
+    server.registerTool("apply_material_texture", {
+      description: "Apply deterministic water, earth, grass, stone, or snow granularity while preserving transparency and source data.",
+      inputSchema: { input_filename: z.string().min(1), output_filename: z.string().min(1), material: z.enum(["water", "earth", "grass", "stone", "snow"]), seed: z.number().int(), intensity: z.number().min(0).max(1).default(0.6), format: z.enum(["png", "gif"]).optional() },
+    }, async ({ input_filename, output_filename, material, seed, intensity, format }) => this.result(await this.visualAssets.applyMaterialTexture({ inputFilename: input_filename, outputFilename: output_filename, material, seed, intensity, ...(format ? { format } : {}) })));
+
     server.registerTool("generate_environment_pack", {
       description: "Generate a complete beach, forest, village, or cave asset pack.",
       inputSchema: { kind: z.enum(["beach", "forest", "village", "cave"]), output_prefix: z.string().min(1), width: z.number().int().positive().max(2048), height: z.number().int().positive().max(2048), seed: z.number().int(), tile_size: z.number().int().min(4).max(128).default(16), detail_level: z.enum(["low", "medium", "high"]).default("high") },

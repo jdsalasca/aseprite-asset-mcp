@@ -73,6 +73,17 @@ export interface TimeOfDayInput {
   delayMs?: number | undefined;
 }
 
+export type MaterialTextureKind = "water" | "earth" | "grass" | "stone" | "snow";
+
+export interface MaterialTextureInput {
+  inputFilename: string;
+  outputFilename: string;
+  material: MaterialTextureKind;
+  seed: number;
+  intensity?: number | undefined;
+  format?: "png" | "gif" | undefined;
+}
+
 export type EnvironmentKind = "beach" | "forest" | "village" | "cave";
 
 export interface EnvironmentPackInput {
@@ -93,5 +104,6 @@ export interface VisualAssetGateway {
   generateWorldMap(input: WorldMapInput): Promise<AssetOperationResult>;
   generateBeachScene(input: BeachSceneInput): Promise<AssetOperationResult>;
   generateTimeOfDayPack(input: TimeOfDayInput): Promise<AssetOperationResult>;
+  applyMaterialTexture(input: MaterialTextureInput): Promise<AssetOperationResult>;
   generateEnvironmentPack(input: EnvironmentPackInput): Promise<AssetOperationResult>;
 }

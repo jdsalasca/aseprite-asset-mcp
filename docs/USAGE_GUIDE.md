@@ -40,6 +40,26 @@ Useful folders are `asset/style`, `asset/quality`, `asset/tilemap`, `asset/world
 
 Reuse the same style file for every sprite and map in the scene.
 
+## Deterministic material texture
+
+Use `apply_material_texture` when an existing PNG/GIF needs procedural grain without changing the source. The same `seed`, `material`, and `intensity` always produce the same output, and transparent pixels remain transparent:
+
+```json
+{
+  "name": "apply_material_texture",
+  "arguments": {
+    "input_filename": "art/coastal/beach-preview.png",
+    "output_filename": "art/coastal/beach-preview-earth.png",
+    "material": "earth",
+    "seed": 42,
+    "intensity": 0.65,
+    "format": "png"
+  }
+}
+```
+
+Supported materials are `water`, `earth`, `grass`, `stone`, and `snow`. Keep `input_filename` and `output_filename` different; this is enforced before decoding.
+
 ## 3. Generate terrain assets
 
 ```json

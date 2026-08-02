@@ -27,11 +27,13 @@ const DESCRIPTION_OVERRIDES: Record<string, string> = {
   generate_beach_scene: "Generate a beach map with animated waves.",
   generate_time_of_day_pack: "Generate day, sunset, night, and sunrise frames.",
   generate_environment_pack: "Generate a complete themed environment pack.",
+  apply_material_texture: "Add deterministic material grain and highlights while preserving transparency.",
 };
 
 function folderFor(name: string): string {
   if (name === "server_capabilities" || name.startsWith("get_tools_")) return "meta/catalog";
   if (name === "create_style_bible") return "asset/style";
+  if (name.includes("material_texture")) return "asset/material";
   if (name === "inspect_reference" || name === "run_asset_quality_gate") return "asset/quality";
   if (name.includes("terrain") || name.includes("tilemap")) return "asset/tilemap";
   if (name.includes("world") || name.includes("beach") || name.includes("environment") || name.includes("map")) return "asset/world";

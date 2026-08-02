@@ -41,6 +41,25 @@ test("quality gate detects isolated pixels and low contrast", async () => {
   assert.match(result.message, /isolated pixels|contrast/);
 });
 
+test("material texture is deterministic, preserves transparency, and cannot overwrite its source", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "visual-assets-material-"));
+  const reference = path.join(directory, "reference.png");
+  const firstOutput = path.join(directory, "earth-a.png");
+  const secondOutput = path.join(directory, "earth-b.png");
+  await makeReference(reference);
+  const assetService = service();
+  const first = await assetService.applyMaterialTexture({ inputFilename: reference, outputFilename: firstOutput, material: "earth", seed: 33, intensity: 0.8 });
+  const second = await assetService.applyMaterialTexture({ inputFilename: reference, outputFilename: secondOutput, material: "earth", seed: 33, intensity: 0.8 });
+  assert.equal(first.ok, true);
+  assert.equal(second.ok, true);
+  assert.deepEqual(await fs.readFile(firstOutput), await fs.readFile(secondOutput));
+  const metadata = await sharp(firstOutput).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  assert.equal(metadata.data[15], 0);
+  const overwrite = await assetService.applyMaterialTexture({ inputFilename: reference, outputFilename: reference, material: "water", seed: 1 });
+  assert.equal(overwrite.ok, false);
+  assert.match(overwrite.message, /different/);
+});
+
 test("terrain tileset, world map, beach waves, and time-of-day pack are reproducible", async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "visual-assets-world-"));
   const tileset = path.join(directory, "terrain.png");
