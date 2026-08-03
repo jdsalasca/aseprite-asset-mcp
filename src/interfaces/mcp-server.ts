@@ -248,6 +248,7 @@ const TOOL_NAMES = [
   "apply_sprite_dither",
   "apply_sprite_color_temperature",
   "generate_sprite_silhouette",
+  "generate_wind_sway",
   "apply_color_grade",
   "generate_sprite_shadow",
   "generate_particle_burst",

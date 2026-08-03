@@ -22,6 +22,8 @@ export interface NormalMapInput extends SpriteEffectBaseInput { strength?: numbe
 export interface RainOverlayInput extends SpriteEffectBaseInput { seed: number; intensity?: number | undefined; wind?: number | undefined; color: string; frames?: number | undefined; delayMs?: number | undefined; }
 export type MotionKind = "idle" | "walk" | "run" | "jump" | "attack";
 export interface MotionPackInput extends SpriteEffectBaseInput { motion: MotionKind; frames: number; seed: number; amplitude?: number | undefined; delayMs?: number | undefined; }
+export type WindSwayDirection = "left" | "right";
+export interface WindSwayInput extends SpriteEffectBaseInput { frames: number; seed: number; amplitude?: number | undefined; direction: WindSwayDirection; delayMs?: number | undefined; }
 export interface SeamlessTextureInput extends SpriteEffectBaseInput { seamWidth?: number | undefined; }
 export interface WaterReflectionInput extends SpriteEffectBaseInput { waterline: number; frames: number; seed: number; amplitude?: number | undefined; opacity?: number | undefined; delayMs?: number | undefined; }
 export interface WaterCausticsInput extends SpriteEffectBaseInput { frames: number; seed: number; intensity?: number | undefined; scale?: number | undefined; color: string; delayMs?: number | undefined; }
@@ -46,6 +48,7 @@ export interface SpriteEffectsGateway {
   generateNormalMap(input: NormalMapInput): Promise<AssetOperationResult>;
   generateRainOverlay(input: RainOverlayInput): Promise<AssetOperationResult>;
   generateMotionPack(input: MotionPackInput): Promise<AssetOperationResult>;
+  generateWindSway(input: WindSwayInput): Promise<AssetOperationResult>;
   generateSeamlessTexture(input: SeamlessTextureInput): Promise<AssetOperationResult>;
   generateWaterReflection(input: WaterReflectionInput): Promise<AssetOperationResult>;
   generateWaterCaustics(input: WaterCausticsInput): Promise<AssetOperationResult>;

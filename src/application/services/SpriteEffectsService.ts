@@ -1,7 +1,7 @@
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { RasterCodec } from "../../domain/image-assets.js";
 import type { RasterFrame } from "../../domain/pixel-art.js";
-import type { CleanupIsolatedPixelsInput, ColorGradeInput, DayNightCycleInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SpriteAmbientOcclusionInput, SpriteColorRampInput, SpriteColorTemperatureInput, SpriteDitherInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteGlowInput, SpriteGrainInput, SpriteRimLightInput, SpriteRimLightDirection, SpriteShadowInput, SpriteSilhouetteInput, SpriteSpecularHighlightInput, WaterCausticsInput, WaterReflectionInput } from "../../domain/sprite-effects.js";
+import type { CleanupIsolatedPixelsInput, ColorGradeInput, DayNightCycleInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SpriteAmbientOcclusionInput, SpriteColorRampInput, SpriteColorTemperatureInput, SpriteDitherInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteGlowInput, SpriteGrainInput, SpriteRimLightInput, SpriteRimLightDirection, SpriteShadowInput, SpriteSilhouetteInput, SpriteSpecularHighlightInput, WaterCausticsInput, WaterReflectionInput, WindSwayInput } from "../../domain/sprite-effects.js";
 
 function ok(value: unknown): AssetOperationResult { return { ok: true, message: JSON.stringify(value) }; }
 function fail(error: unknown): AssetOperationResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
@@ -453,6 +453,36 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
       const format = formatFor(frames, input.format);
       await this.codec.encode(frames, input.outputFilename, format);
       return outputMessage("generate_motion_pack", input.inputFilename, input.outputFilename, frames.length, format);
+    } catch (error) { return fail(error); }
+  }
+
+  public async generateWindSway(input: WindSwayInput): Promise<AssetOperationResult> {
+    try {
+      assertDifferent(input.inputFilename, input.outputFilename);
+      if (!Number.isInteger(input.frames) || input.frames < 2 || input.frames > 24) throw new Error("Wind sway frame count must be an integer from 2 to 24");
+      if (!Number.isInteger(input.seed)) throw new Error("Wind sway seed must be an integer");
+      const amplitude = input.amplitude ?? 2;
+      if (!Number.isFinite(amplitude) || amplitude < 0 || amplitude > 8) throw new Error("Wind sway amplitude must be between 0 and 8");
+      if (input.direction !== "left" && input.direction !== "right") throw new Error("Wind sway direction must be left or right");
+      const source = await this.codec.decode(input.inputFilename);
+      const direction = input.direction === "left" ? -1 : 1;
+      const seedPhase = (Math.abs(input.seed) % 360) * Math.PI / 180;
+      const frames = Array.from({ length: input.frames }, (_, frameIndex) => {
+        const sourceFrame = source[frameIndex % source.length]!;
+        const phase = seedPhase + (frameIndex / input.frames) * Math.PI * 2;
+        const pixels = new Uint8ClampedArray(sourceFrame.width * sourceFrame.height * 4);
+        for (let y = 0; y < sourceFrame.height; y += 1) {
+          const baseWeight = 1 - y / Math.max(1, sourceFrame.height - 1);
+          const shift = Math.round(direction * Math.sin(phase + y * 0.18) * amplitude * baseWeight);
+          for (let x = 0; x < sourceFrame.width; x += 1) {
+            const sourceOffset = (y * sourceFrame.width + x) * 4;
+            if ((sourceFrame.pixels[sourceOffset + 3] ?? 0) === 0) continue;
+            setPixel(pixels, sourceFrame.width, sourceFrame.height, x + shift, y, [sourceFrame.pixels[sourceOffset] ?? 0, sourceFrame.pixels[sourceOffset + 1] ?? 0, sourceFrame.pixels[sourceOffset + 2] ?? 0, sourceFrame.pixels[sourceOffset + 3] ?? 0]);
+          }
+        }
+        return { width: sourceFrame.width, height: sourceFrame.height, pixels, delayMs: input.delayMs ?? sourceFrame.delayMs ?? 90 };
+      });
+      const format = formatFor(frames, input.format); await this.codec.encode(frames, input.outputFilename, format); return outputMessage("generate_wind_sway", input.inputFilename, input.outputFilename, frames.length, format);
     } catch (error) { return fail(error); }
   }
 

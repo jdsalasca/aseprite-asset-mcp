@@ -316,6 +316,37 @@ test("sprite silhouette rejects invalid opacity and colors", async () => {
   assert.equal(invalidColor.ok, false); assert.match(invalidColor.message, /color/i);
 });
 
+test("wind sway is seeded, keeps the base stable, and exports a repeatable GIF", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-wind-sway-"));
+  const input = path.join(directory, "tree.png"); const first = path.join(directory, "first.gif"); const second = path.join(directory, "second.gif");
+  const pixels = new Uint8ClampedArray(7 * 7 * 4);
+  const set = (x: number, y: number, color: [number, number, number, number]) => pixels.set(color, (y * 7 + x) * 4);
+  for (let y = 1; y <= 3; y += 1) for (let x = 2; x <= 4; x += 1) set(x, y, [50, 180, 80, 255]);
+  for (let y = 4; y < 7; y += 1) set(3, y, [110, 70, 35, 255]);
+  await sharp(Buffer.from(pixels), { raw: { width: 7, height: 7, channels: 4 } }).png().toFile(input);
+  const operation = { inputFilename: input, outputFilename: first, frames: 6, seed: 19, amplitude: 2, direction: "right" as const, delayMs: 75, format: "gif" as const };
+  assert.equal((await service().generateWindSway(operation)).ok, true);
+  assert.equal((await service().generateWindSway({ ...operation, outputFilename: second })).ok, true);
+  assert.deepEqual(await fs.readFile(first), await fs.readFile(second));
+  const metadata = await sharp(first, { animated: true }).metadata();
+  assert.equal(metadata.pages, 6); assert.equal(metadata.width, 7); assert.equal(metadata.pageHeight, 7);
+  const output = await sharp(first, { animated: true }).raw().toBuffer({ resolveWithObject: true });
+  const pageBytes = 7 * 7 * 4;
+  assert.notDeepEqual([...output.data.slice(0, pageBytes)], [...output.data.slice(pageBytes, pageBytes * 2)]);
+  const baseOffset = (6 * 7 + 3) * 4;
+  assert.equal(output.data[baseOffset + 3], 255);
+});
+
+test("wind sway rejects unsafe frame, amplitude, and direction contracts", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-wind-sway-invalid-")); const input = path.join(directory, "tree.png"); await makeSprite(input);
+  const invalidFrames = await service().generateWindSway({ inputFilename: input, outputFilename: path.join(directory, "frames.gif"), frames: 1, seed: 1, amplitude: 2, direction: "left" });
+  const invalidAmplitude = await service().generateWindSway({ inputFilename: input, outputFilename: path.join(directory, "amplitude.gif"), frames: 6, seed: 1, amplitude: 9, direction: "left" });
+  const invalidDirection = await service().generateWindSway({ inputFilename: input, outputFilename: path.join(directory, "direction.gif"), frames: 6, seed: 1, amplitude: 2, direction: "up" as "left" });
+  assert.equal(invalidFrames.ok, false); assert.match(invalidFrames.message, /frame/i);
+  assert.equal(invalidAmplitude.ok, false); assert.match(invalidAmplitude.message, /amplitude/i);
+  assert.equal(invalidDirection.ok, false); assert.match(invalidDirection.message, /direction/i);
+});
+
 test("particle burst generation is seeded and exports the requested frame count", async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-particles-")); const first = path.join(directory, "first.gif"); const second = path.join(directory, "second.gif");
   assert.equal((await service().generateParticleBurst({ outputFilename: first, width: 32, height: 32, frames: 6, particleCount: 20, seed: 7, color: "#ffcc55" })).ok, true); assert.equal((await service().generateParticleBurst({ outputFilename: second, width: 32, height: 32, frames: 6, particleCount: 20, seed: 7, color: "#ffcc55" })).ok, true); assert.deepEqual(await fs.readFile(first), await fs.readFile(second)); assert.equal((await sharp(first, { animated: true }).metadata()).pages, 6);

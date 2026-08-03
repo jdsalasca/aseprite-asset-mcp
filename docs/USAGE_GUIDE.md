@@ -69,6 +69,8 @@ Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lightin
 
 `/api/v1/effects/color-temperature` recibe `{ "input_filename": "village.png", "output_filename": "village-warm.png", "temperature": 1, "intensity": 0.7 }`. Aplica una dominante cálida para atardecer/fuego o fría para noche cuando `temperature` es negativa, conserva alpha, frames y la fuente y produce el mismo resultado para los mismos parámetros.
 
+`/api/v1/effects/wind-sway` recibe `{ "input_filename": "tree.png", "output_filename": "tree-wind.gif", "frames": 6, "seed": 19, "amplitude": 2, "direction": "right", "delay_ms": 75 }`. Desplaza filas de forma sinusoidal con la base anclada, conserva dimensiones y transparencia, y produce un loop reproducible para vegetación y props ambientales.
+
 `/api/v1/effects/silhouette` recibe `{ "input_filename": "hero.png", "output_filename": "hero-mask.png", "color": "#08111F", "opacity": 0.6 }`. Reemplaza únicamente el RGB de los píxeles con alpha, mantiene sus transparencias y tiempos de animación, y sirve como máscara reutilizable para sombras, colisiones y composición.
 
 `/api/v1/variants/pack` recibe `{ "input_filename": "forest-ranger.png", "output_prefix": "forest-ranger-variants", "variants": ["rain", "night", "birds", "day_night"], "frames": 8, "seed": 17, "delay_ms": 90 }`. Devuelve todos los artifacts generados en una sola respuesta para reducir llamadas y tokens del agente. Las fuentes estáticas se pueden animar; si se solicitan varios frames, el formato efectivo debe ser GIF.
