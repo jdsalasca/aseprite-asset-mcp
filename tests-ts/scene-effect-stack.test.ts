@@ -5,6 +5,7 @@ import type { RasterFrame } from "../src/domain/pixel-art.js";
 import type { SpriteEffectsGateway } from "../src/domain/sprite-effects.js";
 import type { VisualAssetGateway } from "../src/domain/visual-assets.js";
 import { SceneEffectStackService } from "../src/application/services/SceneEffectStackService.js";
+import { SceneEffectStackToolController } from "../src/interfaces/controllers/SceneEffectStackToolController.js";
 
 const frame: RasterFrame = { width: 12, height: 10, pixels: new Uint8ClampedArray(12 * 10 * 4), delayMs: 80 };
 function operation(name: string): { ok: true; message: string } { return { ok: true, message: JSON.stringify({ operation: name, frames: 6, format: "gif" }) }; }
@@ -35,6 +36,18 @@ test("scene effect stack delegates selected effects once, infers particle size, 
   assert.equal(payload.artifacts[0]?.outputFilename, "out/scene-material_texture.gif");
   assert.equal(payload.deterministic, true);
   assert.equal(payload.sourcePreserved, true);
+});
+
+test("MCP scene controller exposes the complete environmental effect enum", async () => {
+  let handler: ((input: Record<string, unknown>) => Promise<unknown>) | undefined;
+  let captured: Record<string, unknown> | undefined;
+  const fakeGateway = { generateSceneEffectStack: async (input: Record<string, unknown>) => { captured = input; return operation("generate_scene_effect_stack"); } };
+  const fakeServer = { registerTool: (_name: string, _config: unknown, next: (input: Record<string, unknown>) => Promise<unknown>) => { handler = next; } };
+  new SceneEffectStackToolController(fakeGateway as never).register(fakeServer as never);
+  assert.ok(handler);
+  const effects = ["rain", "fog", "snow", "smoke", "fire", "lightning", "waves", "water_spray", "water_reflection", "water_caustics", "wind_sway", "sprite_shadow", "sprite_glow", "day_night", "material_texture", "depth_lighting", "particles"];
+  await handler({ input_filename: "scene.png", output_prefix: "out/scene", effects, frames: 6, seed: 1, delay_ms: 90, material: "earth", direction: "south_east", format: "gif" });
+  assert.deepEqual(captured?.effects, effects);
 });
 
 test("scene effect stack rejects duplicate effects, unsafe paths, invalid frames, and source collisions", async () => {
