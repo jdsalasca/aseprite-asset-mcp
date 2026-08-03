@@ -260,6 +260,7 @@ const TOOL_NAMES = [
   "generate_fire_overlay",
   "generate_lightning_overlay",
   "generate_wave_overlay",
+  "generate_water_spray",
   "generate_motion_pack",
   "generate_seamless_texture",
   "generate_water_reflection",
