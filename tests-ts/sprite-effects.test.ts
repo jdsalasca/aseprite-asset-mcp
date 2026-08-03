@@ -478,6 +478,36 @@ test("smoke overlay rejects invalid density, drift, rise, and animated PNG outpu
   assert.equal(animatedPng.ok, false);
 });
 
+test("fire overlay is deterministic, preserves transparent pixels, and animates flicker", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-fire-overlay-"));
+  const input = path.join(directory, "scene.png");
+  const first = path.join(directory, "first.gif");
+  const second = path.join(directory, "second.gif");
+  await makeSprite(input);
+  const fire = { inputFilename: input, outputFilename: first, seed: 53, intensity: 0.82, flicker: 0.7, color: "#FFD65A", frames: 5, delayMs: 100, format: "gif" as const };
+  const result = await service().generateFireOverlay(fire);
+  assert.equal(result.ok, true);
+  assert.equal((await service().generateFireOverlay({ ...fire, outputFilename: second })).ok, true);
+  const firstFrames = await new SharpRasterCodec().decode(first);
+  const secondFrames = await new SharpRasterCodec().decode(second);
+  assert.equal(firstFrames.length, 5);
+  assert.deepEqual(firstFrames.map((frame) => [...frame.pixels]), secondFrames.map((frame) => [...frame.pixels]));
+  assert.equal(firstFrames[0]?.pixels[(0 * 4 + 0) * 4 + 3], 0);
+  assert.match(result.message, /generate_fire_overlay/);
+});
+
+test("fire overlay rejects invalid intensity, flicker, and animated PNG output", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-fire-overlay-invalid-"));
+  const input = path.join(directory, "scene.png");
+  await makeSprite(input);
+  const invalidIntensity = await service().generateFireOverlay({ inputFilename: input, outputFilename: path.join(directory, "intensity.gif"), seed: 1, intensity: 1.2, flicker: 0.5, color: "#FFFFFF" });
+  const invalidFlicker = await service().generateFireOverlay({ inputFilename: input, outputFilename: path.join(directory, "flicker.gif"), seed: 1, intensity: 0.5, flicker: -1, color: "#FFFFFF" });
+  const animatedPng = await service().generateFireOverlay({ inputFilename: input, outputFilename: path.join(directory, "animated.png"), seed: 1, intensity: 0.5, flicker: 0.5, color: "#FFFFFF", frames: 2, format: "png" });
+  assert.equal(invalidIntensity.ok, false);
+  assert.equal(invalidFlicker.ok, false);
+  assert.equal(animatedPng.ok, false);
+});
+
 test("motion pack creates a deterministic walk cycle from a static asset", async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-motion-")); const input = path.join(directory, "input.png"); const first = path.join(directory, "first.gif"); const second = path.join(directory, "second.gif"); await makeSprite(input); const sourceBefore = await fs.readFile(input);
   const motion = { inputFilename: input, outputFilename: first, motion: "walk" as const, frames: 8, seed: 11, amplitude: 2, delayMs: 70 };
