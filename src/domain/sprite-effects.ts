@@ -29,6 +29,7 @@ export interface WaveOverlayInput extends SpriteEffectBaseInput { seed: number; 
 export interface WaterSprayInput extends SpriteEffectBaseInput { seed: number; density?: number | undefined; drift?: number | undefined; color: string; frames?: number | undefined; delayMs?: number | undefined; }
 export interface DustOverlayInput extends SpriteEffectBaseInput { seed: number; density?: number | undefined; drift?: number | undefined; rise?: number | undefined; color: string; frames?: number | undefined; delayMs?: number | undefined; }
 export interface LeafFallOverlayInput extends SpriteEffectBaseInput { seed: number; density?: number | undefined; wind?: number | undefined; color: string; frames?: number | undefined; delayMs?: number | undefined; }
+export interface WaterRippleOverlayInput extends SpriteEffectBaseInput { seed: number; density?: number | undefined; amplitude?: number | undefined; color: string; frames?: number | undefined; delayMs?: number | undefined; }
 export type MotionKind = "idle" | "walk" | "run" | "jump" | "attack";
 export interface MotionPackInput extends SpriteEffectBaseInput { motion: MotionKind; frames: number; seed: number; amplitude?: number | undefined; delayMs?: number | undefined; }
 export type WindSwayDirection = "left" | "right";
@@ -65,6 +66,7 @@ export interface SpriteEffectsGateway {
   generateWaterSpray(input: WaterSprayInput): Promise<AssetOperationResult>;
   generateDustOverlay(input: DustOverlayInput): Promise<AssetOperationResult>;
   generateLeafFallOverlay(input: LeafFallOverlayInput): Promise<AssetOperationResult>;
+  generateWaterRippleOverlay(input: WaterRippleOverlayInput): Promise<AssetOperationResult>;
   generateMotionPack(input: MotionPackInput): Promise<AssetOperationResult>;
   generateWindSway(input: WindSwayInput): Promise<AssetOperationResult>;
   generateSeamlessTexture(input: SeamlessTextureInput): Promise<AssetOperationResult>;

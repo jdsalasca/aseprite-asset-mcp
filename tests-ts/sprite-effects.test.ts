@@ -634,6 +634,21 @@ test("leaf fall overlay rejects invalid density, wind, and animated PNG output",
   assert.equal(invalidFormat.ok, false); assert.match(invalidFormat.message, /GIF format/);
 });
 
+test("water ripple overlay is deterministic, preserves transparency, and animates impact rings", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-water-ripple-")); const input = path.join(directory, "pond.png"); const first = path.join(directory, "first.gif"); const second = path.join(directory, "second.gif"); await makeSprite(input);
+  const ripple = { inputFilename: input, outputFilename: first, seed: 109, density: 0.72, amplitude: 3, color: "#BDEBFF", frames: 5, delayMs: 90, format: "gif" as const };
+  assert.equal((await service().generateWaterRippleOverlay(ripple)).ok, true); assert.equal((await service().generateWaterRippleOverlay({ ...ripple, outputFilename: second })).ok, true);
+  assert.deepEqual(await fs.readFile(first), await fs.readFile(second)); const frames = await new SharpRasterCodec().decode(first); assert.equal(frames.length, 5); assert.equal(frames[0]?.pixels[3], 0); assert.notDeepEqual([...frames[0]!.pixels], [...frames[1]!.pixels]);
+});
+
+test("water ripple overlay rejects invalid density, amplitude, and animated PNG output", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-water-ripple-invalid-")); const input = path.join(directory, "pond.png"); await makeSprite(input);
+  const invalidDensity = await service().generateWaterRippleOverlay({ inputFilename: input, outputFilename: path.join(directory, "density.gif"), seed: 1, density: 1.1, amplitude: 2, color: "#BDEBFF" });
+  const invalidAmplitude = await service().generateWaterRippleOverlay({ inputFilename: input, outputFilename: path.join(directory, "amplitude.gif"), seed: 1, density: 0.5, amplitude: 9, color: "#BDEBFF" });
+  const invalidFormat = await service().generateWaterRippleOverlay({ inputFilename: input, outputFilename: path.join(directory, "animated.png"), seed: 1, density: 0.5, amplitude: 2, color: "#BDEBFF", frames: 2, format: "png" });
+  assert.equal(invalidDensity.ok, false); assert.match(invalidDensity.message, /density/i); assert.equal(invalidAmplitude.ok, false); assert.match(invalidAmplitude.message, /amplitude/i); assert.equal(invalidFormat.ok, false); assert.match(invalidFormat.message, /GIF format/);
+});
+
 test("motion pack creates a deterministic walk cycle from a static asset", async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-motion-")); const input = path.join(directory, "input.png"); const first = path.join(directory, "first.gif"); const second = path.join(directory, "second.gif"); await makeSprite(input); const sourceBefore = await fs.readFile(input);
   const motion = { inputFilename: input, outputFilename: first, motion: "walk" as const, frames: 8, seed: 11, amplitude: 2, delayMs: 70 };

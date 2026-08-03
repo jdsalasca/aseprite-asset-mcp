@@ -263,6 +263,7 @@ const TOOL_NAMES = [
   "generate_water_spray",
   "generate_dust_overlay",
   "generate_leaf_fall_overlay",
+  "generate_water_ripple_overlay",
   "generate_motion_pack",
   "generate_seamless_texture",
   "generate_water_reflection",

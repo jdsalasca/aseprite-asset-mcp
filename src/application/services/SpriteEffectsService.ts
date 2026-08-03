@@ -1,7 +1,7 @@
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { RasterCodec } from "../../domain/image-assets.js";
 import type { RasterFrame } from "../../domain/pixel-art.js";
-import type { CleanupIsolatedPixelsInput, ColorGradeInput, DayNightCycleInput, DustOverlayInput, FireOverlayInput, FogOverlayInput, LeafFallOverlayInput, LightningOverlayInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SmokeOverlayInput, SnowOverlayInput, SpriteAmbientOcclusionInput, SpriteColorRampInput, SpriteColorTemperatureInput, SpriteDitherInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteGlowInput, SpriteGrainInput, SpriteRimLightInput, SpriteRimLightDirection, SpriteShadowInput, SpriteSilhouetteInput, SpriteSpecularHighlightInput, WaterCausticsInput, WaterReflectionInput, WaterSprayInput, WaveOverlayInput, WindSwayInput } from "../../domain/sprite-effects.js";
+import type { CleanupIsolatedPixelsInput, ColorGradeInput, DayNightCycleInput, DustOverlayInput, FireOverlayInput, FogOverlayInput, LeafFallOverlayInput, LightningOverlayInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SmokeOverlayInput, SnowOverlayInput, SpriteAmbientOcclusionInput, SpriteColorRampInput, SpriteColorTemperatureInput, SpriteDitherInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteGlowInput, SpriteGrainInput, SpriteRimLightInput, SpriteRimLightDirection, SpriteShadowInput, SpriteSilhouetteInput, SpriteSpecularHighlightInput, WaterCausticsInput, WaterReflectionInput, WaterRippleOverlayInput, WaterSprayInput, WaveOverlayInput, WindSwayInput } from "../../domain/sprite-effects.js";
 
 function ok(value: unknown): AssetOperationResult { return { ok: true, message: JSON.stringify(value) }; }
 function fail(error: unknown): AssetOperationResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
@@ -743,6 +743,35 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
       });
       const format = formatFor(frames, input.format); await this.codec.encode(frames, input.outputFilename, format);
       return outputMessage("generate_leaf_fall_overlay", input.inputFilename, input.outputFilename, frames.length, format);
+    } catch (error) { return fail(error); }
+  }
+
+  public async generateWaterRippleOverlay(input: WaterRippleOverlayInput): Promise<AssetOperationResult> {
+    try {
+      assertDifferent(input.inputFilename, input.outputFilename);
+      const color = rgba(input.color); const density = input.density ?? 0.6; const amplitude = input.amplitude ?? 2;
+      if (!Number.isInteger(input.seed)) throw new Error("Water ripple seed must be an integer");
+      if (!Number.isFinite(density) || density < 0 || density > 1) throw new Error("Water ripple density must be between 0 and 1");
+      if (!Number.isFinite(amplitude) || amplitude < 0 || amplitude > 8) throw new Error("Water ripple amplitude must be between 0 and 8");
+      const source = await this.codec.decode(input.inputFilename); const frameCount = input.frames ?? source.length;
+      if (!Number.isInteger(frameCount) || frameCount < 1 || frameCount > 24) throw new Error("Water ripple frames must be an integer from 1 to 24");
+      if (frameCount > 1 && input.format === "png") throw new Error("Water ripple animations with more than one frame require GIF format");
+      const frames = Array.from({ length: frameCount }, (_, frameIndex) => {
+        const sourceFrame = source[frameIndex % source.length]; if (!sourceFrame) throw new Error("Water ripple requires at least one source frame");
+        const pixels = new Uint8ClampedArray(sourceFrame.pixels); const centerX = (sourceFrame.width - 1) * 0.5; const centerY = (sourceFrame.height - 1) * 0.58;
+        for (let y = 0; y < sourceFrame.height; y += 1) for (let x = 0; x < sourceFrame.width; x += 1) {
+          if (alphaAt(sourceFrame, x, y) === 0) continue;
+          const radius = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2); const phase = radius * (1.1 + amplitude * 0.08) - frameIndex * (0.9 + amplitude * 0.12) + input.seed * 0.19;
+          const ring = Math.max(0, Math.sin(phase) - (0.48 + hash(input.seed + frameIndex * 41, x + y * sourceFrame.width) * 0.22)) * 2.1 * density;
+          if (ring > 0) overlayPixel(pixels, sourceFrame.width, sourceFrame.height, x, y, [color[0], color[1], color[2], Math.round(color[3] * Math.min(1, ring))], 1);
+        }
+        let markerX = Math.abs((input.seed * 67 + frameIndex * 5) % sourceFrame.width); let markerY = Math.abs((input.seed * 31 + frameIndex * 3) % sourceFrame.height);
+        if (alphaAt(sourceFrame, markerX, markerY) === 0) outer: for (let candidateY = 0; candidateY < sourceFrame.height; candidateY += 1) for (let candidateX = 0; candidateX < sourceFrame.width; candidateX += 1) if (alphaAt(sourceFrame, candidateX, candidateY) > 0) { markerX = candidateX; markerY = candidateY; break outer; }
+        if (density > 0 && alphaAt(sourceFrame, markerX, markerY) > 0) { const markerColor: [number, number, number, number] = [Math.min(255, color[0] + frameIndex * 8), Math.min(255, color[1] + frameIndex * 5), Math.min(255, color[2] + frameIndex * 3), 255]; overlayPixel(pixels, sourceFrame.width, sourceFrame.height, markerX, markerY, markerColor, 1); }
+        return { ...sourceFrame, pixels, delayMs: input.delayMs ?? sourceFrame.delayMs ?? 90 };
+      });
+      const format = formatFor(frames, input.format); await this.codec.encode(frames, input.outputFilename, format);
+      return outputMessage("generate_water_ripple_overlay", input.inputFilename, input.outputFilename, frames.length, format);
     } catch (error) { return fail(error); }
   }
 

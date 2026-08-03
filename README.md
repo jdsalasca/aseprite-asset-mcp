@@ -182,6 +182,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `generate_water_spray`: crea gotas de spray marino deterministas con densidad, deriva, color, semilla y frames; conserva transparencia, dimensiones, timing y el archivo fuente para oleaje, cascadas e impactos costeros.
 - `generate_dust_overlay`: crea polvo determinista con densidad, deriva, elevación, color, semilla y frames; conserva transparencia, dimensiones, timing y el archivo fuente para caminos, ruinas, desiertos, aterrizajes y golpes de criaturas.
 - `generate_leaf_fall_overlay`: crea hojas otoñales deterministas con densidad, viento, color, semilla y frames; conserva transparencia, dimensiones, timing y el archivo fuente para bosques, parques y escenas ambientales.
+- `generate_water_ripple_overlay`: crea ondas concéntricas deterministas con densidad, amplitud, color, semilla y frames; conserva transparencia, dimensiones, timing y el archivo fuente para charcos, impactos de lluvia y agua somera.
 - `generate_motion_pack`: crea ciclos `idle`, `walk`, `run`, `jump` o `attack` desde un sprite estático o animado.
 - `generate_wind_sway`: crea un GIF ambiental determinista para árboles, follaje, banderas, hierba y props colgantes; mantiene la base estable y controla dirección, amplitud, semilla y timing.
 - `generate_variant_pack`: crea en una sola llamada hasta once variantes deterministas (`rain`, `fire`, `earthquake`, `birds`, `night`, `day_night`, `walk`, `water_reflection`, `water_caustics`, `wind_sway` y el alias legado `wind`) y devuelve un manifiesto compacto de artifacts. `wind_sway` está pensado para árboles, follaje, banderas y props colgantes, con base estable y semilla reproducible.
@@ -248,6 +249,7 @@ POST /api/v1/effects/waves
 POST /api/v1/effects/water-spray
 POST /api/v1/effects/dust
 POST /api/v1/effects/leaf-fall
+POST /api/v1/effects/water-ripple
 POST /api/v1/effects/upscale
 POST /api/v1/effects/remove-background
 POST /api/v1/effects/cleanup

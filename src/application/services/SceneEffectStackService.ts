@@ -8,7 +8,7 @@ import type { VisualAssetGateway } from "../../domain/visual-assets.js";
 function ok(value: unknown): AssetOperationResult { return { ok: true, message: JSON.stringify(value) }; }
 function fail(error: unknown): AssetOperationResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
 
-const EFFECTS: readonly SceneEffectKind[] = ["rain", "fog", "snow", "smoke", "fire", "lightning", "waves", "water_spray", "dust", "leaf_fall", "water_reflection", "water_caustics", "wind_sway", "sprite_shadow", "sprite_glow", "day_night", "material_texture", "depth_lighting", "particles"];
+const EFFECTS: readonly SceneEffectKind[] = ["rain", "fog", "snow", "smoke", "fire", "lightning", "waves", "water_spray", "dust", "leaf_fall", "water_ripple", "water_reflection", "water_caustics", "wind_sway", "sprite_shadow", "sprite_glow", "day_night", "material_texture", "depth_lighting", "particles"];
 
 export class SceneEffectStackService implements SceneEffectStackGateway {
   public constructor(private readonly codec: RasterCodec, private readonly effects: SpriteEffectsGateway, private readonly visual: Pick<VisualAssetGateway, "applyMaterialTexture" | "applyDepthLighting">) {}
@@ -45,6 +45,7 @@ export class SceneEffectStackService implements SceneEffectStackGateway {
     if (effect === "water_spray") return this.effects.generateWaterSpray({ inputFilename: input.inputFilename, outputFilename, seed: input.seed, density: 0.65, drift: 0.18, color: "#F4FDFF", frames: input.frames, delayMs, format });
     if (effect === "dust") return this.effects.generateDustOverlay({ inputFilename: input.inputFilename, outputFilename, seed: input.seed, density: 0.65, drift: 0.12, rise: 0.5, color: "#C79A68", frames: input.frames, delayMs, format });
     if (effect === "leaf_fall") return this.effects.generateLeafFallOverlay({ inputFilename: input.inputFilename, outputFilename, seed: input.seed, density: 0.65, wind: 0.18, color: "#D97732", frames: input.frames, delayMs, format });
+    if (effect === "water_ripple") return this.effects.generateWaterRippleOverlay({ inputFilename: input.inputFilename, outputFilename, seed: input.seed, density: 0.65, amplitude: 2, color: "#BDEBFF", frames: input.frames, delayMs, format });
     if (effect === "water_reflection") return this.effects.generateWaterReflection({ inputFilename: input.inputFilename, outputFilename, waterline: Math.max(1, Math.floor(height * 0.55)), frames: input.frames, seed: input.seed, amplitude: 1, opacity: 0.6, delayMs, format });
     if (effect === "water_caustics") return this.effects.generateWaterCaustics({ inputFilename: input.inputFilename, outputFilename, frames: input.frames, seed: input.seed, intensity: 0.7, scale: 4, color: "#DFF6FF", delayMs, format });
     if (effect === "wind_sway") return this.effects.generateWindSway({ inputFilename: input.inputFilename, outputFilename, frames: input.frames, seed: input.seed, amplitude: 2, direction: "right", delayMs, format });
