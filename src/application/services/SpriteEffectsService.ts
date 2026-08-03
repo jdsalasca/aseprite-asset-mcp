@@ -1,7 +1,7 @@
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { RasterCodec } from "../../domain/image-assets.js";
 import type { RasterFrame } from "../../domain/pixel-art.js";
-import type { CleanupIsolatedPixelsInput, ColorGradeInput, DayNightCycleInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SpriteAmbientOcclusionInput, SpriteColorRampInput, SpriteColorTemperatureInput, SpriteDitherInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteGlowInput, SpriteGrainInput, SpriteRimLightInput, SpriteRimLightDirection, SpriteShadowInput, SpriteSilhouetteInput, SpriteSpecularHighlightInput, WaterCausticsInput, WaterReflectionInput, WindSwayInput } from "../../domain/sprite-effects.js";
+import type { CleanupIsolatedPixelsInput, ColorGradeInput, DayNightCycleInput, FogOverlayInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SpriteAmbientOcclusionInput, SpriteColorRampInput, SpriteColorTemperatureInput, SpriteDitherInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteGlowInput, SpriteGrainInput, SpriteRimLightInput, SpriteRimLightDirection, SpriteShadowInput, SpriteSilhouetteInput, SpriteSpecularHighlightInput, WaterCausticsInput, WaterReflectionInput, WindSwayInput } from "../../domain/sprite-effects.js";
 
 function ok(value: unknown): AssetOperationResult { return { ok: true, message: JSON.stringify(value) }; }
 function fail(error: unknown): AssetOperationResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
@@ -415,6 +415,44 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
       const format = formatFor(frames, input.format);
       await this.codec.encode(frames, input.outputFilename, format);
       return outputMessage("generate_rain_overlay", input.inputFilename, input.outputFilename, frames.length, format);
+    } catch (error) { return fail(error); }
+  }
+
+  public async generateFogOverlay(input: FogOverlayInput): Promise<AssetOperationResult> {
+    try {
+      assertDifferent(input.inputFilename, input.outputFilename);
+      const color = rgba(input.color);
+      const density = input.density ?? 0.55;
+      const drift = input.drift ?? 0;
+      if (!Number.isInteger(input.seed)) throw new Error("Fog seed must be an integer");
+      if (!Number.isFinite(density) || density < 0 || density > 1) throw new Error("Fog density must be between 0 and 1");
+      if (!Number.isFinite(drift) || drift < -1 || drift > 1) throw new Error("Fog drift must be between -1 and 1");
+      const source = await this.codec.decode(input.inputFilename);
+      const frameCount = input.frames ?? source.length;
+      if (!Number.isInteger(frameCount) || frameCount < 1 || frameCount > 24) throw new Error("Fog frames must be an integer from 1 to 24");
+      if (frameCount > 1 && input.format === "png") throw new Error("Fog animations with more than one frame require GIF format");
+      const frames = Array.from({ length: frameCount }, (_, frameIndex) => {
+        const sourceFrame = source[frameIndex % source.length];
+        if (!sourceFrame) throw new Error("Fog requires at least one source frame");
+        const pixels = new Uint8ClampedArray(sourceFrame.pixels);
+        const scale = Math.max(3, Math.round(Math.min(sourceFrame.width, sourceFrame.height) * (0.22 + density * 0.18)));
+        for (let y = 0; y < sourceFrame.height; y += 1) for (let x = 0; x < sourceFrame.width; x += 1) {
+          if (alphaAt(sourceFrame, x, y) === 0) continue;
+          const phaseX = (x + drift * frameIndex * sourceFrame.width + input.seed * 0.31) / scale;
+          const phaseY = (y - frameIndex * (0.35 + Math.abs(drift)) + input.seed * 0.17) / (scale * 0.8);
+          const cloud = (Math.sin(phaseX * 1.7 + Math.sin(phaseY)) + Math.sin(phaseY * 1.35 + Math.cos(phaseX * 0.7))) * 0.25 + 0.5;
+          const localDensity = clamp((cloud - 0.16) * 1.25, 0, 1) * density;
+          const alpha = Math.round(color[3] * localDensity * (0.24 + hash(input.seed + frameIndex * 53, x + y * sourceFrame.width) * 0.46));
+          if (alpha > 0) overlayPixel(pixels, sourceFrame.width, sourceFrame.height, x, y, [color[0], color[1], color[2], alpha], 1);
+        }
+        const markerX = Math.abs((input.seed * 17 + frameIndex * 5) % sourceFrame.width);
+        const markerY = Math.abs((input.seed * 11 + frameIndex * 3) % sourceFrame.height);
+        if (density > 0) overlayPixel(pixels, sourceFrame.width, sourceFrame.height, markerX, markerY, [color[0], color[1], color[2], Math.round(color[3] * density * 0.5)], 1);
+        return { ...sourceFrame, pixels, delayMs: input.delayMs ?? sourceFrame.delayMs ?? 90 };
+      });
+      const format = formatFor(frames, input.format);
+      await this.codec.encode(frames, input.outputFilename, format);
+      return outputMessage("generate_fog_overlay", input.inputFilename, input.outputFilename, frames.length, format);
     } catch (error) { return fail(error); }
   }
 

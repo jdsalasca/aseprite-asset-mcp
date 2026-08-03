@@ -385,6 +385,37 @@ test("rain overlay rejects multiple requested frames with PNG output", async () 
   assert.equal(result.ok, false); assert.match(result.message, /GIF format/);
 });
 
+test("fog overlay is seeded, preserves dimensions and alpha, and exports a repeatable animation", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-fog-overlay-"));
+  const input = path.join(directory, "scene.png");
+  const first = path.join(directory, "first.gif");
+  const second = path.join(directory, "second.gif");
+  await makeSprite(input);
+  const fog = { inputFilename: input, outputFilename: first, seed: 23, density: 0.72, drift: -0.35, color: "#DDEBFF", frames: 5, delayMs: 110, format: "gif" as const };
+  const result = await service().generateFogOverlay(fog);
+  assert.equal(result.ok, true);
+  assert.equal((await service().generateFogOverlay({ ...fog, outputFilename: second })).ok, true);
+  const firstFrames = await new SharpRasterCodec().decode(first);
+  const secondFrames = await new SharpRasterCodec().decode(second);
+  assert.equal(firstFrames.length, 5);
+  assert.deepEqual(firstFrames.map((frame) => [frame.width, frame.height]), secondFrames.map((frame) => [frame.width, frame.height]));
+  assert.deepEqual(firstFrames.map((frame) => [...frame.pixels]), secondFrames.map((frame) => [...frame.pixels]));
+  assert.equal(firstFrames[0]?.pixels[(0 * 8 + 0) * 4 + 3], 0);
+  assert.match(result.message, /generate_fog_overlay/);
+});
+
+test("fog overlay rejects invalid density, drift, and animated PNG output", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-fog-overlay-invalid-"));
+  const input = path.join(directory, "scene.png");
+  await makeSprite(input);
+  const invalidDensity = await service().generateFogOverlay({ inputFilename: input, outputFilename: path.join(directory, "density.gif"), seed: 1, density: 1.2, drift: 0, color: "#FFFFFF" });
+  const invalidDrift = await service().generateFogOverlay({ inputFilename: input, outputFilename: path.join(directory, "drift.gif"), seed: 1, density: 0.5, drift: 2, color: "#FFFFFF" });
+  const animatedPng = await service().generateFogOverlay({ inputFilename: input, outputFilename: path.join(directory, "animated.png"), seed: 1, density: 0.5, drift: 0, color: "#FFFFFF", frames: 2, format: "png" });
+  assert.equal(invalidDensity.ok, false);
+  assert.equal(invalidDrift.ok, false);
+  assert.equal(animatedPng.ok, false);
+});
+
 test("motion pack creates a deterministic walk cycle from a static asset", async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-motion-")); const input = path.join(directory, "input.png"); const first = path.join(directory, "first.gif"); const second = path.join(directory, "second.gif"); await makeSprite(input); const sourceBefore = await fs.readFile(input);
   const motion = { inputFilename: input, outputFilename: first, motion: "walk" as const, frames: 8, seed: 11, amplitude: 2, delayMs: 70 };

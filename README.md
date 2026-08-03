@@ -172,7 +172,8 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `generate_library_variant_pack`: recibe múltiples IDs y genera en una sola llamada packs de lluvia, fuego, terremoto, aves, noche, movimiento y reflejos reutilizando el servicio de variantes existente.
 - `get_asset_preset`: devuelve composiciones listas como `living-forest`, `coastal-sunset`, `fantasy-quest` y `rainy-village`.
 - `generate_asset_preset`: ejecuta un preset completo y devuelve terreno, mapa, preview, oleaje cuando aplica y transición temporal en una respuesta compacta.
-- `generate_scene_effect_stack`: agrupa en una sola llamada lluvia, viento/sway, sombras, glow, partículas, caústicas/reflejos, día-noche, granularidad de material e iluminación direccional; infiere dimensiones para partículas, devuelve todos los artifacts y preserva la fuente.
+- `generate_scene_effect_stack`: agrupa en una sola llamada lluvia, niebla, viento/sway, sombras, glow, partículas, caústicas/reflejos, día-noche, granularidad de material e iluminación direccional; infiere dimensiones para partículas, devuelve todos los artifacts y preserva la fuente.
+- `generate_fog_overlay`: crea una capa de niebla determinista con densidad, deriva, color, semilla y frames; aplica el pase solo a píxeles opacos y conserva dimensiones, alfa y archivo fuente.
 - `generate_motion_pack`: crea ciclos `idle`, `walk`, `run`, `jump` o `attack` desde un sprite estático o animado.
 - `generate_wind_sway`: crea un GIF ambiental determinista para árboles, follaje, banderas, hierba y props colgantes; mantiene la base estable y controla dirección, amplitud, semilla y timing.
 - `generate_variant_pack`: crea en una sola llamada hasta once variantes deterministas (`rain`, `fire`, `earthquake`, `birds`, `night`, `day_night`, `walk`, `water_reflection`, `water_caustics`, `wind_sway` y el alias legado `wind`) y devuelve un manifiesto compacto de artifacts. `wind_sway` está pensado para árboles, follaje, banderas y props colgantes, con base estable y semilla reproducible.
@@ -313,13 +314,13 @@ Las variantes (`rain`, `fire`, `earthquake`, `birds`, `wave-reflection`, `day`, 
 
 La respuesta contiene `artifacts[]` con ruta, operación, cantidad de frames, formato y las garantías `deterministic` y `sourcePreserved`. Las fuentes PNG estáticas también pueden producir GIFs animados; el servidor rechaza explícitamente pedir varios frames con formato PNG.
 
-`generate_scene_effect_stack` reduce llamadas repetidas del agente cuando se quiere probar una escena completa. Selecciona efectos únicos y el servicio reutiliza los puertos existentes de efectos, materiales e iluminación. `wind_sway` comparte el mismo puerto de animación que la herramienta individual, conservando el orden y el resultado determinista:
+`generate_scene_effect_stack` reduce llamadas repetidas del agente cuando se quiere probar una escena completa. Selecciona efectos únicos y el servicio reutiliza los puertos existentes de efectos, materiales e iluminación. `fog` comparte el mismo puerto de efectos que la herramienta individual, conservando el orden y el resultado determinista:
 
 ```json
 {
   "input_filename": "art/forest-ranger.png",
   "output_prefix": "art/forest-ranger-scene",
-  "effects": ["material_texture", "depth_lighting", "rain", "wind_sway", "particles", "water_caustics", "day_night"],
+  "effects": ["material_texture", "depth_lighting", "rain", "fog", "wind_sway", "particles", "water_caustics", "day_night"],
   "frames": 8,
   "seed": 17,
   "material": "earth",

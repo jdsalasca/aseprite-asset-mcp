@@ -70,6 +70,7 @@ const DESCRIPTION_OVERRIDES: Record<string, string> = {
   generate_particle_burst: "Generate a deterministic animated particle burst GIF.",
   generate_normal_map: "Generate a deterministic normal map from sprite alpha depth.",
   generate_rain_overlay: "Generate a seeded rain overlay while preserving sprite dimensions and timing.",
+  generate_fog_overlay: "Generate deterministic atmospheric fog with bounded density and drift while preserving source alpha and timing.",
   generate_motion_pack: "Generate a deterministic movement cycle from a static or animated sprite.",
   generate_seamless_texture: "Make opposite texture borders match for repeatable pixel-art backgrounds.",
   generate_water_reflection: "Generate deterministic animated reflections for oceans, beaches, and wave scenes.",

@@ -20,6 +20,7 @@ export interface SpriteShadowInput extends SpriteEffectBaseInput { offsetX: numb
 export interface ParticleBurstInput { outputFilename: string; width: number; height: number; frames: number; particleCount: number; seed: number; color: string; delayMs?: number | undefined; }
 export interface NormalMapInput extends SpriteEffectBaseInput { strength?: number | undefined; }
 export interface RainOverlayInput extends SpriteEffectBaseInput { seed: number; intensity?: number | undefined; wind?: number | undefined; color: string; frames?: number | undefined; delayMs?: number | undefined; }
+export interface FogOverlayInput extends SpriteEffectBaseInput { seed: number; density?: number | undefined; drift?: number | undefined; color: string; frames?: number | undefined; delayMs?: number | undefined; }
 export type MotionKind = "idle" | "walk" | "run" | "jump" | "attack";
 export interface MotionPackInput extends SpriteEffectBaseInput { motion: MotionKind; frames: number; seed: number; amplitude?: number | undefined; delayMs?: number | undefined; }
 export type WindSwayDirection = "left" | "right";
@@ -47,6 +48,7 @@ export interface SpriteEffectsGateway {
   generateParticleBurst(input: ParticleBurstInput): Promise<AssetOperationResult>;
   generateNormalMap(input: NormalMapInput): Promise<AssetOperationResult>;
   generateRainOverlay(input: RainOverlayInput): Promise<AssetOperationResult>;
+  generateFogOverlay(input: FogOverlayInput): Promise<AssetOperationResult>;
   generateMotionPack(input: MotionPackInput): Promise<AssetOperationResult>;
   generateWindSway(input: WindSwayInput): Promise<AssetOperationResult>;
   generateSeamlessTexture(input: SeamlessTextureInput): Promise<AssetOperationResult>;
