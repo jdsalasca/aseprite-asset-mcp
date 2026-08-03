@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "desert-scholar",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4109,
+    "coverage": 0.25079345703125,
+    "edgePixels": 585,
+    "connectedComponents": 10,
+    "largestComponentRatio": 0.9839376977366756,
+    "distinctRowSpans": 27,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 31,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "pine",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 3721,
+    "coverage": 0.22711181640625,
+    "edgePixels": 639,
+    "connectedComponents": 18,
+    "largestComponentRatio": 0.9822628325718893,
+    "distinctRowSpans": 67,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 32,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

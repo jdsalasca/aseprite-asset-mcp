@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "forest-scout",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4113,
+    "coverage": 0.25103759765625,
+    "edgePixels": 591,
+    "connectedComponents": 11,
+    "largestComponentRatio": 0.9829807926088013,
+    "distinctRowSpans": 26,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 35,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

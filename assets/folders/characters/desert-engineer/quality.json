@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "desert-engineer",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4102,
+    "coverage": 0.2503662109375,
+    "edgePixels": 578,
+    "connectedComponents": 9,
+    "largestComponentRatio": 0.9858605558264262,
+    "distinctRowSpans": 24,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 31,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

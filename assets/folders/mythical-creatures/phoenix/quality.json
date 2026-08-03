@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "phoenix",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4863,
+    "coverage": 0.29681396484375,
+    "edgePixels": 723,
+    "connectedComponents": 7,
+    "largestComponentRatio": 0.9946535060662143,
+    "distinctRowSpans": 62,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 42,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

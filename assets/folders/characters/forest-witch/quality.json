@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "forest-witch",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4110,
+    "coverage": 0.2508544921875,
+    "edgePixels": 586,
+    "connectedComponents": 10,
+    "largestComponentRatio": 0.983941605839416,
+    "distinctRowSpans": 26,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 34,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

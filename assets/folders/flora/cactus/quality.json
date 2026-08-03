@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "cactus",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 3722,
+    "coverage": 0.2271728515625,
+    "edgePixels": 640,
+    "connectedComponents": 18,
+    "largestComponentRatio": 0.9822675980655562,
+    "distinctRowSpans": 67,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 34,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

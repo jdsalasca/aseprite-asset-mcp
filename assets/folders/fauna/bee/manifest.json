@@ -1,15 +1,22 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "id": "bee",
   "title": "bee",
   "category": "fauna",
   "kind": "sprite",
-  "source": "deterministic-library-generator-v2",
+  "source": "deterministic-library-generator-v3",
   "seed": 1370376319,
   "render": {
-    "cellSize": 64,
+    "cellSize": 128,
     "shapeRendering": "crispEdges",
-    "transparentSpriteBackground": true
+    "transparentSpriteBackground": true,
+    "paletteSize": 34,
+    "layers": [
+      "silhouette",
+      "material-ramp",
+      "contact-shadow",
+      "accent-light"
+    ]
   },
   "variants": [
     "idle",
@@ -23,13 +30,32 @@
     "sprite-sheet.png",
     "sprite-sheet.gif",
     "preview.svg",
-    "sprite-sheet.svg"
+    "sprite-sheet.svg",
+    "quality.json"
   ],
   "tags": [
     "fauna",
     "wildlife",
-    "animation"
+    "animation",
+    "premium",
+    "deterministic",
+    "quality-gated"
   ],
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4588,
+    "coverage": 0.280029296875,
+    "edgePixels": 666,
+    "connectedComponents": 6,
+    "largestComponentRatio": 0.9925893635571055,
+    "distinctRowSpans": 52,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 34,
+    "profile": "premium-sprite-v1"
+  },
   "sourcePreserved": true,
   "deterministic": true
 }

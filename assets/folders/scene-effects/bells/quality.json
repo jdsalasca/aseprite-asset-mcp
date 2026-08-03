@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "bells",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 1034,
+    "coverage": 0.0631103515625,
+    "edgePixels": 594,
+    "connectedComponents": 30,
+    "largestComponentRatio": 0.5425531914893617,
+    "distinctRowSpans": 50,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 16,
+    "profile": "premium-transparent-effect-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "warhorse",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4699,
+    "coverage": 0.28680419921875,
+    "edgePixels": 688,
+    "connectedComponents": 6,
+    "largestComponentRatio": 0.9934028516705682,
+    "distinctRowSpans": 50,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 38,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

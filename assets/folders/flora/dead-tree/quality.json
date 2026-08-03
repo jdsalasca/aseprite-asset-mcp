@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "dead-tree",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 3729,
+    "coverage": 0.22760009765625,
+    "edgePixels": 652,
+    "connectedComponents": 20,
+    "largestComponentRatio": 0.9774738535800482,
+    "distinctRowSpans": 67,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 32,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

@@ -1,15 +1,22 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "id": "leaves",
   "title": "leaves",
   "category": "scene-effects",
   "kind": "effect",
-  "source": "deterministic-library-generator-v2",
+  "source": "deterministic-library-generator-v3",
   "seed": 2771933641,
   "render": {
-    "cellSize": 64,
+    "cellSize": 128,
     "shapeRendering": "crispEdges",
-    "transparentSpriteBackground": true
+    "transparentSpriteBackground": true,
+    "paletteSize": 16,
+    "layers": [
+      "silhouette",
+      "material-ramp",
+      "contact-shadow",
+      "accent-light"
+    ]
   },
   "variants": [
     "subtle",
@@ -21,13 +28,32 @@
     "sprite-sheet.png",
     "sprite-sheet.gif",
     "preview.svg",
-    "sprite-sheet.svg"
+    "sprite-sheet.svg",
+    "quality.json"
   ],
   "tags": [
     "effect",
     "particles",
-    "animation"
+    "animation",
+    "premium",
+    "deterministic",
+    "quality-gated"
   ],
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 1014,
+    "coverage": 0.0618896484375,
+    "edgePixels": 581,
+    "connectedComponents": 29,
+    "largestComponentRatio": 0.5512820512820513,
+    "distinctRowSpans": 60,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 16,
+    "profile": "premium-transparent-effect-v1"
+  },
   "sourcePreserved": true,
   "deterministic": true
 }

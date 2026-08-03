@@ -8,7 +8,7 @@ Esta carpeta contiene 21 assets deterministas. Cada subcarpeta documenta sus pre
 
 - [wolf](./wolf/README.md): wolf with idle, walk, hit and habitat variants.
 - [fox](./fox/README.md): fox with idle, walk, hit and habitat variants.
-- [deer](./deer/README.md): deer with idle, walk, hit and habitat variants.
+- [red deer reference sprite](./deer/README.md): Reference-derived red deer with a readable anatomical silhouette and deterministic movement-ready frames.
 - [boar](./boar/README.md): boar with idle, walk, hit and habitat variants.
 - [bear](./bear/README.md): bear with idle, walk, hit and habitat variants.
 - [rabbit](./rabbit/README.md): rabbit with idle, walk, hit and habitat variants.

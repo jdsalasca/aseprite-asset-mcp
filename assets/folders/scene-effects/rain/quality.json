@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "rain",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 1035,
+    "coverage": 0.06317138671875,
+    "edgePixels": 597,
+    "connectedComponents": 30,
+    "largestComponentRatio": 0.5391304347826087,
+    "distinctRowSpans": 57,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 16,
+    "profile": "premium-transparent-effect-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

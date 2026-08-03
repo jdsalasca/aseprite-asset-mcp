@@ -1,15 +1,22 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "id": "cedar",
   "title": "cedar",
   "category": "flora",
   "kind": "prop",
-  "source": "deterministic-library-generator-v2",
+  "source": "deterministic-library-generator-v3",
   "seed": 1897713212,
   "render": {
-    "cellSize": 64,
+    "cellSize": 128,
     "shapeRendering": "crispEdges",
-    "transparentSpriteBackground": true
+    "transparentSpriteBackground": true,
+    "paletteSize": 30,
+    "layers": [
+      "silhouette",
+      "material-ramp",
+      "contact-shadow",
+      "accent-light"
+    ]
   },
   "variants": [
     "rain",
@@ -24,13 +31,32 @@
     "sprite-sheet.png",
     "sprite-sheet.gif",
     "preview.svg",
-    "sprite-sheet.svg"
+    "sprite-sheet.svg",
+    "quality.json"
   ],
   "tags": [
     "tree",
     "nature",
-    "world"
+    "world",
+    "premium",
+    "deterministic",
+    "quality-gated"
   ],
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 3729,
+    "coverage": 0.22760009765625,
+    "edgePixels": 648,
+    "connectedComponents": 19,
+    "largestComponentRatio": 0.9790828640386162,
+    "distinctRowSpans": 68,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 30,
+    "profile": "premium-sprite-v1"
+  },
   "sourcePreserved": true,
   "deterministic": true
 }

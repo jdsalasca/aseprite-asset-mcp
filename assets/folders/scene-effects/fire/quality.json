@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "fire",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 1024,
+    "coverage": 0.0625,
+    "edgePixels": 583,
+    "connectedComponents": 27,
+    "largestComponentRatio": 0.5693359375,
+    "distinctRowSpans": 56,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 15,
+    "profile": "premium-transparent-effect-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

@@ -1,15 +1,22 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "id": "snow",
   "title": "snow",
   "category": "scene-effects",
   "kind": "effect",
-  "source": "deterministic-library-generator-v2",
+  "source": "deterministic-library-generator-v3",
   "seed": 2223183858,
   "render": {
-    "cellSize": 64,
+    "cellSize": 128,
     "shapeRendering": "crispEdges",
-    "transparentSpriteBackground": true
+    "transparentSpriteBackground": true,
+    "paletteSize": 16,
+    "layers": [
+      "silhouette",
+      "material-ramp",
+      "contact-shadow",
+      "accent-light"
+    ]
   },
   "variants": [
     "subtle",
@@ -21,13 +28,32 @@
     "sprite-sheet.png",
     "sprite-sheet.gif",
     "preview.svg",
-    "sprite-sheet.svg"
+    "sprite-sheet.svg",
+    "quality.json"
   ],
   "tags": [
     "effect",
     "particles",
-    "animation"
+    "animation",
+    "premium",
+    "deterministic",
+    "quality-gated"
   ],
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 1024,
+    "coverage": 0.0625,
+    "edgePixels": 588,
+    "connectedComponents": 30,
+    "largestComponentRatio": 0.5439453125,
+    "distinctRowSpans": 52,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 16,
+    "profile": "premium-transparent-effect-v1"
+  },
   "sourcePreserved": true,
   "deterministic": true
 }

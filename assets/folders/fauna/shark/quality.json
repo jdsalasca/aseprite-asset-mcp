@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "shark",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4693,
+    "coverage": 0.28643798828125,
+    "edgePixels": 668,
+    "connectedComponents": 7,
+    "largestComponentRatio": 0.9906243341146388,
+    "distinctRowSpans": 58,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 41,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

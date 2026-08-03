@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "birch",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 3723,
+    "coverage": 0.22723388671875,
+    "edgePixels": 649,
+    "connectedComponents": 20,
+    "largestComponentRatio": 0.978511952726296,
+    "distinctRowSpans": 65,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 32,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "maraca",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4970,
+    "coverage": 0.3033447265625,
+    "edgePixels": 520,
+    "connectedComponents": 7,
+    "largestComponentRatio": 0.9923541247484909,
+    "distinctRowSpans": 55,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 29,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

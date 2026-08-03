@@ -1,15 +1,22 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "id": "palm",
   "title": "palm",
   "category": "flora",
   "kind": "prop",
-  "source": "deterministic-library-generator-v2",
+  "source": "deterministic-library-generator-v3",
   "seed": 2303507949,
   "render": {
-    "cellSize": 64,
+    "cellSize": 128,
     "shapeRendering": "crispEdges",
-    "transparentSpriteBackground": true
+    "transparentSpriteBackground": true,
+    "paletteSize": 33,
+    "layers": [
+      "silhouette",
+      "material-ramp",
+      "contact-shadow",
+      "accent-light"
+    ]
   },
   "variants": [
     "rain",
@@ -24,13 +31,32 @@
     "sprite-sheet.png",
     "sprite-sheet.gif",
     "preview.svg",
-    "sprite-sheet.svg"
+    "sprite-sheet.svg",
+    "quality.json"
   ],
   "tags": [
     "tree",
     "nature",
-    "world"
+    "world",
+    "premium",
+    "deterministic",
+    "quality-gated"
   ],
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 3725,
+    "coverage": 0.22735595703125,
+    "edgePixels": 649,
+    "connectedComponents": 20,
+    "largestComponentRatio": 0.978523489932886,
+    "distinctRowSpans": 67,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 33,
+    "profile": "premium-sprite-v1"
+  },
   "sourcePreserved": true,
   "deterministic": true
 }

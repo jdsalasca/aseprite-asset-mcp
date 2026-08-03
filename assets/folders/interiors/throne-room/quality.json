@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "throne-room",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 16384,
+    "coverage": 1,
+    "edgePixels": 508,
+    "connectedComponents": 1,
+    "largestComponentRatio": 1,
+    "distinctRowSpans": 1,
+    "transparentBorder": false,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 87,
+    "profile": "premium-opaque-scene-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

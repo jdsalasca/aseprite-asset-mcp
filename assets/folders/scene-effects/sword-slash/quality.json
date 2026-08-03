@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "sword-slash",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 1043,
+    "coverage": 0.06365966796875,
+    "edgePixels": 604,
+    "connectedComponents": 29,
+    "largestComponentRatio": 0.5436241610738255,
+    "distinctRowSpans": 56,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 14,
+    "profile": "premium-transparent-effect-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

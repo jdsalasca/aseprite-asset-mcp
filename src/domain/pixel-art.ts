@@ -46,6 +46,7 @@ export interface PixelArtQualityGateOptions {
   minDistinctRowSpans?: number | undefined;
   maxComponents?: number | undefined;
   minLargestComponentRatio?: number | undefined;
+  requireTransparentBorder?: boolean | undefined;
 }
 
 export interface PixelArtQualityGateReport extends PixelArtSubjectReport {

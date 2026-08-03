@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "sparks",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 1045,
+    "coverage": 0.06378173828125,
+    "edgePixels": 608,
+    "connectedComponents": 30,
+    "largestComponentRatio": 0.55311004784689,
+    "distinctRowSpans": 56,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 13,
+    "profile": "premium-transparent-effect-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

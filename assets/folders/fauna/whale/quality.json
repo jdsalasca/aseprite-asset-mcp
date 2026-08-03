@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "whale",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4695,
+    "coverage": 0.28656005859375,
+    "edgePixels": 674,
+    "connectedComponents": 7,
+    "largestComponentRatio": 0.9902023429179979,
+    "distinctRowSpans": 58,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 37,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

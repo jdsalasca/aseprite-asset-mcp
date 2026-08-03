@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "acacia",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 3734,
+    "coverage": 0.2279052734375,
+    "edgePixels": 653,
+    "connectedComponents": 20,
+    "largestComponentRatio": 0.9769683985002678,
+    "distinctRowSpans": 66,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 32,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "staff",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4972,
+    "coverage": 0.303466796875,
+    "edgePixels": 520,
+    "connectedComponents": 7,
+    "largestComponentRatio": 0.9915526950925181,
+    "distinctRowSpans": 53,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 29,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

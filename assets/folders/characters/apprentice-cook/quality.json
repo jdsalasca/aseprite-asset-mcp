@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "apprentice-cook",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4111,
+    "coverage": 0.25091552734375,
+    "edgePixels": 588,
+    "connectedComponents": 11,
+    "largestComponentRatio": 0.9829725127706154,
+    "distinctRowSpans": 27,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 35,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

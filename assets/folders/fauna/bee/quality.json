@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "bee",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4588,
+    "coverage": 0.280029296875,
+    "edgePixels": 666,
+    "connectedComponents": 6,
+    "largestComponentRatio": 0.9925893635571055,
+    "distinctRowSpans": 52,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 34,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

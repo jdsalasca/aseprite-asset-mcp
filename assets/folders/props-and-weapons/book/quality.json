@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "book",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4973,
+    "coverage": 0.30352783203125,
+    "edgePixels": 521,
+    "connectedComponents": 6,
+    "largestComponentRatio": 0.9923587371807762,
+    "distinctRowSpans": 53,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 29,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

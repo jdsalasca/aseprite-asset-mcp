@@ -1,15 +1,23 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "id": "flower-meadow",
   "title": "flower meadow",
   "category": "biomes-and-maps",
   "kind": "scene",
-  "source": "deterministic-library-generator-v2",
+  "source": "deterministic-library-generator-v3",
   "seed": 580833044,
   "render": {
-    "cellSize": 64,
+    "cellSize": 128,
     "shapeRendering": "crispEdges",
-    "transparentSpriteBackground": false
+    "transparentSpriteBackground": false,
+    "paletteSize": 121,
+    "layers": [
+      "sky-or-wall",
+      "horizon-or-floor",
+      "material-texture",
+      "landmarks",
+      "lighting"
+    ]
   },
   "variants": [
     "day",
@@ -23,13 +31,32 @@
     "sprite-sheet.png",
     "sprite-sheet.gif",
     "preview.svg",
-    "sprite-sheet.svg"
+    "sprite-sheet.svg",
+    "quality.json"
   ],
   "tags": [
     "map",
     "scene",
-    "tileset"
+    "tileset",
+    "premium",
+    "deterministic",
+    "quality-gated"
   ],
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 16384,
+    "coverage": 1,
+    "edgePixels": 508,
+    "connectedComponents": 1,
+    "largestComponentRatio": 1,
+    "distinctRowSpans": 1,
+    "transparentBorder": false,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 121,
+    "profile": "premium-opaque-scene-v1"
+  },
   "sourcePreserved": true,
   "deterministic": true
 }

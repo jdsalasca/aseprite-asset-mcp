@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "footsteps",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 1039,
+    "coverage": 0.06341552734375,
+    "edgePixels": 598,
+    "connectedComponents": 29,
+    "largestComponentRatio": 0.5505293551491819,
+    "distinctRowSpans": 56,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 16,
+    "profile": "premium-transparent-effect-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

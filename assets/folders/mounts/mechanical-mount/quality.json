@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "mechanical-mount",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4594,
+    "coverage": 0.2803955078125,
+    "edgePixels": 680,
+    "connectedComponents": 9,
+    "largestComponentRatio": 0.9873748367435786,
+    "distinctRowSpans": 54,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 36,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

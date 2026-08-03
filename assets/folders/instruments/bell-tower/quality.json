@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "bell-tower",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4975,
+    "coverage": 0.30364990234375,
+    "edgePixels": 525,
+    "connectedComponents": 7,
+    "largestComponentRatio": 0.9911557788944724,
+    "distinctRowSpans": 53,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 28,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

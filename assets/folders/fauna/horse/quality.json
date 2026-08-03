@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "horse",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4704,
+    "coverage": 0.287109375,
+    "edgePixels": 695,
+    "connectedComponents": 7,
+    "largestComponentRatio": 0.9925595238095238,
+    "distinctRowSpans": 52,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 36,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

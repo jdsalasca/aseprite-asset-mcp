@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "apprentice-farmer",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4103,
+    "coverage": 0.25042724609375,
+    "edgePixels": 583,
+    "connectedComponents": 10,
+    "largestComponentRatio": 0.985376553741165,
+    "distinctRowSpans": 25,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 36,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

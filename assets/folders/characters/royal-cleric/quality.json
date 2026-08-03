@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "royal-cleric",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4099,
+    "coverage": 0.25018310546875,
+    "edgePixels": 578,
+    "connectedComponents": 10,
+    "largestComponentRatio": 0.9858502073676506,
+    "distinctRowSpans": 27,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 32,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

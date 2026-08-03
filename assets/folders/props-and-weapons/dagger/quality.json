@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "dagger",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4962,
+    "coverage": 0.3028564453125,
+    "edgePixels": 511,
+    "connectedComponents": 5,
+    "largestComponentRatio": 0.9947601773478436,
+    "distinctRowSpans": 53,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 29,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

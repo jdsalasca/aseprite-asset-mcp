@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "light-rays",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 1024,
+    "coverage": 0.0625,
+    "edgePixels": 590,
+    "connectedComponents": 31,
+    "largestComponentRatio": 0.5380859375,
+    "distinctRowSpans": 53,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 14,
+    "profile": "premium-transparent-effect-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

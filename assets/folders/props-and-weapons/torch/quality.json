@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "torch",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4971,
+    "coverage": 0.30340576171875,
+    "edgePixels": 517,
+    "connectedComponents": 6,
+    "largestComponentRatio": 0.9935626634479984,
+    "distinctRowSpans": 55,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 32,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "wheat",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 3726,
+    "coverage": 0.2274169921875,
+    "edgePixels": 647,
+    "connectedComponents": 20,
+    "largestComponentRatio": 0.9785292538915727,
+    "distinctRowSpans": 68,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 33,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

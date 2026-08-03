@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "bamboo",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 3721,
+    "coverage": 0.22711181640625,
+    "edgePixels": 640,
+    "connectedComponents": 18,
+    "largestComponentRatio": 0.9817253426498254,
+    "distinctRowSpans": 67,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 33,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

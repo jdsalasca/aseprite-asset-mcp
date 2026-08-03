@@ -1,13 +1,13 @@
 # mythical creatures
 
-Mythological creatures with combat-ready states. `dragon-ice` is the premium reference-derived example: a detailed 256px dragon with wings, claws, crystal spines and deterministic ice-breath-ready frames.
+Mythological creatures with combat-ready states.
 
 Esta carpeta contiene 20 assets deterministas. Cada subcarpeta documenta sus previews, sprite sheets PNG/SVG, GIF animado, manifest y variantes.
 
 ## Ejemplos
 
 - [dragon ember](./dragon-ember/README.md): dragon ember creature for living fantasy worlds.
-- [dragon ice](./dragon-ice/README.md): dragon ice creature for living fantasy worlds.
+- [premium ice dragon](./dragon-ice/README.md): Premium reference-derived ice dragon with articulated anatomy, crystal spines, wing silhouette and ice-breath animation-ready frames.
 - [dragon storm](./dragon-storm/README.md): dragon storm creature for living fantasy worlds.
 - [dragon forest](./dragon-forest/README.md): dragon forest creature for living fantasy worlds.
 - [dragon void](./dragon-void/README.md): dragon void creature for living fantasy worlds.

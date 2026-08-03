@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "forest-ranger",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4114,
+    "coverage": 0.2510986328125,
+    "edgePixels": 590,
+    "connectedComponents": 11,
+    "largestComponentRatio": 0.9829849295089936,
+    "distinctRowSpans": 26,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 35,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

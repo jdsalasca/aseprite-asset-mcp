@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "deer",
+  "source": "reference-pixel-art-v2",
+  "qualityGate": {
+    "width": 96,
+    "height": 96,
+    "opaquePixels": 3300,
+    "coverage": 0.3580729166666667,
+    "edgePixels": 417,
+    "connectedComponents": 1,
+    "largestComponentRatio": 1,
+    "distinctRowSpans": 47,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "profile": "reference-derived-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "sky-whale",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4598,
+    "coverage": 0.2806396484375,
+    "edgePixels": 677,
+    "connectedComponents": 8,
+    "largestComponentRatio": 0.9891257068290561,
+    "distinctRowSpans": 54,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 40,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

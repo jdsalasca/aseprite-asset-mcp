@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "wave-reflection",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 1040,
+    "coverage": 0.0634765625,
+    "edgePixels": 604,
+    "connectedComponents": 31,
+    "largestComponentRatio": 0.5317307692307692,
+    "distinctRowSpans": 60,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 14,
+    "profile": "premium-transparent-effect-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

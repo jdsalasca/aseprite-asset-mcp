@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "parrot",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4742,
+    "coverage": 0.2894287109375,
+    "edgePixels": 676,
+    "connectedComponents": 9,
+    "largestComponentRatio": 0.9877688738928722,
+    "distinctRowSpans": 55,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 35,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

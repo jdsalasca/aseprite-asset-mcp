@@ -1,12 +1,13 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import sharp from "sharp";
+import { runPixelArtQualityGate } from "../src/application/services/PixelArtPipeline.js";
 
 type Kind = "sprite" | "tileset" | "scene" | "effect" | "character" | "prop";
 interface Seed { id: string; title: string; category: string; kind: Kind; description: string; tags: string[]; variants: string[]; }
 
 const root = path.resolve("assets/folders");
-const palette = ["#10182b", "#263a5a", "#4d7c83", "#79b68a", "#d5c276", "#e89b72", "#d95d75", "#f4f0d0"];
+const palette = ["#10182b", "#18243f", "#263a5a", "#3d5c78", "#4d7c83", "#6eaa6d", "#79b68a", "#a8d18d", "#d5c276", "#f0d89a", "#e89b72", "#d95d75", "#9d4969", "#f4f0d0", "#b9e6df", "#5fcde4"];
 const characterArchetypes = ["knight", "ranger", "mage", "cleric", "rogue", "barbarian", "paladin", "monk", "alchemist", "bard", "farmer", "guard", "merchant", "healer", "blacksmith", "scholar", "nomad", "sailor", "scout", "priest", "queen", "king", "witch", "necromancer", "druid", "engineer", "thief", "pirate", "cartographer", "cook"];
 const characterVariants = ["apprentice", "veteran", "forest", "desert", "royal"];
 const staticSeeds: Seed[] = [
@@ -27,7 +28,13 @@ const seeds: Seed[] = [
   ...staticSeeds,
 ].map((seed) => seed.id === "dragon-ice" ? {
   ...seed,
+  title: "premium ice dragon",
   description: "Premium reference-derived ice dragon with articulated anatomy, crystal spines, wing silhouette and ice-breath animation-ready frames.",
+  tags: [...seed.tags, "premium", "reference-derived", "high-detail"],
+} : seed.id === "deer" ? {
+  ...seed,
+  title: "red deer reference sprite",
+  description: "Reference-derived red deer with a readable anatomical silhouette and deterministic movement-ready frames.",
   tags: [...seed.tags, "premium", "reference-derived", "high-detail"],
 } : seed);
 
@@ -46,6 +53,73 @@ const categoryDescriptions: Record<string, string> = {
 
 function hash(text: string): number { let value = 2166136261; for (const character of text) value = Math.imul(value ^ character.charCodeAt(0), 16777619); return value >>> 0; }
 function color(seed: string, offset: number): string { return palette[(hash(seed) + offset) % palette.length] ?? palette[0]!; }
+function randomUnit(seed: string, index: number): number { return ((Math.imul(hash(seed), 1664525) + Math.imul(index + 1, 1013904223)) >>> 0) / 4294967295; }
+function textureRects(seed: string, x: number, y: number, width: number, height: number, count: number, colors: string[], size = 4): string {
+  return Array.from({ length: count }, (_, index) => {
+    const px = Math.floor(x + randomUnit(seed, index * 3) * Math.max(1, width - size));
+    const py = Math.floor(y + randomUnit(seed, index * 3 + 1) * Math.max(1, height - size));
+    const pw = Math.max(2, Math.floor(size * (0.5 + randomUnit(seed, index * 3 + 2))));
+    const ph = Math.max(2, Math.floor(size * (0.5 + randomUnit(seed, index * 3 + 4))));
+    return `<rect x="${px}" y="${py}" width="${pw}" height="${ph}" fill="${colors[index % colors.length] ?? colors[0]}" opacity="${(0.35 + randomUnit(seed, index * 5 + 2) * 0.5).toFixed(2)}"/>`;
+  }).join("");
+}
+function sceneBackdrop(seed: Seed, width: number, height: number): string {
+  if (seed.category === "interiors") {
+    const wall = color(seed.id, 1);
+    const floor = color(seed.id, 3);
+    const wood = color(seed.id, 8);
+    const glow = color(seed.id, 13);
+    return [
+      `<rect width="${width}" height="${height}" fill="${color(seed.id, 0)}"/>`,
+      `<rect y="12" width="${width}" height="58" fill="${wall}"/>`,
+      `<rect y="70" width="${width}" height="58" fill="${floor}"/>`,
+      `<path d="M0 70H${width} M0 74H${width}" stroke="${wood}" stroke-width="4"/>`,
+      `<path d="M12 12V70 M${width - 16} 12V70 M0 18H${width}" stroke="${wood}" stroke-width="4" opacity=".8"/>`,
+      `<rect x="18" y="24" width="24" height="28" fill="${color(seed.id, 5)}" stroke="${wood}" stroke-width="4"/>`,
+      `<path d="M30 24V52 M18 38H42" stroke="${glow}" stroke-width="3" opacity=".8"/>`,
+      `<rect x="${width - 44}" y="30" width="22" height="36" fill="${color(seed.id, 6)}" stroke="${wood}" stroke-width="4"/>`,
+      `<rect x="${Math.floor(width / 2) - 24}" y="74" width="48" height="16" fill="${wood}" stroke="${color(seed.id, 2)}" stroke-width="4"/>`,
+      `<rect x="${Math.floor(width / 2) - 18}" y="90" width="6" height="28" fill="${wood}"/><rect x="${Math.floor(width / 2) + 12}" y="90" width="6" height="28" fill="${wood}"/>`,
+      textureRects(`${seed.id}:interior`, 6, 78, width - 12, 44, 54, [color(seed.id, 2), color(seed.id, 4), color(seed.id, 9)], 4),
+    ].join("");
+  }
+  const sky = color(seed.id, 0);
+  const land = color(seed.id, 6);
+  const shade = color(seed.id, 2);
+  const light = color(seed.id, 13);
+  const water = color(seed.id, 15);
+  const aquatic = ["beach", "ocean", "coast", "coral-reef", "river"].some((name) => seed.id.includes(name));
+  return [
+    `<rect width="${width}" height="${height}" fill="${sky}"/>`,
+    `<path d="M0 62 L26 34 L52 58 L80 24 L112 56 L${width} 30 V92 H0Z" fill="${shade}"/>`,
+    `<path d="M0 72 L26 44 L52 68 L80 34 L112 66 L${width} 40 V94 H0Z" fill="${color(seed.id, 4)}"/>`,
+    aquatic ? `<rect y="86" width="${width}" height="42" fill="${water}"/>` : `<rect y="86" width="${width}" height="42" fill="${land}"/>`,
+    aquatic ? `<path d="M0 96 Q18 90 36 96 T72 96 T108 96 T${width} 96 M0 112 Q18 106 36 112 T72 112 T108 112 T${width} 112" fill="none" stroke="${light}" stroke-width="4" opacity=".85"/>` : textureRects(`${seed.id}:terrain`, 4, 88, width - 8, 34, 90, [color(seed.id, 2), color(seed.id, 5), color(seed.id, 8), light], 4),
+    `<path d="M8 84H${width - 8}" stroke="${light}" stroke-width="3" opacity=".75"/>`,
+    textureRects(`${seed.id}:sky`, 6, 8, width - 12, 70, 30, [color(seed.id, 1), color(seed.id, 3), color(seed.id, 13)], 3),
+  ].join("");
+}
+function effectBackdrop(seed: Seed, width: number, height: number): string {
+  const accent = color(seed.id, 13);
+  const secondary = color(seed.id, 15);
+  const cx = Math.floor(width / 2);
+  const cy = Math.floor(height / 2);
+  const particles = Array.from({ length: 32 }, (_, index) => {
+    const angle = (index / 32) * Math.PI * 2;
+    const radius = 20 + Math.floor(randomUnit(seed.id, index) * 38);
+    const x = Math.floor(cx + Math.cos(angle) * radius);
+    const y = Math.floor(cy + Math.sin(angle) * radius);
+    return `<rect x="${x}" y="${y}" width="${2 + index % 3}" height="${2 + (index + 1) % 3}" fill="${index % 3 === 0 ? secondary : accent}" opacity=".${4 + index % 5}"/>`;
+  }).join("");
+  return `<g>${particles}<path d="M${cx - 28} ${cy} Q${cx} ${cy - 34} ${cx + 28} ${cy} Q${cx} ${cy + 34} ${cx - 28} ${cy}Z" fill="none" stroke="${accent}" stroke-width="4" opacity=".8"/><path d="M${cx - 16} ${cy} Q${cx} ${cy - 20} ${cx + 16} ${cy} Q${cx} ${cy + 20} ${cx - 16} ${cy}Z" fill="none" stroke="${secondary}" stroke-width="3"/></g>`;
+}
+function premiumDetails(seed: Seed, width: number, height: number): string {
+  if (seed.category === "biomes-and-maps" || seed.category === "interiors") return sceneBackdrop(seed, width, height);
+  if (seed.category === "scene-effects") return effectBackdrop(seed, width, height);
+  const accent = color(seed.id, 13);
+  const shadow = color(seed.id, 1);
+  return `<g opacity=".9"><path d="M16 ${height - 18} H${width - 16}" stroke="${shadow}" stroke-width="4"/><path d="M${Math.floor(width / 2)} 18V${height - 20}" stroke="${accent}" stroke-width="2" opacity=".35"/>${textureRects(`${seed.id}:material`, 18, 18, width - 36, height - 38, 18, [accent, color(seed.id, 7), color(seed.id, 10)], 3)}</g>`;
+}
 async function withFileRetry<T>(operation: () => Promise<T>): Promise<T> {
   let lastError: unknown;
   for (let attempt = 0; attempt < 4; attempt += 1) {
@@ -57,10 +131,11 @@ async function withFileRetry<T>(operation: () => Promise<T>): Promise<T> {
   throw lastError;
 }
 function svgFor(seed: Seed, frames = 1): string {
-  const cell = 64;
+  const cell = 128;
+  const sourceCell = 64;
   const width = cell * frames;
   const blocks: string[] = [];
-  const background = seed.kind === "scene" ? `<rect width="${width}" height="64" fill="${color(seed.id, 0)}"/>` : "";
+  const background = seed.kind === "scene" ? premiumDetails(seed, width, cell) : "";
   const fauna = (x: number, frame: number): string => {
     const fur = color(seed.id, 3);
     const shadow = color(seed.id, 1);
@@ -89,8 +164,9 @@ function svgFor(seed: Seed, frames = 1): string {
   const plant = (x: number, frame: number): string => `<rect x="${x + 29}" y="34" width="6" height="25" fill="#10182b"/><rect x="${x + 31}" y="35" width="3" height="22" fill="${color(seed.id, 2)}"/><path d="M${x + 32} 8 L${x + 14} 27 L${x + 22} 24 L${x + 11} 38 L${x + 27} 31 L${x + 17} 45 L${x + 32} 36 L${x + 48} 45 L${x + 38} 31 L${x + 54} 38 L${x + 43} 24 L${x + 51} 27 Z" fill="#10182b"/><path d="M${x + 32} ${11 + frame} L${x + 19} 27 L${x + 29} 24 L${x + 19} 37 L${x + 31} 30 L${x + 23} 41 L${x + 32} 34 L${x + 43} 41 L${x + 36} 30 L${x + 47} 37 L${x + 36} 24 L${x + 46} 27 Z" fill="${color(seed.id, 4)}"/>`;
   const character = (x: number, frame: number): string => `<ellipse cx="${x + 32}" cy="57" rx="17" ry="3" fill="#10182b" opacity=".5"/><path d="M${x + 21} 29 L${x + 43} 29 L${x + 48} 49 L${x + 16} 49 Z" fill="#10182b"/><path d="M${x + 24} 31 L${x + 40} 31 L${x + 44} 46 L${x + 20} 46 Z" fill="${color(seed.id, 2)}"/><rect x="${x + 26}" y="13" width="12" height="14" fill="#10182b"/><rect x="${x + 28}" y="15" width="8" height="9" fill="${color(seed.id, 5)}"/><rect x="${x + 18 + frame % 2 * 2}" y="32" width="6" height="14" fill="${color(seed.id, 1)}"/><rect x="${x + 40 - frame % 2 * 2}" y="32" width="6" height="14" fill="${color(seed.id, 1)}"/><rect x="${x + 24 + frame % 2}" y="47" width="6" height="11" fill="#10182b"/><rect x="${x + 35 - frame % 2}" y="47" width="6" height="11" fill="#10182b"/><rect x="${x + 31}" y="19" width="2" height="2" fill="#f4f0d0"/>`;
   for (let frame = 0; frame < frames; frame += 1) {
-    const x = frame * cell;
+    const x = frame * sourceCell;
     const accent = color(seed.id, frame + 2);
+    if (seed.kind === "scene" || seed.kind === "effect") continue;
     if (seed.category === "fauna" || seed.category === "mounts") blocks.push(fauna(x, frame));
     else if (seed.category === "mythical-creatures") blocks.push(`${fauna(x, frame)}<path d="M${x + 15} 27 L${x + 5} 14 L${x + 19} 20 Z M${x + 40} 26 L${x + 54} 13 L${x + 48} 29 Z" fill="${accent}" opacity=".9"/>`);
     else if (seed.category === "characters") blocks.push(character(x, frame));
@@ -99,40 +175,56 @@ function svgFor(seed: Seed, frames = 1): string {
     else if (seed.category === "biomes-and-maps" || seed.category === "interiors") blocks.push(`<rect x="${x + 5}" y="${seed.category === "interiors" ? 35 : 40}" width="54" height="19" fill="${color(seed.id, 1)}"/><path d="M${x + 5} 40 L${x + 18} 28 L${x + 31} 36 L${x + 43} 20 L${x + 59} 33 V54 H${x + 5}Z" fill="${color(seed.id, 4)}"/><rect x="${x + 12}" y="${seed.category === "interiors" ? 22 : 30}" width="12" height="20" fill="${accent}"/><rect x="${x + 39}" y="${seed.category === "interiors" ? 18 : 27}" width="11" height="25" fill="${color(seed.id, 6)}"/><path d="M${x + 28} 12 V54 M${x + 20} 20 H${x + 36}" stroke="#f4f0d0" stroke-width="2" opacity=".6"/>`);
     else blocks.push(`<path d="M${x + 12} 48 L${x + 23} 13 L${x + 49} 13 L${x + 53} 19 L${x + 43} 50 Z" fill="#10182b"/><path d="M${x + 18} 45 L${x + 27} 17 L${x + 44} 17 L${x + 47} 21 L${x + 39} 45 Z" fill="${color(seed.id, 3)}"/><rect x="${x + 26}" y="${20 + frame % 3 * 3}" width="4" height="15" fill="${accent}"/>`);
   }
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="64" viewBox="0 0 ${width} 64" shape-rendering="crispEdges">${background}${blocks.join("")}</svg>`;
+  const sourceLayers = blocks.length ? `<g transform="scale(2)">${blocks.join("")}</g>` : "";
+  const detailLayers = seed.kind === "scene" ? "" : premiumDetails(seed, width, cell);
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${cell}" viewBox="0 0 ${width} ${cell}" shape-rendering="crispEdges">${background}${sourceLayers}${detailLayers}</svg>`;
 }
 
 function readme(seed: Seed, folder: string): string {
   const inline = (value: string) => "`" + value + "`";
   const variants = seed.variants.map((variant) => `- ${inline(variant)}: variante determinista sugerida para el pipeline.`).join("\n");
-  return [`# ${seed.title}`, "", seed.description, "", `- **ID:** ${inline(seed.id)}`, `- **Categoría:** ${inline(seed.category)}`, "- **Formatos base:** PNG, GIF animado, SVG y JSON", "- **Archivos:** [preview.png](./preview.png), [sprite-sheet.png](./sprite-sheet.png), [sprite-sheet.gif](./sprite-sheet.gif), [manifest.json](./manifest.json)", "- **Reproducible:** sí; el catálogo y los previews se generan con la semilla derivada del ID.", "", "## Variantes", "", variants, "", "## Ejemplo MCP", "", `Busca este asset con ${inline("get_asset_library")} y después compón una receta con ${inline("create_asset_recipe")}. Para una salida animada, usa ${inline("run_asset_recipe")} con ${inline("animation_pixel_art")} o aplica el efecto indicado por la variante.`, "", "## Carpeta", "", inline(folder), ""].join("\n");
+  return [`# ${seed.title}`, "", seed.description, "", `- **ID:** ${inline(seed.id)}`, `- **Categoría:** ${inline(seed.category)}`, "- **Formatos base:** PNG, GIF animado, SVG, JSON y quality report", "- **Archivos:** [preview.png](./preview.png), [sprite-sheet.png](./sprite-sheet.png), [sprite-sheet.gif](./sprite-sheet.gif), [manifest.json](./manifest.json), [quality.json](./quality.json)", "- **Calidad:** el manifest y `quality.json` registran el perfil, la paleta, la cobertura, la complejidad y el resultado del gate.", "- **Reproducible:** sí; el catálogo y los previews se generan con la semilla derivada del ID.", "", "## Variantes", "", variants, "", "## Ejemplo MCP", "", `Busca este asset con ${inline("get_asset_library")} y después compón una receta con ${inline("create_asset_recipe")}. Para una salida animada, usa ${inline("run_asset_recipe")} con ${inline("animation_pixel_art")} o aplica el efecto indicado por la variante.`, "", "## Carpeta", "", inline(folder), ""].join("\n");
 }
 
-async function writeItem(seed: Seed): Promise<{ id: string; title: string; category: string; folder: string; kind: Kind; description: string; tags: string[]; variants: string[]; formats: ["png", "gif", "svg", "json"]; readmePath: string; previewPath: string; spritePath: string; animationPath: string; deterministic: true }> {
+function qualityProfile(seed: Seed): Record<string, number | boolean> {
+  if (seed.kind === "scene" || ["biomes-and-maps", "interiors"].includes(seed.category)) return { minOpaquePixels: 2000, minCoverage: 0.8, maxCoverage: 1, minEdgePixels: 100, minDistinctRowSpans: 1, maxComponents: 80, minLargestComponentRatio: 0, requireTransparentBorder: false };
+  if (seed.kind === "effect" || seed.category === "scene-effects") return { minOpaquePixels: 24, minCoverage: 0.004, maxCoverage: 0.8, minEdgePixels: 20, minDistinctRowSpans: 8, maxComponents: 160, minLargestComponentRatio: 0 };
+  return { minOpaquePixels: 200, minCoverage: 0.02, maxCoverage: 0.9, minEdgePixels: 24, minDistinctRowSpans: 8, maxComponents: 64, minLargestComponentRatio: 0.45 };
+}
+
+async function writeItem(seed: Seed): Promise<{ id: string; title: string; category: string; folder: string; kind: Kind; description: string; tags: string[]; variants: string[]; formats: ["png", "gif", "svg", "json"]; readmePath: string; qualityPath: string; previewPath: string; spritePath: string; animationPath: string; deterministic: true }> {
   const folder = `${seed.category}/${seed.id}`;
   const directory = path.join(root, seed.category, seed.id);
-  if (seed.id === "dragon-ice") {
+  if (seed.id === "dragon-ice" || seed.id === "deer") {
     try {
       const existingManifest = JSON.parse(await fs.readFile(path.join(directory, "manifest.json"), "utf8")) as { source?: string };
-      if (existingManifest.source === "imagegen-reference-derived-v1") {
-        return { id: seed.id, title: seed.title, category: seed.category, folder, kind: seed.kind, description: seed.description, tags: seed.tags, variants: seed.variants, formats: ["png", "gif", "svg", "json"], readmePath: `${folder}/README.md`, previewPath: `${folder}/preview.png`, spritePath: `${folder}/sprite-sheet.png`, animationPath: `${folder}/sprite-sheet.gif`, deterministic: true };
+      if (["imagegen-reference-derived-v1", "reference-pixel-art-v2"].includes(existingManifest.source ?? "")) {
+        return { id: seed.id, title: seed.title, category: seed.category, folder, kind: seed.kind, description: seed.description, tags: seed.tags, variants: seed.variants, formats: ["png", "gif", "svg", "json"], readmePath: `${folder}/README.md`, qualityPath: `${folder}/quality.json`, previewPath: `${folder}/preview.png`, spritePath: `${folder}/sprite-sheet.png`, animationPath: `${folder}/sprite-sheet.gif`, deterministic: true };
       }
     } catch { /* the premium asset is created later when no manifest exists */ }
   }
   await fs.mkdir(directory, { recursive: true });
+  const cellSize = 128;
   const previewSvg = svgFor(seed);
   const spriteSvg = svgFor(seed, 4);
   const spritePng = await sharp(Buffer.from(spriteSvg)).png().toBuffer();
-  const rawFrames = await Promise.all(Array.from({ length: 4 }, (_, frame) => sharp(spritePng).extract({ left: frame * 64, top: 0, width: 64, height: 64 }).raw().toBuffer()));
+  const rawFrames = await Promise.all(Array.from({ length: 4 }, (_, frame) => sharp(spritePng).extract({ left: frame * cellSize, top: 0, width: cellSize, height: cellSize }).raw().toBuffer()));
   await withFileRetry(() => fs.writeFile(path.join(directory, "preview.svg"), previewSvg, "utf8"));
   await withFileRetry(() => fs.writeFile(path.join(directory, "sprite-sheet.svg"), spriteSvg, "utf8"));
   await withFileRetry(() => sharp(Buffer.from(previewSvg)).png().toFile(path.join(directory, "preview.png")));
   await withFileRetry(() => fs.writeFile(path.join(directory, "sprite-sheet.png"), spritePng));
-  await withFileRetry(() => sharp(Buffer.concat(rawFrames), { raw: { width: 64, height: 64 * 4, channels: 4, pageHeight: 64 }, animated: true }).gif({ delay: [180, 180, 180, 180], loop: 0 }).toFile(path.join(directory, "sprite-sheet.gif")));
-  const manifest = { schemaVersion: 2, id: seed.id, title: seed.title, category: seed.category, kind: seed.kind, source: "deterministic-library-generator-v2", seed: hash(seed.id), render: { cellSize: 64, shapeRendering: "crispEdges", transparentSpriteBackground: seed.kind !== "scene" }, variants: seed.variants, assets: ["preview.png", "sprite-sheet.png", "sprite-sheet.gif", "preview.svg", "sprite-sheet.svg"], tags: seed.tags, sourcePreserved: true, deterministic: true };
+  await withFileRetry(() => sharp(Buffer.concat(rawFrames), { raw: { width: cellSize, height: cellSize * 4, channels: 4, pageHeight: cellSize }, animated: true }).gif({ delay: [180, 180, 180, 180], loop: 0 }).toFile(path.join(directory, "sprite-sheet.gif")));
+  const { data: previewData, info: previewInfo } = await sharp(path.join(directory, "preview.png")).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const previewFrame = { width: previewInfo.width, height: previewInfo.height, pixels: new Uint8ClampedArray(previewData) };
+  const gate = runPixelArtQualityGate(previewFrame, qualityProfile(seed) as Parameters<typeof runPixelArtQualityGate>[1]);
+  const paletteSize = new Set(Array.from({ length: previewData.length / 4 }, (_, index) => `${previewData[index * 4]},${previewData[index * 4 + 1]},${previewData[index * 4 + 2]},${previewData[index * 4 + 3]}`)).size;
+  const qualityGate = { ...gate, paletteSize, profile: seed.kind === "scene" || ["biomes-and-maps", "interiors"].includes(seed.category) ? "premium-opaque-scene-v1" : seed.kind === "effect" || seed.category === "scene-effects" ? "premium-transparent-effect-v1" : "premium-sprite-v1", valid: gate.valid && paletteSize >= 8 };
+  const qualityReport = { schemaVersion: 1, id: seed.id, source: "deterministic-library-generator-v3", qualityGate, deterministic: true, sourcePreserved: true };
+  await withFileRetry(() => fs.writeFile(path.join(directory, "quality.json"), `${JSON.stringify(qualityReport, null, 2)}\n`, "utf8"));
+  const manifest = { schemaVersion: 3, id: seed.id, title: seed.title, category: seed.category, kind: seed.kind, source: "deterministic-library-generator-v3", seed: hash(seed.id), render: { cellSize, shapeRendering: "crispEdges", transparentSpriteBackground: seed.kind !== "scene", paletteSize, layers: seed.kind === "scene" ? ["sky-or-wall", "horizon-or-floor", "material-texture", "landmarks", "lighting"] : ["silhouette", "material-ramp", "contact-shadow", "accent-light"] }, variants: seed.variants, assets: ["preview.png", "sprite-sheet.png", "sprite-sheet.gif", "preview.svg", "sprite-sheet.svg", "quality.json"], tags: [...seed.tags, "premium", "deterministic", "quality-gated"], qualityGate, sourcePreserved: true, deterministic: true };
   await withFileRetry(() => fs.writeFile(path.join(directory, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`, "utf8"));
   await withFileRetry(() => fs.writeFile(path.join(directory, "README.md"), readme(seed, folder), "utf8"));
-  return { id: seed.id, title: seed.title, category: seed.category, folder, kind: seed.kind, description: seed.description, tags: seed.tags, variants: seed.variants, formats: ["png", "gif", "svg", "json"], readmePath: `${folder}/README.md`, previewPath: `${folder}/preview.png`, spritePath: `${folder}/sprite-sheet.png`, animationPath: `${folder}/sprite-sheet.gif`, deterministic: true };
+  return { id: seed.id, title: seed.title, category: seed.category, folder, kind: seed.kind, description: seed.description, tags: seed.tags, variants: seed.variants, formats: ["png", "gif", "svg", "json"], readmePath: `${folder}/README.md`, qualityPath: `${folder}/quality.json`, previewPath: `${folder}/preview.png`, spritePath: `${folder}/sprite-sheet.png`, animationPath: `${folder}/sprite-sheet.gif`, deterministic: true };
 }
 
 async function main(): Promise<void> {
@@ -162,11 +254,14 @@ async function main(): Promise<void> {
     { id: "fantasy-quest", title: "Fantasy quest", description: "A character, mount, dragon, weapons and a dungeon-ready scene.", category: "characters", itemIds: ["veteran-knight", "forest-ranger", "dragon-ember", "warhorse", "sword", "dungeon"], recommendedTools: ["create_character_plan", "create_scene_plan", "run_asset_recipe"], deterministic: true as const },
     { id: "rainy-village", title: "Rainy village", description: "Village interiors, church bell, rain and inhabitants.", category: "interiors", itemIds: ["village", "church", "church-bell", "rain", "veteran-merchant", "apprentice-farmer"], recommendedTools: ["generate_environment_pack", "generate_time_of_day_pack", "generate_particle_burst"], deterministic: true as const },
   ];
-  const catalog = { schemaVersion: 1 as const, libraryVersion: "asset-library-v2", categories, items, presets };
+  const qualityRows = await Promise.all(items.map(async (item) => JSON.parse(await fs.readFile(path.join(root, item.qualityPath), "utf8")) as { qualityGate?: { valid?: boolean; profile?: string } }));
+  const qualityReport = { schemaVersion: 1, libraryVersion: "asset-library-v3", totalItems: items.length, validItems: qualityRows.filter((row) => row.qualityGate?.valid === true).length, invalidItems: qualityRows.filter((row) => row.qualityGate?.valid !== true).length, profiles: Object.fromEntries([...new Set(qualityRows.map((row) => row.qualityGate?.profile ?? "unknown"))].sort().map((profile) => [profile, qualityRows.filter((row) => (row.qualityGate?.profile ?? "unknown") === profile).length])), deterministic: true, sourcePreserved: true };
+  await fs.writeFile(path.join(root, "quality-report.json"), `${JSON.stringify(qualityReport, null, 2)}\n`, "utf8");
+  const catalog = { schemaVersion: 1 as const, libraryVersion: "asset-library-v3", qualityReportPath: "quality-report.json", categories, items, presets };
   await fs.writeFile(path.join(root, "catalog.json"), `${JSON.stringify(catalog, null, 2)}\n`, "utf8");
   const inline = (value: string) => "`" + value + "`";
   const categoryLines = categories.map((category) => `- [${category.title}](./${category.id}/): ${category.itemCount} items`).join("\n");
-  await fs.writeFile(path.join(root, "README.md"), [`# Asset folders`, "", `Esta biblioteca contiene ${items.length} carpetas deterministas. Cada carpeta incluye README, manifest, preview PNG/SVG y sprite sheet PNG/SVG/GIF animado.`, "", "## Calidad y procedencia", "", "- El renderer v2 usa celdas de 64×64, formas por dominio y renderizado crispEdges; los sprites no usan el bloque universal anterior.", "- La suite de calidad comprueba dimensiones, transparencia, cobertura, complejidad de silueta y componentes conectados para fauna, monturas y personajes.", "- El ciervo es un caso reference-derived: su manifest conserva URL, licencia, hash y parámetros de conversión desde una referencia pública.", "- Regenera el ciervo con `npm run asset:reference-fauna` y una variable `DEER_REFERENCE_FILENAME` apuntando a la referencia descargada.", "", "## Navegación rápida", "", `- Consulta ${inline("catalog.json")} o usa el MCP ${inline("get_asset_library")}.`, `- Resuelve un item con ${inline("get_asset_library_item")}.`, `- Usa presets con ${inline("get_asset_preset")}.`, "- Las variantes de lluvia, fuego, terremoto, pájaros, luz y movimiento se aplican con los algoritmos del MCP.", "", "## Categorías", "", categoryLines, ""].join("\n"), "utf8");
+  await fs.writeFile(path.join(root, "README.md"), [`# Asset folders`, "", `Esta biblioteca contiene ${items.length} carpetas premium deterministas. Cada carpeta incluye README, manifest, quality report, preview PNG/SVG y sprite sheet PNG/SVG/GIF animado.`, "", "## Calidad y procedencia", "", "- El renderer v3 usa celdas de 128×128, capas por dominio, paletas ampliadas, materiales, iluminación, textura y renderizado crispEdges.", "- La suite de calidad comprueba dimensiones, paleta, cobertura, transparencia, complejidad de silueta, componentes conectados y perfiles específicos para escenas opacas, efectos y sprites.", "- `quality-report.json` resume la auditoría completa para agentes y la UX sin cargar todos los PNG.", "- `deer` conserva su procedencia pública y `dragon-ice` conserva su fuente visual premium; sus manifests no se sobrescriben con el renderer genérico.", "- Cada carpeta incluye `quality.json` para que un agente pueda filtrar assets válidos sin cargar todos los PNG.", "", "## Navegación rápida", "", `- Consulta ${inline("catalog.json")} o usa el MCP ${inline("get_asset_library")}.`, `- Resuelve un item con ${inline("get_asset_library_item")}.`, `- Usa presets con ${inline("get_asset_preset")}.`, "- Las variantes de lluvia, fuego, terremoto, pájaros, luz y movimiento se aplican con los algoritmos del MCP.", "", "## Categorías", "", categoryLines, ""].join("\n"), "utf8");
   console.log(JSON.stringify({ root, itemCount: items.length, categoryCount: categories.length, presetCount: presets.length }, null, 2));
 }
 

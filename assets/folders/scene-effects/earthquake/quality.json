@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "earthquake",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 1031,
+    "coverage": 0.06292724609375,
+    "edgePixels": 594,
+    "connectedComponents": 31,
+    "largestComponentRatio": 0.5412221144519883,
+    "distinctRowSpans": 53,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 14,
+    "profile": "premium-transparent-effect-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

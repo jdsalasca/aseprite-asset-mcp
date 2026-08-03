@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "dragon-ice",
+  "source": "imagegen-reference-derived-v1",
+  "qualityGate": {
+    "width": 256,
+    "height": 256,
+    "opaquePixels": 16298,
+    "coverage": 0.248687744140625,
+    "edgePixels": 1763,
+    "connectedComponents": 22,
+    "largestComponentRatio": 0.9950300650386551,
+    "distinctRowSpans": 107,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "profile": "imagegen-reference-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

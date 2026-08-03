@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "sirena",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4875,
+    "coverage": 0.29754638671875,
+    "edgePixels": 730,
+    "connectedComponents": 8,
+    "largestComponentRatio": 0.9930256410256411,
+    "distinctRowSpans": 61,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 39,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

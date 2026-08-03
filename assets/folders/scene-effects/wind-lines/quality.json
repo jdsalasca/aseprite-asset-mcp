@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "wind-lines",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 1035,
+    "coverage": 0.06317138671875,
+    "edgePixels": 599,
+    "connectedComponents": 30,
+    "largestComponentRatio": 0.5429951690821256,
+    "distinctRowSpans": 50,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 15,
+    "profile": "premium-transparent-effect-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

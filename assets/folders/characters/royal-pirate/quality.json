@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "royal-pirate",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4101,
+    "coverage": 0.25030517578125,
+    "edgePixels": 579,
+    "connectedComponents": 10,
+    "largestComponentRatio": 0.9858571080224335,
+    "distinctRowSpans": 28,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 37,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

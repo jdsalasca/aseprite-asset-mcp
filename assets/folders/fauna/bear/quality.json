@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "bear",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4587,
+    "coverage": 0.27996826171875,
+    "edgePixels": 670,
+    "connectedComponents": 7,
+    "largestComponentRatio": 0.9917157183344234,
+    "distinctRowSpans": 52,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 34,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

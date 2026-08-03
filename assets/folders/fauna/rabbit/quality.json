@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "rabbit",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4708,
+    "coverage": 0.287353515625,
+    "edgePixels": 701,
+    "connectedComponents": 6,
+    "largestComponentRatio": 0.9923534409515717,
+    "distinctRowSpans": 53,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 39,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

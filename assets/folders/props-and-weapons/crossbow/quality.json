@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "crossbow",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4962,
+    "coverage": 0.3028564453125,
+    "edgePixels": 509,
+    "connectedComponents": 5,
+    "largestComponentRatio": 0.9951632406287787,
+    "distinctRowSpans": 54,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 30,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

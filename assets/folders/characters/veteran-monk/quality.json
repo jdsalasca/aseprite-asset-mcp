@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "veteran-monk",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4108,
+    "coverage": 0.250732421875,
+    "edgePixels": 588,
+    "connectedComponents": 11,
+    "largestComponentRatio": 0.9829600778967867,
+    "distinctRowSpans": 26,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 34,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

@@ -1,15 +1,22 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "id": "chest",
   "title": "chest",
   "category": "props-and-weapons",
   "kind": "prop",
-  "source": "deterministic-library-generator-v2",
+  "source": "deterministic-library-generator-v3",
   "seed": 2554875734,
   "render": {
-    "cellSize": 64,
+    "cellSize": 128,
     "shapeRendering": "crispEdges",
-    "transparentSpriteBackground": true
+    "transparentSpriteBackground": true,
+    "paletteSize": 28,
+    "layers": [
+      "silhouette",
+      "material-ramp",
+      "contact-shadow",
+      "accent-light"
+    ]
   },
   "variants": [
     "clean",
@@ -22,13 +29,32 @@
     "sprite-sheet.png",
     "sprite-sheet.gif",
     "preview.svg",
-    "sprite-sheet.svg"
+    "sprite-sheet.svg",
+    "quality.json"
   ],
   "tags": [
     "prop",
     "equipment",
-    "world"
+    "world",
+    "premium",
+    "deterministic",
+    "quality-gated"
   ],
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4966,
+    "coverage": 0.3031005859375,
+    "edgePixels": 515,
+    "connectedComponents": 6,
+    "largestComponentRatio": 0.9935561820378574,
+    "distinctRowSpans": 55,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 28,
+    "profile": "premium-sprite-v1"
+  },
   "sourcePreserved": true,
   "deterministic": true
 }

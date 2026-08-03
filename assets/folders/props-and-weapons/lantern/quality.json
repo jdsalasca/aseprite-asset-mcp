@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "lantern",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4973,
+    "coverage": 0.30352783203125,
+    "edgePixels": 521,
+    "connectedComponents": 7,
+    "largestComponentRatio": 0.9915543937261211,
+    "distinctRowSpans": 53,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 30,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

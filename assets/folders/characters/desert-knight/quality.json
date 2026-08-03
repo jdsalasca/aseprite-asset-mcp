@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "desert-knight",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4101,
+    "coverage": 0.25030517578125,
+    "edgePixels": 579,
+    "connectedComponents": 9,
+    "largestComponentRatio": 0.9858571080224335,
+    "distinctRowSpans": 25,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 34,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

@@ -1,15 +1,22 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "id": "dolphin",
   "title": "dolphin",
   "category": "fauna",
   "kind": "sprite",
-  "source": "deterministic-library-generator-v2",
+  "source": "deterministic-library-generator-v3",
   "seed": 261292447,
   "render": {
-    "cellSize": 64,
+    "cellSize": 128,
     "shapeRendering": "crispEdges",
-    "transparentSpriteBackground": true
+    "transparentSpriteBackground": true,
+    "paletteSize": 37,
+    "layers": [
+      "silhouette",
+      "material-ramp",
+      "contact-shadow",
+      "accent-light"
+    ]
   },
   "variants": [
     "idle",
@@ -23,13 +30,32 @@
     "sprite-sheet.png",
     "sprite-sheet.gif",
     "preview.svg",
-    "sprite-sheet.svg"
+    "sprite-sheet.svg",
+    "quality.json"
   ],
   "tags": [
     "fauna",
     "wildlife",
-    "animation"
+    "animation",
+    "premium",
+    "deterministic",
+    "quality-gated"
   ],
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4689,
+    "coverage": 0.28619384765625,
+    "edgePixels": 661,
+    "connectedComponents": 7,
+    "largestComponentRatio": 0.9918959266368096,
+    "distinctRowSpans": 56,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 37,
+    "profile": "premium-sprite-v1"
+  },
   "sourcePreserved": true,
   "deterministic": true
 }

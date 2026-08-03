@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "fairy",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4873,
+    "coverage": 0.29742431640625,
+    "edgePixels": 733,
+    "connectedComponents": 7,
+    "largestComponentRatio": 0.9942540529447979,
+    "distinctRowSpans": 61,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 40,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

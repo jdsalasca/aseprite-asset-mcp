@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "sea-serpent",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4590,
+    "coverage": 0.2801513671875,
+    "edgePixels": 671,
+    "connectedComponents": 7,
+    "largestComponentRatio": 0.9912854030501089,
+    "distinctRowSpans": 53,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 38,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

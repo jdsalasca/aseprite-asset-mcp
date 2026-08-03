@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "dragon-void",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4869,
+    "coverage": 0.29718017578125,
+    "edgePixels": 724,
+    "connectedComponents": 6,
+    "largestComponentRatio": 0.9958923803655781,
+    "distinctRowSpans": 59,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 40,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

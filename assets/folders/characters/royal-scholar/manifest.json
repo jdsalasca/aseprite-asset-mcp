@@ -1,15 +1,22 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "id": "royal-scholar",
   "title": "royal scholar",
   "category": "characters",
   "kind": "character",
-  "source": "deterministic-library-generator-v2",
+  "source": "deterministic-library-generator-v3",
   "seed": 53427335,
   "render": {
-    "cellSize": 64,
+    "cellSize": 128,
     "shapeRendering": "crispEdges",
-    "transparentSpriteBackground": true
+    "transparentSpriteBackground": true,
+    "paletteSize": 35,
+    "layers": [
+      "silhouette",
+      "material-ramp",
+      "contact-shadow",
+      "accent-light"
+    ]
   },
   "variants": [
     "idle",
@@ -24,14 +31,33 @@
     "sprite-sheet.png",
     "sprite-sheet.gif",
     "preview.svg",
-    "sprite-sheet.svg"
+    "sprite-sheet.svg",
+    "quality.json"
   ],
   "tags": [
     "character",
     "walk",
     "animation",
-    "scholar"
+    "scholar",
+    "premium",
+    "deterministic",
+    "quality-gated"
   ],
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4102,
+    "coverage": 0.2503662109375,
+    "edgePixels": 582,
+    "connectedComponents": 10,
+    "largestComponentRatio": 0.984397854705022,
+    "distinctRowSpans": 23,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 35,
+    "profile": "premium-sprite-v1"
+  },
   "sourcePreserved": true,
   "deterministic": true
 }

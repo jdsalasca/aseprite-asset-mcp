@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "basilisk",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4863,
+    "coverage": 0.29681396484375,
+    "edgePixels": 719,
+    "connectedComponents": 7,
+    "largestComponentRatio": 0.9946535060662143,
+    "distinctRowSpans": 61,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 40,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

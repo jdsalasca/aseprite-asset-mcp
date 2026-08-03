@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "sugarcane",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 3721,
+    "coverage": 0.22711181640625,
+    "edgePixels": 641,
+    "connectedComponents": 19,
+    "largestComponentRatio": 0.9801128728836335,
+    "distinctRowSpans": 68,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 32,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

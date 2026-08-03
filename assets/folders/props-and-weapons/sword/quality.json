@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "sword",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4973,
+    "coverage": 0.30352783203125,
+    "edgePixels": 518,
+    "connectedComponents": 5,
+    "largestComponentRatio": 0.9939674240900864,
+    "distinctRowSpans": 54,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 27,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

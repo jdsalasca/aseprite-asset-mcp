@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "fern",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 3715,
+    "coverage": 0.22674560546875,
+    "edgePixels": 637,
+    "connectedComponents": 18,
+    "largestComponentRatio": 0.9816958277254374,
+    "distinctRowSpans": 65,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 32,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

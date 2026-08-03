@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "lavender",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 3724,
+    "coverage": 0.227294921875,
+    "edgePixels": 642,
+    "connectedComponents": 18,
+    "largestComponentRatio": 0.9822771213748658,
+    "distinctRowSpans": 67,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 29,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

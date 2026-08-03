@@ -4,8 +4,9 @@ kraken creature for living fantasy worlds.
 
 - **ID:** `kraken`
 - **Categoría:** `mythical-creatures`
-- **Formatos base:** PNG, GIF animado, SVG y JSON
-- **Archivos:** [preview.png](./preview.png), [sprite-sheet.png](./sprite-sheet.png), [sprite-sheet.gif](./sprite-sheet.gif), [manifest.json](./manifest.json)
+- **Formatos base:** PNG, GIF animado, SVG, JSON y quality report
+- **Archivos:** [preview.png](./preview.png), [sprite-sheet.png](./sprite-sheet.png), [sprite-sheet.gif](./sprite-sheet.gif), [manifest.json](./manifest.json), [quality.json](./quality.json)
+- **Calidad:** el manifest y `quality.json` registran el perfil, la paleta, la cobertura, la complejidad y el resultado del gate.
 - **Reproducible:** sí; el catálogo y los previews se generan con la semilla derivada del ID.
 
 ## Variantes

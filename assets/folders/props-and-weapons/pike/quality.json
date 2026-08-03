@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "pike",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4966,
+    "coverage": 0.3031005859375,
+    "edgePixels": 515,
+    "connectedComponents": 6,
+    "largestComponentRatio": 0.9935561820378574,
+    "distinctRowSpans": 54,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 30,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

@@ -341,7 +341,7 @@ export function runPixelArtQualityGate(frame: RasterFrame, options: PixelArtQual
     ...(report.distinctRowSpans < minDistinctRowSpans ? [`distinct row spans ${report.distinctRowSpans} < ${minDistinctRowSpans}`] : []),
     ...(report.connectedComponents > maxComponents ? [`connected components ${report.connectedComponents} > ${maxComponents}`] : []),
     ...(report.largestComponentRatio < minLargestComponentRatio ? [`largest component ratio ${report.largestComponentRatio.toFixed(3)} < ${minLargestComponentRatio}`] : []),
-    ...(!report.transparentBorder ? ["subject has no transparent border"] : []),
+    ...(options.requireTransparentBorder === false || report.transparentBorder ? [] : ["subject has no transparent border"]),
   ];
   return { ...report, valid: violations.length === 0, violations };
 }

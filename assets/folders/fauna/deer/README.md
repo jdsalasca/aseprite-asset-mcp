@@ -4,7 +4,7 @@ Asset derivado de una referencia de dominio público y convertido mediante el pi
 
 - Referencia: [The Stag, or Red Deer — Wikimedia Commons](https://commons.wikimedia.org/wiki/File:The_Stag,_or_Red_Deer_LCCN2007681452.jpg).
 - Calidad: la manifest registra hash, recorte, paleta, cobertura y resultado del gate de silueta.
-- Archivos: preview.png, sprite-sheet.png, sprite-sheet.gif y manifest.json.
+- Archivos: preview.png, sprite-sheet.png, sprite-sheet.gif, manifest.json y quality.json.
 - Animación: cuatro frames de 96×96 con desplazamiento determinista de 1px para idle/walk.
 
 ## Uso MCP

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "forest-pirate",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4098,
+    "coverage": 0.2501220703125,
+    "edgePixels": 580,
+    "connectedComponents": 10,
+    "largestComponentRatio": 0.9853587115666179,
+    "distinctRowSpans": 23,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 36,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

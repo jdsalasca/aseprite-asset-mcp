@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "ancient-tree",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 3732,
+    "coverage": 0.227783203125,
+    "edgePixels": 645,
+    "connectedComponents": 19,
+    "largestComponentRatio": 0.9790996784565916,
+    "distinctRowSpans": 68,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 34,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

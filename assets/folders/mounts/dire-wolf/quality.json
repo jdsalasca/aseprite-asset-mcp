@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "dire-wolf",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4699,
+    "coverage": 0.28680419921875,
+    "edgePixels": 689,
+    "connectedComponents": 5,
+    "largestComponentRatio": 0.9942540966163014,
+    "distinctRowSpans": 51,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 36,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

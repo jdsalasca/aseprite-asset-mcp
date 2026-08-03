@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "dragon-mount",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4588,
+    "coverage": 0.280029296875,
+    "edgePixels": 673,
+    "connectedComponents": 7,
+    "largestComponentRatio": 0.9899738448125545,
+    "distinctRowSpans": 53,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 35,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "kitsune",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4868,
+    "coverage": 0.297119140625,
+    "edgePixels": 723,
+    "connectedComponents": 7,
+    "largestComponentRatio": 0.9946589975349219,
+    "distinctRowSpans": 60,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 39,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

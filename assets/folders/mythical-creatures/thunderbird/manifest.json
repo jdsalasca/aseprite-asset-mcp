@@ -1,15 +1,22 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "id": "thunderbird",
   "title": "thunderbird",
   "category": "mythical-creatures",
   "kind": "sprite",
-  "source": "deterministic-library-generator-v2",
+  "source": "deterministic-library-generator-v3",
   "seed": 2305410294,
   "render": {
-    "cellSize": 64,
+    "cellSize": 128,
     "shapeRendering": "crispEdges",
-    "transparentSpriteBackground": true
+    "transparentSpriteBackground": true,
+    "paletteSize": 41,
+    "layers": [
+      "silhouette",
+      "material-ramp",
+      "contact-shadow",
+      "accent-light"
+    ]
   },
   "variants": [
     "idle",
@@ -23,13 +30,32 @@
     "sprite-sheet.png",
     "sprite-sheet.gif",
     "preview.svg",
-    "sprite-sheet.svg"
+    "sprite-sheet.svg",
+    "quality.json"
   ],
   "tags": [
     "creature",
     "mythology",
-    "combat"
+    "combat",
+    "premium",
+    "deterministic",
+    "quality-gated"
   ],
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4888,
+    "coverage": 0.29833984375,
+    "edgePixels": 721,
+    "connectedComponents": 6,
+    "largestComponentRatio": 0.9959083469721768,
+    "distinctRowSpans": 62,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 41,
+    "profile": "premium-sprite-v1"
+  },
   "sourcePreserved": true,
   "deterministic": true
 }

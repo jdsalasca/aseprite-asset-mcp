@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "veteran-sailor",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4106,
+    "coverage": 0.2506103515625,
+    "edgePixels": 588,
+    "connectedComponents": 11,
+    "largestComponentRatio": 0.9834388699464198,
+    "distinctRowSpans": 25,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 35,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

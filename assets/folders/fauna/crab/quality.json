@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "crab",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4700,
+    "coverage": 0.286865234375,
+    "edgePixels": 677,
+    "connectedComponents": 8,
+    "largestComponentRatio": 0.9897872340425532,
+    "distinctRowSpans": 58,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 38,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

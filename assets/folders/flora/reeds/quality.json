@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "reeds",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 3723,
+    "coverage": 0.22723388671875,
+    "edgePixels": 641,
+    "connectedComponents": 18,
+    "largestComponentRatio": 0.9822723609991942,
+    "distinctRowSpans": 67,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 33,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

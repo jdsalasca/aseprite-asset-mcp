@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "baobab",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 3731,
+    "coverage": 0.22772216796875,
+    "edgePixels": 646,
+    "connectedComponents": 19,
+    "largestComponentRatio": 0.9790940766550522,
+    "distinctRowSpans": 66,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 33,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

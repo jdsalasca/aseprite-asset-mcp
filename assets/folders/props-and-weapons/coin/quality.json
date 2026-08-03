@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "coin",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4968,
+    "coverage": 0.30322265625,
+    "edgePixels": 515,
+    "connectedComponents": 6,
+    "largestComponentRatio": 0.9935587761674718,
+    "distinctRowSpans": 57,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 30,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

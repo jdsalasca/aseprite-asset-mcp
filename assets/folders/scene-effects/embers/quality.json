@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "embers",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 1006,
+    "coverage": 0.0614013671875,
+    "edgePixels": 575,
+    "connectedComponents": 29,
+    "largestComponentRatio": 0.547713717693837,
+    "distinctRowSpans": 56,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 16,
+    "profile": "premium-transparent-effect-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

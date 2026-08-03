@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "snow",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 1024,
+    "coverage": 0.0625,
+    "edgePixels": 588,
+    "connectedComponents": 30,
+    "largestComponentRatio": 0.5439453125,
+    "distinctRowSpans": 52,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 16,
+    "profile": "premium-transparent-effect-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

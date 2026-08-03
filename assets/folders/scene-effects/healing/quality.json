@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "healing",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 1019,
+    "coverage": 0.06219482421875,
+    "edgePixels": 586,
+    "connectedComponents": 29,
+    "largestComponentRatio": 0.5534838076545633,
+    "distinctRowSpans": 57,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 16,
+    "profile": "premium-transparent-effect-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

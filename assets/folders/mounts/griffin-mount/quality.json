@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "griffin-mount",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4594,
+    "coverage": 0.2803955078125,
+    "edgePixels": 677,
+    "connectedComponents": 7,
+    "largestComponentRatio": 0.9904222899434044,
+    "distinctRowSpans": 51,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 33,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

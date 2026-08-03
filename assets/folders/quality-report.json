@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "libraryVersion": "asset-library-v3",
+  "totalItems": 339,
+  "validItems": 339,
+  "invalidItems": 0,
+  "profiles": {
+    "imagegen-reference-sprite-v1": 1,
+    "premium-opaque-scene-v1": 42,
+    "premium-sprite-v1": 275,
+    "premium-transparent-effect-v1": 20,
+    "reference-derived-sprite-v1": 1
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

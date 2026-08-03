@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "maple",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 3730,
+    "coverage": 0.2276611328125,
+    "edgePixels": 649,
+    "connectedComponents": 19,
+    "largestComponentRatio": 0.9790884718498659,
+    "distinctRowSpans": 66,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 33,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

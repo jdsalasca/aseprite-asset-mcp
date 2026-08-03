@@ -13,6 +13,7 @@ export interface AssetLibraryItem {
   variants: string[];
   formats: AssetLibraryFormat[];
   readmePath: string;
+  qualityPath?: string;
   previewPath: string;
   spritePath: string;
   animationPath?: string;
@@ -21,7 +22,7 @@ export interface AssetLibraryItem {
 
 export interface AssetLibraryCategory { id: string; title: string; description: string; itemCount: number; }
 export interface AssetLibraryPreset { id: string; title: string; description: string; category: string; itemIds: string[]; recommendedTools: string[]; deterministic: true; }
-export interface AssetLibraryCatalog { schemaVersion: 1; libraryVersion: string; categories: AssetLibraryCategory[]; items: AssetLibraryItem[]; presets: AssetLibraryPreset[]; }
+export interface AssetLibraryCatalog { schemaVersion: 1; libraryVersion: string; categories: AssetLibraryCategory[]; items: AssetLibraryItem[]; presets: AssetLibraryPreset[]; qualityReportPath?: string; }
 export interface AssetLibraryQuery { query?: string; category?: string; limit?: number; }
 export interface AssetLibrarySearchResult { query: AssetLibraryQuery; total: number; categories: AssetLibraryCategory[]; items: AssetLibraryItem[]; presets: AssetLibraryPreset[]; }
 export interface AssetLibraryPresetComposition { preset: AssetLibraryPreset; items: AssetLibraryItem[]; layers: Array<{ id: string; assetId: string; role: "background" | "midground" | "foreground" | "effect"; order: number }>; deterministic: true; }

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "water-splash",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 1037,
+    "coverage": 0.06329345703125,
+    "edgePixels": 595,
+    "connectedComponents": 29,
+    "largestComponentRatio": 0.5554484088717454,
+    "distinctRowSpans": 49,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 15,
+    "profile": "premium-transparent-effect-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

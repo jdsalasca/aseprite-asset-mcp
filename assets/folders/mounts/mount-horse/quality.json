@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "mount-horse",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4707,
+    "coverage": 0.28729248046875,
+    "edgePixels": 701,
+    "connectedComponents": 6,
+    "largestComponentRatio": 0.9923518164435946,
+    "distinctRowSpans": 53,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 37,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "leaves",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 1014,
+    "coverage": 0.0618896484375,
+    "edgePixels": 581,
+    "connectedComponents": 29,
+    "largestComponentRatio": 0.5512820512820513,
+    "distinctRowSpans": 60,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 16,
+    "profile": "premium-transparent-effect-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

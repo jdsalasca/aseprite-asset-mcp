@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "fog",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 1030,
+    "coverage": 0.0628662109375,
+    "edgePixels": 592,
+    "connectedComponents": 30,
+    "largestComponentRatio": 0.5427184466019418,
+    "distinctRowSpans": 51,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 15,
+    "profile": "premium-transparent-effect-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "bow",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4960,
+    "coverage": 0.302734375,
+    "edgePixels": 512,
+    "connectedComponents": 6,
+    "largestComponentRatio": 0.9935483870967742,
+    "distinctRowSpans": 53,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 29,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

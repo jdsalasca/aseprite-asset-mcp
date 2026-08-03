@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "thunderbird",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4888,
+    "coverage": 0.29833984375,
+    "edgePixels": 721,
+    "connectedComponents": 6,
+    "largestComponentRatio": 0.9959083469721768,
+    "distinctRowSpans": 62,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 41,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "apprentice-knight",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4094,
+    "coverage": 0.2498779296875,
+    "edgePixels": 575,
+    "connectedComponents": 9,
+    "largestComponentRatio": 0.986809965803615,
+    "distinctRowSpans": 23,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 36,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

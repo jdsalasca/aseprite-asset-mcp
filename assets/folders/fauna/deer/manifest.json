@@ -45,13 +45,16 @@
     "sprite-sheet.png",
     "sprite-sheet.gif",
     "preview.svg",
-    "sprite-sheet.svg"
+    "sprite-sheet.svg",
+    "quality.json"
   ],
   "tags": [
     "fauna",
     "wildlife",
     "deer",
     "reference-derived",
+    "premium",
+    "high-detail",
     "animation"
   ],
   "sourcePreserved": true,

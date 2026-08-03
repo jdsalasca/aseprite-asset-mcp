@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "vampire",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4860,
+    "coverage": 0.296630859375,
+    "edgePixels": 719,
+    "connectedComponents": 6,
+    "largestComponentRatio": 0.9958847736625515,
+    "distinctRowSpans": 61,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 40,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

@@ -1,13 +1,14 @@
 # Asset folders
 
-Esta biblioteca contiene 339 carpetas deterministas. Cada carpeta incluye README, manifest, preview PNG/SVG y sprite sheet PNG/SVG/GIF animado.
+Esta biblioteca contiene 339 carpetas premium deterministas. Cada carpeta incluye README, manifest, quality report, preview PNG/SVG y sprite sheet PNG/SVG/GIF animado.
 
 ## Calidad y procedencia
 
-- El renderer v2 usa celdas de 64×64, formas por dominio y renderizado crispEdges; los sprites no usan el bloque universal anterior.
-- La suite comprueba dimensiones, transparencia, cobertura, complejidad de silueta y componentes conectados para fauna, monturas y personajes.
-- El ciervo es un caso derivado de referencia pública: su manifest conserva URL, licencia, hash y parámetros de conversión.
-- Para reproducirlo usa `DEER_REFERENCE_FILENAME=<ruta> npm run asset:reference-fauna`.
+- El renderer v3 usa celdas de 128×128, capas por dominio, paletas ampliadas, materiales, iluminación, textura y renderizado crispEdges.
+- La suite de calidad comprueba dimensiones, paleta, cobertura, transparencia, complejidad de silueta, componentes conectados y perfiles específicos para escenas opacas, efectos y sprites.
+- `quality-report.json` resume la auditoría completa para agentes y la UX sin cargar todos los PNG.
+- `deer` conserva su procedencia pública y `dragon-ice` conserva su fuente visual premium; sus manifests no se sobrescriben con el renderer genérico.
+- Cada carpeta incluye `quality.json` para que un agente pueda filtrar assets válidos sin cargar todos los PNG.
 
 ## Navegación rápida
 

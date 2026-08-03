@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "greatsword",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4959,
+    "coverage": 0.30267333984375,
+    "edgePixels": 508,
+    "connectedComponents": 5,
+    "largestComponentRatio": 0.9951603145795523,
+    "distinctRowSpans": 54,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 31,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

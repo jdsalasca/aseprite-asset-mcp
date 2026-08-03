@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "minotaur",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 4871,
+    "coverage": 0.29730224609375,
+    "edgePixels": 726,
+    "connectedComponents": 7,
+    "largestComponentRatio": 0.9942516936973927,
+    "distinctRowSpans": 60,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 43,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}

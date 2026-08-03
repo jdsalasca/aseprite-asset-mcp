@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "sakura",
+  "source": "deterministic-library-generator-v3",
+  "qualityGate": {
+    "width": 128,
+    "height": 128,
+    "opaquePixels": 3727,
+    "coverage": 0.22747802734375,
+    "edgePixels": 637,
+    "connectedComponents": 17,
+    "largestComponentRatio": 0.9822913871746713,
+    "distinctRowSpans": 66,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": [],
+    "paletteSize": 34,
+    "profile": "premium-sprite-v1"
+  },
+  "deterministic": true,
+  "sourcePreserved": true
+}
