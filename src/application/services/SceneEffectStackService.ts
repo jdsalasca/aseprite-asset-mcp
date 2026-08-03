@@ -8,7 +8,7 @@ import type { VisualAssetGateway } from "../../domain/visual-assets.js";
 function ok(value: unknown): AssetOperationResult { return { ok: true, message: JSON.stringify(value) }; }
 function fail(error: unknown): AssetOperationResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
 
-const EFFECTS: readonly SceneEffectKind[] = ["rain", "water_reflection", "water_caustics", "day_night", "material_texture", "depth_lighting", "particles"];
+const EFFECTS: readonly SceneEffectKind[] = ["rain", "water_reflection", "water_caustics", "wind_sway", "day_night", "material_texture", "depth_lighting", "particles"];
 
 export class SceneEffectStackService implements SceneEffectStackGateway {
   public constructor(private readonly codec: RasterCodec, private readonly effects: SpriteEffectsGateway, private readonly visual: Pick<VisualAssetGateway, "applyMaterialTexture" | "applyDepthLighting">) {}
@@ -38,6 +38,7 @@ export class SceneEffectStackService implements SceneEffectStackGateway {
     if (effect === "rain") return this.effects.generateRainOverlay({ inputFilename: input.inputFilename, outputFilename, seed: input.seed, intensity: 0.7, wind: 0.12, color: "#B7D7FF", frames: input.frames, delayMs, format });
     if (effect === "water_reflection") return this.effects.generateWaterReflection({ inputFilename: input.inputFilename, outputFilename, waterline: Math.max(1, Math.floor(height * 0.55)), frames: input.frames, seed: input.seed, amplitude: 1, opacity: 0.6, delayMs, format });
     if (effect === "water_caustics") return this.effects.generateWaterCaustics({ inputFilename: input.inputFilename, outputFilename, frames: input.frames, seed: input.seed, intensity: 0.7, scale: 4, color: "#DFF6FF", delayMs, format });
+    if (effect === "wind_sway") return this.effects.generateWindSway({ inputFilename: input.inputFilename, outputFilename, frames: input.frames, seed: input.seed, amplitude: 2, direction: "right", delayMs, format });
     if (effect === "day_night") return this.effects.generateDayNightCycle({ inputFilename: input.inputFilename, outputFilename, frames: input.frames, seed: input.seed, intensity: 0.8, delayMs, format });
     if (effect === "material_texture") return this.visual.applyMaterialTexture({ inputFilename: input.inputFilename, outputFilename, material: input.material ?? "earth", seed: input.seed, intensity: 0.6, format });
     if (effect === "depth_lighting") return this.visual.applyDepthLighting({ inputFilename: input.inputFilename, outputFilename, direction: input.direction ?? "south_east", strength: 0.7, ambient: 0.35, format });
