@@ -236,7 +236,7 @@ test("REST controller exposes the same recipe and effect application services", 
     const generatedPreset = await fetch(`${rest.url}/api/v1/library/presets/generate`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ preset_id: "coastal-sunset", output_prefix: "art/coast", width: 32, height: 24, seed: 9 }) });
     assert.equal(generatedPreset.status, 200);
     assert.equal((await generatedPreset.json()).data.operation, "generate_asset_preset");
-    const effectStack = await fetch(`${rest.url}/api/v1/effects/scene-stack`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_filename: "hero.png", output_prefix: "art/hero", effects: ["material_texture", "rain", "wind_sway", "particles"], frames: 6, seed: 9 }) });
+    const effectStack = await fetch(`${rest.url}/api/v1/effects/scene-stack`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_filename: "hero.png", output_prefix: "art/hero", effects: ["material_texture", "rain", "wind_sway", "sprite_shadow", "sprite_glow", "particles"], frames: 6, seed: 9 }) });
     assert.equal(effectStack.status, 200);
     assert.equal((await effectStack.json()).data.operation, "generate_scene_effect_stack");
 
