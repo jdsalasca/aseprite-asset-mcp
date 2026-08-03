@@ -1,4 +1,4 @@
-import type { PixelArtOptions, PixelArtQualityReport, RasterFrame } from "../../domain/pixel-art.js";
+import type { PixelArtOptions, PixelArtQualityGateOptions, PixelArtQualityGateReport, PixelArtQualityReport, PixelArtSubjectReport, RasterFrame } from "../../domain/pixel-art.js";
 
 interface ColorPoint { r: number; g: number; b: number; a: number; count: number }
 interface ColorBox { points: ColorPoint[] }
@@ -240,4 +240,108 @@ export function inspectRasterFrame(frame: RasterFrame, alphaThreshold = 1): Pixe
     }
   }
   return { width: frame.width, height: frame.height, colors: colors.size, opaquePixels, transparentPixels: frame.width * frame.height - opaquePixels, isolatedPixels };
+}
+
+function isOpaque(frame: RasterFrame, x: number, y: number, alphaThreshold: number): boolean {
+  return (frame.pixels[pixelOffset(frame.width, x, y) + 3] ?? 0) >= alphaThreshold;
+}
+
+function componentSizes(frame: RasterFrame, alphaThreshold: number): number[] {
+  const visited = new Uint8Array(frame.width * frame.height);
+  const sizes: number[] = [];
+  for (let y = 0; y < frame.height; y += 1) {
+    for (let x = 0; x < frame.width; x += 1) {
+      const start = y * frame.width + x;
+      if (visited[start] || !isOpaque(frame, x, y, alphaThreshold)) continue;
+      visited[start] = 1;
+      const queue: Array<[number, number]> = [[x, y]];
+      let size = 0;
+      for (let index = 0; index < queue.length; index += 1) {
+        const [currentX, currentY] = queue[index]!;
+        size += 1;
+        for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]] as const) {
+          const nextX = currentX + dx;
+          const nextY = currentY + dy;
+          if (nextX < 0 || nextY < 0 || nextX >= frame.width || nextY >= frame.height) continue;
+          const next = nextY * frame.width + nextX;
+          if (!visited[next] && isOpaque(frame, nextX, nextY, alphaThreshold)) {
+            visited[next] = 1;
+            queue.push([nextX, nextY]);
+          }
+        }
+      }
+      sizes.push(size);
+    }
+  }
+  return sizes;
+}
+
+/**
+ * Inspect the subject silhouette independently from palette quality. This is
+ * deliberately deterministic and catches the old catalog bug where a fauna
+ * asset was just a filled rectangle with no transparent border or anatomy.
+ */
+export function inspectPixelArtSubject(frame: RasterFrame, alphaThreshold = 1): PixelArtSubjectReport {
+  assertFrame(frame);
+  if (!Number.isInteger(alphaThreshold) || alphaThreshold < 0 || alphaThreshold > 255) throw new Error("alphaThreshold must be from 0 to 255");
+  let opaquePixels = 0;
+  let edgePixels = 0;
+  const rowSpans = new Set<string>();
+  for (let y = 0; y < frame.height; y += 1) {
+    let first = -1;
+    let last = -1;
+    for (let x = 0; x < frame.width; x += 1) {
+      if (!isOpaque(frame, x, y, alphaThreshold)) continue;
+      opaquePixels += 1;
+      if (first < 0) first = x;
+      last = x;
+      const hasTransparentNeighbor = ([[-1, 0], [1, 0], [0, -1], [0, 1]] as Array<readonly [number, number]>).some((neighbor) => {
+        const dx = neighbor[0];
+        const dy = neighbor[1];
+        const nx = x + dx;
+        const ny = y + dy;
+        return nx < 0 || ny < 0 || nx >= frame.width || ny >= frame.height || !isOpaque(frame, nx, ny, alphaThreshold);
+      });
+      if (hasTransparentNeighbor) edgePixels += 1;
+    }
+    if (first >= 0) rowSpans.add(`${first}:${last}`);
+  }
+  const components = componentSizes(frame, alphaThreshold);
+  const largest = Math.max(0, ...components);
+  const transparentBorder = ([
+    [0, 0], [frame.width - 1, 0], [0, frame.height - 1], [frame.width - 1, frame.height - 1],
+  ] as Array<readonly [number, number]>).some((corner) => !isOpaque(frame, corner[0], corner[1], alphaThreshold));
+  return {
+    width: frame.width,
+    height: frame.height,
+    opaquePixels,
+    coverage: opaquePixels / (frame.width * frame.height),
+    edgePixels,
+    connectedComponents: components.length,
+    largestComponentRatio: opaquePixels === 0 ? 0 : largest / opaquePixels,
+    distinctRowSpans: rowSpans.size,
+    transparentBorder,
+  };
+}
+
+export function runPixelArtQualityGate(frame: RasterFrame, options: PixelArtQualityGateOptions = {}, alphaThreshold = 1): PixelArtQualityGateReport {
+  const report = inspectPixelArtSubject(frame, alphaThreshold);
+  const minOpaquePixels = options.minOpaquePixels ?? 24;
+  const minCoverage = options.minCoverage ?? 0.04;
+  const maxCoverage = options.maxCoverage ?? 0.86;
+  const minEdgePixels = options.minEdgePixels ?? 12;
+  const minDistinctRowSpans = options.minDistinctRowSpans ?? 4;
+  const maxComponents = options.maxComponents ?? 12;
+  const minLargestComponentRatio = options.minLargestComponentRatio ?? 0.72;
+  const violations = [
+    ...(report.opaquePixels < minOpaquePixels ? [`opaque pixels ${report.opaquePixels} < ${minOpaquePixels}`] : []),
+    ...(report.coverage < minCoverage ? [`coverage ${report.coverage.toFixed(3)} < ${minCoverage}`] : []),
+    ...(report.coverage > maxCoverage ? [`coverage ${report.coverage.toFixed(3)} > ${maxCoverage}`] : []),
+    ...(report.edgePixels < minEdgePixels ? [`edge pixels ${report.edgePixels} < ${minEdgePixels}`] : []),
+    ...(report.distinctRowSpans < minDistinctRowSpans ? [`distinct row spans ${report.distinctRowSpans} < ${minDistinctRowSpans}`] : []),
+    ...(report.connectedComponents > maxComponents ? [`connected components ${report.connectedComponents} > ${maxComponents}`] : []),
+    ...(report.largestComponentRatio < minLargestComponentRatio ? [`largest component ratio ${report.largestComponentRatio.toFixed(3)} < ${minLargestComponentRatio}`] : []),
+    ...(!report.transparentBorder ? ["subject has no transparent border"] : []),
+  ];
+  return { ...report, valid: violations.length === 0, violations };
 }

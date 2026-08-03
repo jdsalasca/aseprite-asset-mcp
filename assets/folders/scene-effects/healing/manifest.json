@@ -1,11 +1,16 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "healing",
   "title": "healing",
   "category": "scene-effects",
   "kind": "effect",
-  "source": "deterministic-library-generator-v1",
+  "source": "deterministic-library-generator-v2",
   "seed": 2445848765,
+  "render": {
+    "cellSize": 64,
+    "shapeRendering": "crispEdges",
+    "transparentSpriteBackground": true
+  },
   "variants": [
     "subtle",
     "strong",

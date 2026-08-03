@@ -1,11 +1,16 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "apprentice-engineer",
   "title": "apprentice engineer",
   "category": "characters",
   "kind": "character",
-  "source": "deterministic-library-generator-v1",
+  "source": "deterministic-library-generator-v2",
   "seed": 2420978024,
+  "render": {
+    "cellSize": 64,
+    "shapeRendering": "crispEdges",
+    "transparentSpriteBackground": true
+  },
   "variants": [
     "idle",
     "walk",

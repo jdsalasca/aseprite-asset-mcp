@@ -1,11 +1,16 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "veteran-pirate",
   "title": "veteran pirate",
   "category": "characters",
   "kind": "character",
-  "source": "deterministic-library-generator-v1",
+  "source": "deterministic-library-generator-v2",
   "seed": 1398951018,
+  "render": {
+    "cellSize": 64,
+    "shapeRendering": "crispEdges",
+    "transparentSpriteBackground": true
+  },
   "variants": [
     "idle",
     "walk",

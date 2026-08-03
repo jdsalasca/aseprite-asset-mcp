@@ -1,11 +1,16 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "sunflower",
   "title": "sunflower",
   "category": "flora",
   "kind": "prop",
-  "source": "deterministic-library-generator-v1",
+  "source": "deterministic-library-generator-v2",
   "seed": 1324078842,
+  "render": {
+    "cellSize": 64,
+    "shapeRendering": "crispEdges",
+    "transparentSpriteBackground": true
+  },
   "variants": [
     "rain",
     "wind",

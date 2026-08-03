@@ -1,11 +1,16 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "shield",
   "title": "shield",
   "category": "props-and-weapons",
   "kind": "prop",
-  "source": "deterministic-library-generator-v1",
+  "source": "deterministic-library-generator-v2",
   "seed": 863312304,
+  "render": {
+    "cellSize": 64,
+    "shapeRendering": "crispEdges",
+    "transparentSpriteBackground": true
+  },
   "variants": [
     "clean",
     "glow",

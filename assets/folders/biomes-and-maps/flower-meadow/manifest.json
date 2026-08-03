@@ -1,11 +1,16 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "flower-meadow",
   "title": "flower meadow",
   "category": "biomes-and-maps",
   "kind": "scene",
-  "source": "deterministic-library-generator-v1",
+  "source": "deterministic-library-generator-v2",
   "seed": 580833044,
+  "render": {
+    "cellSize": 64,
+    "shapeRendering": "crispEdges",
+    "transparentSpriteBackground": false
+  },
   "variants": [
     "day",
     "sunset",

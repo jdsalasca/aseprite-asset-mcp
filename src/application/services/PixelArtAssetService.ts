@@ -1,4 +1,4 @@
-import { inspectRasterFrame, convertRasterFrames, harmonizeRasterFrames } from "./PixelArtPipeline.js";
+import { inspectPixelArtSubject, inspectRasterFrame, convertRasterFrames, harmonizeRasterFrames } from "./PixelArtPipeline.js";
 import path from "node:path";
 import type {
   AssetInspection,
@@ -128,6 +128,7 @@ export class PixelArtAssetService {
     try {
       const frames = await this.codec.decode(filename);
       const reports = frames.map((frame) => inspectRasterFrame(frame));
+      const subject = frames.map((frame) => inspectPixelArtSubject(frame));
       const uniqueColors = new Set<string>();
       for (const frame of frames) {
         for (let offset = 0; offset < frame.pixels.length; offset += 4) {
@@ -141,6 +142,7 @@ export class PixelArtAssetService {
         height: frames[0]?.height ?? 0,
         totalColors: uniqueColors.size,
         reports,
+        subject,
         delaysMs: frames.map((frame) => frame.delayMs ?? 0),
       };
       return ok(inspection);
@@ -171,6 +173,7 @@ export class PixelArtAssetService {
       if (!Number.isInteger(maxIsolatedPixels) || maxIsolatedPixels < 0) throw new Error("Maximum isolated pixels must be a non-negative integer");
       const frames = await this.codec.decode(input.filename);
       const reports = frames.map((frame) => inspectRasterFrame(frame));
+      const subject = frames.map((frame) => inspectPixelArtSubject(frame));
       const uniqueColors = new Set<string>();
       for (const frame of frames) for (let offset = 0; offset < frame.pixels.length; offset += 4) if ((frame.pixels[offset + 3] ?? 0) > 0) uniqueColors.add(`${frame.pixels[offset]},${frame.pixels[offset + 1]},${frame.pixels[offset + 2]},${frame.pixels[offset + 3]}`);
       const violations = reports.flatMap((report, index) => [
@@ -186,6 +189,7 @@ export class PixelArtAssetService {
         operation: "inspect_asset_bundle",
         filename: input.filename,
         inspection: { filename: input.filename, frameCount: frames.length, width: frames[0]?.width ?? 0, height: frames[0]?.height ?? 0, totalColors: uniqueColors.size, reports, delaysMs: frames.map((frame) => frame.delayMs ?? 0) },
+        visualQuality: { algorithm: "subject-silhouette-v1", subject },
         quality: { valid: violations.length === 0, maxColors, maxIsolatedPixels, violations },
         recommendations: [...recommendations],
         deterministic: true,

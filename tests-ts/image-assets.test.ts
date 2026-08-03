@@ -52,6 +52,8 @@ test("asset service converts, inspects, validates, and packs without shelling ou
   const inspection = await service.inspect(converted);
   assert.equal(inspection.ok, true);
   assert.match(inspection.message, /"frameCount":1/);
+  const inspectionPayload = JSON.parse(inspection.message) as { subject?: unknown[] };
+  assert.equal(inspectionPayload.subject?.length, 1);
   const validation = await service.validate({ filename: inputA, maxColors: 2, maxIsolatedPixels: 0 });
   assert.equal(validation.ok, false);
   const atlasResult = await service.buildAtlas({ inputFilenames: [inputA, inputB], outputFilename: atlas, columns: 2, padding: 1 });

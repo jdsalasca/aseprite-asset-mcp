@@ -25,3 +25,30 @@ export interface PixelArtQualityReport {
   transparentPixels: number;
   isolatedPixels: number;
 }
+
+export interface PixelArtSubjectReport {
+  width: number;
+  height: number;
+  opaquePixels: number;
+  coverage: number;
+  edgePixels: number;
+  connectedComponents: number;
+  largestComponentRatio: number;
+  distinctRowSpans: number;
+  transparentBorder: boolean;
+}
+
+export interface PixelArtQualityGateOptions {
+  minOpaquePixels?: number | undefined;
+  minCoverage?: number | undefined;
+  maxCoverage?: number | undefined;
+  minEdgePixels?: number | undefined;
+  minDistinctRowSpans?: number | undefined;
+  maxComponents?: number | undefined;
+  minLargestComponentRatio?: number | undefined;
+}
+
+export interface PixelArtQualityGateReport extends PixelArtSubjectReport {
+  valid: boolean;
+  violations: string[];
+}

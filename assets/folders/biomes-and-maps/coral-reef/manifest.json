@@ -1,11 +1,16 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "coral-reef",
   "title": "coral reef",
   "category": "biomes-and-maps",
   "kind": "scene",
-  "source": "deterministic-library-generator-v1",
+  "source": "deterministic-library-generator-v2",
   "seed": 1152197459,
+  "render": {
+    "cellSize": 64,
+    "shapeRendering": "crispEdges",
+    "transparentSpriteBackground": false
+  },
   "variants": [
     "day",
     "sunset",

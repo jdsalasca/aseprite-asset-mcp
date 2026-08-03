@@ -2,6 +2,13 @@
 
 Esta biblioteca contiene 339 carpetas deterministas. Cada carpeta incluye README, manifest, preview PNG/SVG y sprite sheet PNG/SVG/GIF animado.
 
+## Calidad y procedencia
+
+- El renderer v2 usa celdas de 64×64, formas por dominio y renderizado crispEdges; los sprites no usan el bloque universal anterior.
+- La suite comprueba dimensiones, transparencia, cobertura, complejidad de silueta y componentes conectados para fauna, monturas y personajes.
+- El ciervo es un caso derivado de referencia pública: su manifest conserva URL, licencia, hash y parámetros de conversión.
+- Para reproducirlo usa `DEER_REFERENCE_FILENAME=<ruta> npm run asset:reference-fauna`.
+
 ## Navegación rápida
 
 - Consulta `catalog.json` o usa el MCP `get_asset_library`.

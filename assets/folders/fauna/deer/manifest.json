@@ -1,11 +1,38 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "deer",
-  "title": "deer",
+  "title": "red deer reference sprite",
   "category": "fauna",
   "kind": "sprite",
-  "source": "deterministic-library-generator-v1",
-  "seed": 2615775125,
+  "source": "reference-pixel-art-v2",
+  "reference": {
+    "url": "https://commons.wikimedia.org/wiki/File:The_Stag,_or_Red_Deer_LCCN2007681452.jpg",
+    "license": "Public domain / no known copyright restrictions; Library of Congress scan via Wikimedia Commons",
+    "sha256": "ba8c100f572590bdcab15598cf9e2f45e1ae2aca2cbbfb0492f4e3ca2c10216e",
+    "crop": "full scan with a deterministic deer anatomy mask"
+  },
+  "conversion": {
+    "algorithm": "grayscale ink isolation -> alpha threshold -> box resize -> deterministic 12-color quantization",
+    "target": [
+      96,
+      96
+    ],
+    "frames": 4,
+    "movement": "1px deterministic breathing/step offset"
+  },
+  "qualityGate": {
+    "width": 96,
+    "height": 96,
+    "opaquePixels": 3300,
+    "coverage": 0.3580729166666667,
+    "edgePixels": 417,
+    "connectedComponents": 1,
+    "largestComponentRatio": 1,
+    "distinctRowSpans": 47,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": []
+  },
   "variants": [
     "idle",
     "walk",
@@ -23,6 +50,8 @@
   "tags": [
     "fauna",
     "wildlife",
+    "deer",
+    "reference-derived",
     "animation"
   ],
   "sourcePreserved": true,

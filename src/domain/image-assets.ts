@@ -1,4 +1,4 @@
-import type { PixelArtOptions, PixelArtQualityReport, RasterFrame } from "./pixel-art.js";
+import type { PixelArtOptions, PixelArtQualityReport, PixelArtSubjectReport, RasterFrame } from "./pixel-art.js";
 
 export type ImageOutputFormat = "png" | "gif";
 
@@ -36,6 +36,7 @@ export interface AssetInspection {
   height: number;
   totalColors: number;
   reports: PixelArtQualityReport[];
+  subject?: PixelArtSubjectReport[] | undefined;
   delaysMs: number[];
 }
 
