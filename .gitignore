@@ -42,4 +42,5 @@ ENV/
 # TypeScript workflow outputs
 artifacts/
 .asset-studio/
+tmp/imagegen/
 node_modules/

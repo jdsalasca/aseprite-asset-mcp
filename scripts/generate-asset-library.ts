@@ -25,7 +25,11 @@ const staticSeeds: Seed[] = [
 const seeds: Seed[] = [
   ...characterArchetypes.flatMap((archetype) => characterVariants.map((variant) => ({ id: `${variant}-${archetype}`, title: `${variant} ${archetype}`, category: "characters", kind: "character" as const, description: `${variant} ${archetype} with idle, walk, run and action-ready sprite frames.`, tags: ["character", "walk", "animation", archetype], variants: ["idle", "walk", "run", "attack", "hurt", "celebrate"] }))),
   ...staticSeeds,
-];
+].map((seed) => seed.id === "dragon-ice" ? {
+  ...seed,
+  description: "Premium reference-derived ice dragon with articulated anatomy, crystal spines, wing silhouette and ice-breath animation-ready frames.",
+  tags: [...seed.tags, "premium", "reference-derived", "high-detail"],
+} : seed);
 
 const categoryDescriptions: Record<string, string> = {
   characters: "120 character archetype variants with reusable movement states.",
@@ -107,6 +111,14 @@ function readme(seed: Seed, folder: string): string {
 async function writeItem(seed: Seed): Promise<{ id: string; title: string; category: string; folder: string; kind: Kind; description: string; tags: string[]; variants: string[]; formats: ["png", "gif", "svg", "json"]; readmePath: string; previewPath: string; spritePath: string; animationPath: string; deterministic: true }> {
   const folder = `${seed.category}/${seed.id}`;
   const directory = path.join(root, seed.category, seed.id);
+  if (seed.id === "dragon-ice") {
+    try {
+      const existingManifest = JSON.parse(await fs.readFile(path.join(directory, "manifest.json"), "utf8")) as { source?: string };
+      if (existingManifest.source === "imagegen-reference-derived-v1") {
+        return { id: seed.id, title: seed.title, category: seed.category, folder, kind: seed.kind, description: seed.description, tags: seed.tags, variants: seed.variants, formats: ["png", "gif", "svg", "json"], readmePath: `${folder}/README.md`, previewPath: `${folder}/preview.png`, spritePath: `${folder}/sprite-sheet.png`, animationPath: `${folder}/sprite-sheet.gif`, deterministic: true };
+      }
+    } catch { /* the premium asset is created later when no manifest exists */ }
+  }
   await fs.mkdir(directory, { recursive: true });
   const previewSvg = svgFor(seed);
   const spriteSvg = svgFor(seed, 4);

@@ -1,25 +1,18 @@
-# dragon ice
+# Premium ice dragon
 
-dragon ice creature for living fantasy worlds.
+Dragon de hielo de alta fidelidad para combate y escenas de fantasía.
 
-- **ID:** `dragon-ice`
-- **Categoría:** `mythical-creatures`
-- **Formatos base:** PNG, GIF animado, SVG y JSON
-- **Archivos:** [preview.png](./preview.png), [sprite-sheet.png](./sprite-sheet.png), [sprite-sheet.gif](./sprite-sheet.gif), [manifest.json](./manifest.json)
-- **Reproducible:** sí; el catálogo y los previews se generan con la semilla derivada del ID.
+- Fuente visual de alta calidad conservada en source-reference.png.
+- Silueta completa: cabeza, mandíbula, ojo, cuernos, alas, cuatro patas, garras, cola, placas y espinas de hielo.
+- Paleta limitada y nearest-neighbor para conservar clusters de pixel art.
+- Cuatro frames de 256×256: idle, wing-beat, ice-breath y attack.
+- La manifest conserva el hash de la fuente, el algoritmo y el resultado del quality gate.
 
-## Variantes
+## Uso MCP
 
-- `idle`: variante determinista sugerida para el pipeline.
-- `walk`: variante determinista sugerida para el pipeline.
-- `attack`: variante determinista sugerida para el pipeline.
-- `roar`: variante determinista sugerida para el pipeline.
-- `hurt`: variante determinista sugerida para el pipeline.
+Consulta get_asset_library con dragon-ice. Para variantes adicionales usa apply_depth_lighting, apply_sprite_rim_light, apply_sprite_glow, generate_particle_burst, normal_map y validate_asset_quality sobre copias.
 
-## Ejemplo MCP
+## Regeneración
 
-Busca este asset con `get_asset_library` y después compón una receta con `create_asset_recipe`. Para una salida animada, usa `run_asset_recipe` con `animation_pixel_art` o aplica el efecto indicado por la variante.
-
-## Carpeta
-
-`mythical-creatures/dragon-ice`
+Ejecuta DRAGON_ICE_SOURCE_FILENAME=<ruta> npm run asset:premium-dragon.
+La generación de la fuente y la conversión raster son fases separadas: la conversión, atlas, GIF y quality gate son deterministas.

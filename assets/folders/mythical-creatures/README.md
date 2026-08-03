@@ -1,6 +1,6 @@
 # mythical creatures
 
-Mythological creatures with combat-ready states.
+Mythological creatures with combat-ready states. `dragon-ice` is the premium reference-derived example: a detailed 256px dragon with wings, claws, crystal spines and deterministic ice-breath-ready frames.
 
 Esta carpeta contiene 20 assets deterministas. Cada subcarpeta documenta sus previews, sprite sheets PNG/SVG, GIF animado, manifest y variantes.
 

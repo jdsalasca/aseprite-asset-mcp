@@ -1,24 +1,47 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "id": "dragon-ice",
-  "title": "dragon ice",
+  "title": "premium ice dragon",
   "category": "mythical-creatures",
   "kind": "sprite",
-  "source": "deterministic-library-generator-v2",
-  "seed": 4166331988,
-  "render": {
-    "cellSize": 64,
-    "shapeRendering": "crispEdges",
-    "transparentSpriteBackground": true
+  "source": "imagegen-reference-derived-v1",
+  "sourceReference": {
+    "filename": "source-reference.png",
+    "sha256": "e8f091ba9c3aeb53fb1aa405da4ff3ce76dca25f9b6efde57fa2ea2dae348556",
+    "generation": "built-in image generation followed by chroma-key removal",
+    "promptSummary": "full-body ice dragon with articulated anatomy, wings, crystal spines, scales, claws and ice breath"
+  },
+  "conversion": {
+    "algorithm": "transparent trim -> nearest 224px fit -> 16px safety border -> nearest 256px atlas -> bounded palette",
+    "target": [
+      256,
+      256
+    ],
+    "paletteSize": 310,
+    "frames": 4,
+    "frameMotion": "deterministic 1-2px breathing and wing-weight offsets"
+  },
+  "qualityGate": {
+    "width": 256,
+    "height": 256,
+    "opaquePixels": 16298,
+    "coverage": 0.248687744140625,
+    "edgePixels": 1763,
+    "connectedComponents": 22,
+    "largestComponentRatio": 0.9950300650386551,
+    "distinctRowSpans": 107,
+    "transparentBorder": true,
+    "valid": true,
+    "violations": []
   },
   "variants": [
     "idle",
-    "walk",
-    "attack",
-    "roar",
-    "hurt"
+    "wing-beat",
+    "ice-breath",
+    "attack"
   ],
   "assets": [
+    "source-reference.png",
     "preview.png",
     "sprite-sheet.png",
     "sprite-sheet.gif",
@@ -28,7 +51,11 @@
   "tags": [
     "creature",
     "mythology",
-    "combat"
+    "dragon",
+    "ice",
+    "premium",
+    "reference-derived",
+    "animation"
   ],
   "sourcePreserved": true,
   "deterministic": true

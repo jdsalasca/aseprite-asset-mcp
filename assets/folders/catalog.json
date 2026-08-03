@@ -6878,15 +6878,18 @@
     },
     {
       "id": "dragon-ice",
-      "title": "dragon ice",
+      "title": "premium ice dragon",
       "category": "mythical-creatures",
       "folder": "mythical-creatures/dragon-ice",
       "kind": "sprite",
-      "description": "dragon ice creature for living fantasy worlds.",
+      "description": "Premium reference-derived ice dragon with articulated anatomy, crystal spines, wing silhouette and ice-breath animation-ready frames.",
       "tags": [
         "creature",
         "mythology",
-        "combat"
+        "combat",
+        "premium",
+        "reference-derived",
+        "high-detail"
       ],
       "variants": [
         "idle",
