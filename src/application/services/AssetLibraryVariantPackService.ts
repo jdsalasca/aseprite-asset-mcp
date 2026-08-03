@@ -10,7 +10,7 @@ function ok(value: unknown): AssetOperationResult { return { ok: true, message: 
 function validate(input: AssetLibraryVariantPackInput): void {
   if (!input.outputPrefix.trim() || input.outputPrefix.includes("\0") || /(^|[\\/])\.\.([\\/]|$)/.test(input.outputPrefix)) throw new Error("Library variant output prefix is unsafe");
   if (!Array.isArray(input.itemIds) || input.itemIds.length < 1 || input.itemIds.length > 24) throw new Error("Library variant pack requires between 1 and 24 asset ids");
-  if (!Array.isArray(input.variants) || input.variants.length < 1 || input.variants.length > 9 || new Set(input.variants).size !== input.variants.length) throw new Error("Library variant pack variants must be unique and contain between 1 and 9 variants");
+  if (!Array.isArray(input.variants) || input.variants.length < 1 || input.variants.length > 11 || new Set(input.variants).size !== input.variants.length) throw new Error("Library variant pack variants must be unique and contain between 1 and 11 variants");
   if (!Number.isInteger(input.frames) || input.frames < 2 || input.frames > 24) throw new Error("Library variant pack frames must be an integer from 2 to 24");
   if (!Number.isInteger(input.seed)) throw new Error("Library variant pack seed must be an integer");
   if (input.delayMs !== undefined && (!Number.isInteger(input.delayMs) || input.delayMs <= 0 || input.delayMs > 2000)) throw new Error("Library variant pack delay must be an integer from 1 to 2000 milliseconds");

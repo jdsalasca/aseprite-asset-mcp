@@ -40,6 +40,7 @@ export class AssetVariantPackService implements AssetVariantPackGateway {
     if (variant === "walk") return this.effects.generateMotionPack({ inputFilename: input.inputFilename, outputFilename, motion: "walk", frames: input.frames, seed: input.seed, amplitude: 2, delayMs: input.delayMs ?? 90, format: "gif" });
     if (variant === "water_reflection") return this.effects.generateWaterReflection({ inputFilename: input.inputFilename, outputFilename, waterline: Math.max(1, Math.floor(firstFrame.height * 0.55)), frames: input.frames, seed: input.seed, amplitude: 1, opacity: 0.6, delayMs: input.delayMs ?? 90, format: "gif" });
     if (variant === "water_caustics") return this.effects.generateWaterCaustics({ inputFilename: input.inputFilename, outputFilename, frames: input.frames, seed: input.seed, intensity: 0.7, scale: 4, color: "#DFF6FF", delayMs: input.delayMs ?? 90, format: "gif" });
+    if (variant === "wind_sway" || variant === "wind") return this.effects.generateWindSway({ inputFilename: input.inputFilename, outputFilename, frames: input.frames, seed: input.seed, amplitude: 2, direction: "right", delayMs: input.delayMs ?? 90, format: "gif" });
     const frames = Array.from({ length: input.frames }, (_, frameIndex) => {
       const sourceFrame = source[frameIndex % source.length] ?? firstFrame;
       if (variant === "fire") return this.fireFrame(sourceFrame, frameIndex, input.seed, input.delayMs);
@@ -99,7 +100,7 @@ export class AssetVariantPackService implements AssetVariantPackGateway {
     if (!input.inputFilename.trim() || !input.outputPrefix.trim()) throw new Error("Variant pack filenames are required");
     if (input.inputFilename.includes("\0") || input.outputPrefix.includes("\0")) throw new Error("Variant pack filenames cannot contain null bytes");
     if (input.inputFilename.trim().toLowerCase() === input.outputPrefix.trim().toLowerCase()) throw new Error("Variant pack input and output prefix must be different");
-    if (!Array.isArray(input.variants) || input.variants.length < 1 || input.variants.length > 9) throw new Error("Variant pack requires between 1 and 9 variants");
+    if (!Array.isArray(input.variants) || input.variants.length < 1 || input.variants.length > 11) throw new Error("Variant pack requires between 1 and 11 variants");
     if (new Set(input.variants).size !== input.variants.length) throw new Error("Variant pack variants must be unique");
     if (!Number.isInteger(input.frames) || input.frames < 2 || input.frames > 24) throw new Error("Variant pack frames must be an integer from 2 to 24");
     if (!Number.isInteger(input.seed)) throw new Error("Variant pack seed must be an integer");

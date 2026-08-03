@@ -40,6 +40,15 @@ test("releases already materialized sources when a later variant execution fails
   assert.deepEqual(released.sort(), ["oak", "pine"]);
 });
 
+test("delegates wind sway variants through the shared variant gateway", async () => {
+  const calls: Array<Record<string, unknown>> = [];
+  const service = new AssetLibraryVariantPackService({ load: async () => catalog, read: async () => ({ data: new Uint8Array(), contentType: "image/png" }) }, { materialize: async (asset) => ({ filename: `${asset.id}.png`, release: async () => undefined }) }, { generateVariantPack: async (input) => { calls.push(input); return { ok: true, message: JSON.stringify({ artifacts: [{ variant: "wind_sway", outputFilename: `${input.outputPrefix}-wind_sway.gif` }] }) }; } });
+  const result = await service.generate({ itemIds: ["oak"], outputPrefix: "out/wind", variants: ["wind_sway"], frames: 6, seed: 5 });
+  assert.equal(result.ok, true);
+  assert.deepEqual(calls[0]?.variants, ["wind_sway"]);
+  assert.deepEqual(JSON.parse(result.message).variants, ["wind_sway"]);
+});
+
 test("rejects malformed delegated artifacts instead of publishing an incomplete manifest", async () => {
   let manifestWrites = 0;
   const service = new AssetLibraryVariantPackService({ load: async () => catalog, read: async () => ({ data: new Uint8Array(), contentType: "image/png" }) }, { materialize: async () => ({ filename: "asset.png", release: async () => undefined }) }, { generateVariantPack: async () => ({ ok: true, message: JSON.stringify({ artifacts: [{ variant: "rain" }] }) }) }, { write: async () => { manifestWrites += 1; } });

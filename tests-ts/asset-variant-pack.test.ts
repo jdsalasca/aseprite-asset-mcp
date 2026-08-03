@@ -20,12 +20,13 @@ test("variant pack materializes deterministic environmental variants without mut
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "asset-variant-pack-"));
   const input = path.join(directory, "oak.png"); const firstPrefix = path.join(directory, "first"); const secondPrefix = path.join(directory, "second"); await makeScene(input);
   const sourceBefore = await fs.readFile(input);
-  const variants = ["rain", "fire", "earthquake", "birds", "night", "day_night", "walk", "water_reflection", "water_caustics"] as const;
+  const variants = ["rain", "fire", "earthquake", "birds", "night", "day_night", "walk", "water_reflection", "water_caustics", "wind_sway"] as const;
   const request = { inputFilename: input, outputPrefix: firstPrefix, variants: [...variants], frames: 6, seed: 41, delayMs: 70 };
   const first = await service().generateVariantPack(request);
   assert.equal(first.ok, true);
-  const payload = JSON.parse(first.message) as { operation: string; artifacts: Array<{ variant: string; outputFilename: string; frames: number }> };
+  const payload = JSON.parse(first.message) as { operation: string; artifacts: Array<{ variant: string; outputFilename: string; frames: number; operation: string }> };
   assert.equal(payload.operation, "generate_variant_pack"); assert.equal(payload.artifacts.length, variants.length); assert.deepEqual(payload.artifacts.map((artifact) => artifact.variant), variants);
+  assert.equal(payload.artifacts.find((artifact) => artifact.variant === "wind_sway")?.operation, "generate_wind_sway");
   for (const artifact of payload.artifacts) { assert.equal(await fs.stat(artifact.outputFilename).then(() => true), true); assert.ok(artifact.frames >= 1); }
   assert.deepEqual(await fs.readFile(input), sourceBefore);
   const second = await service().generateVariantPack({ ...request, outputPrefix: secondPrefix });
@@ -41,4 +42,15 @@ test("variant pack rejects empty, duplicate, unsafe, and out-of-range requests",
   assert.equal((await pack.generateVariantPack({ inputFilename: input, outputPrefix: path.join(directory, "out"), variants: [], frames: 6, seed: 1 })).ok, false);
   assert.equal((await pack.generateVariantPack({ inputFilename: input, outputPrefix: path.join(directory, "out"), variants: ["rain", "rain"], frames: 6, seed: 1 })).ok, false);
   assert.equal((await pack.generateVariantPack({ inputFilename: input, outputPrefix: path.join(directory, "out\0bad"), variants: ["fire"], frames: 1, seed: 1 })).ok, false);
+});
+
+test("keeps the legacy wind catalog variant compatible with wind sway", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "asset-variant-pack-wind-alias-"));
+  const input = path.join(directory, "oak.png");
+  await makeScene(input);
+  const result = await service().generateVariantPack({ inputFilename: input, outputPrefix: path.join(directory, "out"), variants: ["wind"], frames: 4, seed: 7 });
+  assert.equal(result.ok, true);
+  const artifact = JSON.parse(result.message).artifacts[0] as { variant: string; operation: string };
+  assert.equal(artifact.variant, "wind");
+  assert.equal(artifact.operation, "generate_wind_sway");
 });

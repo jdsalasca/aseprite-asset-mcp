@@ -75,7 +75,7 @@ const DESCRIPTION_OVERRIDES: Record<string, string> = {
   generate_water_reflection: "Generate deterministic animated reflections for oceans, beaches, and wave scenes.",
   generate_water_caustics: "Generate deterministic animated light caustics for water surfaces and flooded interiors.",
   generate_day_night_cycle: "Generate deterministic day, sunset, night, and sunrise frames while preserving transparency.",
-  generate_variant_pack: "Generate several deterministic environmental variants from one source asset.",
+  generate_variant_pack: "Generate up to eleven deterministic environmental variants from one source asset, including wind sway for foliage and flags; legacy wind is accepted as an alias.",
   generate_asset_preset: "Generate a complete deterministic scene from a library preset.",
   generate_scene_effect_stack: "Generate selected scene effects in one deterministic response while preserving the source.",
   create_asset_recipe: "Compose a deterministic multi-effect asset recipe without executing it.",

@@ -1,6 +1,6 @@
 import type { AssetOperationResult } from "./asset-operations.js";
 
-export type AssetVariantKind = "rain" | "fire" | "earthquake" | "birds" | "night" | "day_night" | "walk" | "water_reflection" | "water_caustics";
+export type AssetVariantKind = "rain" | "fire" | "earthquake" | "birds" | "night" | "day_night" | "walk" | "water_reflection" | "water_caustics" | "wind_sway" | "wind";
 
 export interface AssetVariantPackInput {
   inputFilename: string;
