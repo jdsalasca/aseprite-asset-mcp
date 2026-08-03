@@ -1,7 +1,7 @@
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { RasterCodec } from "../../domain/image-assets.js";
 import type { RasterFrame } from "../../domain/pixel-art.js";
-import type { CleanupIsolatedPixelsInput, ColorGradeInput, DayNightCycleInput, FogOverlayInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SnowOverlayInput, SpriteAmbientOcclusionInput, SpriteColorRampInput, SpriteColorTemperatureInput, SpriteDitherInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteGlowInput, SpriteGrainInput, SpriteRimLightInput, SpriteRimLightDirection, SpriteShadowInput, SpriteSilhouetteInput, SpriteSpecularHighlightInput, WaterCausticsInput, WaterReflectionInput, WindSwayInput } from "../../domain/sprite-effects.js";
+import type { CleanupIsolatedPixelsInput, ColorGradeInput, DayNightCycleInput, FogOverlayInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SmokeOverlayInput, SnowOverlayInput, SpriteAmbientOcclusionInput, SpriteColorRampInput, SpriteColorTemperatureInput, SpriteDitherInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteGlowInput, SpriteGrainInput, SpriteRimLightInput, SpriteRimLightDirection, SpriteShadowInput, SpriteSilhouetteInput, SpriteSpecularHighlightInput, WaterCausticsInput, WaterReflectionInput, WindSwayInput } from "../../domain/sprite-effects.js";
 
 function ok(value: unknown): AssetOperationResult { return { ok: true, message: JSON.stringify(value) }; }
 function fail(error: unknown): AssetOperationResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
@@ -492,6 +492,53 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
       const format = formatFor(frames, input.format);
       await this.codec.encode(frames, input.outputFilename, format);
       return outputMessage("generate_snow_overlay", input.inputFilename, input.outputFilename, frames.length, format);
+    } catch (error) { return fail(error); }
+  }
+
+  public async generateSmokeOverlay(input: SmokeOverlayInput): Promise<AssetOperationResult> {
+    try {
+      assertDifferent(input.inputFilename, input.outputFilename);
+      const color = rgba(input.color);
+      const density = input.density ?? 0.55;
+      const drift = input.drift ?? 0;
+      const rise = input.rise ?? 0.65;
+      if (!Number.isInteger(input.seed)) throw new Error("Smoke seed must be an integer");
+      if (!Number.isFinite(density) || density < 0 || density > 1) throw new Error("Smoke density must be between 0 and 1");
+      if (!Number.isFinite(drift) || drift < -1 || drift > 1) throw new Error("Smoke drift must be between -1 and 1");
+      if (!Number.isFinite(rise) || rise < 0 || rise > 1) throw new Error("Smoke rise must be between 0 and 1");
+      const source = await this.codec.decode(input.inputFilename);
+      const frameCount = input.frames ?? source.length;
+      if (!Number.isInteger(frameCount) || frameCount < 1 || frameCount > 24) throw new Error("Smoke frames must be an integer from 1 to 24");
+      if (frameCount > 1 && input.format === "png") throw new Error("Smoke animations with more than one frame require GIF format");
+      const frames = Array.from({ length: frameCount }, (_, frameIndex) => {
+        const sourceFrame = source[frameIndex % source.length];
+        if (!sourceFrame) throw new Error("Smoke requires at least one source frame");
+        const pixels = new Uint8ClampedArray(sourceFrame.pixels);
+        const puffCount = Math.max(1, Math.round(sourceFrame.width * sourceFrame.height * 0.035 * density));
+        const cloudRadius = Math.max(1, Math.round(Math.min(sourceFrame.width, sourceFrame.height) * (0.08 + density * 0.12)));
+        for (let puff = 0; puff < puffCount; puff += 1) {
+          const seedOffset = input.seed + puff * 47;
+          const startX = Math.floor(hash(seedOffset, 3) * sourceFrame.width);
+          const startY = Math.floor((0.55 + hash(seedOffset, 7) * 0.4) * sourceFrame.height);
+          const vertical = Math.round(frameIndex * rise * Math.max(1, sourceFrame.height * 0.22));
+          const horizontal = Math.round(drift * frameIndex * (1 + hash(seedOffset, 11) * 2));
+          const wobble = Math.round(Math.sin((frameIndex + hash(seedOffset, 13)) * 1.7) * cloudRadius * 0.45);
+          const puffAlpha = Math.round(color[3] * (0.18 + hash(seedOffset, 17) * 0.36) * density);
+          for (let offsetY = -cloudRadius; offsetY <= cloudRadius; offsetY += 1) for (let offsetX = -cloudRadius; offsetX <= cloudRadius; offsetX += 1) {
+            const distance = Math.abs(offsetX) + Math.abs(offsetY) * 0.8;
+            if (distance > cloudRadius * (1.2 + hash(seedOffset, offsetY + offsetX + 19) * 0.8)) continue;
+            const alpha = Math.round(puffAlpha * (1 - Math.min(1, distance / (cloudRadius * 2))));
+            if (alpha > 0) overlayPixel(pixels, sourceFrame.width, sourceFrame.height, startX + horizontal + wobble + offsetX, startY - vertical + offsetY, [color[0], color[1], color[2], alpha], 1);
+          }
+        }
+        const markerX = Math.abs((input.seed * 29 + frameIndex * 7) % sourceFrame.width);
+        const markerY = Math.abs((input.seed * 17 + frameIndex * 5) % sourceFrame.height);
+        if (density > 0) overlayPixel(pixels, sourceFrame.width, sourceFrame.height, markerX, markerY, [color[0], color[1], color[2], Math.round(color[3] * density * 0.55)], 1);
+        return { ...sourceFrame, pixels, delayMs: input.delayMs ?? sourceFrame.delayMs ?? 90 };
+      });
+      const format = formatFor(frames, input.format);
+      await this.codec.encode(frames, input.outputFilename, format);
+      return outputMessage("generate_smoke_overlay", input.inputFilename, input.outputFilename, frames.length, format);
     } catch (error) { return fail(error); }
   }
 

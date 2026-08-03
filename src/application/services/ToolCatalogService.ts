@@ -72,6 +72,7 @@ const DESCRIPTION_OVERRIDES: Record<string, string> = {
   generate_rain_overlay: "Generate a seeded rain overlay while preserving sprite dimensions and timing.",
   generate_fog_overlay: "Generate deterministic atmospheric fog with bounded density and drift while preserving source alpha and timing.",
   generate_snow_overlay: "Generate deterministic animated snow with bounded density and wind while preserving source alpha and timing.",
+  generate_smoke_overlay: "Generate deterministic animated rising smoke with bounded density, drift, and rise while preserving source alpha and timing.",
   generate_motion_pack: "Generate a deterministic movement cycle from a static or animated sprite.",
   generate_seamless_texture: "Make opposite texture borders match for repeatable pixel-art backgrounds.",
   generate_water_reflection: "Generate deterministic animated reflections for oceans, beaches, and wave scenes.",
@@ -107,7 +108,7 @@ function folderFor(name: string): string {
   if (name === "generate_scene_effect_stack") return "asset/effects";
   if (name.includes("material_texture")) return "asset/material";
   if (name.includes("depth_lighting")) return "asset/lighting";
-  if (name.includes("color_grade") || name.includes("color_ramp") || name.includes("color_temperature") || name.includes("grain") || name.includes("dither") || name.includes("outline") || name.includes("background") || name.includes("cleanup") || name.includes("glow") || name.includes("silhouette") || name.includes("wind_sway") || name.includes("rim_light") || name.includes("ambient_occlusion") || name.includes("specular_highlight") || name.includes("shadow") || name.includes("normal_map") || name.includes("rain") || name.includes("snow") || name.includes("motion") || name.includes("seamless") || name.includes("reflection") || name.includes("caustics") || name.includes("day_night") || name.includes("variant_pack")) return "asset/effects";
+  if (name.includes("color_grade") || name.includes("color_ramp") || name.includes("color_temperature") || name.includes("grain") || name.includes("dither") || name.includes("outline") || name.includes("background") || name.includes("cleanup") || name.includes("glow") || name.includes("silhouette") || name.includes("wind_sway") || name.includes("rim_light") || name.includes("ambient_occlusion") || name.includes("specular_highlight") || name.includes("shadow") || name.includes("normal_map") || name.includes("rain") || name.includes("snow") || name.includes("smoke") || name.includes("motion") || name.includes("seamless") || name.includes("reflection") || name.includes("caustics") || name.includes("day_night") || name.includes("variant_pack")) return "asset/effects";
   if (name.includes("particle")) return "asset/particles";
   if (name === "create_asset_recipe" || name === "execute_asset_recipe") return "asset/recipes";
   if (name === "inspect_reference" || name === "run_asset_quality_gate") return "asset/quality";

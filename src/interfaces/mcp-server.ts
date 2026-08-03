@@ -256,6 +256,7 @@ const TOOL_NAMES = [
   "generate_rain_overlay",
   "generate_fog_overlay",
   "generate_snow_overlay",
+  "generate_smoke_overlay",
   "generate_motion_pack",
   "generate_seamless_texture",
   "generate_water_reflection",
