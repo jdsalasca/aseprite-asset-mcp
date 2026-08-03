@@ -1,7 +1,7 @@
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { RasterCodec } from "../../domain/image-assets.js";
 import type { RasterFrame } from "../../domain/pixel-art.js";
-import type { CleanupIsolatedPixelsInput, ColorGradeInput, DayNightCycleInput, FireOverlayInput, FogOverlayInput, LightningOverlayInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SmokeOverlayInput, SnowOverlayInput, SpriteAmbientOcclusionInput, SpriteColorRampInput, SpriteColorTemperatureInput, SpriteDitherInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteGlowInput, SpriteGrainInput, SpriteRimLightInput, SpriteRimLightDirection, SpriteShadowInput, SpriteSilhouetteInput, SpriteSpecularHighlightInput, WaterCausticsInput, WaterReflectionInput, WindSwayInput } from "../../domain/sprite-effects.js";
+import type { CleanupIsolatedPixelsInput, ColorGradeInput, DayNightCycleInput, FireOverlayInput, FogOverlayInput, LightningOverlayInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SmokeOverlayInput, SnowOverlayInput, SpriteAmbientOcclusionInput, SpriteColorRampInput, SpriteColorTemperatureInput, SpriteDitherInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteGlowInput, SpriteGrainInput, SpriteRimLightInput, SpriteRimLightDirection, SpriteShadowInput, SpriteSilhouetteInput, SpriteSpecularHighlightInput, WaterCausticsInput, WaterReflectionInput, WaveOverlayInput, WindSwayInput } from "../../domain/sprite-effects.js";
 
 function ok(value: unknown): AssetOperationResult { return { ok: true, message: JSON.stringify(value) }; }
 function fail(error: unknown): AssetOperationResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
@@ -615,6 +615,44 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
       const format = formatFor(frames, input.format);
       await this.codec.encode(frames, input.outputFilename, format);
       return outputMessage("generate_lightning_overlay", input.inputFilename, input.outputFilename, frames.length, format);
+    } catch (error) { return fail(error); }
+  }
+
+  public async generateWaveOverlay(input: WaveOverlayInput): Promise<AssetOperationResult> {
+    try {
+      assertDifferent(input.inputFilename, input.outputFilename);
+      const color = rgba(input.color);
+      const density = input.density ?? 0.65;
+      const amplitude = input.amplitude ?? 2;
+      if (!Number.isInteger(input.seed)) throw new Error("Wave seed must be an integer");
+      if (!Number.isFinite(density) || density < 0 || density > 1) throw new Error("Wave density must be between 0 and 1");
+      if (!Number.isFinite(amplitude) || amplitude < 0 || amplitude > 8) throw new Error("Wave amplitude must be between 0 and 8");
+      const source = await this.codec.decode(input.inputFilename);
+      const frameCount = input.frames ?? source.length;
+      if (!Number.isInteger(frameCount) || frameCount < 1 || frameCount > 24) throw new Error("Wave frames must be an integer from 1 to 24");
+      if (frameCount > 1 && input.format === "png") throw new Error("Wave animations with more than one frame require GIF format");
+      const frames = Array.from({ length: frameCount }, (_, frameIndex) => {
+        const sourceFrame = source[frameIndex % source.length];
+        if (!sourceFrame) throw new Error("Wave requires at least one source frame");
+        const pixels = new Uint8ClampedArray(sourceFrame.pixels);
+        for (let y = 0; y < sourceFrame.height; y += 1) for (let x = 0; x < sourceFrame.width; x += 1) {
+          if (alphaAt(sourceFrame, x, y) === 0) continue;
+          const shoreline = 1 - Math.abs(y / Math.max(1, sourceFrame.height - 1) - 0.58) * 1.8;
+          if (shoreline <= 0) continue;
+          const phase = x * 0.85 + y * 0.28 + frameIndex * (0.9 + amplitude * 0.12) + input.seed * 0.37;
+          const crest = (Math.sin(phase) + Math.sin(phase * 0.47 + input.seed) + 2) / 4;
+          const texture = hash(input.seed + frameIndex * 71, x + y * sourceFrame.width);
+          const foam = clamp((crest - (0.42 + texture * 0.18)) * 2.4 * shoreline * density, 0, 1);
+          if (foam > 0.02) overlayPixel(pixels, sourceFrame.width, sourceFrame.height, x, y, [color[0], color[1], color[2], Math.round(color[3] * foam)], 1);
+        }
+        const markerX = Math.abs((input.seed * 41 + frameIndex * 7) % sourceFrame.width);
+        const markerY = Math.min(sourceFrame.height - 1, Math.max(0, Math.round(sourceFrame.height * (0.58 + Math.sin(frameIndex * 0.8 + input.seed) * 0.08))));
+        if (density > 0 && alphaAt(sourceFrame, markerX, markerY) > 0) overlayPixel(pixels, sourceFrame.width, sourceFrame.height, markerX, markerY, [color[0], color[1], color[2], Math.round(color[3] * density * 0.8)], 1);
+        return { ...sourceFrame, pixels, delayMs: input.delayMs ?? sourceFrame.delayMs ?? 90 };
+      });
+      const format = formatFor(frames, input.format);
+      await this.codec.encode(frames, input.outputFilename, format);
+      return outputMessage("generate_wave_overlay", input.inputFilename, input.outputFilename, frames.length, format);
     } catch (error) { return fail(error); }
   }
 
