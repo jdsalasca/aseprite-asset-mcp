@@ -174,6 +174,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `generate_asset_preset`: ejecuta un preset completo y devuelve terreno, mapa, preview, oleaje cuando aplica y transición temporal en una respuesta compacta.
 - `generate_scene_effect_stack`: agrupa en una sola llamada lluvia, niebla, viento/sway, sombras, glow, partículas, caústicas/reflejos, día-noche, granularidad de material e iluminación direccional; infiere dimensiones para partículas, devuelve todos los artifacts y preserva la fuente.
 - `generate_fog_overlay`: crea una capa de niebla determinista con densidad, deriva, color, semilla y frames; aplica el pase solo a píxeles opacos y conserva dimensiones, alfa y archivo fuente.
+- `generate_snow_overlay`: crea nieve determinista con densidad, viento, color, semilla y frames; conserva transparencia, dimensiones, timing y el archivo fuente para escenas invernales.
 - `generate_motion_pack`: crea ciclos `idle`, `walk`, `run`, `jump` o `attack` desde un sprite estático o animado.
 - `generate_wind_sway`: crea un GIF ambiental determinista para árboles, follaje, banderas, hierba y props colgantes; mantiene la base estable y controla dirección, amplitud, semilla y timing.
 - `generate_variant_pack`: crea en una sola llamada hasta once variantes deterministas (`rain`, `fire`, `earthquake`, `birds`, `night`, `day_night`, `walk`, `water_reflection`, `water_caustics`, `wind_sway` y el alias legado `wind`) y devuelve un manifiesto compacto de artifacts. `wind_sway` está pensado para árboles, follaje, banderas y props colgantes, con base estable y semilla reproducible.
@@ -229,6 +230,7 @@ POST /api/v1/library/scene-compose
 POST /api/v1/library/scene-animation-compose
 POST /api/v1/library/variants/pack
 POST /api/v1/effects/motion
+POST /api/v1/effects/snow
 POST /api/v1/effects/upscale
 POST /api/v1/effects/remove-background
 POST /api/v1/effects/cleanup
@@ -320,7 +322,7 @@ La respuesta contiene `artifacts[]` con ruta, operación, cantidad de frames, fo
 {
   "input_filename": "art/forest-ranger.png",
   "output_prefix": "art/forest-ranger-scene",
-  "effects": ["material_texture", "depth_lighting", "rain", "fog", "wind_sway", "particles", "water_caustics", "day_night"],
+  "effects": ["material_texture", "depth_lighting", "rain", "fog", "snow", "wind_sway", "particles", "water_caustics", "day_night"],
   "frames": 8,
   "seed": 17,
   "material": "earth",

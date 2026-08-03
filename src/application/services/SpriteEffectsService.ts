@@ -1,7 +1,7 @@
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { RasterCodec } from "../../domain/image-assets.js";
 import type { RasterFrame } from "../../domain/pixel-art.js";
-import type { CleanupIsolatedPixelsInput, ColorGradeInput, DayNightCycleInput, FogOverlayInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SpriteAmbientOcclusionInput, SpriteColorRampInput, SpriteColorTemperatureInput, SpriteDitherInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteGlowInput, SpriteGrainInput, SpriteRimLightInput, SpriteRimLightDirection, SpriteShadowInput, SpriteSilhouetteInput, SpriteSpecularHighlightInput, WaterCausticsInput, WaterReflectionInput, WindSwayInput } from "../../domain/sprite-effects.js";
+import type { CleanupIsolatedPixelsInput, ColorGradeInput, DayNightCycleInput, FogOverlayInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SnowOverlayInput, SpriteAmbientOcclusionInput, SpriteColorRampInput, SpriteColorTemperatureInput, SpriteDitherInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteGlowInput, SpriteGrainInput, SpriteRimLightInput, SpriteRimLightDirection, SpriteShadowInput, SpriteSilhouetteInput, SpriteSpecularHighlightInput, WaterCausticsInput, WaterReflectionInput, WindSwayInput } from "../../domain/sprite-effects.js";
 
 function ok(value: unknown): AssetOperationResult { return { ok: true, message: JSON.stringify(value) }; }
 function fail(error: unknown): AssetOperationResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
@@ -453,6 +453,45 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
       const format = formatFor(frames, input.format);
       await this.codec.encode(frames, input.outputFilename, format);
       return outputMessage("generate_fog_overlay", input.inputFilename, input.outputFilename, frames.length, format);
+    } catch (error) { return fail(error); }
+  }
+
+  public async generateSnowOverlay(input: SnowOverlayInput): Promise<AssetOperationResult> {
+    try {
+      assertDifferent(input.inputFilename, input.outputFilename);
+      const color = rgba(input.color);
+      const density = input.density ?? 0.55;
+      const wind = input.wind ?? 0;
+      if (!Number.isInteger(input.seed)) throw new Error("Snow seed must be an integer");
+      if (!Number.isFinite(density) || density < 0 || density > 1) throw new Error("Snow density must be between 0 and 1");
+      if (!Number.isFinite(wind) || wind < -1 || wind > 1) throw new Error("Snow wind must be between -1 and 1");
+      const source = await this.codec.decode(input.inputFilename);
+      const frameCount = input.frames ?? source.length;
+      if (!Number.isInteger(frameCount) || frameCount < 1 || frameCount > 24) throw new Error("Snow frames must be an integer from 1 to 24");
+      if (frameCount > 1 && input.format === "png") throw new Error("Snow animations with more than one frame require GIF format");
+      const frames = Array.from({ length: frameCount }, (_, frameIndex) => {
+        const sourceFrame = source[frameIndex % source.length];
+        if (!sourceFrame) throw new Error("Snow requires at least one source frame");
+        const pixels = new Uint8ClampedArray(sourceFrame.pixels);
+        const flakes = Math.max(1, Math.round(sourceFrame.width * sourceFrame.height * 0.045 * density));
+        for (let flake = 0; flake < flakes; flake += 1) {
+          const random = hash(input.seed + frameIndex * 113, flake);
+          const startX = Math.floor(random * sourceFrame.width);
+          const startY = Math.floor(hash(input.seed + 197, flake) * sourceFrame.height);
+          const size = density > 0.65 && hash(input.seed + 271, flake) > 0.72 ? 2 : 1;
+          const fall = Math.round(frameIndex * (0.8 + hash(input.seed + 347, flake) * 1.4));
+          const drift = Math.round(wind * frameIndex * (1 + hash(input.seed + 419, flake) * 2));
+          const alpha = Math.round(color[3] * (0.45 + hash(input.seed + 503, flake) * 0.55));
+          for (let offsetY = 0; offsetY < size; offsetY += 1) for (let offsetX = 0; offsetX < size; offsetX += 1) overlayPixel(pixels, sourceFrame.width, sourceFrame.height, startX + drift + offsetX, startY + fall + offsetY, [color[0], color[1], color[2], alpha], 1);
+        }
+        const markerX = Math.abs((input.seed * 23 + frameIndex * 7) % sourceFrame.width);
+        const markerY = Math.abs((input.seed * 13 + frameIndex * 5) % sourceFrame.height);
+        if (density > 0) overlayPixel(pixels, sourceFrame.width, sourceFrame.height, markerX, markerY, [color[0], color[1], color[2], Math.round(color[3] * density * 0.7)], 1);
+        return { ...sourceFrame, pixels, delayMs: input.delayMs ?? sourceFrame.delayMs ?? 90 };
+      });
+      const format = formatFor(frames, input.format);
+      await this.codec.encode(frames, input.outputFilename, format);
+      return outputMessage("generate_snow_overlay", input.inputFilename, input.outputFilename, frames.length, format);
     } catch (error) { return fail(error); }
   }
 

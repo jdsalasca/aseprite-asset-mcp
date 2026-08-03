@@ -416,6 +416,36 @@ test("fog overlay rejects invalid density, drift, and animated PNG output", asyn
   assert.equal(animatedPng.ok, false);
 });
 
+test("snow overlay is deterministic, preserves transparent pixels, and animates flakes", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-snow-overlay-"));
+  const input = path.join(directory, "scene.png");
+  const first = path.join(directory, "first.gif");
+  const second = path.join(directory, "second.gif");
+  await makeSprite(input);
+  const snow = { inputFilename: input, outputFilename: first, seed: 31, density: 0.8, wind: -0.25, color: "#F5FBFF", frames: 5, delayMs: 100, format: "gif" as const };
+  const result = await service().generateSnowOverlay(snow);
+  assert.equal(result.ok, true);
+  assert.equal((await service().generateSnowOverlay({ ...snow, outputFilename: second })).ok, true);
+  const firstFrames = await new SharpRasterCodec().decode(first);
+  const secondFrames = await new SharpRasterCodec().decode(second);
+  assert.equal(firstFrames.length, 5);
+  assert.deepEqual(firstFrames.map((frame) => [...frame.pixels]), secondFrames.map((frame) => [...frame.pixels]));
+  assert.equal(firstFrames[0]?.pixels[(0 * 4 + 0) * 4 + 3], 0);
+  assert.match(result.message, /generate_snow_overlay/);
+});
+
+test("snow overlay rejects invalid density, wind, and animated PNG output", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-snow-overlay-invalid-"));
+  const input = path.join(directory, "scene.png");
+  await makeSprite(input);
+  const invalidDensity = await service().generateSnowOverlay({ inputFilename: input, outputFilename: path.join(directory, "density.gif"), seed: 1, density: 1.2, wind: 0, color: "#FFFFFF" });
+  const invalidWind = await service().generateSnowOverlay({ inputFilename: input, outputFilename: path.join(directory, "wind.gif"), seed: 1, density: 0.5, wind: 2, color: "#FFFFFF" });
+  const animatedPng = await service().generateSnowOverlay({ inputFilename: input, outputFilename: path.join(directory, "animated.png"), seed: 1, density: 0.5, wind: 0, color: "#FFFFFF", frames: 2, format: "png" });
+  assert.equal(invalidDensity.ok, false);
+  assert.equal(invalidWind.ok, false);
+  assert.equal(animatedPng.ok, false);
+});
+
 test("motion pack creates a deterministic walk cycle from a static asset", async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-motion-")); const input = path.join(directory, "input.png"); const first = path.join(directory, "first.gif"); const second = path.join(directory, "second.gif"); await makeSprite(input); const sourceBefore = await fs.readFile(input);
   const motion = { inputFilename: input, outputFilename: first, motion: "walk" as const, frames: 8, seed: 11, amplitude: 2, delayMs: 70 };
