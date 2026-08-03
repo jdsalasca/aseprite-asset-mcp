@@ -611,6 +611,29 @@ test("dust overlay rejects invalid density, drift, rise, and animated PNG output
   assert.equal(invalidDensity.ok, false); assert.equal(invalidDrift.ok, false); assert.equal(invalidRise.ok, false); assert.equal(animatedPng.ok, false);
 });
 
+test("leaf fall overlay is deterministic, preserves transparency, and exports the requested animation", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-leaf-fall-"));
+  const input = path.join(directory, "tree.png"); const first = path.join(directory, "first.gif"); const second = path.join(directory, "second.gif");
+  await makeSprite(input);
+  const leafFall = { inputFilename: input, outputFilename: first, seed: 103, density: 0.68, wind: -0.2, color: "#D97732", frames: 5, delayMs: 85, format: "gif" as const };
+  assert.equal((await service().generateLeafFallOverlay(leafFall)).ok, true);
+  assert.equal((await service().generateLeafFallOverlay({ ...leafFall, outputFilename: second })).ok, true);
+  assert.deepEqual(await fs.readFile(first), await fs.readFile(second));
+  const frames = await new SharpRasterCodec().decode(first);
+  assert.equal(frames.length, 5); assert.equal(frames[0]?.pixels[3], 0); assert.match((await service().generateLeafFallOverlay(leafFall)).message, /generate_leaf_fall_overlay/);
+  assert.notDeepEqual([...frames[0]!.pixels], [...frames[1]!.pixels]);
+});
+
+test("leaf fall overlay rejects invalid density, wind, and animated PNG output", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-leaf-fall-invalid-")); const input = path.join(directory, "tree.png"); await makeSprite(input);
+  const invalidDensity = await service().generateLeafFallOverlay({ inputFilename: input, outputFilename: path.join(directory, "density.gif"), seed: 1, density: 1.1, wind: 0, color: "#D97732" });
+  const invalidWind = await service().generateLeafFallOverlay({ inputFilename: input, outputFilename: path.join(directory, "wind.gif"), seed: 1, density: 0.5, wind: 1.1, color: "#D97732" });
+  const invalidFormat = await service().generateLeafFallOverlay({ inputFilename: input, outputFilename: path.join(directory, "animated.png"), seed: 1, density: 0.5, wind: 0, color: "#D97732", frames: 2, format: "png" });
+  assert.equal(invalidDensity.ok, false); assert.match(invalidDensity.message, /density/i);
+  assert.equal(invalidWind.ok, false); assert.match(invalidWind.message, /wind/i);
+  assert.equal(invalidFormat.ok, false); assert.match(invalidFormat.message, /GIF format/);
+});
+
 test("motion pack creates a deterministic walk cycle from a static asset", async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-motion-")); const input = path.join(directory, "input.png"); const first = path.join(directory, "first.gif"); const second = path.join(directory, "second.gif"); await makeSprite(input); const sourceBefore = await fs.readFile(input);
   const motion = { inputFilename: input, outputFilename: first, motion: "walk" as const, frames: 8, seed: 11, amplitude: 2, delayMs: 70 };

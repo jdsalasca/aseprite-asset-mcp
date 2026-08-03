@@ -1,7 +1,7 @@
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { RasterCodec } from "../../domain/image-assets.js";
 import type { RasterFrame } from "../../domain/pixel-art.js";
-import type { CleanupIsolatedPixelsInput, ColorGradeInput, DayNightCycleInput, DustOverlayInput, FireOverlayInput, FogOverlayInput, LightningOverlayInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SmokeOverlayInput, SnowOverlayInput, SpriteAmbientOcclusionInput, SpriteColorRampInput, SpriteColorTemperatureInput, SpriteDitherInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteGlowInput, SpriteGrainInput, SpriteRimLightInput, SpriteRimLightDirection, SpriteShadowInput, SpriteSilhouetteInput, SpriteSpecularHighlightInput, WaterCausticsInput, WaterReflectionInput, WaterSprayInput, WaveOverlayInput, WindSwayInput } from "../../domain/sprite-effects.js";
+import type { CleanupIsolatedPixelsInput, ColorGradeInput, DayNightCycleInput, DustOverlayInput, FireOverlayInput, FogOverlayInput, LeafFallOverlayInput, LightningOverlayInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, RemoveBackgroundInput, SeamlessTextureInput, SmokeOverlayInput, SnowOverlayInput, SpriteAmbientOcclusionInput, SpriteColorRampInput, SpriteColorTemperatureInput, SpriteDitherInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteGlowInput, SpriteGrainInput, SpriteRimLightInput, SpriteRimLightDirection, SpriteShadowInput, SpriteSilhouetteInput, SpriteSpecularHighlightInput, WaterCausticsInput, WaterReflectionInput, WaterSprayInput, WaveOverlayInput, WindSwayInput } from "../../domain/sprite-effects.js";
 
 function ok(value: unknown): AssetOperationResult { return { ok: true, message: JSON.stringify(value) }; }
 function fail(error: unknown): AssetOperationResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
@@ -713,6 +713,36 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
       });
       const format = formatFor(frames, input.format); await this.codec.encode(frames, input.outputFilename, format);
       return outputMessage("generate_dust_overlay", input.inputFilename, input.outputFilename, frames.length, format);
+    } catch (error) { return fail(error); }
+  }
+
+  public async generateLeafFallOverlay(input: LeafFallOverlayInput): Promise<AssetOperationResult> {
+    try {
+      assertDifferent(input.inputFilename, input.outputFilename);
+      const color = rgba(input.color); const density = input.density ?? 0.6; const wind = input.wind ?? 0;
+      if (!Number.isInteger(input.seed)) throw new Error("Leaf fall seed must be an integer");
+      if (!Number.isFinite(density) || density < 0 || density > 1) throw new Error("Leaf fall density must be between 0 and 1");
+      if (!Number.isFinite(wind) || wind < -1 || wind > 1) throw new Error("Leaf fall wind must be between -1 and 1");
+      const source = await this.codec.decode(input.inputFilename); const frameCount = input.frames ?? source.length;
+      if (!Number.isInteger(frameCount) || frameCount < 1 || frameCount > 24) throw new Error("Leaf fall frames must be an integer from 1 to 24");
+      if (frameCount > 1 && input.format === "png") throw new Error("Leaf fall animations with more than one frame require GIF format");
+      const frames = Array.from({ length: frameCount }, (_, frameIndex) => {
+        const sourceFrame = source[frameIndex % source.length]; if (!sourceFrame) throw new Error("Leaf fall requires at least one source frame");
+        const pixels = new Uint8ClampedArray(sourceFrame.pixels); const leafCount = Math.max(1, Math.round(sourceFrame.width * sourceFrame.height * 0.04 * density));
+        for (let leaf = 0; leaf < leafCount; leaf += 1) {
+          const base = input.seed + leaf * 73; const x = Math.floor(hash(base, 3) * sourceFrame.width); const y = Math.floor(hash(base, 7) * sourceFrame.height * 0.55);
+          const fall = Math.round(frameIndex * (0.8 + hash(base, 11) * 1.4)); const horizontal = Math.round(wind * frameIndex * (1 + hash(base, 13) * 2));
+          const flutter = Math.round(Math.sin(frameIndex * 1.5 + hash(base, 17) * 6) * (1 + density * 2)); const size = density > 0.68 && hash(base, 19) > 0.78 ? 2 : 1;
+          const alpha = Math.round(color[3] * (0.45 + hash(base, 23) * 0.5) * density);
+          for (let offset = 0; offset < size; offset += 1) overlayPixel(pixels, sourceFrame.width, sourceFrame.height, x + horizontal + flutter + offset, y + fall + offset, [color[0], color[1], color[2], alpha], 1);
+        }
+        let markerX = Math.abs((input.seed * 59 + frameIndex * 7) % sourceFrame.width); let markerY = Math.abs((input.seed * 29 + frameIndex * 5) % sourceFrame.height);
+        if (alphaAt(sourceFrame, markerX, markerY) === 0) outer: for (let candidateY = 0; candidateY < sourceFrame.height; candidateY += 1) for (let candidateX = 0; candidateX < sourceFrame.width; candidateX += 1) if (alphaAt(sourceFrame, candidateX, candidateY) > 0) { markerX = candidateX; markerY = candidateY; break outer; }
+        if (density > 0 && alphaAt(sourceFrame, markerX, markerY) > 0) { const markerColor: [number, number, number, number] = [Math.min(255, color[0] + frameIndex * 9), Math.max(0, color[1] - frameIndex * 9), Math.min(255, color[2] + frameIndex * 5), 255]; overlayPixel(pixels, sourceFrame.width, sourceFrame.height, markerX, markerY, markerColor, 1); }
+        return { ...sourceFrame, pixels, delayMs: input.delayMs ?? sourceFrame.delayMs ?? 90 };
+      });
+      const format = formatFor(frames, input.format); await this.codec.encode(frames, input.outputFilename, format);
+      return outputMessage("generate_leaf_fall_overlay", input.inputFilename, input.outputFilename, frames.length, format);
     } catch (error) { return fail(error); }
   }
 
