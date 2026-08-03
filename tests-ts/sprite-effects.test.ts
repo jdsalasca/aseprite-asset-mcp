@@ -508,6 +508,36 @@ test("fire overlay rejects invalid intensity, flicker, and animated PNG output",
   assert.equal(animatedPng.ok, false);
 });
 
+test("lightning overlay is deterministic, preserves transparent pixels, and animates flashes", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-lightning-overlay-"));
+  const input = path.join(directory, "scene.png");
+  const first = path.join(directory, "first.gif");
+  const second = path.join(directory, "second.gif");
+  await makeSprite(input);
+  const lightning = { inputFilename: input, outputFilename: first, seed: 67, intensity: 0.72, flash: 0.8, color: "#D8F3FF", frames: 5, delayMs: 100, format: "gif" as const };
+  const result = await service().generateLightningOverlay(lightning);
+  assert.equal(result.ok, true);
+  assert.equal((await service().generateLightningOverlay({ ...lightning, outputFilename: second })).ok, true);
+  const firstFrames = await new SharpRasterCodec().decode(first);
+  const secondFrames = await new SharpRasterCodec().decode(second);
+  assert.equal(firstFrames.length, 5);
+  assert.deepEqual(firstFrames.map((frame) => [...frame.pixels]), secondFrames.map((frame) => [...frame.pixels]));
+  assert.equal(firstFrames[0]?.pixels[(0 * 4 + 0) * 4 + 3], 0);
+  assert.match(result.message, /generate_lightning_overlay/);
+});
+
+test("lightning overlay rejects invalid intensity, flash, and animated PNG output", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-lightning-overlay-invalid-"));
+  const input = path.join(directory, "scene.png");
+  await makeSprite(input);
+  const invalidIntensity = await service().generateLightningOverlay({ inputFilename: input, outputFilename: path.join(directory, "intensity.gif"), seed: 1, intensity: 1.2, flash: 0.5, color: "#FFFFFF" });
+  const invalidFlash = await service().generateLightningOverlay({ inputFilename: input, outputFilename: path.join(directory, "flash.gif"), seed: 1, intensity: 0.5, flash: -1, color: "#FFFFFF" });
+  const animatedPng = await service().generateLightningOverlay({ inputFilename: input, outputFilename: path.join(directory, "animated.png"), seed: 1, intensity: 0.5, flash: 0.5, color: "#FFFFFF", frames: 2, format: "png" });
+  assert.equal(invalidIntensity.ok, false);
+  assert.equal(invalidFlash.ok, false);
+  assert.equal(animatedPng.ok, false);
+});
+
 test("motion pack creates a deterministic walk cycle from a static asset", async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-motion-")); const input = path.join(directory, "input.png"); const first = path.join(directory, "first.gif"); const second = path.join(directory, "second.gif"); await makeSprite(input); const sourceBefore = await fs.readFile(input);
   const motion = { inputFilename: input, outputFilename: first, motion: "walk" as const, frames: 8, seed: 11, amplitude: 2, delayMs: 70 };

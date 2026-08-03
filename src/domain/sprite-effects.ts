@@ -24,6 +24,7 @@ export interface FogOverlayInput extends SpriteEffectBaseInput { seed: number; d
 export interface SnowOverlayInput extends SpriteEffectBaseInput { seed: number; density?: number | undefined; wind?: number | undefined; color: string; frames?: number | undefined; delayMs?: number | undefined; }
 export interface SmokeOverlayInput extends SpriteEffectBaseInput { seed: number; density?: number | undefined; drift?: number | undefined; rise?: number | undefined; color: string; frames?: number | undefined; delayMs?: number | undefined; }
 export interface FireOverlayInput extends SpriteEffectBaseInput { seed: number; intensity?: number | undefined; flicker?: number | undefined; color: string; frames?: number | undefined; delayMs?: number | undefined; }
+export interface LightningOverlayInput extends SpriteEffectBaseInput { seed: number; intensity?: number | undefined; flash?: number | undefined; color: string; frames?: number | undefined; delayMs?: number | undefined; }
 export type MotionKind = "idle" | "walk" | "run" | "jump" | "attack";
 export interface MotionPackInput extends SpriteEffectBaseInput { motion: MotionKind; frames: number; seed: number; amplitude?: number | undefined; delayMs?: number | undefined; }
 export type WindSwayDirection = "left" | "right";
@@ -55,6 +56,7 @@ export interface SpriteEffectsGateway {
   generateSnowOverlay(input: SnowOverlayInput): Promise<AssetOperationResult>;
   generateSmokeOverlay(input: SmokeOverlayInput): Promise<AssetOperationResult>;
   generateFireOverlay(input: FireOverlayInput): Promise<AssetOperationResult>;
+  generateLightningOverlay(input: LightningOverlayInput): Promise<AssetOperationResult>;
   generateMotionPack(input: MotionPackInput): Promise<AssetOperationResult>;
   generateWindSway(input: WindSwayInput): Promise<AssetOperationResult>;
   generateSeamlessTexture(input: SeamlessTextureInput): Promise<AssetOperationResult>;

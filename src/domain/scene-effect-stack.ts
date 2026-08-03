@@ -1,7 +1,7 @@
 import type { AssetOperationResult } from "./asset-operations.js";
 import type { LightDirection, MaterialTextureKind } from "./visual-assets.js";
 
-export type SceneEffectKind = "rain" | "fog" | "snow" | "smoke" | "fire" | "water_reflection" | "water_caustics" | "wind_sway" | "sprite_shadow" | "sprite_glow" | "day_night" | "material_texture" | "depth_lighting" | "particles";
+export type SceneEffectKind = "rain" | "fog" | "snow" | "smoke" | "fire" | "lightning" | "water_reflection" | "water_caustics" | "wind_sway" | "sprite_shadow" | "sprite_glow" | "day_night" | "material_texture" | "depth_lighting" | "particles";
 
 export interface SceneEffectStackInput {
   inputFilename: string;

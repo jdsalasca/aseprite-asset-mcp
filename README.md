@@ -177,6 +177,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `generate_snow_overlay`: crea nieve determinista con densidad, viento, color, semilla y frames; conserva transparencia, dimensiones, timing y el archivo fuente para escenas invernales.
 - `generate_smoke_overlay`: crea humo determinista con densidad, deriva, elevación, color, semilla y frames; conserva transparencia, dimensiones, timing y el archivo fuente para fogatas, chimeneas, volcanes y daño ambiental.
 - `generate_fire_overlay`: crea fuego/luz cálida y parpadeo de brasas deterministas con intensidad, flicker, color, semilla y frames; conserva transparencia, dimensiones, timing y el archivo fuente para antorchas, fogatas, volcanes e incendios.
+- `generate_lightning_overlay`: crea relámpagos deterministas con flash global y trayectoria de rayo acotada, intensidad, color, semilla y frames; conserva transparencia, dimensiones, timing y el archivo fuente para lluvias y tormentas.
 - `generate_motion_pack`: crea ciclos `idle`, `walk`, `run`, `jump` o `attack` desde un sprite estático o animado.
 - `generate_wind_sway`: crea un GIF ambiental determinista para árboles, follaje, banderas, hierba y props colgantes; mantiene la base estable y controla dirección, amplitud, semilla y timing.
 - `generate_variant_pack`: crea en una sola llamada hasta once variantes deterministas (`rain`, `fire`, `earthquake`, `birds`, `night`, `day_night`, `walk`, `water_reflection`, `water_caustics`, `wind_sway` y el alias legado `wind`) y devuelve un manifiesto compacto de artifacts. `wind_sway` está pensado para árboles, follaje, banderas y props colgantes, con base estable y semilla reproducible.
@@ -237,6 +238,8 @@ POST /api/v1/effects/snow
 POST /api/v1/effects/smoke
 
 POST /api/v1/effects/fire
+
+POST /api/v1/effects/lightning
 POST /api/v1/effects/upscale
 POST /api/v1/effects/remove-background
 POST /api/v1/effects/cleanup
