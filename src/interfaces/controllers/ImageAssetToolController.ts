@@ -55,16 +55,6 @@ export class ImageAssetToolController {
       ? this.result(await this.assets.exportSprite(input_filename, output_filename, "gif"))
       : this.result(await this.imageAssets.exportGif(input_filename, output_filename)));
 
-    server.registerTool("inspect_asset", {
-      description: "Return compact dimensions, frame, palette, transparency, and delay statistics.",
-      inputSchema: { filename: z.string().min(1) },
-    }, async ({ filename }) => this.result(await this.imageAssets.inspect(filename)));
-
-    server.registerTool("validate_asset_quality", {
-      description: "Check palette size and isolated pixels before an asset enters a game build.",
-      inputSchema: { filename: z.string().min(1), max_colors: z.number().int().min(1).max(256).default(256), max_isolated_pixels: z.number().int().nonnegative().default(9007199254740991) },
-    }, async ({ filename, max_colors, max_isolated_pixels }) => this.result(await this.imageAssets.validate({ filename, maxColors: max_colors, maxIsolatedPixels: max_isolated_pixels })));
-
     server.registerTool("inspect_asset_bundle", {
       description: "Inspect one asset and return compact quality violations and deterministic recommendations in one call.",
       inputSchema: { filename: z.string().min(1), max_colors: z.number().int().min(1).max(256).default(256), max_isolated_pixels: z.number().int().nonnegative().default(9007199254740991) },
@@ -109,11 +99,6 @@ export class ImageAssetToolController {
       description: "Generate deterministic placement anchors from sprite geometry for scene composition and game-engine transforms.",
       inputSchema: { filename: z.string().min(1), output_filename: z.string().min(1), min_component_pixels: z.number().int().min(1).max(4096).default(1) },
     }, async ({ filename, output_filename, min_component_pixels }) => this.result(await this.spriteAnchors.generate({ filename, outputFilename: output_filename, minComponentPixels: min_component_pixels })));
-
-    server.registerTool("build_texture_atlas", {
-      description: "Pack equal-size image frames into one PNG texture atlas.",
-      inputSchema: { input_filenames: z.array(z.string().min(1)).min(1), output_filename: z.string().min(1), columns: z.number().int().positive().optional(), padding: z.number().int().nonnegative().default(0) },
-    }, async ({ input_filenames, output_filename, columns, padding }) => this.result(await this.imageAssets.buildAtlas({ inputFilenames: input_filenames, outputFilename: output_filename, ...(columns === undefined ? {} : { columns }), padding })));
 
     server.registerTool("export_asset_pack", {
       description: "Export an atlas PNG and a compact JSON manifest in one call.",

@@ -62,7 +62,6 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("adjust_hsl_native"));
     assert.ok(tools.includes("adjust_brightness_contrast"));
     assert.ok(tools.includes("invert_colors"));
-    assert.ok(tools.includes("outline_cel"));
     assert.ok(tools.includes("replace_color"));
     assert.ok(tools.includes("adjust_hsl"));
     assert.ok(tools.includes("apply_convolution"));
@@ -116,7 +115,6 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("convert_image_to_pixel_art"));
     assert.ok(tools.includes("convert_animation_to_pixel_art"));
     assert.ok(tools.includes("export_animation_gif"));
-    assert.ok(tools.includes("inspect_asset"));
     assert.ok(tools.includes("inspect_asset_bundle"));
     assert.ok(tools.includes("inspect_asset_batch"));
     assert.ok(tools.includes("inspect_animation_quality"));
@@ -126,8 +124,6 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("generate_sprite_hitboxes"));
     assert.ok(tools.includes("build_sprite_runtime_bundle"));
     assert.ok(tools.includes("generate_sprite_anchors"));
-    assert.ok(tools.includes("validate_asset_quality"));
-    assert.ok(tools.includes("build_texture_atlas"));
     assert.ok(tools.includes("run_asset_recipe"));
     assert.ok(tools.includes("batch_asset_job"));
     assert.ok(tools.includes("export_asset_pack"));
@@ -139,7 +135,6 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("generate_beach_scene"));
     assert.ok(tools.includes("extend_scene"));
     assert.ok(tools.includes("generate_biome_transition"));
-    assert.ok(tools.includes("generate_time_of_day_pack"));
     assert.ok(tools.includes("generate_environment_pack"));
     assert.ok(tools.includes("get_asset_library"));
     assert.ok(tools.includes("get_asset_library_item"));
@@ -152,7 +147,7 @@ test("TypeScript MCP server completes a real stdio handshake", async () => {
     assert.ok(tools.includes("generate_water_reflection"));
     assert.ok(tools.includes("generate_water_caustics"));
     assert.ok(tools.includes("generate_day_night_cycle"));
-    assert.ok(tools.includes("generate_variant_pack"));
+    assert.ok(tools.includes("generate_source_variant_pack"));
     assert.ok(tools.includes("get_asset_preset"));
     assert.ok(tools.includes("compose_asset_preset"));
     assert.ok(tools.includes("audit_asset_library"));
@@ -287,7 +282,6 @@ test("MCP stdio executes drawing primitives against real Aseprite", { skip: !exi
     await call("adjust_hsl_native", { filename: source, layer_name: "body", frame_index: 2, hue: 5, saturation: 0, lightness: 0 });
     await call("adjust_brightness_contrast", { filename: source, layer_name: "body", frame_index: 2, brightness: 0, contrast: 0 });
     await call("invert_colors", { filename: source, layer_name: "body", frame_index: 2 });
-    await call("outline_cel", { filename: source, layer_name: "body", frame_index: 2, color: "#00ff00", include_diagonals: true });
     await call("replace_color", { filename: source, layer_name: "body", frame_index: 2, from_color: "#00ff00", to_color: "#ff00ff", tolerance: 0 });
     await call("adjust_hsl", { filename: source, layer_name: "body", frame_index: 2, hue_shift: 5, saturation_shift: 0, lightness_shift: 0 });
     await call("list_convolution_matrices", {});

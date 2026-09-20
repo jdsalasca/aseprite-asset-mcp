@@ -13,7 +13,7 @@ const catalog: AssetLibraryCatalog = {
     { id: "pine", title: "Pine tree", category: "flora", folder: "flora/pine", kind: "sprite", description: "Pine", tags: ["tree"], variants: ["fire"], formats: ["png", "svg", "json"], readmePath: "flora/pine/README.md", previewPath: "flora/pine/preview.png", spritePath: "flora/pine/sprite-sheet.png", deterministic: true },
     { id: "knight", title: "Knight", category: "characters", folder: "characters/knight", kind: "character", description: "Knight walk cycle", tags: ["walk", "combat"], variants: ["idle", "walk", "attack"], formats: ["png", "gif", "json"], readmePath: "characters/knight/README.md", previewPath: "characters/knight/preview.png", spritePath: "characters/knight/sprite-sheet.png", deterministic: true },
   ],
-  presets: [{ id: "rainy-grove", title: "Rainy grove", description: "Oak, pine, rain and water", category: "flora", itemIds: ["oak", "pine"], recommendedTools: ["generate_environment_pack", "generate_time_of_day_pack"], deterministic: true }],
+  presets: [{ id: "rainy-grove", title: "Rainy grove", description: "Oak, pine, rain and water", category: "flora", itemIds: ["oak", "pine"], recommendedTools: ["generate_environment_pack", "generate_day_night_cycle"], deterministic: true }],
 };
 class FakeLibrary implements AssetLibraryPort { public async load(): Promise<AssetLibraryCatalog> { return catalog; } public async read() { return { data: new Uint8Array([1, 2, 3]), contentType: "image/png" }; } }
 

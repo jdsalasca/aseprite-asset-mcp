@@ -53,7 +53,7 @@ Controles: POST /api/v1/recipes, /api/v1/material-texture, /api/v1/depth-lightin
 
 `/api/v1/assets/quality-bundle` recibe `{ "filename": "forest-ranger.png", "max_colors": 64, "max_isolated_pixels": 4 }` y devuelve inspección, violaciones, recomendaciones y las garantías `deterministic`/`sourcePreserved` sin generar archivos. Es el camino recomendado para que la UX valide antes de encadenar mejoras.
 
-`/api/v1/assets/enhancement-bundle` recibe `{ "filename": "hero.png", "output_filename": "hero-enhanced.png", "format": "png", "goals": ["cleanup", "terrain_grain", "directional_lighting"], "max_colors": 64, "seed": 7 }`. Ejecuta el mismo caso de uso que `apply_enhancement_bundle`: inspección, plan, aplicación no destructiva y quality gate en una sola llamada.
+`/api/v1/assets/enhancement-bundle` recibe `{ "filename": "hero.png", "output_filename": "hero-enhanced.png", "format": "png", "goals": ["cleanup", "terrain_grain", "directional_lighting"], "max_colors": 64, "seed": 7 }`. Ejecuta el mismo caso de uso que `apply_enhancement_plan`: inspección, plan, aplicación no destructiva y quality gate en una sola llamada.
 
 `/api/v1/assets/enhancement-batch` recibe una lista `items` con `filename`, `output_filename` y `format`. El servicio bloquea colisiones entre fuentes y salidas antes de materializar, conserva el orden, continúa después de un error individual y devuelve un resumen compacto para la UX.
 
@@ -219,12 +219,13 @@ The map is deterministic. Reusing the same seed recreates the same layout.
 
 ```json
 {
-  "name":"generate_time_of_day_pack",
+  "name":"generate_day_night_cycle",
   "arguments":{
     "input_filename":"art/coastal/beach-map.png",
     "output_filename":"art/coastal/beach-time-of-day.gif",
-    "manifest_filename":"art/coastal/beach-time-of-day.json",
-    "steps":12,
+    "frames":12,
+    "seed":23,
+    "intensity":0.8,
     "delay_ms":160
   }
 }
