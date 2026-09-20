@@ -52,5 +52,8 @@ test("enhancement refuses to overwrite the source asset", async () => {
     detectedSignals: [], warnings: [], destructive: false, passes: [{ id: "quality_gate", reason: "test", parameters: {} }],
   };
   const service = new DeterministicEnhancementService(new SharpRasterCodec());
-  await assert.rejects(() => service.apply(plan, { outputFilename: source.toUpperCase(), format: "png" }), /different from the source asset/);
+  // Cross-platform: use the exact same path. The old `source.toUpperCase()` alias only
+  // resolves to the source file on case-insensitive filesystems (Windows) and tried to
+  // mkdir a bogus "/TMP" root on Linux CI.
+  await assert.rejects(() => service.apply(plan, { outputFilename: source, format: "png" }), /different from the source asset/);
 });
