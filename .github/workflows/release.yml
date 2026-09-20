@@ -66,8 +66,20 @@ jobs:
             echo "aseprite-asset-mcp@${VERSION} is not on npm yet; will publish."
           fi
 
+      - name: Check npm token
+        id: token_check
+        run: |
+          if [ -n "${NPM_TOKEN}" ]; then
+            echo "has_token=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_token=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::NPM_TOKEN secret is not configured; skipping npm publish. Add it in Settings -> Secrets and variables -> Actions."
+          fi
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Publish to npm with provenance
-        if: steps.version_check.outputs.already_published == 'false'
+        if: steps.version_check.outputs.already_published == 'false' && steps.token_check.outputs.has_token == 'true'
         run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
