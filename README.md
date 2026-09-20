@@ -119,14 +119,13 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `harmonize_asset_palette`: mueve un PNG/GIF hacia una familia cromática de acento, limita la paleta y conserva transparencia/delays en una salida separada.
 - `build_contact_sheet`: ajusta sprites heterogéneos a celdas nearest-neighbor, genera un PNG de preview y un manifest JSON navegable en una sola llamada.
 - `export_animation_gif`: exporta una imagen animada o un `.aseprite` a GIF.
-- `inspect_asset` y `validate_asset_quality`: reportan dimensiones, frames, colores, transparencia, delays y pixeles aislados antes de exportar.
-- `inspect_asset_bundle`: combina inspección, quality gate, violaciones y recomendaciones deterministas en una sola respuesta compacta.
+- `inspect_asset_bundle`: combina dimensiones, frames, colores, transparencia, delays, violaciones y recomendaciones deterministas en una sola respuesta compacta.
 - `inspect_asset_batch`: audita hasta 32 assets en una sola llamada, conserva el orden, aísla fallos de decodificación y devuelve un resumen `valid/invalid/failed` sin transferir buffers de píxeles.
 - `audit_asset_manifest`: revisa los archivos referenciados por un manifest generado, detecta faltantes o archivos vacíos y devuelve formato, tamaño y hash SHA-256 en una respuesta compacta.
 - `recommend_asset_scene`: recibe un prompt de mundo, tags o efectos y devuelve una selección determinista de assets con ranking, razones y cobertura de tipos/variantes para componer escenas con menos llamadas.
 - `build_scene_bundle`: compone en una llamada la versión PNG, la animación GIF y sus manifests de una escena, reutilizando los compositores existentes y deteniéndose si falla la composición estática.
-- `apply_enhancement_bundle`: inspecciona, planifica, aplica y ejecuta quality gate en una sola llamada determinista, preservando la fuente y reduciendo round-trips de la UX/agente.
-- `apply_enhancement_batch`: aplica ese bundle a hasta 24 assets en una llamada, conserva el orden, aísla fallos por archivo y bloquea colisiones antes de escribir.
+- `apply_enhancement_plan`: inspecciona, planifica, aplica y ejecuta quality gate en una sola llamada determinista, preservando la fuente y reduciendo round-trips de la UX/agente.
+- `apply_enhancement_batch`: aplica ese mismo pipeline a hasta 24 assets en una llamada, conserva el orden, aísla fallos por archivo y bloquea colisiones antes de escribir.
 - `inspect_animation_quality`: audita una animación en una sola llamada, detecta frames duplicados, cambios por transición, timing irregular, deriva de paleta y costura de loop.
 - `inspect_sprite_geometry`: calcula bounds alfa, componentes conectados, baseline y pivotes por frame para placement estable.
 - `generate_sprite_hitboxes`: deriva un manifest JSON de colisión desde esa geometría, con modo `components` o `union` y padding acotado, sin duplicar análisis raster.
@@ -135,8 +134,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `normalize_sprite`: recorta PNG/GIF a los bounds alfa compartidos, añade padding determinista, conserva los delays y escribe un manifest JSON con pivote para motores 2D.
 - `build_animation_sheet`: convierte todos los frames de una animación en un PNG spritesheet con coordenadas, pivotes `bottom_center`, delays y duración de loop en un manifest navegable.
 - `inspect_sprite_geometry`: calcula bounds alfa, componentes conectados, baseline y pivotes por frame para detectar jitter antes de colisiones o composición de escenas.
-- `build_texture_atlas`: empaqueta imágenes del mismo tamaño en un atlas PNG con columnas y padding.
-- `export_asset_pack`: entrega el atlas y un manifiesto JSON con la posición de cada asset.
+- `export_asset_pack`: empaqueta imágenes del mismo tamaño en un atlas PNG y entrega un manifiesto JSON con la posición de cada asset.
 - `create_style_bible`: fija paleta, luz, escala, detalle y semilla para mantener consistencia.
 - `inspect_reference` y `run_asset_quality_gate`: analizan color, contraste, bordes, transparencia, banding y píxeles aislados.
 - `build_terrain_tileset`: genera 16 máscaras cardinales por terreno para transiciones reutilizables.
@@ -148,7 +146,6 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `generate_water_reflection`: genera un GIF determinista con reflejo bajo una línea de agua, oleaje y destellos temporales para océanos, playas y mapas.
 - `generate_water_caustics`: genera una pasada GIF de luz refractada sobre píxeles opacos de agua, piscinas, playas o interiores inundados.
 - `generate_day_night_cycle`: genera un GIF determinista con las etapas `day`, `sunset`, `night` y `sunrise`, preservando transparencia y dimensiones.
-- `generate_time_of_day_pack`: crea transición día, atardecer, noche y amanecer.
 - `generate_environment_pack`: empaqueta playa, bosque, aldea o cueva en una sola llamada.
 - `create_asset_recipe`: compone outline, grading, materiales, luz, sombras, partículas, normal map y quality gate en un plan determinista sin ejecutar cambios.
 - `get_asset_library`: busca una biblioteca de 339 items preconstruidos en 10 categorías, con resultados compactos para reducir tokens.
@@ -163,7 +160,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `generate_asset_preset`: ejecuta un preset completo y devuelve terreno, mapa, preview, oleaje cuando aplica y transición temporal en una respuesta compacta.
 - `generate_scene_effect_stack`: agrupa en una sola llamada lluvia, partículas, caústicas/reflejos, día-noche, granularidad de material e iluminación direccional; infiere dimensiones para partículas, devuelve todos los artifacts y preserva la fuente.
 - `generate_motion_pack`: crea ciclos `idle`, `walk`, `run`, `jump` o `attack` desde un sprite estático o animado.
-- `generate_variant_pack`: crea en una sola llamada hasta nueve variantes deterministas (`rain`, `fire`, `earthquake`, `birds`, `night`, `day_night`, `walk`, `water_reflection` y `water_caustics`) y devuelve un manifiesto compacto de artifacts.
+- `generate_source_variant_pack`: crea en una sola llamada hasta nueve variantes deterministas (`rain`, `fire`, `earthquake`, `birds`, `night`, `day_night`, `walk`, `water_reflection` y `water_caustics`) a partir de un asset fuente y devuelve un manifiesto compacto de artifacts.
 
 Las operaciones de imagen no necesitan abrir Aseprite; eso reduce latencia y tokens para conversiones masivas. Las operaciones sobre `.aseprite` siguen pasando por el adaptador CLI hexagonal y mantienen la compatibilidad con Godot.
 
@@ -261,7 +258,7 @@ Las dos últimas rutas sirven PNG/GIF de forma binaria desde el adaptador de arc
 
 `build_scene_bundle` y `POST /api/v1/library/scene-bundle` reciben `item_ids`, `output_prefix`, `width`, `height`, `padding`, `frames` y `delay_ms`. Generan `scene.png`, `scene.json`, `scene.gif` y `scene-animation.json` dentro del prefijo indicado con una respuesta compacta.
 
-`apply_enhancement_bundle` y `POST /api/v1/assets/enhancement-bundle` reciben `{ "filename": "hero.png", "output_filename": "hero-enhanced.png", "format": "png", "goals": ["cleanup", "terrain_grain", "directional_lighting"], "max_colors": 64, "seed": 7 }`. El mismo servicio de aplicación analiza la referencia, crea el plan explicable, escribe una salida separada y ejecuta el quality gate; devuelve `plan`, `applied`, `quality`, `deterministic` y `sourcePreserved` en una respuesta.
+`apply_enhancement_plan` (MCP) y `POST /api/v1/assets/enhancement-bundle` (REST) reciben `{ "filename": "hero.png", "output_filename": "hero-enhanced.png", "format": "png", "goals": ["cleanup", "terrain_grain", "directional_lighting"], "max_colors": 64, "seed": 7 }`. El servicio de aplicación analiza la referencia, crea el plan explicable, escribe una salida separada y ejecuta el quality gate; devuelve `plan`, `applied`, `quality`, `deterministic` y `sourcePreserved` en una respuesta.
 
 `apply_enhancement_batch` y `POST /api/v1/assets/enhancement-batch` reciben `{ "items": [{ "filename": "hero.png", "output_filename": "hero-batch.png", "format": "png" }, { "filename": "tree.gif", "output_filename": "tree-batch.gif", "format": "gif" }], "goals": ["cleanup", "particles"], "max_colors": 64, "seed": 7 }`. Validan colisiones globales antes de escribir, procesan en orden y devuelven `summary: { total, succeeded, failed }` con error por item.
 
@@ -275,7 +272,7 @@ Las variantes (`rain`, `fire`, `earthquake`, `birds`, `wave-reflection`, `day`, 
 
 `inspect_sprite_geometry` recibe `{ "filename": "hero.gif", "min_component_pixels": 1 }` y devuelve por frame los componentes alfa 4-conectados, bounds, baseline y pivote. Un bounds inestable genera recomendación de normalización, pero no se marca como error: el movimiento intencional también puede cambiar la silueta.
 
-`generate_variant_pack` evita nueve llamadas del agente cuando se necesita explorar un asset en distintos contextos. Ejemplo MCP/REST equivalente:
+`generate_source_variant_pack` evita nueve llamadas del agente cuando se necesita explorar un asset fuente en distintos contextos. Ejemplo MCP/REST equivalente:
 
 ```json
 {
