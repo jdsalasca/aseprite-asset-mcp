@@ -6,6 +6,63 @@ MCP server público para crear pixel art, personajes y escenarios de Aseprite co
 
 El servidor usa stdio. El adaptador MCP llama a casos de uso de aplicación y el adaptador de infraestructura ejecuta Aseprite de forma controlada. Los workflows generan primero un plan JSON reproducible y un manifiesto compatible con Godot.
 
+## Install / Quickstart
+
+En 5 minutos:
+
+1. Requisitos: Node.js 24 o posterior, npm 11 o posterior y Aseprite instalado. El servidor invoca el binario de Aseprite; si no está en el `PATH`, define `ASEPRITE_PATH`:
+
+```powershell
+$env:ASEPRITE_PATH = 'C:\Program Files (x86)\Steam\steamapps\common\Aseprite\Aseprite.exe'
+```
+
+2. Ejecuta el servidor sin instalarlo (paquete público en npm) o instálalo globalmente para obtener el bin `aseprite-asset-mcp`:
+
+```bash
+npx -y aseprite-asset-mcp
+# o
+npm install -g aseprite-asset-mcp && aseprite-asset-mcp
+```
+
+3. Apunta tu cliente MCP al bin. El servidor habla stdio y `ASEPRITE_PATH` se pasa como variable de entorno.
+
+Claude Desktop (`claude_desktop_config.json`) y Cursor (`mcp.json`) usan `mcpServers`:
+
+```json
+{
+  "mcpServers": {
+    "aseprite": {
+      "command": "npx",
+      "args": ["-y", "aseprite-asset-mcp"],
+      "env": {
+        "ASEPRITE_PATH": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Aseprite\\Aseprite.exe"
+      }
+    }
+  }
+}
+```
+
+OpenCode (`opencode.json`) usa `mcp` con `type: "local"`:
+
+```json
+{
+  "mcp": {
+    "aseprite": {
+      "type": "local",
+      "command": ["npx", "-y", "aseprite-asset-mcp"],
+      "environment": {
+        "ASEPRITE_PATH": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Aseprite\\Aseprite.exe"
+      },
+      "enabled": true
+    }
+  }
+}
+```
+
+Si instalaste el paquete globalmente, usa `"command": "aseprite-asset-mcp"` y omite `args`.
+
+4. Verifica el handshake pidiendo al agente `server_capabilities` o `get_tools_list`. Debe reportar 185 tools.
+
 ## Arquitectura
 
 ```text

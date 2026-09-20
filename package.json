@@ -1,19 +1,46 @@
 {
   "name": "aseprite-asset-mcp",
-  "version": "0.1.0",
-  "private": true,
+  "version": "1.0.0",
   "type": "module",
   "engines": {
     "node": ">=24.0.0",
     "npm": ">=11.0.0"
   },
   "description": "Token-efficient TypeScript MCP asset factory for Aseprite, pixel art, animation, and Godot exports.",
+  "license": "MIT",
+  "author": "Juan David Salas Camargo",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jdsalasca/aseprite-asset-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jdsalasca/aseprite-asset-mcp/issues"
+  },
+  "homepage": "https://github.com/jdsalasca/aseprite-asset-mcp#readme",
+  "keywords": [
+    "mcp",
+    "aseprite",
+    "pixel-art",
+    "game-assets",
+    "ai-agents",
+    "godot"
+  ],
+  "bin": {
+    "aseprite-asset-mcp": "dist/interfaces/mcp-server.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "mcp": "tsx src/interfaces/mcp-server.ts",
-    "build": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "npm run typecheck && npm run test:ts",
     "test:ts": "tsx --test \"tests-ts/**/*.test.ts\"",
+    "test:integration": "tsx --test tests-ts/integration/real-aseprite.test.ts",
+    "prepublishOnly": "npm run typecheck && npm run test:ts && npm run build",
     "asset:character": "tsx scripts/character-workflow.ts",
     "asset:scene": "tsx scripts/scene-workflow.ts",
     "asset:paint": "tsx scripts/paint-godot-assets.ts",
