@@ -180,7 +180,6 @@ const TOOL_NAMES = [
   "adjust_hsl_native",
   "adjust_brightness_contrast",
   "invert_colors",
-  "outline_cel",
   "replace_color",
   "adjust_hsl",
   "apply_convolution",
@@ -198,7 +197,6 @@ const TOOL_NAMES = [
   "get_tools_search",
   "suggest_enhancement_plan",
   "apply_enhancement_plan",
-  "apply_enhancement_bundle",
   "apply_enhancement_batch",
   "convert_image_to_pixel_art",
   "convert_animation_to_pixel_art",
@@ -206,7 +204,6 @@ const TOOL_NAMES = [
   "harmonize_asset_palette",
   "build_contact_sheet",
   "export_animation_gif",
-  "inspect_asset",
   "inspect_asset_bundle",
   "inspect_asset_batch",
   "inspect_animation_quality",
@@ -216,8 +213,6 @@ const TOOL_NAMES = [
   "generate_sprite_hitboxes",
   "build_sprite_runtime_bundle",
   "generate_sprite_anchors",
-  "validate_asset_quality",
-  "build_texture_atlas",
   "run_asset_recipe",
   "batch_asset_job",
   "start_asset_job",
@@ -232,7 +227,6 @@ const TOOL_NAMES = [
   "generate_beach_scene",
   "extend_scene",
   "generate_biome_transition",
-  "generate_time_of_day_pack",
   "generate_environment_pack",
   "apply_material_texture",
   "apply_depth_lighting",
@@ -247,7 +241,7 @@ const TOOL_NAMES = [
   "generate_water_reflection",
   "generate_water_caustics",
   "generate_day_night_cycle",
-  "generate_variant_pack",
+  "generate_source_variant_pack",
   "generate_asset_preset",
   "generate_scene_effect_stack",
   "create_asset_recipe",
@@ -397,7 +391,7 @@ export class AsepriteMcpServerAdapter {
     new AssetManifestAuditToolController(this.assetManifestAudit).register(this.server);
     new AssetSceneRecommendationToolController(this.assetSceneRecommendation).register(this.server);
     new AssetSceneBundleToolController(this.assetSceneBundle).register(this.server);
-    new EnhancementToolController(this.visualAssets, this.enhancements, undefined, this.enhancementBundle).register(this.server);
+    new EnhancementToolController(this.visualAssets, this.enhancements).register(this.server);
     new EnhancementBatchToolController(this.enhancementBatch).register(this.server);
     new AssetJobToolController(this.assetJobs).register(this.server);
     new LayerFrameToolController(this.assets).register(this.server);

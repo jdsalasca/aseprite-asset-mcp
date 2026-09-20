@@ -10773,7 +10773,7 @@
       "recommendedTools": [
         "generate_world_map",
         "generate_environment_pack",
-        "generate_time_of_day_pack"
+        "generate_day_night_cycle"
       ],
       "deterministic": true
     },
@@ -10792,7 +10792,7 @@
       ],
       "recommendedTools": [
         "generate_beach_scene",
-        "generate_time_of_day_pack",
+        "generate_day_night_cycle",
         "apply_depth_lighting"
       ],
       "deterministic": true
@@ -10832,7 +10832,7 @@
       ],
       "recommendedTools": [
         "generate_environment_pack",
-        "generate_time_of_day_pack",
+        "generate_day_night_cycle",
         "generate_particle_burst"
       ],
       "deterministic": true

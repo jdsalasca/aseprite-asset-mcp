@@ -49,11 +49,6 @@ export class VisualAssetToolController {
       inputSchema: { input_map_filename: z.string().min(1), output_map_filename: z.string().min(1), preview_filename: z.string().min(1).optional(), transition_width: z.number().int().min(1).max(8).default(2), seed: z.number().int().default(1) },
     }, async ({ input_map_filename, output_map_filename, preview_filename, transition_width, seed }) => this.result(await this.visualAssets.generateBiomeTransition({ inputMapFilename: input_map_filename, outputMapFilename: output_map_filename, ...(preview_filename ? { previewFilename: preview_filename } : {}), transitionWidth: transition_width, seed })));
 
-    server.registerTool("generate_time_of_day_pack", {
-      description: "Generate a deterministic day, sunset, night, and sunrise GIF pack.",
-      inputSchema: { input_filename: z.string().min(1), output_filename: z.string().min(1), manifest_filename: z.string().min(1).optional(), steps: z.number().int().min(2).max(24).default(8), delay_ms: z.number().int().positive().default(180) },
-    }, async ({ input_filename, output_filename, manifest_filename, steps, delay_ms }) => this.result(await this.visualAssets.generateTimeOfDayPack({ inputFilename: input_filename, outputFilename: output_filename, ...(manifest_filename ? { manifestFilename: manifest_filename } : {}), steps, delayMs: delay_ms })));
-
     server.registerTool("apply_material_texture", {
       description: "Apply deterministic water, earth, grass, stone, or snow granularity while preserving transparency and source data.",
       inputSchema: { input_filename: z.string().min(1), output_filename: z.string().min(1), material: z.enum(["water", "earth", "grass", "stone", "snow"]), seed: z.number().int(), intensity: z.number().min(0).max(1).default(0.6), format: z.enum(["png", "gif"]).optional() },
