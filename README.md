@@ -204,7 +204,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `generate_seamless_texture`: iguala bordes opuestos para texturas repetibles de agua, tierra, piedra o hierba sin alterar la fuente.
 - `generate_water_reflection`: genera un GIF determinista con reflejo bajo una línea de agua, oleaje y destellos temporales para océanos, playas y mapas.
 - `generate_water_caustics`: genera una pasada GIF de luz refractada sobre píxeles opacos de agua, piscinas, playas o interiores inundados.
-- `generate_day_night_cycle`: genera un GIF determinista con las etapas `day`, `sunset`, `night` y `sunrise`, preservando transparencia y dimensiones.
+- `generate_day_night_cycle`: genera un GIF determinista con las etapas `day`, `sunset`, `night` y `sunrise`, preservando transparencia y dimensiones. Acepta un `manifest_filename` opcional que escribe un manifest JSON determinista (`kind: day_night_cycle`) con las fases.
 - `generate_environment_pack`: empaqueta playa, bosque, aldea o cueva en una sola llamada.
 - `create_asset_recipe`: compone outline, grading, materiales, luz, sombras, partículas, normal map y quality gate en un plan determinista sin ejecutar cambios.
 - `get_asset_library`: busca una biblioteca de 339 items preconstruidos en 10 categorías, con resultados compactos para reducir tokens.
@@ -261,6 +261,8 @@ Para regenerar la biblioteca después de cambiar sus semillas:
 npm run asset:library:catalog
 ```
 
+La API HTTP sidecar (`/api/v1/...`) es experimental y puede cambiar entre versiones minor; los cambios breaking se documentan en el CHANGELOG.
+
 Ejemplos REST:
 
 ```text
@@ -281,7 +283,7 @@ POST /api/v1/effects/water-caustics
 POST /api/v1/effects/day-night
 POST /api/v1/variants/pack
 POST /api/v1/assets/quality-bundle
-POST /api/v1/assets/enhancement-bundle
+POST /api/v1/assets/enhancement-plan
 POST /api/v1/assets/enhancement-batch
 POST /api/v1/assets/quality-batch
 POST /api/v1/assets/animation-quality
@@ -317,7 +319,7 @@ Las dos últimas rutas sirven PNG/GIF de forma binaria desde el adaptador de arc
 
 `build_scene_bundle` y `POST /api/v1/library/scene-bundle` reciben `item_ids`, `output_prefix`, `width`, `height`, `padding`, `frames` y `delay_ms`. Generan `scene.png`, `scene.json`, `scene.gif` y `scene-animation.json` dentro del prefijo indicado con una respuesta compacta.
 
-`apply_enhancement_plan` (MCP) y `POST /api/v1/assets/enhancement-bundle` (REST) reciben `{ "filename": "hero.png", "output_filename": "hero-enhanced.png", "format": "png", "goals": ["cleanup", "terrain_grain", "directional_lighting"], "max_colors": 64, "seed": 7 }`. El servicio de aplicación analiza la referencia, crea el plan explicable, escribe una salida separada y ejecuta el quality gate; devuelve `plan`, `applied`, `quality`, `deterministic` y `sourcePreserved` en una respuesta.
+`apply_enhancement_plan` (MCP) y `POST /api/v1/assets/enhancement-plan` (REST) reciben `{ "filename": "hero.png", "output_filename": "hero-enhanced.png", "format": "png", "goals": ["cleanup", "terrain_grain", "directional_lighting"], "max_colors": 64, "seed": 7 }`. El servicio de aplicación analiza la referencia, crea el plan explicable, escribe una salida separada y ejecuta el quality gate; devuelve `plan`, `applied`, `quality`, `deterministic` y `sourcePreserved` en una respuesta.
 
 `apply_enhancement_batch` y `POST /api/v1/assets/enhancement-batch` reciben `{ "items": [{ "filename": "hero.png", "output_filename": "hero-batch.png", "format": "png" }, { "filename": "tree.gif", "output_filename": "tree-batch.gif", "format": "gif" }], "goals": ["cleanup", "particles"], "max_colors": 64, "seed": 7 }`. Validan colisiones globales antes de escribir, procesan en orden y devuelven `summary: { total, succeeded, failed }` con error por item.
 

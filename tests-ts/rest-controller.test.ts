@@ -6,16 +6,17 @@ import { AssetRecipeComposerService } from "../src/application/services/AssetRec
 import type { AssetRestUseCases } from "../src/application/ports/AssetRestPorts.js";
 import { AssetRestController } from "../src/interfaces/rest/AssetRestController.js";
 import type { AssetOperationResult } from "../src/domain/asset-operations.js";
-import type { SpriteEffectsGateway } from "../src/domain/sprite-effects.js";
+import type { DayNightCycleInput, SpriteEffectsGateway } from "../src/domain/sprite-effects.js";
 import { AssetLibraryService } from "../src/application/services/AssetLibraryService.js";
 import type { AssetLibraryCatalog } from "../src/domain/asset-library.js";
 import type { AssetLibraryPort } from "../src/application/ports/AssetLibraryPort.js";
 
 function result(operation: string): AssetOperationResult { return { ok: true, message: JSON.stringify({ operation, deterministic: true, sourcePreserved: true }) }; }
+let capturedDayNight: DayNightCycleInput | undefined;
 const libraryCatalog: AssetLibraryCatalog = { schemaVersion: 1, libraryVersion: "test", categories: [{ id: "flora", title: "Flora", description: "Plants", itemCount: 1 }], items: [{ id: "oak", title: "Oak", category: "flora", folder: "flora/oak", kind: "sprite", description: "Tree", tags: ["tree"], variants: ["rain"], formats: ["png", "svg", "json"], readmePath: "flora/oak/README.md", previewPath: "flora/oak/preview.png", spritePath: "flora/oak/sprite-sheet.png", deterministic: true }], presets: [{ id: "test-preset", title: "Test preset", description: "Oak", category: "flora", itemIds: ["oak"], recommendedTools: ["generate_world_map"], deterministic: true }] };
 class FakeLibrary implements AssetLibraryPort { public async load(): Promise<AssetLibraryCatalog> { return libraryCatalog; } public async read() { return { data: new Uint8Array([137, 80, 78, 71]), contentType: "image/png" }; } }
 function fakeUseCases(): AssetRestUseCases {
-  const effects: SpriteEffectsGateway = { applyPixelOutline: async () => result("apply_pixel_outline"), applyColorGrade: async () => result("apply_color_grade"), generateSpriteShadow: async () => result("generate_sprite_shadow"), generateParticleBurst: async () => result("generate_particle_burst"), generateNormalMap: async () => result("generate_normal_map"), generateRainOverlay: async () => result("generate_rain_overlay"), generateMotionPack: async () => result("generate_motion_pack"), generateSeamlessTexture: async () => result("generate_seamless_texture"), generateWaterReflection: async () => result("generate_water_reflection"), generateWaterCaustics: async () => result("generate_water_caustics"), generateDayNightCycle: async () => result("generate_day_night_cycle") };
+  const effects: SpriteEffectsGateway = { applyPixelOutline: async () => result("apply_pixel_outline"), applyColorGrade: async () => result("apply_color_grade"), generateSpriteShadow: async () => result("generate_sprite_shadow"), generateParticleBurst: async () => result("generate_particle_burst"), generateNormalMap: async () => result("generate_normal_map"), generateRainOverlay: async () => result("generate_rain_overlay"), generateMotionPack: async () => result("generate_motion_pack"), generateSeamlessTexture: async () => result("generate_seamless_texture"), generateWaterReflection: async () => result("generate_water_reflection"), generateWaterCaustics: async () => result("generate_water_caustics"), generateDayNightCycle: async (input) => { capturedDayNight = input; return result("generate_day_night_cycle"); } };
   return {
     createRecipe: (input) => new AssetRecipeComposerService().compose(input),
     executeRecipe: async (input) => ({ ok: true, recipeId: "test-recipe", outputFilename: input.inputFilename, steps: [], sourcePreserved: true, deterministic: true }),
@@ -35,7 +36,7 @@ function fakeUseCases(): AssetRestUseCases {
     assetManifestAudit: { audit: async () => result("audit_asset_manifest") },
     assetSceneRecommendation: { recommend: async () => result("recommend_asset_scene") },
     assetSceneBundle: { build: async () => result("build_scene_bundle") },
-    enhancementBundle: { apply: async () => result("apply_enhancement_bundle") },
+    enhancementPlan: { apply: async () => result("apply_enhancement_plan") },
     enhancementBatch: { apply: async () => result("apply_enhancement_batch") },
     imageAssets: { upscalePixelArt: async () => result("upscale_pixel_art"), qualityBundle: async () => result("inspect_asset_bundle"), harmonizePalette: async () => result("harmonize_asset_palette") },
     batchQuality: { inspect: async () => result("inspect_asset_batch") },
@@ -155,18 +156,22 @@ test("REST controller exposes the same recipe and effect application services", 
     const caustics = await fetch(`${rest.url}/api/v1/effects/water-caustics`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_filename: "hero.png", output_filename: "hero-caustics.gif", frames: 4, seed: 3, intensity: 0.8, scale: 3, color: "#DFF6FF" }) });
     assert.equal(caustics.status, 200);
     assert.equal((await caustics.json()).data.operation, "generate_water_caustics");
-    const dayNight = await fetch(`${rest.url}/api/v1/effects/day-night`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_filename: "hero.png", output_filename: "hero-day-night.gif", frames: 8, seed: 23, intensity: 0.8 }) });
+    capturedDayNight = undefined;
+    const dayNight = await fetch(`${rest.url}/api/v1/effects/day-night`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_filename: "hero.png", output_filename: "hero-day-night.gif", frames: 8, seed: 23, intensity: 0.8, manifest_filename: "hero-day-night.json" }) });
     assert.equal(dayNight.status, 200);
     assert.equal((await dayNight.json()).data.operation, "generate_day_night_cycle");
+    assert.equal((capturedDayNight as DayNightCycleInput | undefined)?.manifestFilename, "hero-day-night.json");
     const variantPack = await fetch(`${rest.url}/api/v1/variants/pack`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_filename: "oak.png", output_prefix: "oak-variants", variants: ["rain", "fire", "birds"], frames: 6, seed: 4 }) });
     assert.equal(variantPack.status, 200);
     assert.equal((await variantPack.json()).data.operation, "generate_variant_pack");
     const qualityBundle = await fetch(`${rest.url}/api/v1/assets/quality-bundle`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ filename: "hero.png", max_colors: 32, max_isolated_pixels: 4 }) });
     assert.equal(qualityBundle.status, 200);
     assert.equal((await qualityBundle.json()).data.operation, "inspect_asset_bundle");
-    const enhancementBundle = await fetch(`${rest.url}/api/v1/assets/enhancement-bundle`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ filename: "hero.png", output_filename: "hero-enhanced.png", goals: ["cleanup", "particles"], max_colors: 32, seed: 7 }) });
-    assert.equal(enhancementBundle.status, 200);
-    assert.equal((await enhancementBundle.json()).data.operation, "apply_enhancement_bundle");
+    const enhancementPlan = await fetch(`${rest.url}/api/v1/assets/enhancement-plan`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ filename: "hero.png", output_filename: "hero-enhanced.png", goals: ["cleanup", "particles"], max_colors: 32, seed: 7 }) });
+    assert.equal(enhancementPlan.status, 200);
+    assert.equal((await enhancementPlan.json()).data.operation, "apply_enhancement_plan");
+    const legacyEnhancementPlan = await fetch(`${rest.url}/api/v1/assets/enhancement-bundle`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ filename: "hero.png", output_filename: "hero-enhanced.png" }) });
+    assert.equal(legacyEnhancementPlan.status, 404);
     const enhancementBatch = await fetch(`${rest.url}/api/v1/assets/enhancement-batch`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ items: [{ filename: "hero.png", output_filename: "hero-batch.png", format: "png" }, { filename: "oak.png", output_filename: "oak-batch.gif", format: "gif" }], goals: ["cleanup"], max_colors: 32, seed: 7 }) });
     assert.equal(enhancementBatch.status, 200);
     assert.equal((await enhancementBatch.json()).data.operation, "apply_enhancement_batch");

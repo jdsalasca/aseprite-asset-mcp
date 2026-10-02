@@ -4,7 +4,7 @@ import type { AssetOperationResult } from "./asset-operations.js";
 
 export type EnhancementGoal = "cleanup" | "terrain_grain" | "water_flow" | "directional_lighting" | "particles" | "time_of_day" | "animation";
 
-export interface EnhancementPlanInput {
+export interface EnhancementPlannerInput {
   filename: string;
   analysis: ReferenceAnalysis;
   goals?: readonly EnhancementGoal[] | undefined;
@@ -43,7 +43,7 @@ export interface EnhancementApplyReport {
   sourcePreserved: true;
 }
 
-export interface EnhancementBundleInput {
+export interface EnhancementPlanInput {
   filename: string;
   outputFilename: string;
   format: ImageOutputFormat;
@@ -52,8 +52,8 @@ export interface EnhancementBundleInput {
   seed?: number | undefined;
 }
 
-export interface EnhancementBundleResult {
-  operation: "apply_enhancement_bundle";
+export interface EnhancementPlanResult {
+  operation: "apply_enhancement_plan";
   plan: EnhancementPlan;
   applied: EnhancementApplyReport;
   quality: { valid: boolean; violations: string[] };
@@ -61,8 +61,8 @@ export interface EnhancementBundleResult {
   sourcePreserved: true;
 }
 
-export interface EnhancementBundleGateway {
-  apply(input: EnhancementBundleInput): Promise<AssetOperationResult>;
+export interface EnhancementPlanGateway {
+  apply(input: EnhancementPlanInput): Promise<AssetOperationResult>;
 }
 
 export interface EnhancementBatchItemInput {

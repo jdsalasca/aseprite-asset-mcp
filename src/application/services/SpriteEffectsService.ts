@@ -1,11 +1,13 @@
+import path from "node:path";
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
-import type { RasterCodec } from "../../domain/image-assets.js";
+import type { AssetManifestWriter, RasterCodec } from "../../domain/image-assets.js";
 import type { RasterFrame } from "../../domain/pixel-art.js";
 import type { ColorGradeInput, DayNightCycleInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, SeamlessTextureInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteShadowInput, WaterCausticsInput, WaterReflectionInput } from "../../domain/sprite-effects.js";
 
 function ok(value: unknown): AssetOperationResult { return { ok: true, message: JSON.stringify(value) }; }
 function fail(error: unknown): AssetOperationResult { return { ok: false, message: error instanceof Error ? error.message : String(error) }; }
 function assertDifferent(input: string, output: string): void { if (input.trim().toLowerCase() === output.trim().toLowerCase()) throw new Error("Input and output filenames must be different"); }
+function sameFile(a: string, b: string): boolean { const left = path.resolve(a); const right = path.resolve(b); return process.platform === "win32" ? left.toLowerCase() === right.toLowerCase() : left === right; }
 function rgba(color: string): [number, number, number, number] { const value = color.replace(/^#/, ""); if (!/^[0-9a-fA-F]{6}(?:[0-9a-fA-F]{2})?$/.test(value)) throw new Error(`Invalid color: ${color}`); return [Number.parseInt(value.slice(0, 2), 16), Number.parseInt(value.slice(2, 4), 16), Number.parseInt(value.slice(4, 6), 16), value.length === 8 ? Number.parseInt(value.slice(6, 8), 16) : 255]; }
 function formatFor(frames: RasterFrame[], format?: SpriteEffectFormat): SpriteEffectFormat { return format ?? (frames.length > 1 ? "gif" : "png"); }
 function clamp(value: number, min: number, max: number): number { return Math.max(min, Math.min(max, value)); }
@@ -36,7 +38,7 @@ function interpolateChannel(left: number, right: number, progress: number): numb
 function interpolateRgb(left: [number, number, number], right: [number, number, number], progress: number): [number, number, number] { return [interpolateChannel(left[0], right[0], progress), interpolateChannel(left[1], right[1], progress), interpolateChannel(left[2], right[2], progress)]; }
 
 export class SpriteEffectsService implements SpriteEffectsGateway {
-  public constructor(private readonly codec: RasterCodec) {}
+  public constructor(private readonly codec: RasterCodec, private readonly manifestWriter?: AssetManifestWriter) {}
 
   public async applyPixelOutline(input: PixelOutlineInput): Promise<AssetOperationResult> {
     try {
@@ -281,7 +283,12 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
 
   public async generateDayNightCycle(input: DayNightCycleInput): Promise<AssetOperationResult> {
     try {
-      assertDifferent(input.inputFilename, input.outputFilename);
+      if (sameFile(input.inputFilename, input.outputFilename)) throw new Error("Input and output filenames must be different");
+      if (input.manifestFilename) {
+        if (sameFile(input.inputFilename, input.manifestFilename) || sameFile(input.outputFilename, input.manifestFilename)) throw new Error("Manifest filename must be different from the input and output filenames.");
+      }
+      const manifestWriter = this.manifestWriter;
+      if (input.manifestFilename && !manifestWriter) return fail(new Error("Day-night manifest writing is not configured"));
       const source = await this.codec.decode(input.inputFilename);
       const firstFrame = source[0];
       if (!firstFrame) throw new Error("Day-night cycle requires at least one source frame");
@@ -317,7 +324,8 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
       });
       const format = formatFor(frames, input.format);
       await this.codec.encode(frames, input.outputFilename, format);
-      return ok({ operation: "generate_day_night_cycle", input: input.inputFilename, output: input.outputFilename, frames: frames.length, format, stages, deterministic: true, sourcePreserved: true });
+      if (input.manifestFilename) await manifestWriter!.write(input.manifestFilename, { schemaVersion: 1, kind: "day_night_cycle", input: input.inputFilename, output: input.outputFilename, frames: frames.length, phases: stages, seed: input.seed, intensity, delayMs: input.delayMs ?? 90 });
+      return ok({ operation: "generate_day_night_cycle", input: input.inputFilename, output: input.outputFilename, frames: frames.length, format, stages, manifest: input.manifestFilename || null, deterministic: true, sourcePreserved: true });
     } catch (error) { return fail(error); }
   }
 }

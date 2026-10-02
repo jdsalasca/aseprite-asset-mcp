@@ -5,6 +5,18 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-10-02
+
+### Added
+- `generate_day_night_cycle` accepts an optional `manifest_filename` and writes a deterministic JSON manifest (`kind: "day_night_cycle"`, phases `day/sunset/night/sunrise`); the result reports `manifest` (or `null`).
+
+### Changed
+- REST: `POST /api/v1/assets/enhancement-bundle` renamed to `POST /api/v1/assets/enhancement-plan`; internal service/port renamed to `EnhancementPlanService`/`enhancementPlan`.
+
+### Breaking
+- REST route `/enhancement-bundle` now returns 404 (use `/enhancement-plan`).
+- Payload label for composed enhancements changes from `apply_enhancement_bundle` to `apply_enhancement_plan`; the batch item results do not expose that label.
+
 ## [1.0.0] - 2026-09-20
 
 First public release of the TypeScript/Node MCP server.

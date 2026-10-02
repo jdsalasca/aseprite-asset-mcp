@@ -1,20 +1,20 @@
 import path from "node:path";
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
-import type { EnhancementBatchGateway, EnhancementBatchInput, EnhancementBatchItemResult, EnhancementBatchResult, EnhancementBundleGateway } from "../../domain/enhancement.js";
+import type { EnhancementBatchGateway, EnhancementBatchInput, EnhancementBatchItemResult, EnhancementBatchResult, EnhancementPlanGateway } from "../../domain/enhancement.js";
 
 function failure(error: unknown): string { return error instanceof Error ? error.message : String(error); }
 function key(filename: string): string { return path.resolve(filename).toLowerCase(); }
 function validName(filename: unknown): filename is string { return typeof filename === "string" && filename.trim().length > 0 && !filename.includes("\0"); }
 
 export class EnhancementBatchService implements EnhancementBatchGateway {
-  public constructor(private readonly bundle: EnhancementBundleGateway) {}
+  public constructor(private readonly plans: EnhancementPlanGateway) {}
 
   public async apply(input: EnhancementBatchInput): Promise<AssetOperationResult> {
     try {
       this.validate(input);
       const items: EnhancementBatchItemResult[] = [];
       for (const item of input.items) {
-        const result = await this.bundle.apply({ filename: item.filename, outputFilename: item.outputFilename, format: item.format, ...(input.goals ? { goals: input.goals } : {}), maxColors: input.maxColors, seed: input.seed });
+        const result = await this.plans.apply({ filename: item.filename, outputFilename: item.outputFilename, format: item.format, ...(input.goals ? { goals: input.goals } : {}), maxColors: input.maxColors, seed: input.seed });
         items.push(this.itemResult(item.filename, item.outputFilename, result));
       }
       const succeeded = items.filter((item) => item.ok).length;
@@ -47,7 +47,7 @@ export class EnhancementBatchService implements EnhancementBatchGateway {
     if (!result.ok) return { filename, outputFilename, ok: false, error: result.message };
     try {
       const payload = JSON.parse(result.message) as { operation?: string; applied?: { plan?: never; planId?: string; frames?: number; passesApplied?: string[] }; quality?: { valid?: boolean; violations?: string[] }; plan?: { planId?: string } };
-      if (payload.operation !== "apply_enhancement_bundle" || !payload.applied || !payload.quality || typeof payload.quality.valid !== "boolean") throw new Error("Enhancement bundle returned an invalid payload");
+      if (payload.operation !== "apply_enhancement_plan" || !payload.applied || !payload.quality || typeof payload.quality.valid !== "boolean") throw new Error("Enhancement plan returned an invalid payload");
       return { filename, outputFilename, ok: true, ...(payload.plan?.planId ? { planId: payload.plan.planId } : payload.applied.planId ? { planId: payload.applied.planId } : {}), ...(payload.applied.frames === undefined ? {} : { frames: payload.applied.frames }), ...(payload.applied.passesApplied ? { passesApplied: payload.applied.passesApplied.map(String) } : {}), quality: { valid: payload.quality.valid, violations: Array.isArray(payload.quality.violations) ? payload.quality.violations.map(String) : [] } };
     } catch (error) {
       return { filename, outputFilename, ok: false, error: failure(error) };
