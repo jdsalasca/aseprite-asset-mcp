@@ -282,7 +282,7 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
   public async generateDayNightCycle(input: DayNightCycleInput): Promise<AssetOperationResult> {
     try {
       assertDifferent(input.inputFilename, input.outputFilename);
-      if (input.manifestFilename) assertDifferent(input.inputFilename, input.manifestFilename);
+      if (input.manifestFilename) { assertDifferent(input.inputFilename, input.manifestFilename); assertDifferent(input.outputFilename, input.manifestFilename); }
       const source = await this.codec.decode(input.inputFilename);
       const firstFrame = source[0];
       if (!firstFrame) throw new Error("Day-night cycle requires at least one source frame");
