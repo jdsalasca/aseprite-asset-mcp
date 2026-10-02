@@ -37,14 +37,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify Aseprite binary
-        shell: pwsh
+      - name: Verify Aseprite binary and system font
         run: |
           if (-not (Test-Path -LiteralPath $env:ASEPRITE_PATH)) {
             Write-Error "Aseprite not found at '$env:ASEPRITE_PATH'. Install it or set the ASEPRITE_PATH repository variable."
             exit 1
           }
+          $fonts = @('C:\Windows\Fonts\arial.ttf', 'C:\Windows\Fonts\segoeui.ttf')
+          if (-not ($fonts | Where-Object { Test-Path -LiteralPath $_ })) {
+            Write-Error "No system font found. The text integration test needs at least one of: $($fonts -join ', ')."
+            exit 1
+          }
           & $env:ASEPRITE_PATH --version
 
       - name: Run real Aseprite integration tests
-        run: npx tsx --test tests-ts/integration/real-aseprite.test.ts
+        run: npm run test:integration

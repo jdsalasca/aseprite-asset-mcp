@@ -17,9 +17,14 @@ por lo que el gate se cumple y los 8 tests corren de verdad (8/8, sin skips).
 ## Requisitos
 
 - Un runner self-hosted **Windows** con:
-  - Node.js 24 y npm.
   - Aseprite instalado (Steam o standalone).
+  - Al menos una fuente del sistema de Windows: `C:\Windows\Fonts\arial.ttf` o
+    `C:\Windows\Fonts\segoeui.ttf` (sin ninguna, el test de texto se salta).
   - Registrado con los labels `self-hosted`, `windows` y `aseprite`.
+
+Node.js 24 **no** hace falta preinstalarlo en la máquina: el workflow lo instala
+con `actions/setup-node`. El step de pre-check exige el binario de Aseprite y al
+menos una de esas fuentes, y falla con `exit 1` si falta cualquiera de los dos.
 
 ## Registro del runner
 
@@ -65,6 +70,16 @@ gh variable set ASEPRITE_PATH --body "C:\Program Files (x86)\Steam\steamapps\com
 
 ## Disparo manual
 
+`workflow_dispatch` y `schedule` solo funcionan cuando el workflow ya existe en
+la rama por defecto (`develop`). **Mientras el PR esté abierto, `gh workflow run`
+fallará**: los workflows de una rama de feature no son desplegables. Antes del
+merge, la verificación disponible es el check de PR (`typecheck`) y que el
+archivo exista en la rama.
+
+Orden correcto: **merge a `develop` → registrar el runner → `gh workflow run`**.
+
+Después del merge:
+
 ```bash
 gh workflow run "Aseprite integration"
 # con override de ruta
@@ -79,13 +94,12 @@ Mientras el runner `[self-hosted, windows, aseprite]` no exista, cualquier run
 (nightly o manual) queda en **`queued`** indefinidamente porque ningún runner
 satisface los labels.
 
-Para no acumular runs en cola, comenta el bloque `schedule:` del workflow
-mientras no haya runner:
+Para no acumular runs en cola, comenta solo el bloque `schedule:` del workflow
+mientras no haya runner (no comentes `on:`, dejarías `workflow_dispatch` huérfano):
 
 ```yaml
-# on:
-#   schedule:
-#     - cron: '0 8 * * *' # nightly, 08:00 UTC
+  # schedule:
+  #   - cron: '0 8 * * *' # nightly, 08:00 UTC
 ```
 
 Al registrar el runner, descomenta el bloque. Un run manual ya encolado puede
@@ -94,6 +108,8 @@ cancelarse con `gh run cancel <run-id>`.
 ## Evidencia esperada
 
 Con el runner registrado y Aseprite accesible, el step
-**Run real Aseprite integration tests** debe reportar **8/8 tests OK, 0
-skipped**. El step **Verify Aseprite binary** falla con `exit 1` (y un mensaje
-explícito) si el binario no existe, en vez de saltar silenciosamente.
+**Run real Aseprite integration tests** (que ejecuta `npm run test:integration`)
+debe reportar **8/8 tests OK, 0 skipped**. El step **Verify Aseprite binary and
+system font** falla con `exit 1` y un mensaje explícito si falta el binario o si
+no existe ninguna fuente (`arial.ttf`/`segoeui.ttf`), en vez de dejar el job en
+verde con 7/8.
