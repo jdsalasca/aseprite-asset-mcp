@@ -1,0 +1,54 @@
+name: Aseprite integration
+
+# Runs the real-Aseprite integration suite on a self-hosted runner that has
+# Aseprite installed. Never triggered by pull_request/push: it would block PRs
+# until the runner is registered. See docs/CI_ASEPRITE.md.
+on:
+  schedule:
+    - cron: '0 8 * * *' # nightly, 08:00 UTC
+  workflow_dispatch:
+    inputs:
+      aseprite_path:
+        description: Path to the Aseprite executable on the runner
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aseprite-integration
+  cancel-in-progress: false
+
+jobs:
+  integration:
+    runs-on: [self-hosted, windows, aseprite]
+    timeout-minutes: 20
+    env:
+      ASEPRITE_PATH: ${{ inputs.aseprite_path || vars.ASEPRITE_PATH || 'C:\Program Files (x86)\Steam\steamapps\common\Aseprite\Aseprite.exe' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify Aseprite binary and system font
+        run: |
+          if (-not (Test-Path -LiteralPath $env:ASEPRITE_PATH)) {
+            Write-Error "Aseprite not found at '$env:ASEPRITE_PATH'. Install it or set the ASEPRITE_PATH repository variable."
+            exit 1
+          }
+          $fonts = @('C:\Windows\Fonts\arial.ttf', 'C:\Windows\Fonts\segoeui.ttf')
+          if (-not ($fonts | Where-Object { Test-Path -LiteralPath $_ })) {
+            Write-Error "No system font found. The text integration test needs at least one of: $($fonts -join ', ')."
+            exit 1
+          }
+          & $env:ASEPRITE_PATH --version
+
+      - name: Run real Aseprite integration tests
+        run: npm run test:integration
