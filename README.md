@@ -233,6 +233,8 @@ npm test
 
 Las pruebas de dominio y planes no necesitan abrir Aseprite. La prueba MCP inicia el servidor TypeScript real, hace el handshake stdio y verifica las herramientas expuestas.
 
+Los tests de integración reales corren en un runner self-hosted — ver [docs/CI_ASEPRITE.md](docs/CI_ASEPRITE.md).
+
 ## Docker
 
 La imagen usa Node.js 24. El binario de Aseprite debe estar disponible dentro del contenedor y configurarse con `ASEPRITE_PATH`; no se incluyen credenciales ni binarios propietarios.
