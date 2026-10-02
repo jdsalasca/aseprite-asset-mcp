@@ -5,7 +5,7 @@ import type { EnhancementBatchResult } from "../src/domain/enhancement.js";
 import { EnhancementBatchService } from "../src/application/services/EnhancementBatchService.js";
 
 function success(filename: string, outputFilename: string, planId = "plan-1"): AssetOperationResult {
-  return { ok: true, message: JSON.stringify({ operation: "apply_enhancement_bundle", plan: { planId }, applied: { planId, outputFilename, frames: 1, passesApplied: ["cleanup"] }, quality: { valid: true, violations: [] }, deterministic: true, sourcePreserved: true }) };
+  return { ok: true, message: JSON.stringify({ operation: "apply_enhancement_plan", plan: { planId }, applied: { planId, outputFilename, frames: 1, passesApplied: ["cleanup"] }, quality: { valid: true, violations: [] }, deterministic: true, sourcePreserved: true }) };
 }
 
 test("enhancement batch preserves order and isolates one failed asset", async () => {

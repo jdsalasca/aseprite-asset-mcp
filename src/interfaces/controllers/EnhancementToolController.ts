@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
-import { EnhancementPlanService } from "../../application/services/EnhancementPlanService.js";
+import { EnhancementPlannerService } from "../../application/services/EnhancementPlannerService.js";
 import type { EnhancementGoal } from "../../domain/enhancement.js";
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { ReferenceAnalysis } from "../../domain/visual-assets.js";
@@ -10,7 +10,7 @@ import { DeterministicEnhancementService } from "../../application/services/Dete
 const ENHANCEMENT_GOALS = ["cleanup", "terrain_grain", "water_flow", "directional_lighting", "particles", "time_of_day", "animation"] as const;
 
 export class EnhancementToolController {
-  public constructor(private readonly visualAssets: VisualAssetService, private readonly enhancements: DeterministicEnhancementService, private readonly plans = new EnhancementPlanService()) {}
+  public constructor(private readonly visualAssets: VisualAssetService, private readonly enhancements: DeterministicEnhancementService, private readonly plans = new EnhancementPlannerService()) {}
 
   public register(server: McpServer): void {
     server.registerTool("suggest_enhancement_plan", {

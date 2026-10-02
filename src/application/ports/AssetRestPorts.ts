@@ -27,7 +27,7 @@ import type { AssetLibraryVariantPackService } from "../services/AssetLibraryVar
 import type { AssetManifestAuditService } from "../services/AssetManifestAuditService.js";
 import type { AssetSceneRecommendationService } from "../services/AssetSceneRecommendationService.js";
 import type { AssetSceneBundleService } from "../services/AssetSceneBundleService.js";
-import type { EnhancementBundleService } from "../services/EnhancementBundleService.js";
+import type { EnhancementPlanService } from "../services/EnhancementPlanService.js";
 import type { EnhancementBatchService } from "../services/EnhancementBatchService.js";
 
 export interface AssetRestUseCases {
@@ -49,7 +49,7 @@ export interface AssetRestUseCases {
   assetManifestAudit: Pick<AssetManifestAuditService, "audit">;
   assetSceneRecommendation: Pick<AssetSceneRecommendationService, "recommend">;
   assetSceneBundle: Pick<AssetSceneBundleService, "build">;
-  enhancementBundle: Pick<EnhancementBundleService, "apply">;
+  enhancementPlan: Pick<EnhancementPlanService, "apply">;
   enhancementBatch: Pick<EnhancementBatchService, "apply">;
   imageAssets: Pick<PixelArtAssetService, "upscalePixelArt" | "qualityBundle" | "harmonizePalette">;
   batchQuality: Pick<AssetBatchQualityService, "inspect">;
