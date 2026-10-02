@@ -44,6 +44,10 @@ export function composeRasterSceneFrame(input: RasterSceneCompositionInput): Ras
   const frameIndex = input.frameIndex ?? 0;
   const drawableWidth = input.width - input.padding * 2;
   const drawableHeight = input.height - input.padding * 2;
+  const columns = Math.max(1, Math.ceil(Math.sqrt(input.layers.length)));
+  const rows = Math.max(1, Math.ceil(input.layers.length / columns));
+  const cellWidth = Math.max(1, Math.floor(drawableWidth / columns));
+  const cellHeight = Math.max(1, Math.floor(drawableHeight / rows));
   const pixels = new Uint8ClampedArray(input.width * input.height * 4);
   const placements: RasterScenePlacement[] = [];
   input.layers.forEach((layer, index) => {
@@ -51,9 +55,11 @@ export function composeRasterSceneFrame(input: RasterSceneCompositionInput): Ras
     if (!availableFrames || availableFrames.length === 0) throw new Error(`Scene layer has no renderable frames: ${layer.assetId}`);
     const source = availableFrames[frameIndex % availableFrames.length];
     if (!source) throw new Error(`Scene layer frame is unavailable: ${layer.assetId}`);
-    const fitted = fit(source, drawableWidth, drawableHeight);
-    const x = input.padding + Math.floor((drawableWidth - fitted.width) / 2);
-    const y = input.padding + Math.floor((drawableHeight - fitted.height) / 2);
+    const cellX = (index % columns) * cellWidth;
+    const cellY = Math.floor(index / columns) * cellHeight;
+    const fitted = fit(source, cellWidth, cellHeight);
+    const x = input.padding + cellX + Math.floor((cellWidth - fitted.width) / 2);
+    const y = input.padding + cellY + Math.floor((cellHeight - fitted.height) / 2);
     composite(pixels, input.width, input.height, fitted, x, y);
     placements.push({ ...layer, x, y, width: fitted.width, height: fitted.height });
   });
