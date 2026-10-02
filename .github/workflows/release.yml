@@ -1,14 +1,18 @@
 name: Release npm package
 
 # Publishes `aseprite-asset-mcp` to the public npm registry when a GitHub
-# Release is published (or when a `v*` tag is pushed).
+# Release is published (or when a `v*` tag is pushed, or manually).
 #
-# Required repository secret:
-#   NPM_TOKEN - an npm "Automation" access token with publish rights for the
-#               `aseprite-asset-mcp` package.
-# Configure it in GitHub under:
-#   Settings -> Secrets and variables -> Actions -> New repository secret.
-# This workflow never hardcodes a token; it only reads `secrets.NPM_TOKEN`.
+# Authentication, in order of preference:
+#   1. Trusted Publishing (OIDC) - recommended, no secrets.
+#      Configure it on npmjs.com: package -> Settings -> Trusted Publisher ->
+#      GitHub Actions with repository `jdsalasca/aseprite-asset-mcp` and
+#      workflow `release.yml`. If the trusted publisher exists, this workflow
+#      publishes with provenance automatically.
+#   2. NPM_TOKEN - optional repository secret holding an npm Automation token,
+#      used only when the OIDC trusted publisher is not configured.
+#      Settings -> Secrets and variables -> Actions -> New repository secret.
+# The workflow never hardcodes a token.
 
 on:
   release:
@@ -20,7 +24,7 @@ on:
 
 permissions:
   contents: read
-  id-token: write # required for npm provenance
+  id-token: write # required for npm trusted publishing / provenance
 
 concurrency:
   group: npm-release-${{ github.ref }}
@@ -29,6 +33,8 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -66,20 +72,12 @@ jobs:
             echo "aseprite-asset-mcp@${VERSION} is not on npm yet; will publish."
           fi
 
-      - name: Check npm token
-        id: token_check
-        run: |
-          if [ -n "${NPM_TOKEN}" ]; then
-            echo "has_token=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has_token=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::NPM_TOKEN secret is not configured; skipping npm publish. Add it in Settings -> Secrets and variables -> Actions."
-          fi
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish with Trusted Publishing (OIDC)
+        if: steps.version_check.outputs.already_published == 'false' && env.NPM_TOKEN == ''
+        run: npm publish --provenance --access public
 
-      - name: Publish to npm with provenance
-        if: steps.version_check.outputs.already_published == 'false' && steps.token_check.outputs.has_token == 'true'
+      - name: Publish with NPM_TOKEN
+        if: steps.version_check.outputs.already_published == 'false' && env.NPM_TOKEN != ''
         run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
