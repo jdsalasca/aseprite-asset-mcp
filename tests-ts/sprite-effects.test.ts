@@ -4,6 +4,8 @@ import os from "node:os";
 import path from "node:path";
 import sharp from "sharp";
 import test from "node:test";
+import type { RasterCodec } from "../src/domain/image-assets.js";
+import type { RasterFrame } from "../src/domain/pixel-art.js";
 import { SpriteEffectsService } from "../src/application/services/SpriteEffectsService.js";
 import { JsonAssetManifestWriter } from "../src/infrastructure/image/JsonAssetManifestWriter.js";
 import { SharpRasterCodec } from "../src/infrastructure/image/SharpRasterCodec.js";
@@ -251,4 +253,48 @@ test("day night manifest rejects a path alias of the generated output image", as
   const clash = await serviceWithManifest.generateDayNightCycle({ inputFilename: input, outputFilename: output, frames: 8, seed: 5, manifestFilename: alias });
   assert.equal(clash.ok, false);
   assert.deepEqual(await fs.readFile(output), before);
+});
+
+function litCells(frame: RasterFrame): Set<number> {
+  const lit = new Set<number>();
+  for (let index = 0; index < frame.pixels.length; index += 4) if ((frame.pixels[index + 3] ?? 0) > 0) lit.add(index / 4);
+  return lit;
+}
+
+function isolatedCells(frame: RasterFrame): number {
+  const lit = litCells(frame);
+  let isolated = 0;
+  for (const cell of lit) {
+    const x = cell % frame.width; const y = Math.floor(cell / frame.width);
+    let neighbour = false;
+    for (let dy = -1; dy <= 1 && !neighbour; dy += 1) for (let dx = -1; dx <= 1 && !neighbour; dx += 1) {
+      if (dx === 0 && dy === 0) continue;
+      const nx = x + dx; const ny = y + dy;
+      if (nx < 0 || ny < 0 || nx >= frame.width || ny >= frame.height) continue;
+      if (lit.has(ny * frame.width + nx)) neighbour = true;
+    }
+    if (!neighbour) isolated += 1;
+  }
+  return isolated;
+}
+
+test("particle burst renders visible clusters with fading trails instead of lone pixels", async () => {
+  let encoded: RasterFrame[] = [];
+  const codec: RasterCodec = { decode: async () => [], encode: async (frames) => { encoded = frames; } };
+  const result = await new SpriteEffectsService(codec).generateParticleBurst({ outputFilename: "burst.gif", width: 48, height: 48, frames: 12, particleCount: 40, seed: 7, color: "#FFCC33", delayMs: 70 });
+  assert.equal(result.ok, true);
+  assert.equal(encoded.length, 12);
+  assert.equal(new Set(encoded.map((entry) => [...entry.pixels].join(","))).size, 12, "every frame must show a different burst state");
+  for (const frame of encoded) {
+    const cells = litCells(frame);
+    assert.ok(cells.size > 0, "every frame must light at least one pixel");
+    assert.ok(cells.size >= 80, `a 40 particle burst must light at least 80 pixels, lit ${cells.size}`);
+    assert.equal(isolatedCells(frame), 0, "no particle may render as a lone pixel");
+  }
+});
+
+test("particle burst keeps every requested frame in the written GIF", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-burst-pages-")); const output = path.join(directory, "burst.gif");
+  assert.equal((await service().generateParticleBurst({ outputFilename: output, width: 48, height: 48, frames: 12, particleCount: 40, seed: 7, color: "#FFCC33", delayMs: 70 })).ok, true);
+  assert.equal((await sharp(output, { animated: true }).metadata()).pages, 12, "the written GIF must keep every requested frame");
 });
