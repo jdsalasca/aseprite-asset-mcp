@@ -313,7 +313,7 @@ export class AsepriteMcpServerAdapter {
     this.spriteRuntimeBundle = new SpriteRuntimeBundleService(this.animationSheet, this.spriteHitbox, manifestWriter);
     this.spriteAnchors = new SpriteAnchorsService(this.spriteGeometry, manifestWriter);
     this.visualAssets = new VisualAssetService(rasterCodec, manifestWriter, undefined, undefined, manifestWriter);
-    this.spriteEffects = new SpriteEffectsService(rasterCodec);
+    this.spriteEffects = new SpriteEffectsService(rasterCodec, manifestWriter);
     this.variantPack = new AssetVariantPackService(rasterCodec, this.spriteEffects);
     this.recipes = new AssetRecipeComposerService();
     this.assetLibrary = new AssetLibraryService(new FileAssetLibraryAdapter());

@@ -1,5 +1,5 @@
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
-import type { RasterCodec } from "../../domain/image-assets.js";
+import type { AssetManifestWriter, RasterCodec } from "../../domain/image-assets.js";
 import type { RasterFrame } from "../../domain/pixel-art.js";
 import type { ColorGradeInput, DayNightCycleInput, MotionPackInput, NormalMapInput, ParticleBurstInput, PixelOutlineInput, RainOverlayInput, SeamlessTextureInput, SpriteEffectFormat, SpriteEffectsGateway, SpriteShadowInput, WaterCausticsInput, WaterReflectionInput } from "../../domain/sprite-effects.js";
 
@@ -36,7 +36,7 @@ function interpolateChannel(left: number, right: number, progress: number): numb
 function interpolateRgb(left: [number, number, number], right: [number, number, number], progress: number): [number, number, number] { return [interpolateChannel(left[0], right[0], progress), interpolateChannel(left[1], right[1], progress), interpolateChannel(left[2], right[2], progress)]; }
 
 export class SpriteEffectsService implements SpriteEffectsGateway {
-  public constructor(private readonly codec: RasterCodec) {}
+  public constructor(private readonly codec: RasterCodec, private readonly manifestWriter?: AssetManifestWriter) {}
 
   public async applyPixelOutline(input: PixelOutlineInput): Promise<AssetOperationResult> {
     try {
@@ -282,6 +282,7 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
   public async generateDayNightCycle(input: DayNightCycleInput): Promise<AssetOperationResult> {
     try {
       assertDifferent(input.inputFilename, input.outputFilename);
+      if (input.manifestFilename) assertDifferent(input.inputFilename, input.manifestFilename);
       const source = await this.codec.decode(input.inputFilename);
       const firstFrame = source[0];
       if (!firstFrame) throw new Error("Day-night cycle requires at least one source frame");
@@ -317,7 +318,11 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
       });
       const format = formatFor(frames, input.format);
       await this.codec.encode(frames, input.outputFilename, format);
-      return ok({ operation: "generate_day_night_cycle", input: input.inputFilename, output: input.outputFilename, frames: frames.length, format, stages, deterministic: true, sourcePreserved: true });
+      if (input.manifestFilename) {
+        if (!this.manifestWriter) return fail(new Error("Day-night manifest writing is not configured"));
+        await this.manifestWriter.write(input.manifestFilename, { schemaVersion: 1, kind: "day_night_cycle", input: input.inputFilename, output: input.outputFilename, frames: frames.length, phases: stages, seed: input.seed, intensity, delayMs: input.delayMs ?? 90 });
+      }
+      return ok({ operation: "generate_day_night_cycle", input: input.inputFilename, output: input.outputFilename, frames: frames.length, format, stages, manifest: input.manifestFilename ?? null, deterministic: true, sourcePreserved: true });
     } catch (error) { return fail(error); }
   }
 }
