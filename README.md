@@ -204,7 +204,7 @@ El agente puede descubrir capacidades por carpetas antes de cargar detalles:
 - `generate_seamless_texture`: iguala bordes opuestos para texturas repetibles de agua, tierra, piedra o hierba sin alterar la fuente.
 - `generate_water_reflection`: genera un GIF determinista con reflejo bajo una línea de agua, oleaje y destellos temporales para océanos, playas y mapas.
 - `generate_water_caustics`: genera una pasada GIF de luz refractada sobre píxeles opacos de agua, piscinas, playas o interiores inundados.
-- `generate_day_night_cycle`: genera un GIF determinista con las etapas `day`, `sunset`, `night` y `sunrise`, preservando transparencia y dimensiones.
+- `generate_day_night_cycle`: genera un GIF determinista con las etapas `day`, `sunset`, `night` y `sunrise`, preservando transparencia y dimensiones. Acepta un `manifest_filename` opcional que escribe un manifest JSON determinista (`kind: day_night_cycle`) con las fases.
 - `generate_environment_pack`: empaqueta playa, bosque, aldea o cueva en una sola llamada.
 - `create_asset_recipe`: compone outline, grading, materiales, luz, sombras, partículas, normal map y quality gate en un plan determinista sin ejecutar cambios.
 - `get_asset_library`: busca una biblioteca de 339 items preconstruidos en 10 categorías, con resultados compactos para reducir tokens.
@@ -260,6 +260,8 @@ Para regenerar la biblioteca después de cambiar sus semillas:
 ```text
 npm run asset:library:catalog
 ```
+
+La API HTTP sidecar (`/api/v1/...`) es experimental y puede cambiar entre versiones minor; los cambios breaking se documentan en el CHANGELOG.
 
 Ejemplos REST:
 

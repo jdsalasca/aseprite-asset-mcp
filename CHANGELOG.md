@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking
 - REST route `/enhancement-bundle` now returns 404 (use `/enhancement-plan`).
-- Payload label for composed enhancements changes from `apply_enhancement_bundle` to `apply_enhancement_plan` (also inside `apply_enhancement_batch` results).
+- Payload label for composed enhancements changes from `apply_enhancement_bundle` to `apply_enhancement_plan`; the batch item results do not expose that label.
 
 ## [1.0.0] - 2026-09-20
 

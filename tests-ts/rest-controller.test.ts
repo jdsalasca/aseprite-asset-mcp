@@ -156,10 +156,11 @@ test("REST controller exposes the same recipe and effect application services", 
     const caustics = await fetch(`${rest.url}/api/v1/effects/water-caustics`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_filename: "hero.png", output_filename: "hero-caustics.gif", frames: 4, seed: 3, intensity: 0.8, scale: 3, color: "#DFF6FF" }) });
     assert.equal(caustics.status, 200);
     assert.equal((await caustics.json()).data.operation, "generate_water_caustics");
+    capturedDayNight = undefined;
     const dayNight = await fetch(`${rest.url}/api/v1/effects/day-night`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_filename: "hero.png", output_filename: "hero-day-night.gif", frames: 8, seed: 23, intensity: 0.8, manifest_filename: "hero-day-night.json" }) });
     assert.equal(dayNight.status, 200);
     assert.equal((await dayNight.json()).data.operation, "generate_day_night_cycle");
-    assert.equal(capturedDayNight?.manifestFilename, "hero-day-night.json");
+    assert.equal((capturedDayNight as DayNightCycleInput | undefined)?.manifestFilename, "hero-day-night.json");
     const variantPack = await fetch(`${rest.url}/api/v1/variants/pack`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input_filename: "oak.png", output_prefix: "oak-variants", variants: ["rain", "fire", "birds"], frames: 6, seed: 4 }) });
     assert.equal(variantPack.status, 200);
     assert.equal((await variantPack.json()).data.operation, "generate_variant_pack");

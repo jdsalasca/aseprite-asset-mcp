@@ -219,6 +219,7 @@ test("day night manifest cannot overwrite the source and defaults to null", asyn
   assert.equal(clash.ok, false);
   const noWriter = await service().generateDayNightCycle({ inputFilename: input, outputFilename: output, frames: 8, seed: 5, manifestFilename: manifest });
   assert.equal(noWriter.ok, false);
+  assert.equal(existsSync(output), false);
   const plain = await serviceWithManifest.generateDayNightCycle({ inputFilename: input, outputFilename: output, frames: 8, seed: 5 });
   assert.equal(plain.ok, true);
   assert.equal(JSON.parse(plain.message).manifest, null);
@@ -234,6 +235,20 @@ test("day night manifest cannot overwrite the generated output image", async () 
   assert.equal(generated.ok, true);
   const before = await fs.readFile(output);
   const clash = await serviceWithManifest.generateDayNightCycle({ inputFilename: input, outputFilename: output, frames: 8, seed: 5, manifestFilename: output });
+  assert.equal(clash.ok, false);
+  assert.deepEqual(await fs.readFile(output), before);
+});
+
+test("day night manifest rejects a path alias of the generated output image", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-day-night-output-alias-"));
+  const input = path.join(directory, "input.png"); const output = path.join(directory, "cycle.gif");
+  await makeSprite(input);
+  const serviceWithManifest = new SpriteEffectsService(new SharpRasterCodec(), new JsonAssetManifestWriter());
+  const generated = await serviceWithManifest.generateDayNightCycle({ inputFilename: input, outputFilename: output, frames: 8, seed: 5 });
+  assert.equal(generated.ok, true);
+  const before = await fs.readFile(output);
+  const alias = `${directory}${path.sep}.${path.sep}cycle.gif`;
+  const clash = await serviceWithManifest.generateDayNightCycle({ inputFilename: input, outputFilename: output, frames: 8, seed: 5, manifestFilename: alias });
   assert.equal(clash.ok, false);
   assert.deepEqual(await fs.readFile(output), before);
 });
