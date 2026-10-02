@@ -1,5 +1,7 @@
 # Aseprite Asset MCP
 
+[![npm version](https://img.shields.io/npm/v/aseprite-asset-mcp?logo=npm&color=cb3837)](https://www.npmjs.com/package/aseprite-asset-mcp)
+
 Plan de arquitectura y evolución: [docs/IMPROVEMENT_PLAN.md](docs/IMPROVEMENT_PLAN.md). La integración con la UX independiente está documentada en [docs/ASSET_STUDIO_INTEGRATION.md](docs/ASSET_STUDIO_INTEGRATION.md).
 
 MCP server público para crear pixel art, personajes y escenarios de Aseprite con TypeScript 6.0.3, Node.js 24 y arquitectura hexagonal.
