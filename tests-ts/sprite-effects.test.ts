@@ -293,6 +293,21 @@ test("particle burst renders visible clusters with fading trails instead of lone
   }
 });
 
+test("the ignition core keeps the hue of a cold particle colour", async () => {
+  let encoded: RasterFrame[] = [];
+  const codec: RasterCodec = { decode: async () => [], encode: async (frames) => { encoded = frames; } };
+  await new SpriteEffectsService(codec).generateParticleBurst({ outputFilename: "cold.gif", width: 48, height: 48, frames: 6, particleCount: 24, seed: 3, color: "#3366ff" });
+  const first = encoded[0];
+  assert.ok(first);
+  let maxRed = 0; let maxGreen = 0; let maxBlue = 0;
+  for (let offset = 0; offset < first.pixels.length; offset += 4) {
+    if ((first.pixels[offset + 3] ?? 0) === 0) continue;
+    maxRed = Math.max(maxRed, first.pixels[offset] ?? 0); maxGreen = Math.max(maxGreen, first.pixels[offset + 1] ?? 0); maxBlue = Math.max(maxBlue, first.pixels[offset + 2] ?? 0);
+  }
+  assert.ok(maxBlue > maxRed, `a blue burst must stay blue, got maxRed=${maxRed} maxBlue=${maxBlue}`);
+  assert.ok(maxGreen >= maxRed, `a blue burst must not shift to magenta, got maxRed=${maxRed} maxGreen=${maxGreen}`);
+});
+
 test("particle burst keeps every requested frame in the written GIF", async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "sprite-burst-pages-")); const output = path.join(directory, "burst.gif");
   assert.equal((await service().generateParticleBurst({ outputFilename: output, width: 48, height: 48, frames: 12, particleCount: 40, seed: 7, color: "#FFCC33", delayMs: 70 })).ok, true);

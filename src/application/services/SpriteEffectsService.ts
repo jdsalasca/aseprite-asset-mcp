@@ -81,7 +81,8 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
         if (phase < 0.35) {
           const life = phase / 0.35;
           const core = Math.max(1, Math.round(reach * 0.15 * (1 - life)));
-          const hot: [number, number, number, number] = [255, Math.min(255, color[1] + 40), Math.min(255, color[2] + 90), 255];
+          const hotness = 0.85;
+          const hot: [number, number, number, number] = [color[0] + (255 - color[0]) * hotness, color[1] + (255 - color[1]) * hotness, color[2] + (255 - color[2]) * hotness, 255].map((value, index) => (index === 3 ? value : Math.round(value))) as [number, number, number, number];
           for (let dy = -core; dy <= core; dy += 1) for (let dx = -core; dx <= core; dx += 1) {
             if (dx * dx + dy * dy > core * core + core) continue;
             setPixel(pixels, input.width, input.height, Math.round(centerX + dx), Math.round(centerY + dy), hot);
