@@ -71,8 +71,8 @@ import { AssetSceneRecommendationService } from "../application/services/AssetSc
 import { AssetSceneRecommendationToolController } from "./controllers/AssetSceneRecommendationToolController.js";
 import { AssetSceneBundleService } from "../application/services/AssetSceneBundleService.js";
 import { AssetSceneBundleToolController } from "./controllers/AssetSceneBundleToolController.js";
+import { SERVER_VERSION } from "../domain/server-version.js";
 
-const SERVER_VERSION = "1.0.0";
 const TYPESCRIPT_VERSION = "6.0.3";
 const TOOL_NAMES = [
   "server_capabilities",

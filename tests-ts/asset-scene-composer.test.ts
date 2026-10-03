@@ -18,9 +18,28 @@ test("composes library previews into a deterministic PNG and manifest", async ()
   assert.equal(result.ok, true);
   assert.equal(encoded?.width, 16);
   assert.equal(encoded?.height, 16);
-  assert.equal(encoded?.pixels[(8 * 16 + 8) * 4 + 2], 255);
+  assert.equal(encoded?.pixels[(6 * 16 + 3) * 4], 255);
+  assert.equal(encoded?.pixels[(6 * 16 + 9) * 4 + 2], 255);
   assert.equal((manifest as { kind: string }).kind, "asset_scene");
-  assert.deepEqual(JSON.parse(result.message), { operation: "compose_asset_scene", output: "out/scene.png", manifest: "out/scene.json", libraryVersion: "scene-v1", itemIds: ["oak", "pine"], width: 16, height: 16, padding: 2, layers: [{ id: "scene-oak", assetId: "oak", title: "oak", category: "flora", kind: "sprite", role: "background", order: 0, previewPath: "flora/oak/preview.png", spritePath: "flora/oak/sprite-sheet.png", x: 6, y: 6, width: 4, height: 4 }, { id: "scene-pine", assetId: "pine", title: "pine", category: "flora", kind: "sprite", role: "foreground", order: 1, previewPath: "flora/pine/preview.png", spritePath: "flora/pine/sprite-sheet.png", x: 6, y: 6, width: 4, height: 4 }], deterministic: true, sourcePreserved: true });
+  assert.deepEqual(JSON.parse(result.message), { operation: "compose_asset_scene", output: "out/scene.png", manifest: "out/scene.json", libraryVersion: "scene-v1", itemIds: ["oak", "pine"], width: 16, height: 16, padding: 2, layers: [{ id: "scene-oak", assetId: "oak", title: "oak", category: "flora", kind: "sprite", role: "background", order: 0, previewPath: "flora/oak/preview.png", spritePath: "flora/oak/sprite-sheet.png", x: 3, y: 6, width: 4, height: 4 }, { id: "scene-pine", assetId: "pine", title: "pine", category: "flora", kind: "sprite", role: "foreground", order: 1, previewPath: "flora/pine/preview.png", spritePath: "flora/pine/sprite-sheet.png", x: 9, y: 6, width: 4, height: 4 }], deterministic: true, sourcePreserved: true });
+});
+
+test("every scene layer stays visible instead of stacking at the centre", async () => {
+  let encoded: RasterFrame | undefined;
+  const codec: RasterCodec = { decode: async () => [], encode: async (frames) => { encoded = frames[0]; } };
+  const decoder = { decodeBuffer: async (data: Uint8Array) => [frame(data[0] === 2 ? [0, 0, 255, 255] : [255, 0, 0, 255])] };
+  const library = { load: async () => catalog, read: async (asset: { id: string }) => ({ data: new Uint8Array([asset.id === "pine" ? 2 : 1]), contentType: "image/png" }) };
+  const result = await new AssetSceneComposerService(library, decoder, codec, { write: async () => undefined }).compose({ itemIds: ["oak", "pine"], outputFilename: "out/scene.png", manifestFilename: "out/scene.json", width: 32, height: 32, padding: 2 });
+  assert.equal(result.ok, true);
+  const reds = new Set<number>(); const blues = new Set<number>();
+  const pixels = encoded?.pixels ?? new Uint8ClampedArray(0);
+  for (let offset = 0; offset < pixels.length; offset += 4) {
+    const red = pixels[offset] ?? 0; const green = pixels[offset + 1] ?? 0; const blue = pixels[offset + 2] ?? 0;
+    if (red > 200 && green < 60 && blue < 60) reds.add(offset / 4);
+    if (blue > 200 && green < 60 && red < 60) blues.add(offset / 4);
+  }
+  assert.ok(reds.size > 0, "the first layer must stay visible");
+  assert.ok(blues.size > 0, "the last layer must stay visible instead of covering the others");
 });
 
 test("composer rejects output collisions and missing references without encoding", async () => {

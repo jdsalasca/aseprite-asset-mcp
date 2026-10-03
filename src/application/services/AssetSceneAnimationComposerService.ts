@@ -31,9 +31,9 @@ export class AssetSceneAnimationComposerService {
       const items = resolveAssetSelection(catalog, input.itemIds);
       const layers = buildAssetSceneLayers(items);
       const frameSets = await Promise.all(layers.map(async (layer) => {
-        const binary = await this.library.read(items[layer.order]!, "preview");
+        const binary = await this.library.read(items[layer.order]!, "animation");
         const frames = await this.decoder.decodeBuffer(binary.data);
-        if (frames.length === 0) throw new Error(`Asset preview has no renderable frames: ${items[layer.order]!.id}`);
+        if (frames.length === 0) throw new Error(`Asset animation has no renderable frames: ${items[layer.order]!.id}`);
         return frames;
       }));
       const delayMs = input.delayMs ?? 90;

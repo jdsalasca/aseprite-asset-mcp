@@ -44,6 +44,11 @@ export class AnimationQualityService implements AnimationQualityPort {
       const transitions = frames.slice(1).map((frame, index) => transition(frames[index]!, frame, index + 1, index + 2));
       const loopTransition = transition(frames.at(-1)!, first, frames.length, 1);
       const duplicateFrames = transitions.filter((item) => item.changedPixels === 0).map((item) => item.toFrame);
+      // A seamless loop replays frame 1 after the last frame, so the last frame is expected to differ.
+      // Only flag the seam when the wrap-around jump dwarfs the steps taken inside the loop.
+      const internalChanges = transitions.map((item) => item.changedPixels).sort((left, right) => left - right);
+      const medianChange = internalChanges[Math.floor(internalChanges.length / 2)] ?? 0;
+      const seamPops = loopTransition.changedPixels > medianChange * 2;
       const frameColors = frames.map(colorSet);
       const firstColors = frameColors[0]!;
       const driftFrames = frameColors.map((colors, index) => [...colors].some((color) => !firstColors.has(color)) || [...firstColors].some((color) => !colors.has(color)) ? index + 1 : -1).filter((index) => index > 0);
@@ -51,14 +56,14 @@ export class AnimationQualityService implements AnimationQualityPort {
       const timing = { consistent: new Set(delaysMs).size <= 1, positive: delaysMs.every((delay) => delay > 0) };
       const violations = [
         ...(duplicateFrames.length ? [`duplicate frames: ${duplicateFrames.join(", ")}`] : []),
-        ...(loopTransition.changedPixels ? [`loop seam changes ${loopTransition.changedPixels} pixels`] : []),
+        ...(seamPops ? [`loop seam changes ${loopTransition.changedPixels} pixels`] : []),
         ...(!timing.consistent ? ["frame timing is inconsistent"] : []),
         ...(!timing.positive ? ["one or more frame delays are not positive"] : []),
         ...(driftFrames.length ? [`palette drift detected in frames: ${driftFrames.join(", ")}`] : []),
       ];
       const recommendations = new Set<string>();
       if (duplicateFrames.length) recommendations.add("Remove duplicate frames or use them intentionally as explicit hold frames.");
-      if (loopTransition.changedPixels) recommendations.add("Align the final frame with the first frame or mark the animation as non-looping.");
+      if (seamPops) recommendations.add("Ease the final frame toward the first one: the wrap-around jump is larger than the steps inside the loop.");
       if (!timing.consistent || !timing.positive) recommendations.add("Normalize frame delays before exporting to the target engine.");
       if (driftFrames.length) recommendations.add("Harmonize the animation palette so frames do not flash between colors.");
       if (recommendations.size === 0) recommendations.add("Animation passes duplicate-frame, timing, loop, and palette checks.");

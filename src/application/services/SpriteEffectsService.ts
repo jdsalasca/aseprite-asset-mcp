@@ -70,7 +70,48 @@ export class SpriteEffectsService implements SpriteEffectsGateway {
   public async generateParticleBurst(input: ParticleBurstInput): Promise<AssetOperationResult> {
     try {
       const color = rgba(input.color); if (!Number.isInteger(input.width) || input.width < 8 || input.width > 512 || !Number.isInteger(input.height) || input.height < 8 || input.height > 512) throw new Error("Particle canvas dimensions must be integers from 8 to 512"); if (!Number.isInteger(input.frames) || input.frames < 2 || input.frames > 24 || !Number.isInteger(input.particleCount) || input.particleCount < 1 || input.particleCount > 128) throw new Error("Particle frames/count are outside the supported range");
-      const frames: RasterFrame[] = Array.from({ length: input.frames }, (_, frameIndex) => { const pixels = new Uint8ClampedArray(input.width * input.height * 4); const phase = frameIndex / (input.frames - 1); for (let particle = 0; particle < input.particleCount; particle += 1) { const angle = hash(input.seed, particle) * Math.PI * 2; const radius = phase * (Math.min(input.width, input.height) * (0.15 + hash(input.seed + 7, particle) * 0.38)); const x = Math.round(input.width / 2 + Math.cos(angle) * radius); const y = Math.round(input.height / 2 + Math.sin(angle) * radius); const alpha = Math.round(color[3] * (0.18 + (1 - phase) * 0.82) * (0.45 + hash(input.seed + 11, particle) * 0.55)); setPixel(pixels, input.width, input.height, x, y, [color[0], color[1], color[2], alpha]); if (particle % 3 === 0) setPixel(pixels, input.width, input.height, x + 1, y, [color[0], color[1], color[2], Math.round(alpha * 0.6)]); } const cadenceX = 1 + (frameIndex % Math.max(1, input.width - 2)); const cadenceY = 1 + ((frameIndex * 2) % Math.max(1, input.height - 2)); const cadenceAlpha = Math.min(255, 80 + frameIndex * 24); setPixel(pixels, input.width, input.height, cadenceX, cadenceY, [color[0], color[1], color[2], cadenceAlpha]); return { width: input.width, height: input.height, pixels, delayMs: input.delayMs ?? 80 }; }); await this.codec.encode(frames, input.outputFilename, "gif"); return outputMessage("generate_particle_burst", null, input.outputFilename, frames.length, "gif");
+      const reach = Math.min(input.width, input.height);
+      const centerX = input.width / 2;
+      const centerY = input.height / 2;
+      const phaseStep = 1 / (input.frames - 1);
+      const streakPhase = Math.min(0.5, phaseStep * 3);
+      const frames: RasterFrame[] = Array.from({ length: input.frames }, (_, frameIndex) => {
+        const pixels = new Uint8ClampedArray(input.width * input.height * 4);
+        const phase = frameIndex / (input.frames - 1);
+        if (phase < 0.35) {
+          const life = phase / 0.35;
+          const core = Math.max(1, Math.round(reach * 0.15 * (1 - life)));
+          const hotness = 0.85;
+          const hot: [number, number, number, number] = [color[0] + (255 - color[0]) * hotness, color[1] + (255 - color[1]) * hotness, color[2] + (255 - color[2]) * hotness, 255].map((value, index) => (index === 3 ? value : Math.round(value))) as [number, number, number, number];
+          for (let dy = -core; dy <= core; dy += 1) for (let dx = -core; dx <= core; dx += 1) {
+            if (dx * dx + dy * dy > core * core + core) continue;
+            setPixel(pixels, input.width, input.height, Math.round(centerX + dx), Math.round(centerY + dy), hot);
+          }
+        }
+        for (let particle = 0; particle < input.particleCount; particle += 1) {
+          const angle = (particle * 2.399963 + hash(input.seed, particle) * 0.35) % (Math.PI * 2);
+          const spin = (hash(input.seed + 19, particle) - 0.5) * 1.1;
+          const travel = reach * (0.32 + hash(input.seed + 7, particle) * 0.3);
+          const launch = travel * hash(input.seed + 13, particle) * 0.3;
+          const head = launch + phase * (travel - launch);
+          const tail = launch + Math.max(0, phase * (1 - streakPhase)) * (travel - launch);
+          const length = head - tail;
+          const points = Math.max(1, Math.ceil(length));
+          const rim = head / travel;
+          const rimShade = rim > 0.82 ? 0.6 : 1;
+          const heading = angle + spin * phase;
+          const size = rim < 0.55 ? 2 : 1;
+          for (let point = 0; point <= points; point += 1) {
+            const travelled = length * (point / points);
+            const shade = [1, 0.72, 0.5][point === 0 ? 0 : point <= points * 0.5 ? 1 : 2]! * rimShade;
+            const radius = head - travelled;
+            const left = Math.round(centerX + Math.cos(heading) * radius - size / 2);
+            const top = Math.round(centerY + Math.sin(heading) * radius - size / 2);
+            for (let dy = 0; dy < size; dy += 1) for (let dx = 0; dx < size; dx += 1) setPixel(pixels, input.width, input.height, left + dx, top + dy, [Math.round(color[0] * shade), Math.round(color[1] * shade), Math.round(color[2] * shade), 255]);
+          }
+        }
+        return { width: input.width, height: input.height, pixels, delayMs: input.delayMs ?? 80 };
+      }); await this.codec.encode(frames, input.outputFilename, "gif"); return outputMessage("generate_particle_burst", null, input.outputFilename, frames.length, "gif");
     } catch (error) { return fail(error); }
   }
 

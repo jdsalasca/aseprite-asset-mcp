@@ -25,6 +25,20 @@ test("composes animated library previews with cyclic frame selection and a GIF m
   assert.deepEqual(JSON.parse(result.message), { operation: "compose_asset_scene_animation", output: "out/scene.gif", manifest: "out/scene.json", libraryVersion: "scene-animation-v1", itemIds: ["rain"], width: 16, height: 16, padding: 2, frames: 3, delayMs: 120, frameLayers: manifest.frameLayers, deterministic: true, sourcePreserved: true });
 });
 
+test("composes animated library scenes from the animated sheets instead of the static previews", async () => {
+  let encoded: RasterFrame[] = []; let manifest: any;
+  const codec: RasterCodec = { decode: async () => [], encode: async (frames, _filename) => { encoded = frames; } };
+  // Mirrors reality: preview.png and sprite-sheet.png decode to a single frame,
+  // sprite-sheet.gif decodes to four. The kind byte stands in for the library binary.
+  const library = { load: async () => catalog, read: async (_item: unknown, kind: string) => ({ data: new Uint8Array([kind === "animation" ? 1 : 0]), contentType: "image/gif" }) };
+  const decoder = { decodeBuffer: async (data: Uint8Array) => (data[0] === 1 ? [frame([255, 0, 0, 255]), frame([0, 255, 0, 255]), frame([0, 0, 255, 255]), frame([255, 255, 0, 255])] : [frame([255, 0, 0, 255])]) };
+  const result = await new AssetSceneAnimationComposerService(library, decoder, codec, { write: async (_filename, value) => { manifest = value; } }).compose({ itemIds: ["rain"], outputFilename: "out/scene.gif", manifestFilename: "out/scene.json", width: 16, height: 16, padding: 2, frames: 8, delayMs: 90 });
+  assert.equal(result.ok, true);
+  assert.equal(encoded.length, 8);
+  assert.equal(new Set(encoded.map((entry) => [...entry.pixels].join(","))).size, 4, "composed frames must vary across the four source frames");
+  assert.equal(manifest.frameLayers.length, 8);
+});
+
 test("animated scene composition fails closed for invalid timing and output collisions", async () => {
   let encoded = false;
   const codec: RasterCodec = { decode: async () => [], encode: async () => { encoded = true; } };
