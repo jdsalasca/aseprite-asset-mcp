@@ -5,6 +5,16 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-10-03
+
+### Fixed
+- `compose_asset_scene_animation` composed from the static preview and returned 1 frame instead of N; it now uses the library's animation sheets (339 items) and cycles their 4 real frames.
+- `inspect_animation_quality` flagged a "loop seam" on any real cycle; it now only flags it when the seam exceeds twice the median of the internal changes.
+- `generate_particle_burst` was invisible (1 px particles collapsing to 3 pixels, and continuous alpha made the encoder merge frames); it now has an ignition core, radial streaks, and color shading with opaque pixels.
+- `compose_asset_scene` stacked every layer in the center, so only the last one was visible; each layer now occupies a cell of a grid.
+- The burst core tinted toward a fixed warm shift and came out magenta with cool colors; it now blends toward white.
+- `server_capabilities` reported a hardcoded version; it is now derived from `package.json`.
+
 ## [1.1.0] - 2026-10-02
 
 ### Added
