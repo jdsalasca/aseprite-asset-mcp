@@ -52,7 +52,14 @@ export class SpriteGeometryService implements SpriteGeometryPort {
       const baselines = frameViews.map((frame) => frame.baselineY).filter((value): value is number => value !== null);
       const baselineDrift = baselines.length > 1 ? Math.max(...baselines) - Math.min(...baselines) : 0;
       const stableBounds = bounds.every((value) => JSON.stringify(value) === JSON.stringify(bounds[0]));
-      const payload = { operation: "inspect_sprite_geometry", filename: input.filename, frameCount: frames.length, frames: frameViews, animation: { stableBounds, baselineDrift }, quality: { valid: true }, deterministic: true, sourcePreserved: true };
+      // `width`/`height` son la dimension del FRAME (no la de los bounds opacos):
+      // es lo que los consumidores usan para recortar los hitboxes y lo que
+      // escriben en el manifest. Sin ellos el contrato de
+      // SpriteHitboxService/SpriteAnchorsService era insatisfacible y sus tools
+      // fallaban siempre. `violations` completa el `quality` que ya declaraban.
+      const reference = frames[0];
+      if (reference === undefined) throw new Error("Sprite must contain at least one frame");
+      const payload = { operation: "inspect_sprite_geometry", filename: input.filename, width: reference.width, height: reference.height, frameCount: frames.length, frames: frameViews, animation: { stableBounds, baselineDrift }, quality: { valid: true, violations: [] as string[] }, deterministic: true, sourcePreserved: true };
       return { ok: true, message: JSON.stringify(payload) };
     } catch (error) { return fail(error); }
   }

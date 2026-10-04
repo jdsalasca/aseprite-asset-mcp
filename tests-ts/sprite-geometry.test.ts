@@ -36,3 +36,25 @@ test("rejects unsafe filenames and invalid component thresholds", async () => {
   assert.equal(threshold.ok, false);
   assert.match(threshold.message, /component/i);
 });
+
+// El contrato que consumen SpriteHitboxService y SpriteAnchorsService exige
+// `width` y `height` enteros EN EL PAYLOAD (los usan para recortar los hitboxes
+// y se escriben en el manifest). El servicio no los emitia, asi que la
+// comprobacion `Number.isInteger(payload.width)` era insatisfacible y
+// generate_sprite_hitboxes, generate_sprite_anchors y
+// build_sprite_runtime_bundle fallaban SIEMPRE. Lo destapo la verificacion de F2
+// del Asset Studio contra el MCP real ("Geometry service returned an invalid
+// geometry contract"). aqui no se cubria porque cada servicio se testeaba con
+// su propio doble, no encadenados.
+test("emite width y height enteros del frame para que el contrato de hitboxes se pueda satisfacer", async () => {
+  const codec: RasterCodec = { decode: async () => [frame([[1, 1]])], encode: async () => undefined };
+  const result = await new SpriteGeometryService(codec).inspect({ filename: "hero.gif" });
+  assert.equal(result.ok, true);
+  const payload = JSON.parse(result.message) as { width: unknown; height: unknown; quality: { valid: boolean; violations?: string[] } };
+  assert.equal(Number.isInteger(payload.width), true, `width debe ser entero, llegó ${JSON.stringify(payload.width)}`);
+  assert.equal(Number.isInteger(payload.height), true, `height debe ser entero, llegó ${JSON.stringify(payload.height)}`);
+  assert.equal(payload.width, 5);
+  assert.equal(payload.height, 4);
+  // El tipo `GeometryPayload` de los consumidores declara `violations`.
+  assert.deepEqual(payload.quality.violations, []);
+});
