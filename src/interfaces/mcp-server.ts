@@ -392,7 +392,7 @@ export class AsepriteMcpServerAdapter {
     new AssetManifestAuditToolController(this.assetManifestAudit).register(this.server);
     new AssetSceneRecommendationToolController(this.assetSceneRecommendation).register(this.server);
     new AssetSceneBundleToolController(this.assetSceneBundle).register(this.server);
-    new EnhancementToolController(this.visualAssets, this.enhancements).register(this.server);
+    new EnhancementToolController(this.visualAssets, this.enhancementPlan).register(this.server);
     new EnhancementBatchToolController(this.enhancementBatch).register(this.server);
     new AssetJobToolController(this.assetJobs).register(this.server);
     new LayerFrameToolController(this.assets).register(this.server);

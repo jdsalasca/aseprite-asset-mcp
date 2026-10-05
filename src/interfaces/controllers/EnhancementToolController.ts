@@ -1,16 +1,15 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
 import { EnhancementPlannerService } from "../../application/services/EnhancementPlannerService.js";
-import type { EnhancementGoal } from "../../domain/enhancement.js";
+import type { EnhancementGoal, EnhancementPlanGateway } from "../../domain/enhancement.js";
 import type { AssetOperationResult } from "../../domain/asset-operations.js";
 import type { ReferenceAnalysis } from "../../domain/visual-assets.js";
-import { VisualAssetService } from "../../application/services/VisualAssetService.js";
-import { DeterministicEnhancementService } from "../../application/services/DeterministicEnhancementService.js";
+import type { VisualAssetService } from "../../application/services/VisualAssetService.js";
 
 const ENHANCEMENT_GOALS = ["cleanup", "terrain_grain", "water_flow", "directional_lighting", "particles", "time_of_day", "animation"] as const;
 
 export class EnhancementToolController {
-  public constructor(private readonly visualAssets: VisualAssetService, private readonly enhancements: DeterministicEnhancementService, private readonly plans = new EnhancementPlannerService()) {}
+  public constructor(private readonly visualAssets: Pick<VisualAssetService, "inspectReference">, private readonly enhancementPlan: EnhancementPlanGateway, private readonly plans = new EnhancementPlannerService()) {}
 
   public register(server: McpServer): void {
     server.registerTool("suggest_enhancement_plan", {
@@ -42,19 +41,10 @@ export class EnhancementToolController {
         seed: z.number().int().default(1),
       },
     }, async ({ filename, output_filename, format, goals, max_colors, seed }) => {
-      const analysisResult = await this.visualAssets.inspectReference(filename);
-      if (!analysisResult.ok) return this.result(analysisResult);
-      try {
-        const analysis = JSON.parse(analysisResult.message) as ReferenceAnalysis;
-        const plan = this.plans.suggest({ filename, analysis, ...(goals ? { goals: goals as EnhancementGoal[] } : {}), maxColors: max_colors, seed });
-        const applied = await this.enhancements.apply(plan, { outputFilename: output_filename, format });
-        const qualityResult = await this.visualAssets.runQualityGate({ filename: output_filename, maxColors: max_colors, maxIsolatedPixels: 4, minContrast: 0.08 });
-        let quality: unknown;
-        try { quality = JSON.parse(qualityResult.message); } catch { quality = { valid: qualityResult.ok, violations: qualityResult.ok ? [] : [qualityResult.message] }; }
-        return this.text({ plan, applied, quality });
-      } catch (error) {
-        return this.result({ ok: false, message: error instanceof Error ? error.message : String(error) });
-      }
+      // Aplicar un plan y medirlo tiene UNA sola implementacion (EnhancementPlanService). La tool solo
+      // traduce el sobre a texto: si vuelve a copiar el flujo, las dos copias se separan.
+      const applied = await this.enhancementPlan.apply({ filename, outputFilename: output_filename, format, ...(goals ? { goals: goals as EnhancementGoal[] } : {}), maxColors: max_colors, seed });
+      return applied.ok ? this.text(applied.message) : this.result(applied);
     });
   }
 

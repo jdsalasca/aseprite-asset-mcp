@@ -1,4 +1,5 @@
 import type { AssetOperationResult } from "./asset-operations.js";
+import type { PixelArtQualityReport } from "./pixel-art.js";
 
 export type DetailLevel = "low" | "medium" | "high";
 export type TerrainKind = "water" | "sand" | "grass" | "rock" | "snow" | "mud";
@@ -37,6 +38,24 @@ export interface QualityGateInput {
   maxIsolatedPixels?: number | undefined;
   minContrast?: number | undefined;
   maxBandingRuns?: number | undefined;
+}
+
+/** Lo que el gate mide de UN frame: el informe del raster mas las bandas. */
+export interface QualityGateReport extends PixelArtQualityReport {
+  bandingRuns: number;
+}
+
+/**
+ * Lo que `runQualityGate` responde SIEMPRE, encontrado o no. Ojo al `ok` del sobre: es
+ * `violations.length === 0`, o sea que un resultado con infracciones tambien es un exito del
+ * servidor. Para leer el mensaje hay que mirar el JSON, no el `ok`.
+ */
+export interface QualityGateResult {
+  filename: string;
+  valid: boolean;
+  frames: number;
+  reports: QualityGateReport[];
+  violations: string[];
 }
 
 export interface TerrainTilesetInput {

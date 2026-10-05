@@ -1,4 +1,4 @@
-import type { ReferenceAnalysis } from "./visual-assets.js";
+import type { ReferenceAnalysis, QualityGateResult } from "./visual-assets.js";
 import type { ImageOutputFormat } from "./image-assets.js";
 import type { AssetOperationResult } from "./asset-operations.js";
 
@@ -56,7 +56,13 @@ export interface EnhancementPlanResult {
   operation: "apply_enhancement_plan";
   plan: EnhancementPlan;
   applied: EnhancementApplyReport;
-  quality: { valid: boolean; violations: string[] };
+  /** El RESULTADO, medido con el gate. */
+  quality: QualityGateResult;
+  /**
+   * El ORIGEN, medido con el MISMO gate y los mismos umbrales antes de escribir. Sin esto, "se
+   * aplicaron 2 pasadas" no dice si ayudaron: solo habia un numero, el del despues.
+   */
+  sourceQuality: QualityGateResult;
   deterministic: true;
   sourcePreserved: true;
 }

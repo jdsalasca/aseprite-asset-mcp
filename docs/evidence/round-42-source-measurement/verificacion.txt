@@ -1,0 +1,81 @@
+## Que cambio
+
+`apply_enhancement_plan` media el RESULTADO y tiraba el ORIGEN. Con las dos medidas, "se aplicaron 2
+pasadas" se puede comprobar por fin. Salida real del MCP con este codigo, sobre el PNG de 96x96 con
+ruido del workspace de la ronda:
+
+```
+ORIGEN     96x96 px · 6384 colores · 6384 opacos · 2832 transparentes · 0 aislados · 158 bandas
+           frame 1: colors 6384 > 64
+RESULTADO  96x96 px · 6383 colores · 6384 opacos · 2832 transparentes · 0 aislados · 158 bandas
+           frame 1: colors 6383 > 64
+APLICADO   passesApplied: ["cleanup", "terrain_grain"]   (el plan tenia 3, la 3.ª es el gate)
+```
+
+`cleanup` bajo la paleta en UN color. Sin el antes, era imposible saber eso: la unica cifra que
+llegaba era la del despues.
+
+## El bug de fondo: dos copias del mismo flujo
+
+`apply_enhancement_plan` estaba implementado dos veces y no hacian lo mismo:
+
+| | lee el gate asi | que recibe quien llama |
+|---|---|---|
+| `EnhancementToolController` (la tool) | `JSON.parse` siempre | informe completo, con `reports` |
+| `EnhancementPlanService` (REST y batch) | `JSON.parse` solo si `ok` | el JSON entero metido como UNA infraccion |
+
+La causa: `VisualAssetService.runQualityGate` responde `ok: violations.length === 0`
+(`src/application/services/VisualAssetService.ts:252`), o sea que **contesta `ok: false` cuando HAY
+infracciones**, que es el caso interesante, y el servicio lo leia como "fallo".
+
+Reproducido antes de arreglar nada, en el test nuevo (salida real del fallo):
+
+```
+violations: [ '{"filename":"enhanced.png","valid":false,"frames":1,"reports":[{"width":96,...
+                "colors":6396,...}],"violations":["frame 1: colors 6396 > 64"]}' ]
+```
+
+Un solo string, y los numeros dentro. El mismo MCP, dos respuestas distintas segun por donde se
+llame. Ahora hay una sola copia: la tool delega en `EnhancementPlanService`, y hay un test que
+comprueba que el texto que sale es el payload del servicio, para que las dos no vuelvan a separarse.
+
+De paso, `EnhancementPlanResult.quality` decia `{ valid, violations }` cuando el gate ya enviaba
+`filename`, `frames` y `reports`. Tipo nuevo `QualityGateResult` en `domain/visual-assets.ts`, al lado
+del `QualityGateInput` que ya existia, y `EnhancementPlanResult.sourceQuality`.
+
+## Los umbrales tienen que ser los mismos
+
+El gate del origen se llama con `maxColors` de la tool, `maxIsolatedPixels: 4` y `minContrast: 0.08`,
+igual que el del resultado. Con otros umbrales las dos lineas no serian comparables, y el test lo
+comprueba en las dos llamadas. El ORIGEN se mide **antes** de escribir, no despues: si no, "antes"
+seria una foto del despues.
+
+## Coste, medido
+
+Sobre el mismo 96x96, en caliente, tres llamadas cada una:
+
+```
+gate del origen   20.1 ms   (85.0 y 32.6 en las dos primeras, con JIT)
+gate de la salida 16.9 ms
+apply completo    66.6 ms   (con los DOS gates dentro)
+```
+
+El coste anadido es una medida del gate, ~20 ms aqui. Escala con pixeles x frames, asi que en una
+hoja de animacion grande sera mas; se acepta porque responde a la pregunta que el panel no podia
+contestar. El origen se decodifica dos veces (el gate y su `inspectReference` interno); no se
+refactoriza `runQualityGate` para evitarlo porque eso tocaria todos sus llamantes por un unico caso.
+
+## Fuera de alcance
+
+- **Un veredicto de "mejoro"**. El panel enseña las dos medidas y no las juzga: no sabe la intencion
+  de cada pasada. Si el antes y el despues se leen como dos frases, no hace falta un adjetivo.
+- **`apply_enhancement_batch` gana `sourceQuality`**: mapea `quality` a mano a proposito
+  (`EnhancementBatchService.ts:51`). Si se beneficia es del arreglo del parseo, no de un campo nuevo.
+- **`suggest_enhancement_plan`**: no escribe nada, no hay despues que comparar.
+
+## Suite
+
+- `mcp-tests.txt`: **201/201** (198 + 3 nuevos). El nuevo de las infracciones salio en rojo con el
+  bloque de JSON dentro del string.
+- `mcp-typecheck.txt`: limpio.
+- `mcp-build.txt`: `tsc -p tsconfig.build.json`, limpio.
