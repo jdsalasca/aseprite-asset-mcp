@@ -50,4 +50,9 @@ test("stops a composed recipe at the first failed operation", async () => {
   assert.equal(executed.ok, false);
   assert.equal(calls, 1);
   assert.equal(executed.failedStep, "outline");
+  // `error` se conserva, pero se anade `message`, que es como el resto del MCP (326 sitios) llama
+  // al motivo de un `ok: false`. Sin esto, un cliente que solo lea `message` -como hacia el Studio
+  // antes de la ronda 28- muestra un texto generico y se pierde el motivo real.
+  assert.equal(executed.message, executed.error);
+  assert.ok(executed.message && executed.message.length > 0, "el fallo debe traer el motivo");
 });

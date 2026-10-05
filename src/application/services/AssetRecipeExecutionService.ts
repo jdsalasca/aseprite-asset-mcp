@@ -16,6 +16,11 @@ export interface AssetRecipeExecutionResult {
   steps: AssetRecipeExecutionStep[];
   failedStep?: import("../../domain/asset-recipe.js").AssetRecipeStep;
   error?: string;
+  /**
+   * El motivo del fallo, con el nombre que usa el resto del MCP para `ok: false`. `error` se
+   * mantiene por compatibilidad con quien ya lo lea; los dos llevan el mismo texto.
+   */
+  message?: string;
   sourcePreserved: true;
   deterministic: true;
 }
@@ -38,7 +43,7 @@ function outputFor(step: AssetRecipeStepPlan): string {
 }
 
 function failedResult(plan: AssetRecipePlan, outputFilename: string, steps: AssetRecipeExecutionStep[], step: import("../../domain/asset-recipe.js").AssetRecipeStep, error: string): AssetRecipeExecutionResult {
-  return { ok: false, recipeId: plan.recipeId, outputFilename, steps, failedStep: step, error, sourcePreserved: true, deterministic: true };
+  return { ok: false, recipeId: plan.recipeId, outputFilename, steps, failedStep: step, error, message: error, sourcePreserved: true, deterministic: true };
 }
 
 export class AssetRecipeExecutionService {
