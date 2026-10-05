@@ -1,0 +1,69 @@
+## Que cambia
+
+`export_spritesheet` (la ruta de Aseprite) contestaba con una frase:
+
+```
+"Sprite sheet exported to C:\\...\\run-sheet.png"
+```
+
+Sin una sola cifra, cuando el manifest que escribio Aseprite justo al lado las tiene todas. Ahora
+devuelve lo que se escribio, leido de ese manifest:
+
+```json
+{ "operation": "export_spritesheet", "output": "...run-sheet.png", "data": "...run-sheet.json",
+  "sheetType": "horizontal", "scale": 2, "padding": 0,
+  "frames": 4, "width": 256, "height": 64, "frameWidth": 64, "frameHeight": 64,
+  "sourcePreserved": true }
+```
+
+Y sin manifest, medido tambien, los cinco campos de medida van a `null`:
+
+```json
+{ "operation": "export_spritesheet", "output": "...run-sheet2.png", "sheetType": "rows", "scale": 1,
+  "padding": 0, "frames": null, "width": null, "height": null, "frameWidth": null, "frameHeight": null,
+  "sourcePreserved": true }
+```
+
+`null` y no `0`: `0 frames` es una medida y aqui no se ha medido nada. Es el mismo criterio que las
+rondas 41 y 43 del Studio.
+
+## Por que del manifest y no de la imagen
+
+Porque `meta.size` y `frames[]` son la fuente de verdad de lo que hay en la hoja. Medir el PNG
+tendria que ser leer su cabecera, o sea reescribir un lector de imagenes para sacar dos numeros.
+
+**Y un dato que no se suponia**: `sourceSize` sale a **64x64**, no a los 32x32 del GIF de origen. O
+sea que Aseprite escribe ya el frame escalado en la hoja (4 x 64 = 256 = `meta.size.w`, cuadra). La
+primera version de este test asumia 32x32 y lo escribi como si fuera medido; la llamada real lo
+desmintio y el fixture se corrigio con el valor de verdad. El campo se llama `frameWidth`/`frameHeight`
+y es el frame **en la hoja**, no el de origen.
+
+## La tool hermana ya lo hacia, y el que no lo leia era el panel
+
+Al medir descubri que el panel de EXPORTACION del Studio no usa esta tool: usa
+`build_animation_sheet`, que ya devolvia ocho campos de medida. El agujero estaba solo en el cliente.
+La correccion completa esta en el commit del Studio
+(`docs/evidence/round-44-export-measure/`); aqui queda esta parte, que es el mismo defecto en la tool
+que usan los agentes y la API REST.
+
+## Casos que hay que cubrir, y hay test
+
+- `json-array` (el que usa Aseprite con `--format json-array`): `frames` es una lista.
+- `json-hash`: `frames` es un objeto, y hay que contar **claves**. Sin esto, el recuento seria `[]` y
+  `0` para toda hoja exportada en ese formato.
+- Texto que no es JSON, vacio, o sin `meta`: todo a `null`.
+- Manifesto parcial (`frames: [{}]`): el recuento **si** es un dato (`1`), los tamaños que no vienen
+  de el se quedan en `null`. "No lo se" y "son cero" no son lo mismo, y el test lo fija.
+
+## Lo que NO se ha anadido
+
+- **`deterministic: true`**. Las demas tools lo llevan, pero aqui nadie lo ha medido y no se afirma.
+- **Los bytes del PNG**. El adapter ya falla si Aseprite dice que si y el fichero no esta.
+- **`export_sprite_atlas` y `export_asset_bundle`**. El atlas tiene su manifiesto y el bundle tres
+  ficheros: otra ronda, no un tmbin.
+
+## Suite
+
+- `mcp-tests.txt`: **205/205** (201 + 4 nuevos).
+- `mcp-typecheck.txt`: limpio.
+- `mcp-build.txt`: `tsc -p tsconfig.build.json`, limpio.

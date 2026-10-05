@@ -6,6 +6,7 @@ import type { AnimationAuditInput, AnimationEasing, AnimationSanitizeInput, Asse
 import { availableTextFonts, measureText as rasterMeasureText, rasterizeText } from "../text/TextRasterizer.js";
 import { AsepriteCommandAdapter, execFileAsync, previewServers, SHEET_TYPES, DATA_FORMATS, ANIMATION_EASINGS, SCALE_ANCHORS, UNSAFE_LUA_PATTERNS, BLEND_MODES, PALETTE_PRESETS, rgbToHsl, hslToHex, CONVOLUTION_MATRICES, luaEscape, safePath, validatePath, isPositiveInteger, validateFrameRange, isHexColor, validateName, validateNativeRegion, result, parsePixelFields } from "./AsepriteCommandAdapter.js";
 import type { SceneExportPort } from "../../application/ports/AssetCapabilityPorts.js";
+import { measureSheetManifest, type SpriteSheetExportResult, type SpriteSheetMeasure } from "./SpriteSheetManifest.js";
 
 export class AsepriteSceneAdapter extends AsepriteCommandAdapter implements SceneExportPort {
 public async createTilemapLayer(filename: string, layerName: string, tileWidth: number, tileHeight: number): Promise<AssetOperationResult> {
@@ -82,6 +83,28 @@ public async exportSpritesheet(input: Parameters<AssetRuntimePort["exportSprites
         }
       }
     }
-    return result(command, `Sprite sheet exported to ${output}`);
+    // Que se escribio, no "que se pidio": los numeros salen del manifest que acaba de escribir
+    // Aseprite. Sin manifest no hay medida y los campos van a null, que es distinto de cero.
+    const payload: SpriteSheetExportResult = {
+      operation: "export_spritesheet",
+      output,
+      ...(data ? { data } : {}),
+      sheetType: input.sheetType ?? "horizontal",
+      scale: input.scale ?? 1,
+      padding: input.padding ?? 0,
+      ...(await this.measureSheet(data)),
+      sourcePreserved: true,
+    };
+    return { ok: command.ok, message: JSON.stringify(payload) };
+  }
+
+  /** La medida del manifest recien escrito; toda a null si no se pidio o no se puede leer. */
+  private async measureSheet(data: string | undefined): Promise<SpriteSheetMeasure> {
+    if (!data) return { frames: null, width: null, height: null, frameWidth: null, frameHeight: null };
+    try {
+      return measureSheetManifest(await fs.readFile(data, "utf8"));
+    } catch {
+      return { frames: null, width: null, height: null, frameWidth: null, frameHeight: null };
+    }
   }
 }
