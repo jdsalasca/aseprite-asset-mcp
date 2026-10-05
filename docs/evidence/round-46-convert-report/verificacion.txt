@@ -1,0 +1,53 @@
+## Que cambia
+
+`convert_image_to_pixel_art` (y `convert_animation_to_pixel_art`, que es la misma funcion) contestaba
+con lo que se habia pedido y nada de lo que habia salido:
+
+```json
+antes  { "operation": "convert_image_to_pixel_art", "frames": 1,
+         "width": 64, "height": 32, "maxColors": 4 }
+ahora  { "operation": "convert_image_to_pixel_art", "frames": 1,
+         "width": 64, "height": 32, "maxColors": 4,
+         "reports": [{ "width": 64, "height": 32, "colors": 4,
+                       "opaquePixels": 2048, "transparentPixels": 0, "isolatedPixels": 0 }] }
+```
+
+Una linea: `frames.map(inspectRasterFrame)`. `inspectRasterFrame` ya estaba importada en el fichero
+(**la usan otras cuatro llamadas**) y es la misma que usa la puerta de calidad, asi que el shape del
+informe no es nuevo: es el que `inspect_asset_bundle` ya manda en `inspection.reports[]`.
+
+Los tres ecos se quedan (`width`, `height`, `maxColors`): son lo pedido y hay otros consumidores que
+los leen. Lo que se anade es lo obtenido.
+
+## MEDIDO con degradado real
+
+Un PNG de 64x32 con degradado horizontal, **2048 colores de origen**, convertido con
+`max_colors: 4`:
+
+```
+reports[0] = { width: 64, height: 32, colors: 4, opaquePixels: 2048, transparentPixels: 0, isolatedPixels: 0 }
+```
+
+La cuantizacion cumplio (4 de un maximo de 4) y ahora se puede comprobar en pantalla. Antes solo
+constaba en el boton que el usuario habia escrito.
+
+## Los dos casos de test
+
+1. El informe coincide con el frame **que se escribio**: el test cuenta los colores unicos de
+   `encoded[0].pixels` y compara. Sin eso, un informe que mida otra cosa pasaria los tests.
+2. Una imagen de **un solo color** convertida pidiendo 16 reporta `colors: 1`, no 16. Sin esto, el
+   informe podria devolver el maximo pedido y ser una medida inventada.
+
+Y que el `reports` es un array aunque la conversion sea de una imagen: el mismo metodo sirve para
+animaciones y un campo aplanado obligaria a tener dos formas de la misma medida.
+
+## Lo que no se ha tocado
+
+- `width`, `height` y `maxColors` del payload: son la peticion.
+- El veredicto de "se cumplio el max": no lo gradua el MCP y el Studio no lo inventa.
+
+## Suite
+
+- `mcp-tests.txt`: **209/209** (207 + 2 nuevos).
+- `mcp-typecheck.txt`: limpio.
+- `mcp-build.txt`: `tsc -p tsconfig.build.json`, limpio.

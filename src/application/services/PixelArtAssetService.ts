@@ -79,9 +79,13 @@ export class PixelArtAssetService {
       assertPathPair(input.inputFilename, input.outputFilename);
       const source = await this.codec.decode(input.inputFilename);
       if (!animation && source.length > 1) throw new Error("Input is animated; use convert_animation_to_pixel_art");
-      const frames = convertRasterFrames(animation ? source : [source[0]!], input);
-      await this.codec.encode(frames, input.outputFilename, input.format ?? (animation ? "gif" : "png"));
-      return ok({ operation: animation ? "convert_animation_to_pixel_art" : "convert_image_to_pixel_art", input: input.inputFilename, output: input.outputFilename, frames: frames.length, width: input.width, height: input.height, maxColors: input.maxColors });
+const frames = convertRasterFrames(animation ? source : [source[0]!], input);
+        await this.codec.encode(frames, input.outputFilename, input.format ?? (animation ? "gif" : "png"));
+        // `width`, `height` y `maxColors` de abajo son lo que se PIDIO. Lo que salio es esto: el
+        // informe del frame que se acaba de escribir, el mismo que usa la puerta de calidad. Sin el,
+        // "convertir a 16 colores" no dice cuantos colores hay en el resultado.
+        const reports = frames.map((frame) => inspectRasterFrame(frame));
+        return ok({ operation: animation ? "convert_animation_to_pixel_art" : "convert_image_to_pixel_art", input: input.inputFilename, output: input.outputFilename, frames: frames.length, width: input.width, height: input.height, maxColors: input.maxColors, reports });
     } catch (error) { return fail(error); }
   }
 
