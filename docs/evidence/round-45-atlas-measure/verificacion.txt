@@ -1,0 +1,48 @@
+## Que cambia
+
+`export_asset_pack` escribia su manifest con la medida entera y la respuesta solo llevaba un numero:
+
+```json
+antes  { "operation": "export_asset_pack", "atlas": ..., "manifest": ..., "assets": 4 }
+ahora  { "operation": "export_asset_pack", "atlas": ..., "manifest": ..., "assets": 4,
+         "columns": 2, "rows": 2, "width": 129, "height": 65,
+         "cellWidth": 64, "cellHeight": 64, "padding": 1 }
+```
+
+Los siete valores no se calculan: se suman al payload los que el servicio ya habia escrito en el
+manifest (`atlas.width`, `atlas.height`, `columns`, `Math.ceil(decoded.length / columns)`, `first.width`,
+`first.height`, `padding`). No se relee el atlas ni se decodifica nada nuevo.
+
+## El detalle que el test fijo, y que no es lo que parece
+
+**El padding del atlas no cuenta igual que el de la hoja de sprites.** `atlasFrame`
+(`PixelArtAssetService.ts:56-57`) lo coloca **entre** celdas:
+
+```
+atlas:       columns * celda + (columns - 1) * padding
+spritesheet: columns * celda + (columns + 1) * padding
+```
+
+Con 4 assets de 64x64 en 2 columnas y 1 de padding, el atlas son **129x65** y no 195x195 como daria la
+formula de la hoja. Mi primera version del test uso la de la hoja y fallo `5 !== 7` (en la version
+pequena de 2x2 celdas de 2 px: 5 contra 7). El unico que puede decir como se mide es el codigo que
+mide, y ahora el test lo dice en un comentario para que no se vuelva a suponer.
+
+## Tambien: un atlas que no se escribe no devuelve medidas
+
+Cuando la salida pisa una entrada, `assertOutputDiffersFromInputs` corta antes de escribir y el
+resultado es un error sin cifras. No hay forma de devolver media medida a medias, y hay test.
+
+## Lo que no se ha tocado
+
+- **`build_sprite_runtime_bundle`**: ya mandaba `frames` y `artifacts`. No hay nada que calcular ahi;
+  la parte client-side de esta ronda ya lo enseña.
+- **`export_spritesheet`**: la de Aseprite, que quedo con su medida en la ronda 44. No la usa el panel.
+- **La posicion de cada asset** (`manifest.assets[]` con columna y fila): es un dato por asset y
+  pertenece al manifest descargable.
+
+## Suite
+
+- `mcp-tests.txt`: **207/207** (205 + 2 nuevos).
+- `mcp-typecheck.txt`: limpio.
+- `mcp-build.txt`: `tsc -p tsconfig.build.json`, limpio.

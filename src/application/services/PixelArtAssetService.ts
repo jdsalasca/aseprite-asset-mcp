@@ -238,7 +238,9 @@ export class PixelArtAssetService {
         padding,
         assets: input.inputFilenames.map((filename, index) => ({ filename, index, column: index % columns, row: Math.floor(index / columns) })),
       });
-      return ok({ operation: "export_asset_pack", atlas: input.outputFilename, manifest: input.manifestFilename, assets: decoded.length });
+      // La misma medida que va al manifest, tambien en la respuesta: quien genera el atlas necesita
+      // saber cuanto ha salido, y el unico sitio donde ya estaba calculada era el manifest.
+      return ok({ operation: "export_asset_pack", atlas: input.outputFilename, manifest: input.manifestFilename, assets: decoded.length, columns, rows: Math.ceil(decoded.length / columns), width: atlas.width, height: atlas.height, cellWidth: first.width, cellHeight: first.height, padding });
     } catch (error) { return fail(error); }
   }
 
