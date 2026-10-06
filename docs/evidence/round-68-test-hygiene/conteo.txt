@@ -1,0 +1,13 @@
+# Cuanto ensuciaba la suite del MCP, y por que nadie lo habia visto
+
+ANTES
+  directorios .artifact-* en la raiz : 123
+  ficheros dentro                   : 156  (117 .png + 39 .gif)
+  peso                              : 0.8 KB
+  mas antiguo                       : 2026-10-02
+  nuevos por cada `npm test`        : 3
+
+DESPUES
+  directorios .artifact-* en la raiz : 0
+  directorios totales en la raiz    : 12 (antes 125)
+  nuevos por cada `npm test`        : 0

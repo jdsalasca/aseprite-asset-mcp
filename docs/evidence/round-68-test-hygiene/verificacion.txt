@@ -1,0 +1,104 @@
+# Ronda 68 · Los tests dejaban 123 directorios en la raiz del repo
+
+## Lo que habia
+
+Un unico fichero. `tests-ts/artifact-resolver.test.ts` tenia tres llamadas a
+`mkdtemp(path.join(process.cwd(), ".artifact-X-"))` y **no borraba ninguna**. Medido sobre la raiz del
+repo:
+
+```
+directorios .artifact-* : 123
+ficheros dentro          : 156   (117 .png + 39 .gif)
+peso                     : 0.8 KB
+mas antiguo              : 2026-10-02
+nuevos por cada npm test : 3
+```
+
+Cuatro dias de acumulacion, y tres directorios mas cada vez que se corria la suite.
+
+## Lo que hace la ronda incomoda no es que este sucio
+
+Es que **git no lo ve**. Los 156 ficheros son `.png` y `.gif`, y `.gitignore` ya descarta ambos por ser
+archivos de Aseprite. Asi que:
+
+```
+git status --short   ->  limpio
+git ls-files | grep .artifact-  ->  0
+```
+
+Cuatro dias y nada se quejo. Y el modo en que puede cobrar caro es concreto: **en cuanto un test escriba
+ahi un `.json`, aparecera como untracked y se podra commitear por accidente**. No es que el `.gitignore`
+este equivocado para esto -los PNG y los GIF si deben ignorarse-; es que ese `.gitignore` tapaba sin
+querer un problema que no es suyo.
+
+Por eso la guardia mira **el disco** y no el estado de git: aqui el estado de git no puede ser el
+vigilante de si mismo.
+
+## El arreglo
+
+Un helper de cinco lineas en el mismo fichero:
+
+```ts
+async function temporal(t: TestContext, prefix: string): Promise<string> {
+  const directory = await mkdtemp(path.join(os.tmpdir(), prefix));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  return directory;
+}
+```
+
+- **`os.tmpdir()` y no `process.cwd()`**: el temporal del sistema es lo unico que se limpia cuando el
+  proceso muere. La raiz del repo no.
+- **`t.after` y no un `try/finally` en cada test**: con `t.after` no se puede olvidar el borrado al
+  anadir un caso nuevo. Un `try/finally` se copia tres veces y el cuarto se olvida, que es exactamente
+  como pasaron estos 123.
+
+La guardia va **en el mismo fichero**, no en uno nuevo. Quien edite el fichero que causo el problema
+tiene que ver la guardia en la misma pantalla; separarla es esconder el aviso en otro edificio.
+
+## El orden de los pasos, que no es casual
+
+1. La guardia primero, y **fallar antes de borrar**. Si se borraran los 123 primero, el test pasaria sin
+   que nadie hubiera visto que detecta algo. El rojo lista los nombres de los 123, y eso se
+   comprueba en el mensaje:
+
+   ```
+   AssertionError: directorios .artifact-* en la raiz del repo: .artifact-allowed-2ujPam, .artifact-allowed-3yTpW8, ...
+   ```
+
+2. Despues borrar, y comprobar que `git status` sigue limpio. Y lo estaba: solo aparecian mis cambios. Eso
+   **confirma la tesis** de que los 123 eran invisibles para git; si hubieran estado versionados, al
+   borrarlos habria salido una oleada de `D`.
+
+## Lo que NO se toco
+
+El segundo test usa `path.join(process.cwd(), ".missing-output.gif")`. Parece del mismo tipo y **no hay
+que tocarlo**: no escribe nada, solo necesita una ruta que no exista para probar el rechazo de salida
+ausente. Cambiarla por el temporal no estaria mal, pero seria mover algo que ya esta bien.
+
+## Verificacion
+
+```
+npx tsx --test tests-ts/artifact-resolver.test.ts   5/5
+npm test                                             216/216 (incluye el typecheck)
+```
+
+Y el numero que es el entregable de verdad, medido **despues** de correr la suite entera:
+
+```
+directorios .artifact-* en la raiz : 0
+directorios totales en la raiz    : 12   (antes 125)
+```
+
+Una suite que se puede correr N veces sin ensuciar nada.
+
+## Aprendizaje
+
+- **Un `.gitignore` puede tapar sin querer un problema que no es suyo.** Aqui las reglas de Aseprite
+  (`*.png`, `*.gif`) hacian que 156 ficheros de test fueran invisibles. El arreglo correcto no era quitar
+  esas reglas -los assets si deben ignorarse- sino poner algo que mire donde de verdad esta el problema.
+- **Un temporal que se limpia solo no es el temporal por defecto.** `mkdtemp` acepta un directorio y la
+ convencion es crear el temporal ahi, pero el "temporal" por defecto de un repo es su propia raiz. El
+  helper lo pone en el sitio correcto una vez y los tres usos lo heredan.
+- **Lo que se puede olvidar en un `try/finally` se olvida; lo que se puede olvidar en un `t.after` tambien,
+  pero es codigo que no hay que escribir.** Los hooks de `node:test` viven en la firma del test, asi que
+  un caso nuevo no puede pasar por alto el cleanup sin que se note al escribirlo.
