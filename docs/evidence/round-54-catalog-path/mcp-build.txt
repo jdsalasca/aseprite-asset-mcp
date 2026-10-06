@@ -1,0 +1,4 @@
+
+> aseprite-asset-mcp@1.1.1 build
+> tsc -p tsconfig.build.json
+

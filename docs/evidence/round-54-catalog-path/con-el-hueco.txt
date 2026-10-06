@@ -1,0 +1,27 @@
+Ô£û el catalogo se encuentra desde cualquier directorio de trabajo (10.6733ms)
+Ô£ö el default apunta al catalogo del paquete, no a un relativo al CWD (7.1706ms)
+Ôä╣ tests 2
+Ôä╣ suites 0
+Ôä╣ pass 1
+Ôä╣ fail 1
+Ôä╣ cancelled 0
+Ôä╣ skipped 0
+Ôä╣ todo 0
+Ôä╣ duration_ms 340.1606
+
+Ô£û failing tests:
+
+test at tests-ts\asset-library-path.test.ts:1:282
+Ô£û el catalogo se encuentra desde cualquier directorio de trabajo (10.6733ms)
+  Error: ENOENT: no such file or directory, open 'C:\Users\jdsal\AppData\Local\Temp\mcp-otro-cwd-RRog8a\assets\folders\catalog.json'
+      at async open (node:internal/fs/promises:640:25)
+      at async Object.readFile (node:internal/fs/promises:1290:14)
+      at async FileAssetLibraryAdapter.load (C:\Users\jdsal\Documents\Programming-personal\aseprite-asset-mcp\src\infrastructure\assets\FileAssetLibraryAdapter.ts:11:31)
+      at async TestContext.<anonymous> (C:\Users\jdsal\Documents\Programming-personal\aseprite-asset-mcp\tests-ts\asset-library-path.test.ts:30:21)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    errno: -4058,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: 'C:\\Users\\jdsal\\AppData\\Local\\Temp\\mcp-otro-cwd-RRog8a\\assets\\folders\\catalog.json'
+  }

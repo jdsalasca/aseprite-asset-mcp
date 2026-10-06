@@ -1,11 +1,23 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import type { AssetLibraryBinary, AssetLibraryBinaryKind, AssetLibraryCatalog, AssetLibraryItem } from "../../domain/asset-library.js";
 import type { AssetLibraryPort } from "../../application/ports/AssetLibraryPort.js";
 
+/**
+ * Raíz del paquete, no del directorio de trabajo. El Studio lanza este proceso con el CWD en su propio
+ * directorio, y `path.resolve("assets/folders/catalog.json")` lo busca alli: el catálogo existe (290 KB,
+ * más de 250 assets) pero nunca aparece donde se le pregunta, y toda la biblioteca falla con ENOENT.
+ *
+ * `outDir` es `dist` con `rootDir` `src`, así que desde `src/infrastructure/assets/` y desde
+ * `dist/infrastructure/assets/` hay tres niveles hasta la raíz: el mismo `import.meta.url` vale en los
+ * dos. Es el mismo truco que usa `domain/server-version.ts` para leer su `package.json`.
+ */
+const PACKAGE_CATALOG = fileURLToPath(new URL("../../../assets/folders/catalog.json", import.meta.url));
+
 export class FileAssetLibraryAdapter implements AssetLibraryPort {
   private readonly root: string;
-  public constructor(private readonly catalogPath = path.resolve("assets/folders/catalog.json")) { this.root = path.dirname(this.catalogPath); }
+  public constructor(private readonly catalogPath = PACKAGE_CATALOG) { this.root = path.dirname(this.catalogPath); }
 
   public async load(): Promise<AssetLibraryCatalog> {
     const parsed = JSON.parse(await fs.readFile(this.catalogPath, "utf8")) as AssetLibraryCatalog;

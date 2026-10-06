@@ -1,0 +1,104 @@
+# Ronda 54 (MCP) · El catálogo de la biblioteca no debe depender del directorio de trabajo
+
+## De dónde salió el bug
+
+Una captura de la ronda 52. En un proyecto recién abierto, BIBLIOTECA pintaba:
+
+```
+No se pudo leer la biblioteca
+ENOENT: no such file or directory, open '…\aseprite-asset-studio\assets\folders\catalog.json'
+```
+
+El `ENOENT` apuntaba al directorio **del Studio**, no al del MCP. Eso no era un catálogo ausente: el
+catálogo existe, son 290 KB con más de 250 assets, y vive en el repo del MCP.
+
+```ts
+public constructor(private readonly catalogPath = path.resolve("assets/folders/catalog.json")) {}
+```
+
+`path.resolve` con una ruta relativa se resuelve contra `process.cwd()`, no contra el paquete. El Studio
+lanza el MCP con el CWD en su propio directorio, así que el catálogo nunca aparece donde se le pregunta.
+Y de ese `load()` dependen los siete servicios de biblioteca: assets, presets, escenas, recomendaciones,
+variantes, resúmenes y auditoría.
+
+## El test que no cubría nada
+
+```ts
+test("generated asset library exposes 100+ navigable folders …", async () => {
+  const catalog = await new FileAssetLibraryAdapter().load();   // sin ruta: usa el default
+  …
+  assert.ok((await fs.stat(path.resolve("assets/folders", item.readmePath))).isFile(), true);
+```
+
+Pasa porque el runner arranca con CWD en la raíz del repo, no porque el código sea correcto. Las dos
+aserciones de `readmePath`/`previewPath` repiten la misma dependencia. Ese test no podía servir de red:
+con el CWD del Studio habría fallado y en CI nunca lo haría.
+
+## El arreglo, con el idiom que el repo ya tenía
+
+`domain/server-version.ts` ya resolvió esta misma pregunta —dónde está la raíz del paquete— con:
+
+```ts
+readFileSync(new URL("../../package.json", import.meta.url), "utf8")
+```
+
+`outDir` es `dist` con `rootDir` `src`, así que desde `src/infrastructure/assets/` y desde
+`dist/infrastructure/assets/` hay tres niveles hasta la raíz: el mismo `import.meta.url` vale en los dos.
+El adaptador usa ahora ese mismo truco con `fileURLToPath(new URL("../../../assets/folders/catalog.json", …))`.
+
+## Rojo antes que verde
+
+`tests-ts/asset-library-path.test.ts` falla primero con **la firma exacta del bug del Studio**, porque
+cambia de directorio a propósito:
+
+```
+✖ el catalogo se encuentra desde cualquier directorio de trabajo
+  Error: ENOENT: no such file or directory,
+  open 'C:\Users\jdsal\AppData\Local\Temp\mcp-otro-cwd-RRog8a\assets\folders\catalog.json'
+ℹ pass 1  ℹ fail 1
+```
+
+El test que pasaba en verde es el que comprueba la razón de fondo del default. Salida completa en
+`con-el-hueco.txt`.
+
+Un error mío en el camino: la primera versión usaba `os.mkdtemp`, que no existe (`mkdtemp` es de
+`fs/promises`). Rojo por la razón equivocada, corregido antes de sacar conclusiones.
+
+## Verificación
+
+```
+MCP  pass 211  fail 0        (antes 209)
+typecheck + build: limpio, sin "error TS"
+```
+
+**El `dist` compilado, que es lo que de verdad se ejecuta, cargado desde TEMP:**
+
+```
+items=339 presets=4 cwd=C:\Users\jdsal\AppData\Local\Temp
+```
+
+## De extremo a extremo, desde el Studio
+
+MCP arrancado por el gateway del Studio —con el CWD en el repo del Studio, que es exactamente el caso
+que fallaba— y el panel BIBLIOTECA pasa de error a contenido:
+
+| | antes | después |
+|---|---|---|
+| alerta al cargar | `ENOENT … studio/assets/folders/catalog.json` | ninguna |
+| assets | — | **339** |
+| categorías | — | **10** (characters 150, props-and-weapons 26, biomes-and-maps 20…) |
+| presets | — | **4** (Coastal sunset, Fantasy quest, Living forest, Rainy village) |
+| previews | — | renderizan el pixel art |
+
+Los previews también salen ahora: `read()` resuelve los binarios contra `root`, que sale del mismo
+`catalogPath` del constructor. Captura: `biblioteca-339-assets.png`.
+
+`alertasAlCargar: []` y `alertasTrasBuscar: []` — no se cambió un error por otro.
+
+## Fuera de alcance, anotado
+
+- Las aserciones `path.resolve("assets/folders", …)` del test existente: es la misma trampa, pero en el
+  test, y los scripts de npm siempre arrancan en la raíz del repo.
+- **Cachear el catálogo**: `load()` lee 290 KB en cada llamada y hay siete servicios que lo piden. Es
+  trabajo real y medible, pero es otro problema; mezclarlo aquí habría hecho la ronda irrevisable.
+- La publicación del MCP sigue bloqueada por `E401 Unauthorized` de npm. Esta ronda no lo toca.
