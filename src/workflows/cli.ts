@@ -19,11 +19,15 @@ function optionValue(args: string[], name: string): string | undefined {
 export function parseCliOptions(args: string[]): CliOptions {
   const execute = args.includes("--execute");
   const outputArgument = optionValue(args, "--output");
-  const rootArgument = optionValue(args, "--root");
+  const root = optionValue(args, "--root") || process.cwd();
   return {
     execute,
-    outputDirectory: outputArgument || path.join("artifacts", "aseprite"),
-    root: rootArgument || process.cwd(),
+    // `--root` y `--output` tienen que decir lo mismo sobre "aqui". Con el output por defecto siendo
+    // relativo, el plan y el manifiesto de un proyecto acababan escritos en el directorio desde el que
+    // se lanzo el comando, no dentro del proyecto. `resolve` y no `join`: si el `--output` es absoluto
+    // y explicito se respeta tal cual, que es una instruccion del usuario y no un fallo.
+    outputDirectory: path.resolve(root, outputArgument || path.join("artifacts", "aseprite")),
+    root,
   };
 }
 

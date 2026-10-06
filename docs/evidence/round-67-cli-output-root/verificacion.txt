@@ -1,0 +1,95 @@
+# Ronda 67 · Los artefactos del CLI caian en el directorio equivocado
+
+## El defecto, medido con el comando real
+
+`parseCliOptions` calculaba `root` y `outputDirectory` por separado, y los dos no decian lo mismo
+sobre "aqui":
+
+- `root` por defecto = `process.cwd()`
+- `outputDirectory` por defecto = `artifacts/aseprite`, una ruta **relativa** que se resuelve al usarla
+  contra el CWD
+
+Ejecutado desde un directorio distinto del proyecto:
+
+```
+cd  <shell vacia>
+npx tsx scripts/character-workflow.ts --root <proyecto>
+```
+
+```
+proyecto pedido : (vacio)
+mi shell       : artifacts/aseprite/hero/hero.character.plan.json
+                 artifacts/aseprite/hero/hero.godot.json
+```
+
+El plan y el manifiesto que **describen** el proyecto se escribian fuera de el, en el directorio desde
+el que se lanzo el comando. Con `--execute` eso significa que Aseprite trabaja contra `--root` mientras
+que su salida se guarda en otro sitio.
+
+Y lo que lo hace mas dano: **el CLI no tenia ni un test**. Los dos scripts que lo usan
+(`character-workflow.ts` y `scene-workflow.ts`, publicados como `asset:character` y `asset:scene`) no
+tenian ninguno. Un modulo con dos puntos de entrada publicados y cero tests es un modulo que solo se
+puede cambiar leyendo las 47 lineas enteras.
+
+## El arreglo
+
+Una expresion en `parseCliOptions`:
+
+```ts
+const root = optionValue(args, "--root") || process.cwd();
+outputDirectory: path.resolve(root, outputArgument || path.join("artifacts", "aseprite")),
+```
+
+`resolve` y no `join`, y no por gusto: `join` concatena dos absolutas y produce basura, mientras que
+`resolve` manda un relativo contra `root` y **respeta un absoluto tal cual**. Asi que el unico caso que
+hay quelamar aparte -un `--output` absoluto y explicito, que significa "escribe aqui"- no necesita ni una
+rama. Sin `if` nuevo.
+
+Ese caso esta protegido por test porque es el que un arreglo bienintencionado rompe sin darse cuenta:
+convertirlo a relativo, o moverlo dentro de `--root`, seria un fallo nuevo y peor que el que se arregla,
+porque le quitaria al usuario la capacidad de escribir donde quiere.
+
+## Verificacion con el comando, no solo con unit tests
+
+Un test que solo mira `parseCliOptions` verifica una funcion. Esto verifica el comando. Mismo comando,
+mismo shell, mismo proyecto, antes y despues:
+
+| | antes | despues |
+|---|---|---|
+| proyecto pedido | **(vacio)** | `artifacts/aseprite/hero/hero.character.plan.json` + `hero.godot.json` |
+| mi shell | 2 ficheros | **(vacio)** |
+
+Y el absoluto explicito, comprobado con el comando y no solo con el test:
+
+```
+npx tsx scripts/character-workflow.ts --root <proyecto> --output <destino>
+-> los 2 JSON en <destino>
+```
+
+## El rojo decia la cosa correcta
+
+```
+expected: C:\Users\...\proyecto-ajeno\artifacts\aseprite
+actual  : artifacts\aseprite
+```
+
+Ese detalle importa: un rojo que dijera "expected a string" estaria midiendo otra cosa. Este mide
+exactamente que el output no se resolvia contra la raiz.
+
+## Verificacion
+
+```
+npx tsx --test tests-ts/cli.test.ts     4/4
+npm test                               215/215 (incluye el typecheck)
+```
+
+## Aprendizaje
+
+- **Un argumento con valor por defecto y otro que significan lo mismo tienen que derivar el uno del otro.**
+  `root` y `outputDirectory` se calcularon por separado y por eso discreparon. El sintoma -los ficheros
+  en el sitio equivocado- es el que se ve; la causa es que se calcularon en dos sitios. Arreglarlo en la
+  firma (`CliOptions` ahora siempre lleva la ruta ya resuelta) hace que la discrepancia no pueda volver a
+  aparecer aunque mañana se llame desde otro sitio.
+- **Un modulo con puntos de entrada publicados y cero tests es codigo que solo se puede cambiar con
+  cuidado.** El CLI llevaba ahi desde antes que esta ronda y no habia forma de saber que tocaba. Cuatro
+  tests no son cobertura: son la licencia minima para poder tocarlo.

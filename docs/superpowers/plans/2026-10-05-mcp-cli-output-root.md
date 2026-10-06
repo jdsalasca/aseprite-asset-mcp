@@ -1,6 +1,26 @@
+Estado: completada. 215/215 en el MCP, 4 tests nuevos. Sin if nuevo: una expresion con path.resolve.
+
+Comprobado con el comando, no solo con unit tests: antes el proyecto pedido quedaba vacio y los dos
+JSON caian en el shell; despues los dos van dentro del proyecto y el shell queda vacio. El --output
+absoluto explicito se comprueba aparte porque es el caso que un arreglo bienintencionado rompe.
+
+El defecto de fondo: oot y outputDirectory se calcularon por separado y por eso discreparon. Ahora
+CliOptions.outputDirectory lleva la ruta ya resuelta, asi que la discrepancia no puede reaparecer
+aunque se llame desde otro sitio.
+
+De paso: el CLI **no tenia ni un test**, y tiene dos puntos de entrada publicados (sset:character,
+sset:scene). Cuatro tests no son cobertura, son la licencia minima para poder tocarlo.
+
+Observado y no tocado: la raiz del repo tiene ~125 directorios .artifact-* que los tests dejan al
+correr. estan en .gitignore (git status sale limpio) pero ensucian la raiz. Limpiar eso y que los tests
+escriban en el temporal es ronda propia.
+
+Bloqueo vivo: publicar 1.1.1 sigue necesitando credenciales (E401). Este arreglo esta en el repo pero no
+llega a los usuarios por npm mientras tanto.
+
 # Los artefactos del CLI caen en el directorio equivocado
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Que `--output` se resuelva contra `--root` cuando es relativo, de modo que los artefactos de un workflow caigan dentro del proyecto que el usuario nombró.
 
@@ -36,7 +56,7 @@
 - Consumes: `parseCliOptions` de `src/workflows/cli.ts`, que toma `string[]` y devuelve `CliOptions { execute: boolean; outputDirectory: string; root: string }`.
 - Produces: cuatro expectativas sobre dónde acaba `outputDirectory`.
 
-- [ ] **Step 1: Escribe el test**
+- [x] **Step 1: Escribe el test**
 
 Con `import { deepStrictEqual, strictEqual } from "node:assert"` y `import { test } from "node:test"`, como el resto de la suite del MCP.
 
@@ -49,12 +69,12 @@ Los cuatro casos, con sus valores exactos:
 
 `RAIZ` es un temporal real creado con `fs.mkdtempSync(path.join(os.tmpdir(), "cli-root-"))` y borrado al final. **No usar literales de ruta**: en Windows el separador y las mayúsculas hacen fallar comparaciones de cadenas que en Linux pasan.
 
-- [ ] **Step 2: Ejecuta y mira cómo falla**
+- [x] **Step 2: Ejecuta y mira cómo falla**
 
 Run: `npx tsx --test tests-ts/cli.test.ts`
 Expected: FAIL en el caso 1, y el fallo tiene que decir que esperaba `C:\...\artifacts\aseprite` y recibió `artifacts\aseprite`. **Ese detalle es la prueba de que el test mide el fallo real y no otra cosa.**
 
-- [ ] **Step 3: Commitea el rojo**
+- [x] **Step 3: Commitea el rojo**
 
 ```bash
 git add tests-ts/cli.test.ts
@@ -70,7 +90,7 @@ git commit -m "test: cli artifacts must land under --root, not under the working
 - Consumes: nada nuevo.
 - Produces: la misma firma `parseCliOptions(args: string[]): CliOptions`.
 
-- [ ] **Step 4: Resuelve el output contra la raíz**
+- [x] **Step 4: Resuelve el output contra la raíz**
 
 En `parseCliOptions`, calcula primero `root` y luego resuelve `outputDirectory` con `path.resolve(root, outputArgument || path.join("artifacts", "aseprite"))`.
 
@@ -78,17 +98,17 @@ En `parseCliOptions`, calcula primero `root` y luego resuelve `outputDirectory` 
 
 Un comentario que diga **por qué**, en dos líneas: `--root` y `--output` tienen que significar lo mismo sobre "aquí", o el plan y el manifiesto de un proyecto acaban escritos en el directorio desde el que se lanzó el comando.
 
-- [ ] **Step 5: Los tests del plan, en verde**
+- [x] **Step 5: Los tests del plan, en verde**
 
 Run: `npx tsx --test tests-ts/cli.test.ts`
 Expected: PASS, 4/4.
 
-- [ ] **Step 6: La suite entera del MCP**
+- [x] **Step 6: La suite entera del MCP**
 
 Run: `npm test`
 Expected: PASS. El typecheck va dentro. Si algo falla, mira si es un script que esperaba `outputDirectory` **relativa**: los dos que lo usan, `character-workflow.ts` y `scene-workflow.ts`, solo hacen `path.join` y lo meten en el plan, así que una ruta absoluta les sirve igual.
 
-- [ ] **Step 7: Comprobación con el caso real, no solo con unit tests**
+- [x] **Step 7: Comprobación con el caso real, no solo con unit tests**
 
 Run, desde un directorio **distinto** del proyecto:
 
@@ -101,7 +121,7 @@ Antes: los dos JSON salen en `<shell-vacia>\artifacts\aseprite\hero\` y `<proyec
 
 Esta comprobación es la que importa. Un test que solo mira `parseCliOptions` verifica una funcion; esto verifica el comando.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add src/workflows/cli.ts
@@ -116,11 +136,11 @@ git commit -m "fix: resolve cli output against --root so artifacts land in the p
 **Interfaces:**
 - Consumes: la salida real del paso 7 y de `npm test`.
 
-- [ ] **Step 9: Guarda la evidencia**
+- [x] **Step 9: Guarda la evidencia**
 
 `mcp-tests.txt` con la salida de `npm test`, `antes-despues.txt` con el árbol de ficheros de los dos directorios antes y después, y `verificacion.txt` con el defecto, el arreglo y el por qué.
 
-- [ ] **Step 10: Cierra**
+- [x] **Step 10: Cierra**
 
 Temporales borrados, plan marcado, `git status` limpio, commit de la evidencia.
 
